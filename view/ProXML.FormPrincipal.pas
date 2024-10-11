@@ -45,7 +45,7 @@ uses
   FireDAC.Stan.StorageBin,
   Vcl.Samples.Gauges,
   Vcl.CategoryButtons,
-  Vcl.Menus;
+  Vcl.Menus, DM;
 
 type
   TFormPrincipal = class(TForm)
@@ -116,6 +116,7 @@ type
     procedure CategoryButtons1Categories0Items1Click(Sender: TObject);
     procedure GerarPDF1Click(Sender: TObject);
     procedure CategoryButtons1Categories0Items2Click(Sender: TObject);
+    procedure GravarNotasDB();
   private
     procedure SetTextoTranferencia(const Text: String);
     { Private declarations }
@@ -158,6 +159,8 @@ begin
        messagedlg('Sem dados para gerar relatório !!', mtInformation	, [mbOk], 0);
        Exit;
     end;
+
+    GravarNotasDB;
 end;
 
 procedure TFormPrincipal.DBGrid1DrawColumnCell(Sender: TObject;
@@ -196,6 +199,33 @@ end;
 procedure TFormPrincipal.GerarPDF1Click(Sender: TObject);
 begin
    SetTextoTranferencia(DBGrid1.DataSource.DataSet.FieldByName('chave').Value);
+end;
+
+procedure TFormPrincipal.GravarNotasDB;
+begin
+  //Grava as notas no banco de dados SQLIte
+
+  if not FDMemTable1.Active then
+    FDMemTable1.Open;
+
+
+  FDMemTable1.First;
+  while not FDMemTable1.Eof do
+  begin
+
+    DMConfig.InserirNotaDB(
+      FDMemTable1.FieldByName('numero').AsString,
+      FDMemTable1.FieldByName('chave').AsString,
+      FDMemTable1.FieldByName('data').AsString,
+      FDMemTable1.FieldByName('vtotal').AsString,
+      FDMemTable1.FieldByName('vlicms').AsString,
+      FDMemTable1.FieldByName('bcicms').AsString
+    );
+
+    FDMemTable1.Next;
+  end;
+
+
 end;
 
 procedure TFormPrincipal.SkSvg1Click(Sender: TObject);

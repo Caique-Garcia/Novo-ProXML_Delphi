@@ -102,7 +102,8 @@ procedure TDMConfig.InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC: St
 begin
     Query.Active := False;
     Query.SQL.Clear;
-    Query.SQL.Add('insert into config ');
+
+    Query.SQL.Add('insert into nf ');
     Query.SQL.Add('values( :NUMERO, :CHAVE, :VALOR, :DATA, :BCICMS, :VLICMS )');
     Query.Params.ParamByName('NUMERO').AsString         := Trim(Numero);
     Query.Params.ParamByName('CHAVE').AsString          := Trim(Chave);

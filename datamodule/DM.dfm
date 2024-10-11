@@ -2,7 +2,7 @@ object DMConfig: TDMConfig
   OldCreateOrder = False
   OnCreate = DataModuleCreate
   Height = 273
-  Width = 452
+  Width = 383
   object Conexao: TFDConnection
     Params.Strings = (
       'DriverID=SQLite'
