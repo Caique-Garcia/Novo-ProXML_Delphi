@@ -20,7 +20,7 @@ uses
 
 type
   TFormRelatorios = class(TForm)
-    QuickRepRelConvenio: TQuickRep;
+    QuickNotas: TQuickRep;
     Label186: TLabel;
     QRBand166: TQRBand;
     QRLabel600: TQRLabel;
@@ -45,15 +45,18 @@ type
     QRBand169: TQRBand;
     QRLabel610: TQRLabel;
     QRLabel613: TQRLabel;
-    QRLabelTotalConv: TQRLabel;
-    QRLabelPagoConv: TQRLabel;
     QRShape88: TQRShape;
     QRLabel621: TQRLabel;
-    QRLabel628: TQRLabel;
+    QRLabelValorTotal: TQRLabel;
+    QRLabelTotalICMS: TQRLabel;
+    QRLabelTotalBC: TQRLabel;
   private
+
     { Private declarations }
   public
-    { Public declarations }
+    procedure SetTotal(const Value: String);
+    procedure SetTotalBC(const Value: String);
+    procedure SetTotalICMS(const Value: String);
   end;
 
 var
@@ -62,5 +65,22 @@ var
 implementation
 
 {$R *.dfm}
+
+{ TFormRelatorios }
+
+procedure TFormRelatorios.SetTotal(const Value: String);
+begin
+    QRLabelValorTotal.Caption := Trim(Value);
+end;
+
+procedure TFormRelatorios.SetTotalICMS(const Value: String);
+begin
+    QRLabelTotalICMS.Caption := Trim(Value);
+end;
+
+procedure TFormRelatorios.SetTotalBC(const Value: String);
+begin
+    QRLabelTotalBC.Caption := Trim(Value);
+end;
 
 end.
