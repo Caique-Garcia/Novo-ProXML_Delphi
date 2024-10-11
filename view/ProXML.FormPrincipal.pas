@@ -107,6 +107,8 @@ type
     Panel8: TPanel;
     PopupMenu: TPopupMenu;
     GerarPDF1: TMenuItem;
+    Loading: TTabSheet;
+    SkAnimatedImage1: TSkAnimatedImage;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -118,6 +120,7 @@ type
     procedure CategoryButtons1Categories0Items2Click(Sender: TObject);
     procedure GravarNotasDB();
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure CategoryButtons1Categories0Items3Click(Sender: TObject);
   private
     procedure SetTextoTranferencia(const Text: String);
     procedure FinalizaRelatorio(Sender: TObject);
@@ -159,7 +162,7 @@ begin
    begin
 
    end;
-    ShowMessage('Show Relatório');
+   PageControl1.ActivePageIndex := 0;
 end;
 
 procedure TFormPrincipal.CategoryButtons1Categories0Items2Click(
@@ -176,6 +179,13 @@ begin
 
     GravarNotasDB;
 
+end;
+
+procedure TFormPrincipal.CategoryButtons1Categories0Items3Click(
+  Sender: TObject);
+begin
+    //PageControl1.ActivePageIndex := 2;
+    //SkAnimatedImage1.Animation.Start;
 end;
 
 procedure TFormPrincipal.DBGrid1DrawColumnCell(Sender: TObject;
@@ -233,7 +243,8 @@ begin
   DMConfig.DeleteDados;
 
   FDMemTable1.First;
-
+  PageControl1.ActivePageIndex := 2;
+  SkAnimatedImage1.Animation.Start;
 
   T:= TThread.CreateAnonymousThread(procedure
   begin
