@@ -43,7 +43,9 @@ uses
   Vcl.Grids,
   Vcl.DBGrids,
   FireDAC.Stan.StorageBin,
-  Vcl.Samples.Gauges, Vcl.CategoryButtons, Vcl.Menus;
+  Vcl.Samples.Gauges,
+  Vcl.CategoryButtons,
+  Vcl.Menus;
 
 type
   TFormPrincipal = class(TForm)
@@ -173,7 +175,8 @@ begin
 //
 //    //Alinha textos na linha do grid
 //   DBGrid1.Canvas.TextRect(Rect, Rect.Left + 28, Rect.Top + 6, Column.Field.DisplayText);
-
+ //Ajustar linhas DBGrid
+   TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
 end;
 
 procedure TFormPrincipal.FormShow(Sender: TObject);
