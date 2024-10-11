@@ -155,7 +155,11 @@ end;
 procedure TFormPrincipal.FinalizaRelatorio(Sender: TObject);
 begin
    //
-   ShowMessage('Show Relatório');
+   while Not DMConfig.QryNotas.RecordCount = FDMemTable1.RecordCount do
+   begin
+
+   end;
+    ShowMessage('Show Relatório');
 end;
 
 procedure TFormPrincipal.CategoryButtons1Categories0Items2Click(
@@ -170,16 +174,8 @@ begin
        Exit;
     end;
 
+    GravarNotasDB;
 
-
-    T:= TThread.CreateAnonymousThread(procedure
-    begin
-       GravarNotasDB;
-    end
-    );
-
-    T.OnTerminate := FinalizaRelatorio;
-    T.Start;
 end;
 
 procedure TFormPrincipal.DBGrid1DrawColumnCell(Sender: TObject;
@@ -226,6 +222,8 @@ begin
 end;
 
 procedure TFormPrincipal.GravarNotasDB;
+var
+    T: TThread;
 begin
   //Grava as notas no banco de dados SQLIte
 
@@ -235,20 +233,29 @@ begin
   DMConfig.DeleteDados;
 
   FDMemTable1.First;
-  while not FDMemTable1.Eof do
+
+
+  T:= TThread.CreateAnonymousThread(procedure
   begin
+      while not FDMemTable1.Eof do
+      begin
 
-    DMConfig.InserirNotaDB(
-      FDMemTable1.FieldByName('numero').AsString,
-      FDMemTable1.FieldByName('chave').AsString,
-      FDMemTable1.FieldByName('data').AsString,
-      FDMemTable1.FieldByName('vtotal').AsString,
-      FDMemTable1.FieldByName('vlicms').AsString,
-      FDMemTable1.FieldByName('bcicms').AsString
-    );
+         DMConfig.InserirNotaDB(
+          FDMemTable1.FieldByName('numero').AsString,
+          FDMemTable1.FieldByName('chave').AsString,
+          FDMemTable1.FieldByName('data').AsString,
+          FDMemTable1.FieldByName('vtotal').AsString,
+          FDMemTable1.FieldByName('vlicms').AsString,
+          FDMemTable1.FieldByName('bcicms').AsString
+        );
 
-    FDMemTable1.Next;
-  end;
+        FDMemTable1.Next;
+      end;
+  end
+  );
+
+  T.OnTerminate := FinalizaRelatorio;
+  T.Start;
 
 
 end;
