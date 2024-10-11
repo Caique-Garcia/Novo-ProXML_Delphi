@@ -117,8 +117,10 @@ type
     procedure GerarPDF1Click(Sender: TObject);
     procedure CategoryButtons1Categories0Items2Click(Sender: TObject);
     procedure GravarNotasDB();
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     procedure SetTextoTranferencia(const Text: String);
+    procedure FinalizaRelatorio(Sender: TObject);
     { Private declarations }
   public
     { Public declarations }
@@ -150,8 +152,16 @@ begin
    PageControl1.ActivePageIndex := 1;
 end;
 
+procedure TFormPrincipal.FinalizaRelatorio(Sender: TObject);
+begin
+   //
+   ShowMessage('Show Relatório');
+end;
+
 procedure TFormPrincipal.CategoryButtons1Categories0Items2Click(
   Sender: TObject);
+var
+    T : TThread;
 begin
     //Geração de relatóeio
     if DataSource1.DataSet.RecordCount <= 0 then
@@ -160,7 +170,16 @@ begin
        Exit;
     end;
 
-    GravarNotasDB;
+
+
+    T:= TThread.CreateAnonymousThread(procedure
+    begin
+       GravarNotasDB;
+    end
+    );
+
+    T.OnTerminate := FinalizaRelatorio;
+    T.Start;
 end;
 
 procedure TFormPrincipal.DBGrid1DrawColumnCell(Sender: TObject;
@@ -180,6 +199,11 @@ begin
 //   DBGrid1.Canvas.TextRect(Rect, Rect.Left + 28, Rect.Top + 6, Column.Field.DisplayText);
  //Ajustar linhas DBGrid
    TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
+end;
+
+procedure TFormPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  action := cafree;
 end;
 
 procedure TFormPrincipal.FormShow(Sender: TObject);
@@ -208,6 +232,7 @@ begin
   if not FDMemTable1.Active then
     FDMemTable1.Open;
 
+  DMConfig.DeleteDados;
 
   FDMemTable1.First;
   while not FDMemTable1.Eof do
