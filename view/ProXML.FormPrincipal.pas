@@ -43,7 +43,7 @@ uses
   Vcl.Grids,
   Vcl.DBGrids,
   FireDAC.Stan.StorageBin,
-  Vcl.Samples.Gauges, Vcl.CategoryButtons;
+  Vcl.Samples.Gauges, Vcl.CategoryButtons, Vcl.Menus;
 
 type
   TFormPrincipal = class(TForm)
@@ -103,6 +103,8 @@ type
     PanelMenus: TPanel;
     CategoryButtons1: TCategoryButtons;
     Panel8: TPanel;
+    PopupMenu: TPopupMenu;
+    GerarPDF1: TMenuItem;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -110,7 +112,10 @@ type
     procedure FormShow(Sender: TObject);
     procedure CategoryButtons1Categories0Items0Click(Sender: TObject);
     procedure CategoryButtons1Categories0Items1Click(Sender: TObject);
+    procedure GerarPDF1Click(Sender: TObject);
+    procedure CategoryButtons1Categories0Items2Click(Sender: TObject);
   private
+    procedure SetTextoTranferencia(const Text: String);
     { Private declarations }
   public
     { Public declarations }
@@ -125,7 +130,7 @@ var
 implementation
 
 uses
-  uCalculadoraXML;
+  uCalculadoraXML, Vcl.Clipbrd;
 
 {$R *.dfm}
 
@@ -142,20 +147,32 @@ begin
    PageControl1.ActivePageIndex := 1;
 end;
 
+procedure TFormPrincipal.CategoryButtons1Categories0Items2Click(
+  Sender: TObject);
+begin
+    //Geração de relatóeio
+    if DataSource1.DataSet.RecordCount <= 0 then
+    begin
+       messagedlg('Sem dados para gerar relatório !!', mtInformation	, [mbOk], 0);
+       Exit;
+    end;
+end;
+
 procedure TFormPrincipal.DBGrid1DrawColumnCell(Sender: TObject;
   const Rect: TRect; DataCol: Integer; Column: TColumn; State: TGridDrawState);
 begin
-    //Mudando cor da seleção
-    if (gdSelected in State) then
-    begin
-      //Cor da Seleção
-      DBGrid1.Canvas.Brush.Color :=$00FCDDC9; //$00E9E5E4;
-
-      //Cor da Fonte
-      //DBGCaixa.Canvas.Font.Color := clHighlightText;
-    end;
-    //Alinha textos na linha do grid
-    DBGrid1.Canvas.TextRect(Rect, Rect.Left + 28, Rect.Top + 6, Column.Field.DisplayText);
+//    //Mudando cor da seleção
+//    if (gdSelected in State) then
+//    begin
+//      //Cor da Seleção
+//      DBGrid1.Canvas.Brush.Color :=$00FCDDC9; //$00E9E5E4;
+//
+//      //Cor da Fonte
+//      //DBGCaixa.Canvas.Font.Color := clHighlightText;
+//    end;
+//
+//    //Alinha textos na linha do grid
+//   DBGrid1.Canvas.TextRect(Rect, Rect.Left + 28, Rect.Top + 6, Column.Field.DisplayText);
 
 end;
 
@@ -165,6 +182,17 @@ begin
    TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
    DataSource1.DataSet.First;
    PageControl1.ActivePageIndex := 0;
+end;
+
+procedure TFormPrincipal.SetTextoTranferencia(const Text: String);
+begin
+    //Setar texto do NCM na area de transferencia
+    Clipboard.AsText := Text;
+end;
+
+procedure TFormPrincipal.GerarPDF1Click(Sender: TObject);
+begin
+   SetTextoTranferencia(DBGrid1.DataSource.DataSet.FieldByName('chave').Value);
 end;
 
 procedure TFormPrincipal.SkSvg1Click(Sender: TObject);
@@ -192,6 +220,10 @@ begin
     begin
       CalculadoraXML.CaminhoDiretorio := EditCaminho.Text;
       CalculadoraXML.ProcessarXMLs;
+      DBGrid1.Refresh;
+    end else
+    begin
+         messagedlg('Por favor selecione um repositório !!', mtInformation	, [mbOk], 0);
     end;
     
   finally

@@ -5,7 +5,7 @@ object FormPrincipal: TFormPrincipal
   BorderStyle = bsSingle
   Caption = 'Pro XML'
   ClientHeight = 699
-  ClientWidth = 1106
+  ClientWidth = 1161
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,7 +20,7 @@ object FormPrincipal: TFormPrincipal
   object PnlContainer: TPanel
     Left = 0
     Top = 0
-    Width = 1106
+    Width = 1161
     Height = 699
     Align = alClient
     BevelOuter = bvNone
@@ -33,17 +33,18 @@ object FormPrincipal: TFormPrincipal
     ParentBackground = False
     ParentFont = False
     TabOrder = 0
-    ExplicitHeight = 721
+    ExplicitWidth = 1106
     object PnlCabecalho: TPanel
       Left = 0
       Top = 0
-      Width = 1106
+      Width = 1161
       Height = 113
       Align = alTop
       BevelOuter = bvNone
       Color = 2169367
       ParentBackground = False
       TabOrder = 0
+      ExplicitWidth = 1106
       object PnlLogo: TPanel
         AlignWithMargins = True
         Left = 20
@@ -57,9 +58,6 @@ object FormPrincipal: TFormPrincipal
         Align = alLeft
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 30
-        ExplicitTop = 50
-        ExplicitHeight = 101
         object Image1: TImage
           Left = 0
           Top = 0
@@ -241,7 +239,7 @@ object FormPrincipal: TFormPrincipal
       end
       object PnlImg: TPanel
         AlignWithMargins = True
-        Left = 924
+        Left = 979
         Top = 30
         Width = 152
         Height = 53
@@ -252,13 +250,13 @@ object FormPrincipal: TFormPrincipal
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitHeight = 141
+        ExplicitLeft = 924
       end
     end
     object PnlCorpo: TPanel
       Left = 0
       Top = 113
-      Width = 1106
+      Width = 1161
       Height = 586
       Align = alClient
       BevelOuter = bvNone
@@ -267,10 +265,10 @@ object FormPrincipal: TFormPrincipal
       Padding.Right = 30
       Padding.Bottom = 15
       TabOrder = 1
-      ExplicitTop = 201
-      ExplicitHeight = 520
+      ExplicitTop = 116
+      ExplicitWidth = 1106
       object PnlInfo: TPanel
-        Left = 844
+        Left = 899
         Top = 15
         Width = 232
         Height = 556
@@ -285,7 +283,7 @@ object FormPrincipal: TFormPrincipal
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitHeight = 490
+        ExplicitLeft = 844
         object PanelVaorICMS: TPanel
           Left = 0
           Top = 160
@@ -600,7 +598,7 @@ object FormPrincipal: TFormPrincipal
         AlignWithMargins = True
         Left = 30
         Top = 15
-        Width = 804
+        Width = 859
         Height = 556
         Margins.Left = 0
         Margins.Top = 0
@@ -611,11 +609,11 @@ object FormPrincipal: TFormPrincipal
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
-        ExplicitHeight = 490
+        ExplicitWidth = 804
         object PnlInfoLocal: TPanel
           Left = 0
           Top = 97
-          Width = 804
+          Width = 859
           Height = 459
           Align = alClient
           BevelOuter = bvNone
@@ -626,13 +624,12 @@ object FormPrincipal: TFormPrincipal
           Font.Style = []
           ParentFont = False
           TabOrder = 0
-          ExplicitTop = 10
-          ExplicitHeight = 568
+          ExplicitWidth = 804
           object PageControl1: TPageControl
             AlignWithMargins = True
             Left = 229
             Top = 15
-            Width = 570
+            Width = 625
             Height = 429
             Margins.Left = 5
             Margins.Top = 15
@@ -641,16 +638,15 @@ object FormPrincipal: TFormPrincipal
             ActivePage = TabSheet2
             Align = alClient
             TabOrder = 0
-            ExplicitHeight = 451
+            ExplicitWidth = 570
             object TabSheet1: TTabSheet
               Caption = 'TabSheet1'
               TabVisible = False
-              ExplicitWidth = 747
-              ExplicitHeight = 376
+              ExplicitWidth = 562
               object Gauge1: TGauge
                 Left = 0
                 Top = 387
-                Width = 562
+                Width = 617
                 Height = 32
                 Align = alBottom
                 BorderStyle = bsNone
@@ -667,7 +663,7 @@ object FormPrincipal: TFormPrincipal
               object Memo1: TMemo
                 Left = 0
                 Top = 0
-                Width = 562
+                Width = 617
                 Height = 387
                 Align = alClient
                 BevelInner = bvNone
@@ -681,44 +677,41 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ReadOnly = True
                 TabOrder = 0
-                ExplicitTop = -24
-                ExplicitWidth = 747
-                ExplicitHeight = 340
+                ExplicitWidth = 562
               end
             end
             object TabSheet2: TTabSheet
               Caption = 'TabSheet2'
               ImageIndex = 1
               TabVisible = False
-              ExplicitWidth = 747
-              ExplicitHeight = 376
+              ExplicitWidth = 562
               object Panel5: TPanel
                 Left = 0
                 Top = 0
-                Width = 562
+                Width = 617
                 Height = 419
                 Align = alClient
                 BevelOuter = bvNone
                 Color = clWhite
                 ParentBackground = False
                 TabOrder = 0
-                ExplicitWidth = 747
-                ExplicitHeight = 376
+                ExplicitWidth = 562
                 object DBGrid1: TDBGrid
                   Left = 0
                   Top = 0
-                  Width = 562
+                  Width = 617
                   Height = 419
                   Align = alClient
                   BorderStyle = bsNone
                   DataSource = DataSource1
                   Font.Charset = DEFAULT_CHARSET
                   Font.Color = 2169367
-                  Font.Height = -11
+                  Font.Height = -13
                   Font.Name = 'Segoe UI'
                   Font.Style = []
                   Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleHotTrack]
                   ParentFont = False
+                  PopupMenu = PopupMenu
                   ReadOnly = True
                   TabOrder = 0
                   TitleFont.Charset = DEFAULT_CHARSET
@@ -731,78 +724,47 @@ object FormPrincipal: TFormPrincipal
                     item
                       Expanded = False
                       FieldName = 'numero'
-                      Font.Charset = DEFAULT_CHARSET
-                      Font.Color = 2169367
-                      Font.Height = -11
-                      Font.Name = 'Segoe UI'
-                      Font.Style = []
                       Title.Alignment = taCenter
                       Title.Caption = 'N'#250'mero'
-                      Width = 57
+                      Width = 53
                       Visible = True
                     end
                     item
                       Expanded = False
                       FieldName = 'chave'
-                      Font.Charset = DEFAULT_CHARSET
-                      Font.Color = 2169367
-                      Font.Height = -11
-                      Font.Name = 'Segoe UI'
-                      Font.Style = []
                       Title.Alignment = taCenter
                       Title.Caption = 'Chave'
-                      Width = 270
+                      Width = 318
+                      Visible = True
+                    end
+                    item
+                      Expanded = False
+                      FieldName = 'vtotal'
+                      Title.Alignment = taCenter
+                      Title.Caption = 'Valor R$'
+                      Width = 94
                       Visible = True
                     end
                     item
                       Alignment = taCenter
                       Expanded = False
                       FieldName = 'data'
-                      Font.Charset = DEFAULT_CHARSET
-                      Font.Color = 2169367
-                      Font.Height = -11
-                      Font.Name = 'Segoe UI'
-                      Font.Style = []
                       Title.Alignment = taCenter
                       Title.Caption = 'Data'
-                      Width = 108
+                      Width = 106
                       Visible = True
                     end
                     item
                       Expanded = False
                       FieldName = 'vlicms'
-                      Font.Charset = DEFAULT_CHARSET
-                      Font.Color = 2169367
-                      Font.Height = -11
-                      Font.Name = 'Segoe UI'
-                      Font.Style = []
                       Title.Alignment = taCenter
                       Visible = False
                     end
                     item
                       Expanded = False
                       FieldName = 'bcicms'
-                      Font.Charset = DEFAULT_CHARSET
-                      Font.Color = 2169367
-                      Font.Height = -11
-                      Font.Name = 'Segoe UI'
-                      Font.Style = []
                       Title.Alignment = taCenter
-                      Width = -1
                       Visible = False
-                    end
-                    item
-                      Expanded = False
-                      FieldName = 'vtotal'
-                      Font.Charset = DEFAULT_CHARSET
-                      Font.Color = 2169367
-                      Font.Height = -11
-                      Font.Name = 'Segoe UI'
-                      Font.Style = []
-                      Title.Alignment = taCenter
-                      Title.Caption = 'Valor'
-                      Width = 94
-                      Visible = True
                     end>
                 end
               end
@@ -822,8 +784,6 @@ object FormPrincipal: TFormPrincipal
             BevelOuter = bvNone
             ShowCaption = False
             TabOrder = 1
-            ExplicitTop = 0
-            ExplicitHeight = 481
             object CategoryButtons1: TCategoryButtons
               Left = 2
               Top = 28
@@ -850,7 +810,8 @@ object FormPrincipal: TFormPrincipal
                       OnClick = CategoryButtons1Categories0Items1Click
                     end
                     item
-                      Caption = 'Relat'#243'rios'
+                      Caption = 'Exportar Relat'#243'rio'
+                      OnClick = CategoryButtons1Categories0Items2Click
                     end
                     item
                       Caption = 'Enviar'
@@ -877,17 +838,18 @@ object FormPrincipal: TFormPrincipal
         object Panel6: TPanel
           Left = 0
           Top = 0
-          Width = 804
+          Width = 859
           Height = 97
           Align = alTop
           BevelOuter = bvNone
           ShowCaption = False
           TabOrder = 1
+          ExplicitWidth = 804
           object Shape8: TShape
             AlignWithMargins = True
             Left = 10
             Top = 96
-            Width = 784
+            Width = 839
             Height = 1
             Margins.Left = 10
             Margins.Top = 0
@@ -936,13 +898,17 @@ object FormPrincipal: TFormPrincipal
             Font.Name = 'Segoe UI'
             Font.Style = []
             ParentFont = False
+            ParentShowHint = False
+            ReadOnly = True
+            ShowHint = True
             TabOrder = 0
-            TextHint = 'Selecione uma pasta contendo XMLs'
+            Text = 'Selecione uma pasta contendo XMLs de NFCe'
+            TextHint = 'Selecione uma pasta contendo XMLs de NFCe'
           end
           object Panel7: TPanel
             Left = 682
             Top = 24
-            Width = 105
+            Width = 167
             Height = 36
             BevelOuter = bvNone
             Color = 13264672
@@ -952,7 +918,7 @@ object FormPrincipal: TFormPrincipal
             object SpeedButton1: TSpeedButton
               Left = 0
               Top = 0
-              Width = 105
+              Width = 167
               Height = 36
               Cursor = crHandPoint
               Align = alClient
@@ -1035,7 +1001,7 @@ object FormPrincipal: TFormPrincipal
     Left = 872
     Top = 537
     Content = {
-      414442530F0050336F020000FF00010001FF02FF03040016000000460044004D
+      414442530F001B1B6F020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
@@ -1094,6 +1060,14 @@ object FormPrincipal: TFormPrincipal
     end
     object FDMemTable1vtotal: TFloatField
       FieldName = 'vtotal'
+    end
+  end
+  object PopupMenu: TPopupMenu
+    Left = 928
+    Top = 541
+    object GerarPDF1: TMenuItem
+      Caption = 'Copiar Chave'
+      OnClick = GerarPDF1Click
     end
   end
 end

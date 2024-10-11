@@ -19,6 +19,7 @@ type
     procedure SetValorTotalFloat(const Value: Double);
     procedure SetValorTotalBCFloat(const Value: Double);
     procedure SetValorTotalICMSFloat(const Value: Double);
+    function FormataDataStr(const DataStr: String): String;
 
 
   public
@@ -46,7 +47,10 @@ uses
   Xml.XMLDoc,
   System.IOUtils,
   System.SysUtils,
-  Vcl.Dialogs, ProXML.FormPrincipal, System.Types;
+  Vcl.Dialogs,
+  ProXML.FormPrincipal,
+  System.Types,
+  DB;
 
 { TCalculadoraXML }
 
@@ -54,16 +58,17 @@ procedure TCalculadoraXML.GetTagValueFromXML(var CaminhoXML: string);
   var
     XMLDocument: IXMLDocument;
     NodeinfNFe, NodeprotNFe, NodeIde : IXMLNode;
-    BValorString, TagAutorizado, NumeroNF, DataEm: String;
+    BValorString, TagAutorizado, NumeroNF, DataEm, ModeloXML: String;
     AValorFloat, BValorFloat, AValorFloatBC, AValorFloatICMS: Double;
     posicao: Integer;
 begin
+    //Função que trabalha os dados do arquivo
    XMLDocument := TXMLDocument.Create(Nil);
 
   try
     //Aqui carregamos o arquivo XML no objeto XMLDocument
     XMLDocument.LoadFromFile(CaminhoXML);
-    NodeIde := XMLDocument.ChildNodes.FindNode('nfeProc').ChildNodes.FindNode('NFe').ChildNodes.FindNode('infNFe').ChildNodes.FindNode('ide');
+    NodeIde  := XMLDocument.ChildNodes.FindNode('nfeProc').ChildNodes.FindNode('NFe').ChildNodes.FindNode('infNFe').ChildNodes.FindNode('ide');
     NumeroNF := NodeIde.ChildValues['nNF'];
 
     //Tentando recuperar a data do XML
@@ -71,6 +76,21 @@ begin
       DataEm := NodeIde.ChildValues['dhEmi'];
     except
       DataEm := '0000-00-00';
+    end;
+
+    try
+      ModeloXML := NodeIde.ChildValues['mod'];
+      if ModeloXML <> '65' then
+      begin
+          FormPrincipal.Memo1.Lines.Add('XML ' + ExtractFileName(CaminhoXML) + ' - modelo diferente de 65');
+          Exit;
+      end;
+
+    except on e: Exception do
+        begin
+            FormPrincipal.Memo1.Lines.Add('XML ' + ExtractFileName(CaminhoXML) + ' - Falha ao recuperar modelo');
+            Exit;
+        end;
     end;
 
     //Aqui vamos tentar pegar o Valor da Tag de Autorização
@@ -118,9 +138,16 @@ begin
 
       FormPrincipal.FDMemTable1.FieldByName('numero').AsInteger := StrToInt(NumeroNF);
       FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Copy(ExtractFileName(CaminhoXML), 1, posicao - 1);;
-      FormPrincipal.FDMemTable1.FieldByName('data').AsString := Copy(DataEm, 1, 10);
+
+      FormPrincipal.FDMemTable1.FieldByName('data').AsString := FormataDataStr(Copy(DataEm, 1, 10));
+
+      TFloatField(FormPrincipal.FDMemTable1.FieldByName('vlicms')).DisplayFormat := '#,##0.00';
       FormPrincipal.FDMemTable1.FieldByName('vlicms').AsFloat := AValorFloatICMS;
+
+      TFloatField(FormPrincipal.FDMemTable1.FieldByName('bcicms')).DisplayFormat := '#,##0.00';
       FormPrincipal.FDMemTable1.FieldByName('bcicms').AsFloat := AValorFloatBC;
+
+      TFloatField(FormPrincipal.FDMemTable1.FieldByName('vtotal')).DisplayFormat := '#,##0.00';
       FormPrincipal.FDMemTable1.FieldByName('vtotal').AsFloat := BValorFloat;
 
       FormPrincipal.FDMemTable1.Post;
@@ -138,6 +165,29 @@ begin
   end;
 end;
 
+function TCalculadoraXML.FormataDataStr(const DataStr: String): String;
+var
+  DateStr       : string;
+  FormattedDate : string;
+  Dia           : string;
+  Mes           : string;
+  Ano           : string;
+
+begin
+  //Função que formata data no padrão dd/mm/yyyy
+  Result:= '';
+
+  // String de data no formato YYYY-MM-DD
+  DateStr := DataStr;
+
+  Ano := Copy(DateStr, 1, 4);
+  Mes := Copy(DateStr, 6, 2);
+  Dia := Copy(DateStr, 9, 2);
+
+  // Exibir o resultado
+  Result := Dia+'/'+Mes+'/'+Ano;
+end;
+
 procedure TCalculadoraXML.ProcessarXMLs;
 var
   //files: TArray<string>;
@@ -145,22 +195,24 @@ var
   i: integer;
   AValorTotal, AValorTotalBC, AValorTotalICMS: String;
 begin
-  ValorTotalFloat:= 0.00;
-  ValorTotalBCFloat:= 0.00;
-  ValorTotalICMSFloat:= 0.00;
-  ContadorXML:= 0;
-  ErroNaLeitura:= 0;
+  //Função que processar XMLS no diretorio
+  ValorTotalFloat       := 0.00;
+  ValorTotalBCFloat     := 0.00;
+  ValorTotalICMSFloat   := 0.00;
+  ContadorXML           := 0;
+  ErroNaLeitura         := 0;
+  ValorTotal            := '0.00';
 
-  ValorTotal := '0.00';
-  //Processar XMLS no diretorio
+
   //Pegando arquivos e jogando num array de nomes de arquivos
   files := TDirectory.GetFiles(CaminhoDiretorio + '\', '*.xml');
 
   FormPrincipal.Gauge1.MaxValue := High(files);
+
     //Passando pelo Arraay com os nomes dos XMLs
     for  i := 0 to High(files) do
     begin
-        ////Aqui executamos a função que lê o arquivo XML
+        ////Aqui executamos a função que faz a leitura dos dados do arquivo XML
         try
             GetTagValueFromXML(files[i]);
         except
