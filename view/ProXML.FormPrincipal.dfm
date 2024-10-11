@@ -764,10 +764,10 @@ object FormPrincipal: TFormPrincipal
               ExplicitTop = 28
               ExplicitHeight = 397
               object SkAnimatedImage1: TSkAnimatedImage
-                Left = 176
-                Top = 88
-                Width = 233
-                Height = 177
+                Left = 208
+                Top = 110
+                Width = 185
+                Height = 145
                 Data = {
                   7B2276223A22342E362E38222C226672223A36302C226970223A302C226F7022
                   3A3130362C2277223A3530302C2268223A3530302C226E6D223A22436F6D7020
@@ -944,6 +944,13 @@ object FormPrincipal: TFormPrincipal
                   222C226E70223A332C22636978223A322C226978223A312C226D6E223A224144
                   424520566563746F722047726F7570227D5D2C226970223A302C226F70223A36
                   30302C227374223A302C22626D223A302C227372223A317D5D7D}
+              end
+              object ProgressBar: TProgressBar
+                Left = 168
+                Top = 304
+                Width = 281
+                Height = 17
+                TabOrder = 1
               end
             end
           end

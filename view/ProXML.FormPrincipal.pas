@@ -109,6 +109,7 @@ type
     GerarPDF1: TMenuItem;
     Loading: TTabSheet;
     SkAnimatedImage1: TSkAnimatedImage;
+    ProgressBar: TProgressBar;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -160,8 +161,10 @@ begin
    //
    while Not DMConfig.QryNotas.RecordCount = FDMemTable1.RecordCount do
    begin
-
+      ProgressBar.Position := DMConfig.QryNotas.RecordCount;
    end;
+
+   ProgressBar.Position := DMConfig.QryNotas.RecordCount;
    PageControl1.ActivePageIndex := 0;
 end;
 
@@ -245,6 +248,9 @@ begin
   FDMemTable1.First;
   PageControl1.ActivePageIndex := 2;
   SkAnimatedImage1.Animation.Start;
+
+
+  ProgressBar.Max := FDMemTable1.RecordCount;
 
   T:= TThread.CreateAnonymousThread(procedure
   begin
