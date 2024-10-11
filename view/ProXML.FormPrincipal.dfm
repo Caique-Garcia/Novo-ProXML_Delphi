@@ -946,9 +946,9 @@ object FormPrincipal: TFormPrincipal
                   30302C227374223A302C22626D223A302C227372223A317D5D7D}
               end
               object ProgressBar: TProgressBar
-                Left = 168
-                Top = 304
-                Width = 281
+                Left = 9
+                Top = 392
+                Width = 598
                 Height = 17
                 TabOrder = 1
               end
@@ -1185,7 +1185,7 @@ object FormPrincipal: TFormPrincipal
     Left = 872
     Top = 537
     Content = {
-      414442530F0054306F020000FF00010001FF02FF03040016000000460044004D
+      414442530F00B7336F020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000

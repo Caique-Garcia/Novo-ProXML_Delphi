@@ -49,6 +49,7 @@ type
     QRLabelValorTotal: TQRLabel;
     QRLabelTotalICMS: TQRLabel;
     QRLabelTotalBC: TQRLabel;
+
   private
 
     { Private declarations }

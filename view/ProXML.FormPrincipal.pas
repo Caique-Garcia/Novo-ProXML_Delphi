@@ -45,7 +45,7 @@ uses
   FireDAC.Stan.StorageBin,
   Vcl.Samples.Gauges,
   Vcl.CategoryButtons,
-  Vcl.Menus, DM;
+  Vcl.Menus, DM, ProXML.FormRelatorios;
 
 type
   TFormPrincipal = class(TForm)
@@ -110,6 +110,7 @@ type
     Loading: TTabSheet;
     SkAnimatedImage1: TSkAnimatedImage;
     ProgressBar: TProgressBar;
+    FormRelatorio: TFormRelatorios;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -166,6 +167,17 @@ begin
 
    ProgressBar.Position := DMConfig.QryNotas.RecordCount;
    PageControl1.ActivePageIndex := 0;
+
+   FormRelatorio := TFormRelatorios.Create(Nil);
+   try
+        FormRelatorio.SetTotal(LabelValorTotal.Caption);
+        FormRelatorio.SetTotalBC(LabelbaseICMS.Caption);
+        FormRelatorio.SetTotalICMS(LabelValorICMS.Caption);
+        FormRelatorio.GerarRelatorio;
+   finally
+        FreeAndNil(FormRelatorio);
+   end
+
 end;
 
 procedure TFormPrincipal.CategoryButtons1Categories0Items2Click(
