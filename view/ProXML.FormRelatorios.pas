@@ -15,7 +15,8 @@ uses
   QRCtrls,
   QuickRpt,
   Vcl.StdCtrls,
-  Vcl.ExtCtrls;
+  Vcl.ExtCtrls,
+  DM;
 
 type
   TFormRelatorios = class(TForm)

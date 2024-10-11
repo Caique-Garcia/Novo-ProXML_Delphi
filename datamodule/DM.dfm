@@ -2,7 +2,7 @@ object DMConfig: TDMConfig
   OldCreateOrder = False
   OnCreate = DataModuleCreate
   Height = 273
-  Width = 302
+  Width = 452
   object Conexao: TFDConnection
     Params.Strings = (
       'DriverID=SQLite'
@@ -22,7 +22,7 @@ object DMConfig: TDMConfig
   object QryNotas: TFDQuery
     Connection = Conexao
     SQL.Strings = (
-      'SELECT CHAVE, VALOR, DATA, BCICMS, VLICMS FROM NF')
+      'SELECT NUMERO, CHAVE, VALOR, DATA, BCICMS, VLICMS FROM NF')
     Left = 232
     Top = 120
     object QryNotasCHAVE: TWideStringField
@@ -48,6 +48,10 @@ object DMConfig: TDMConfig
       FieldName = 'VLICMS'
       Origin = 'VLICMS'
       Size = 30
+    end
+    object QryNotasNUMERO: TWideStringField
+      FieldName = 'NUMERO'
+      Origin = 'NUMERO'
     end
   end
 end

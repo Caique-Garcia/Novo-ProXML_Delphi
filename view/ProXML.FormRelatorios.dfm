@@ -14,11 +14,12 @@ object FormRelatorios: TFormRelatorios
   PixelsPerInch = 96
   TextHeight = 13
   object QuickRepRelConvenio: TQuickRep
-    Left = 46
-    Top = -523
+    Left = 54
+    Top = 37
     Width = 794
     Height = 1123
     ShowingPreview = False
+    DataSet = DMConfig.QryNotas
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -13
@@ -86,26 +87,26 @@ object FormRelatorios: TFormRelatorios
       Left = 38
       Top = 38
       Width = 718
-      Height = 85
+      Height = 243
       AlignToBottom = False
       TransparentBand = False
       ForceNewColumn = False
       ForceNewPage = False
       Size.Values = (
-        224.895833333333300000
+        642.937500000000000000
         1899.708333333333000000)
       PreCaluculateBandHeight = False
       KeepOnOnePage = False
       BandType = rbPageHeader
       object QRLabel600: TQRLabel
-        Left = 6
-        Top = 21
+        Left = 0
+        Top = 77
         Width = 707
         Height = 17
         Size.Values = (
           44.979166666666670000
-          15.875000000000000000
-          55.562500000000000000
+          0.000000000000000000
+          203.729166666666700000
           1870.604166666667000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
@@ -128,15 +129,15 @@ object FormRelatorios: TFormRelatorios
         FontSize = 10
       end
       object QRLabel601: TQRLabel
-        Left = 5
-        Top = 4
+        Left = 0
+        Top = 54
         Width = 707
         Height = 17
         Size.Values = (
-          44.979166666666700000
-          13.229166666666700000
-          10.583333333333300000
-          1870.604166666670000000)
+          44.979166666666670000
+          0.000000000000000000
+          142.875000000000000000
+          1870.604166666667000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -158,14 +159,14 @@ object FormRelatorios: TFormRelatorios
         FontSize = 10
       end
       object QRLabel602: TQRLabel
-        Left = 5
-        Top = 45
+        Left = 6
+        Top = 173
         Width = 707
         Height = 17
         Size.Values = (
           44.979166666666670000
-          13.229166666666670000
-          119.062500000000000000
+          15.875000000000000000
+          457.729166666666600000
           1870.604166666667000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
@@ -173,7 +174,7 @@ object FormRelatorios: TFormRelatorios
         Alignment = taLeftJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'QRLabel37'
+        Caption = 'XMLs de notas modelos 65 processados pelo perograma'
         Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clGray
@@ -188,21 +189,21 @@ object FormRelatorios: TFormRelatorios
         FontSize = 10
       end
       object QRLabel606: TQRLabel
-        Left = 4
-        Top = 65
+        Left = 6
+        Top = 221
         Width = 43
         Height = 16
         Size.Values = (
           42.333333333333340000
-          10.583333333333330000
-          171.979166666666700000
+          15.875000000000000000
+          584.729166666666800000
           113.770833333333300000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taLeftJustify
         AlignToBand = False
-        Caption = 'C'#243'digo'
+        Caption = 'N'#250'mero'
         Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -217,21 +218,21 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRLabel607: TQRLabel
-        Left = 114
-        Top = 63
-        Width = 29
+        Left = 180
+        Top = 221
+        Width = 36
         Height = 16
         Size.Values = (
           42.333333333333340000
-          301.625000000000000000
-          166.687500000000000000
-          76.729166666666680000)
+          476.250000000000000000
+          584.729166666666800000
+          95.250000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taLeftJustify
         AlignToBand = False
-        Caption = 'Nome'
+        Caption = 'Chave'
         Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -246,14 +247,43 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRLabel608: TQRLabel
-        Left = 673
-        Top = 65
+        Left = 595
+        Top = 221
+        Width = 113
+        Height = 16
+        Size.Values = (
+          42.333333333333340000
+          1574.270833333333000000
+          584.729166666666800000
+          298.979166666666700000)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        Caption = 'Base de C'#225'lculo '
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Courier New'
+        Font.Style = [fsItalic]
+        ParentFont = False
+        Transparent = False
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 8
+      end
+      object QRLabel611: TQRLabel
+        Left = 359
+        Top = 221
         Width = 36
         Height = 16
         Size.Values = (
           42.333333333333340000
-          1780.645833333333000000
-          171.979166666666700000
+          949.854166666666800000
+          584.729166666666800000
           95.250000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
@@ -274,51 +304,22 @@ object FormRelatorios: TFormRelatorios
         VerticalAlignment = tlTop
         FontSize = 8
       end
-      object QRLabel611: TQRLabel
-        Left = 317
-        Top = 64
-        Width = 57
-        Height = 16
-        Size.Values = (
-          42.333333333333340000
-          838.729166666666800000
-          169.333333333333300000
-          150.812500000000000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taLeftJustify
-        AlignToBand = False
-        Caption = 'Conv'#234'nio'
-        Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Courier New'
-        Font.Style = [fsItalic]
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 8
-      end
       object QRLabel612: TQRLabel
-        Left = 478
-        Top = 65
-        Width = 71
+        Left = 496
+        Top = 221
+        Width = 29
         Height = 16
         Size.Values = (
           42.333333333333340000
-          1264.708333333333000000
-          171.979166666666700000
-          187.854166666666700000)
+          1312.333333333333000000
+          584.729166666666800000
+          76.729166666666680000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taLeftJustify
         AlignToBand = False
-        Caption = 'Valor Pago'
+        Caption = 'ICMS'
         Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -333,14 +334,14 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRShape40: TQRShape
-        Left = 3
-        Top = 82
+        Left = 5
+        Top = 238
         Width = 709
         Height = 1
         Size.Values = (
           2.645833333333333000
-          7.937500000000000000
-          216.958333333333400000
+          13.229166666666670000
+          629.708333333333400000
           1875.895833333333000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
@@ -353,7 +354,7 @@ object FormRelatorios: TFormRelatorios
     end
     object QRBand167: TQRBand
       Left = 38
-      Top = 123
+      Top = 281
       Width = 718
       Height = 27
       AlignToBottom = False
@@ -382,6 +383,7 @@ object FormRelatorios: TFormRelatorios
         Alignment = taLeftJustify
         AlignToBand = False
         Color = clWhite
+        DataSet = DMConfig.QryNotas
         DataField = 'CliFor'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -398,14 +400,14 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRDBText249: TQRDBText
-        Left = 75
-        Top = 7
+        Left = 116
+        Top = 6
         Width = 29
         Height = 16
         Size.Values = (
           42.333333333333340000
-          198.437500000000000000
-          18.520833333333330000
+          306.916666666666700000
+          15.875000000000000000
           76.729166666666680000)
         XLColumn = 0
         XLNumFormat = nfGeneral
@@ -491,13 +493,13 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRDBText253: TQRDBText
-        Left = 269
+        Left = 351
         Top = 7
         Width = 57
         Height = 16
         Size.Values = (
           42.333333333333340000
-          711.729166666666800000
+          928.687500000000000000
           18.520833333333330000
           150.812500000000000000)
         XLColumn = 0
@@ -524,7 +526,7 @@ object FormRelatorios: TFormRelatorios
     end
     object QRBand168: TQRBand
       Left = 38
-      Top = 231
+      Top = 389
       Width = 718
       Height = 34
       AlignToBottom = False
@@ -628,7 +630,7 @@ object FormRelatorios: TFormRelatorios
     end
     object QRBand169: TQRBand
       Left = 38
-      Top = 150
+      Top = 308
       Width = 718
       Height = 81
       AlignToBottom = False
@@ -642,14 +644,14 @@ object FormRelatorios: TFormRelatorios
       KeepOnOnePage = False
       BandType = rbSummary
       object QRLabel610: TQRLabel
-        Left = 520
-        Top = 11
+        Left = 544
+        Top = 13
         Width = 41
         Height = 17
         Size.Values = (
           44.979166666666670000
-          1375.833333333333000000
-          29.104166666666670000
+          1439.333333333333000000
+          34.395833333333340000
           108.479166666666700000)
         XLColumn = 0
         XLNumFormat = nfGeneral
@@ -671,21 +673,21 @@ object FormRelatorios: TFormRelatorios
         FontSize = 10
       end
       object QRLabel613: TQRLabel
-        Left = 480
-        Top = 34
-        Width = 81
+        Left = 552
+        Top = 36
+        Width = 33
         Height = 17
         Size.Values = (
           44.979166666666670000
-          1270.000000000000000000
-          89.958333333333340000
-          214.312500000000000000)
+          1460.500000000000000000
+          95.250000000000000000
+          87.312500000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taLeftJustify
         AlignToBand = False
-        Caption = 'VALOR PAGO'
+        Caption = 'ICMS'
         Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -776,21 +778,21 @@ object FormRelatorios: TFormRelatorios
         VertAdjust = 0
       end
       object QRLabel621: TQRLabel
-        Left = 488
-        Top = 58
-        Width = 73
+        Left = 472
+        Top = 59
+        Width = 113
         Height = 17
         Size.Values = (
           44.979166666666670000
-          1291.166666666667000000
-          153.458333333333300000
-          193.145833333333300000)
+          1248.833333333333000000
+          156.104166666666700000
+          298.979166666666700000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taLeftJustify
         AlignToBand = False
-        Caption = 'REGISTROS'
+        Caption = 'BASE DE C'#193'CULO'
         Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
