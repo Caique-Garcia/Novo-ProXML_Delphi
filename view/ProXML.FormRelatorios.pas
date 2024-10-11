@@ -23,7 +23,6 @@ type
     QuickNotas: TQuickRep;
     Label186: TLabel;
     QRBand166: TQRBand;
-    QRLabel600: TQRLabel;
     QRLabel601: TQRLabel;
     QRLabel602: TQRLabel;
     QRLabel606: TQRLabel;
@@ -57,6 +56,7 @@ type
     procedure SetTotal(const Value: String);
     procedure SetTotalBC(const Value: String);
     procedure SetTotalICMS(const Value: String);
+    procedure GerarRelatorio();
   end;
 
 var
@@ -67,6 +67,19 @@ implementation
 {$R *.dfm}
 
 { TFormRelatorios }
+
+procedure TFormRelatorios.GerarRelatorio;
+begin
+    //Gera o relatório de notas
+    DMConfig.QryNotas.Active := False;
+
+    DMConfig.QryNotas.Active := True;
+
+    if Not DMConfig.QryNotas.IsEmpty then
+        QuickNotas.Preview
+    else
+        raise Exception.Create('Sem registros no banco de dados!');
+end;
 
 procedure TFormRelatorios.SetTotal(const Value: String);
 begin
