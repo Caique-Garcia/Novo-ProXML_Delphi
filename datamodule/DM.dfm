@@ -3,18 +3,51 @@ object DMConfig: TDMConfig
   OnCreate = DataModuleCreate
   Height = 273
   Width = 302
-  object Conxao: TFDConnection
+  object Conexao: TFDConnection
     Params.Strings = (
       'DriverID=SQLite'
-      'Database=config')
-    AfterConnect = ConxaoAfterConnect
-    BeforeConnect = ConxaoBeforeConnect
+      'Database=D:\PROJETOS\Novo-ProXML_Delphi\bin\db\notas.db')
+    Connected = True
+    LoginPrompt = False
+    AfterConnect = ConexaoAfterConnect
+    BeforeConnect = ConexaoBeforeConnect
     Left = 136
     Top = 88
   end
   object Query: TFDQuery
-    Connection = Conxao
+    Connection = Conexao
     Left = 136
     Top = 144
+  end
+  object QryNotas: TFDQuery
+    Connection = Conexao
+    SQL.Strings = (
+      'SELECT CHAVE, VALOR, DATA, BCICMS, VLICMS FROM NF')
+    Left = 232
+    Top = 120
+    object QryNotasCHAVE: TWideStringField
+      FieldName = 'CHAVE'
+      Origin = 'CHAVE'
+      Size = 50
+    end
+    object QryNotasVALOR: TWideStringField
+      FieldName = 'VALOR'
+      Origin = 'VALOR'
+    end
+    object QryNotasDATA: TWideStringField
+      FieldName = 'DATA'
+      Origin = 'DATA'
+      Size = 36
+    end
+    object QryNotasBCICMS: TWideStringField
+      FieldName = 'BCICMS'
+      Origin = 'BCICMS'
+      Size = 30
+    end
+    object QryNotasVLICMS: TWideStringField
+      FieldName = 'VLICMS'
+      Origin = 'VLICMS'
+      Size = 30
+    end
   end
 end

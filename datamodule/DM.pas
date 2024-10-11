@@ -28,13 +28,22 @@ uses
 
 type
   TDMConfig = class(TDataModule)
-    Conxao: TFDConnection;
+    Conexao: TFDConnection;
     Query: TFDQuery;
+    QryNotas: TFDQuery;
+    QryNotasCHAVE: TWideStringField;
+    QryNotasVALOR: TWideStringField;
+    QryNotasDATA: TWideStringField;
+    QryNotasBCICMS: TWideStringField;
+    QryNotasVLICMS: TWideStringField;
     procedure DataModuleCreate(Sender: TObject);
-    procedure ConxaoBeforeConnect(Sender: TObject);
-    procedure ConxaoAfterConnect(Sender: TObject);
+    procedure ConexaoBeforeConnect(Sender: TObject);
+    procedure ConexaoAfterConnect(Sender: TObject);
   private
+
   public
+    procedure InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC: String);
+    procedure DeleteDados;
   end;
 
 var
@@ -46,9 +55,9 @@ implementation
 
 {$R *.dfm}
 
-procedure TDMConfig.ConxaoAfterConnect(Sender: TObject);
+procedure TDMConfig.ConexaoAfterConnect(Sender: TObject);
 begin
-     Conxao.ExecSQL('CREATE TABLE IF NOT EXISTS nf ( ' +
+     Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS nf ( ' +
                                 'NUMERO           TEXT (20), '  +
                                 'CHAVE            TEXT (50), '  +
                                 'VALOR            TEXT (20), '  +
@@ -58,12 +67,12 @@ begin
                                 ' ); ');
 end;
 
-procedure TDMConfig.ConxaoBeforeConnect(Sender: TObject);
+procedure TDMConfig.ConexaoBeforeConnect(Sender: TObject);
 begin
-   Conxao.DriverName := 'SQLite';
+   Conexao.DriverName := 'SQLite';
 
   {$IFDEF MSWINDOWS}
-   Conxao.Params.Values['Database'] := System.SysUtils.GetCurrentDir + '\db\notas.db';
+   Conexao.Params.Values['Database'] := System.SysUtils.GetCurrentDir + '\db\notas.db';
   {$ELSE}
    Conxao.Params.Values['Database'] := TPath.Combine( TPath.GetDocumentsPath, '\notas.db');
   {$ENDIF}
@@ -80,7 +89,32 @@ begin
     if not DirectoryExists(Diretorio) then
         CreateDir(Diretorio);
 
-    Conxao.Connected := True;
+    Conexao.Connected := True;
+end;
+
+procedure TDMConfig.DeleteDados();
+begin
+    Conexao.ExecSQL('DELETE FROM nf ;');
+end;
+
+procedure TDMConfig.InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC: String);
+begin
+    Query.Active := False;
+    Query.SQL.Clear;
+    Query.SQL.Add('insert into config ');
+    Query.SQL.Add('values( :NUMERO, :CHAVE, :VALOR, :DATA, :BCICMS, :VLICMS )');
+    Query.Params.ParamByName('NUMERO').AsString         := Trim(Numero);
+    Query.Params.ParamByName('CHAVE').AsString          := Trim(Chave);
+    Query.Params.ParamByName('VALOR').AsString          := Trim(Valor);
+    Query.Params.ParamByName('DATA').AsString           := Trim(Data);
+    Query.Params.ParamByName('BCICMS').AsString         := Trim(BC);
+    Query.Params.ParamByName('VLICMS').AsString         := Trim(ICMS);
+
+    try
+        Query.ExecSQL;
+    except on e: Exception do
+        raise Exception.Create('Erro na gravação de dados: '+ e.message);
+    end;
 end;
 
 end.
