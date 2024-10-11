@@ -33,7 +33,6 @@ object FormPrincipal: TFormPrincipal
     ParentBackground = False
     ParentFont = False
     TabOrder = 0
-    ExplicitWidth = 1106
     object PnlCabecalho: TPanel
       Left = 0
       Top = 0
@@ -44,7 +43,6 @@ object FormPrincipal: TFormPrincipal
       Color = 2169367
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 1106
       object PnlLogo: TPanel
         AlignWithMargins = True
         Left = 20
@@ -250,7 +248,6 @@ object FormPrincipal: TFormPrincipal
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitLeft = 924
       end
     end
     object PnlCorpo: TPanel
@@ -265,8 +262,6 @@ object FormPrincipal: TFormPrincipal
       Padding.Right = 30
       Padding.Bottom = 15
       TabOrder = 1
-      ExplicitTop = 116
-      ExplicitWidth = 1106
       object PnlInfo: TPanel
         Left = 899
         Top = 15
@@ -283,7 +278,6 @@ object FormPrincipal: TFormPrincipal
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitLeft = 844
         object PanelVaorICMS: TPanel
           Left = 0
           Top = 160
@@ -609,7 +603,6 @@ object FormPrincipal: TFormPrincipal
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
-        ExplicitWidth = 804
         object PnlInfoLocal: TPanel
           Left = 0
           Top = 97
@@ -624,7 +617,6 @@ object FormPrincipal: TFormPrincipal
           Font.Style = []
           ParentFont = False
           TabOrder = 0
-          ExplicitWidth = 804
           object PageControl1: TPageControl
             AlignWithMargins = True
             Left = 229
@@ -638,11 +630,9 @@ object FormPrincipal: TFormPrincipal
             ActivePage = TabSheet2
             Align = alClient
             TabOrder = 0
-            ExplicitWidth = 570
             object TabSheet1: TTabSheet
               Caption = 'TabSheet1'
               TabVisible = False
-              ExplicitWidth = 562
               object Gauge1: TGauge
                 Left = 0
                 Top = 387
@@ -677,14 +667,12 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ReadOnly = True
                 TabOrder = 0
-                ExplicitWidth = 562
               end
             end
             object TabSheet2: TTabSheet
               Caption = 'TabSheet2'
               ImageIndex = 1
               TabVisible = False
-              ExplicitWidth = 562
               object Panel5: TPanel
                 Left = 0
                 Top = 0
@@ -695,7 +683,6 @@ object FormPrincipal: TFormPrincipal
                 Color = clWhite
                 ParentBackground = False
                 TabOrder = 0
-                ExplicitWidth = 562
                 object DBGrid1: TDBGrid
                   Left = 0
                   Top = 0
@@ -844,7 +831,6 @@ object FormPrincipal: TFormPrincipal
           BevelOuter = bvNone
           ShowCaption = False
           TabOrder = 1
-          ExplicitWidth = 804
           object Shape8: TShape
             AlignWithMargins = True
             Left = 10
@@ -1001,7 +987,7 @@ object FormPrincipal: TFormPrincipal
     Left = 872
     Top = 537
     Content = {
-      414442530F0011356F020000FF00010001FF02FF03040016000000460044004D
+      414442530F00F81A6F020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
