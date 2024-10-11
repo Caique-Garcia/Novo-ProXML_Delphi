@@ -36,6 +36,7 @@ type
     QryNotasDATA: TWideStringField;
     QryNotasBCICMS: TWideStringField;
     QryNotasVLICMS: TWideStringField;
+    QryNotasNUMERO: TWideStringField;
     procedure DataModuleCreate(Sender: TObject);
     procedure ConexaoBeforeConnect(Sender: TObject);
     procedure ConexaoAfterConnect(Sender: TObject);
