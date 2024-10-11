@@ -14,7 +14,7 @@ object FormRelatorios: TFormRelatorios
   PixelsPerInch = 96
   TextHeight = 13
   object QuickNotas: TQuickRep
-    Left = 46
+    Left = 70
     Top = 37
     Width = 794
     Height = 1123
@@ -117,65 +117,35 @@ object FormRelatorios: TFormRelatorios
         Shape = qrsRectangle
         VertAdjust = 0
       end
-      object QRLabel600: TQRLabel
-        Left = 0
-        Top = 77
-        Width = 707
-        Height = 17
-        Size.Values = (
-          44.979166666666670000
-          0.000000000000000000
-          203.729166666666700000
-          1870.604166666667000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taCenter
-        AlignToBand = False
-        AutoSize = False
-        Caption = 'QRLabel35'
-        Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Courier New'
-        Font.Style = []
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 10
-      end
       object QRLabel601: TQRLabel
-        Left = 0
+        Left = 16
         Top = 54
-        Width = 707
-        Height = 17
+        Width = 273
+        Height = 66
         Size.Values = (
-          44.979166666666670000
-          0.000000000000000000
+          174.625000000000000000
+          42.333333333333340000
           142.875000000000000000
-          1870.604166666667000000)
+          722.312500000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
-        Alignment = taCenter
+        Alignment = taLeftJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'QRLabel36'
+        Caption = 'Pro XML'
         Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Courier New'
+        Font.Height = -48
+        Font.Name = 'Segoe UI'
         Font.Style = [fsBold]
         ParentFont = False
         Transparent = False
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 10
+        FontSize = 36
       end
       object QRLabel602: TQRLabel
         Left = 6
@@ -193,7 +163,7 @@ object FormRelatorios: TFormRelatorios
         Alignment = taLeftJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'XMLs de notas modelos 65 processados pelo perograma'
+        Caption = 'XMLs de notas modelos 65 processados pelo programa'
         Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clGray
@@ -371,13 +341,13 @@ object FormRelatorios: TFormRelatorios
       object QRDBText248: TQRDBText
         Left = 6
         Top = 7
-        Width = 43
+        Width = 49
         Height = 16
         Size.Values = (
           42.333333333333340000
           15.875000000000000000
           18.520833333333330000
-          113.770833333333300000)
+          129.645833333333300000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -386,10 +356,10 @@ object FormRelatorios: TFormRelatorios
         Color = clWhite
         DataSet = DMConfig.QryNotas
         DataField = 'NUMERO'
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
-        Font.Name = 'Courier New'
+        Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
         Transparent = False
@@ -418,10 +388,10 @@ object FormRelatorios: TFormRelatorios
         Color = clWhite
         DataSet = DMConfig.QryNotas
         DataField = 'CHAVE'
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
-        Font.Name = 'Courier New'
+        Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
         Transparent = False
@@ -433,15 +403,15 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRDBText250: TQRDBText
-        Left = 634
+        Left = 637
         Top = 6
-        Width = 43
+        Width = 40
         Height = 16
         Size.Values = (
           42.333333333333340000
-          1677.458333333333000000
+          1685.395833333333000000
           15.875000000000000000
-          113.770833333333300000)
+          105.833333333333300000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -450,10 +420,10 @@ object FormRelatorios: TFormRelatorios
         Color = clWhite
         DataSet = DMConfig.QryNotas
         DataField = 'BCICMS'
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
-        Font.Name = 'Courier New'
+        Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
         Transparent = False
@@ -465,15 +435,15 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRDBText252: TQRDBText
-        Left = 495
+        Left = 499
         Top = 7
-        Width = 43
+        Width = 39
         Height = 16
         Size.Values = (
           42.333333333333340000
-          1309.687500000000000000
+          1320.270833333333000000
           18.520833333333330000
-          113.770833333333300000)
+          103.187500000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -482,10 +452,10 @@ object FormRelatorios: TFormRelatorios
         Color = clWhite
         DataSet = DMConfig.QryNotas
         DataField = 'VLICMS'
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
-        Font.Name = 'Courier New'
+        Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
         Transparent = False
@@ -514,10 +484,10 @@ object FormRelatorios: TFormRelatorios
         Color = clWhite
         DataSet = DMConfig.QryNotas
         DataField = 'VALOR'
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
-        Font.Name = 'Courier New'
+        Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
         Transparent = False
@@ -531,7 +501,7 @@ object FormRelatorios: TFormRelatorios
     end
     object QRBand168: TQRBand
       Left = 38
-      Top = 473
+      Top = 507
       Width = 718
       Height = 34
       AlignToBottom = False
@@ -639,27 +609,27 @@ object FormRelatorios: TFormRelatorios
       Left = 38
       Top = 308
       Width = 718
-      Height = 165
+      Height = 199
       AlignToBottom = False
       TransparentBand = False
       ForceNewColumn = False
       ForceNewPage = False
       Size.Values = (
-        436.562499999999900000
+        526.520833333333400000
         1899.708333333333000000)
       PreCaluculateBandHeight = False
       KeepOnOnePage = False
       BandType = rbSummary
       object QRLabel610: TQRLabel
-        Left = 544
-        Top = 37
-        Width = 41
-        Height = 17
+        Left = 505
+        Top = 43
+        Width = 60
+        Height = 38
         Size.Values = (
-          44.979166666666670000
-          1439.333333333333000000
-          97.895833333333340000
-          108.479166666666700000)
+          100.541666666666700000
+          1336.145833333333000000
+          113.770833333333300000
+          158.750000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -667,28 +637,28 @@ object FormRelatorios: TFormRelatorios
         AlignToBand = False
         Caption = 'TOTAL'
         Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Courier New'
+        Font.Height = -19
+        Font.Name = 'Segoe UI'
         Font.Style = [fsBold]
         ParentFont = False
         Transparent = False
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 10
+        FontSize = 14
       end
       object QRLabel613: TQRLabel
-        Left = 552
-        Top = 60
-        Width = 33
-        Height = 17
+        Left = 517
+        Top = 87
+        Width = 48
+        Height = 58
         Size.Values = (
-          44.979166666666670000
-          1460.500000000000000000
-          158.750000000000000000
-          87.312500000000000000)
+          153.458333333333300000
+          1367.895833333333000000
+          230.187500000000000000
+          127.000000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -696,17 +666,17 @@ object FormRelatorios: TFormRelatorios
         AlignToBand = False
         Caption = 'ICMS'
         Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Courier New'
+        Font.Height = -19
+        Font.Name = 'Segoe UI'
         Font.Style = [fsBold]
         ParentFont = False
         Transparent = False
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 10
+        FontSize = 14
       end
       object QRShape88: TQRShape
         Left = 5
@@ -727,15 +697,15 @@ object FormRelatorios: TFormRelatorios
         VertAdjust = 0
       end
       object QRLabel621: TQRLabel
-        Left = 472
-        Top = 83
-        Width = 113
-        Height = 17
+        Left = 409
+        Top = 126
+        Width = 156
+        Height = 38
         Size.Values = (
-          44.979166666666670000
-          1248.833333333333000000
-          219.604166666666700000
-          298.979166666666700000)
+          100.541666666666700000
+          1082.145833333333000000
+          333.375000000000000000
+          412.750000000000100000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -743,28 +713,28 @@ object FormRelatorios: TFormRelatorios
         AlignToBand = False
         Caption = 'BASE DE C'#193'CULO'
         Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Courier New'
+        Font.Height = -19
+        Font.Name = 'Segoe UI'
         Font.Style = [fsBold]
         ParentFont = False
         Transparent = False
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 10
+        FontSize = 14
       end
       object QRLabelValorTotal: TQRLabel
-        Left = 632
-        Top = 37
-        Width = 41
-        Height = 17
+        Left = 608
+        Top = 43
+        Width = 57
+        Height = 26
         Size.Values = (
-          44.979166666666670000
-          1672.166666666667000000
-          97.895833333333340000
-          108.479166666666700000)
+          68.791666666666680000
+          1608.666666666667000000
+          113.770833333333300000
+          150.812500000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -772,28 +742,28 @@ object FormRelatorios: TFormRelatorios
         AlignToBand = False
         Caption = 'TOTAL'
         Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Courier New'
+        Font.Height = -19
+        Font.Name = 'Segoe UI Semibold'
         Font.Style = [fsBold]
         ParentFont = False
         Transparent = False
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 10
+        FontSize = 14
       end
       object QRLabelTotalICMS: TQRLabel
-        Left = 632
-        Top = 60
-        Width = 41
-        Height = 17
+        Left = 608
+        Top = 87
+        Width = 57
+        Height = 26
         Size.Values = (
-          44.979166666666670000
-          1672.166666666667000000
-          158.750000000000000000
-          108.479166666666700000)
+          68.791666666666680000
+          1608.666666666667000000
+          230.187500000000000000
+          150.812500000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -801,28 +771,28 @@ object FormRelatorios: TFormRelatorios
         AlignToBand = False
         Caption = 'TOTAL'
         Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Courier New'
+        Font.Height = -19
+        Font.Name = 'Segoe UI Semibold'
         Font.Style = [fsBold]
         ParentFont = False
         Transparent = False
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 10
+        FontSize = 14
       end
       object QRLabelTotalBC: TQRLabel
-        Left = 632
-        Top = 83
-        Width = 41
-        Height = 17
+        Left = 608
+        Top = 126
+        Width = 57
+        Height = 26
         Size.Values = (
-          44.979166666666670000
-          1672.166666666667000000
-          219.604166666666700000
-          108.479166666666700000)
+          68.791666666666680000
+          1608.666666666667000000
+          333.375000000000000000
+          150.812500000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -830,17 +800,17 @@ object FormRelatorios: TFormRelatorios
         AlignToBand = False
         Caption = 'TOTAL'
         Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
+        Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Courier New'
+        Font.Height = -19
+        Font.Name = 'Segoe UI Semibold'
         Font.Style = [fsBold]
         ParentFont = False
         Transparent = False
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 10
+        FontSize = 14
       end
     end
   end
