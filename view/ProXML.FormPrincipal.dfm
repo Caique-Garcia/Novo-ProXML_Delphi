@@ -995,6 +995,11 @@ object FormPrincipal: TFormPrincipal
                   TextColor = 2169367
                 end>
               Color = clWhite
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clGray
+              Font.Height = -13
+              Font.Name = 'Segoe UI'
+              Font.Style = []
               RegularButtonColor = clWhite
               SelectedButtonColor = 15132390
               TabOrder = 0
@@ -1007,6 +1012,14 @@ object FormPrincipal: TFormPrincipal
               Align = alTop
               BevelOuter = bvNone
               Caption = 'Op'#231#245'es'
+              Color = clWhite
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clGray
+              Font.Height = -13
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              ParentBackground = False
+              ParentFont = False
               TabOrder = 1
             end
           end
