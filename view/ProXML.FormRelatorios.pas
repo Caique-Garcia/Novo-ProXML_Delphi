@@ -49,6 +49,7 @@ type
     QRLabelValorTotal: TQRLabel;
     QRLabelTotalICMS: TQRLabel;
     QRLabelTotalBC: TQRLabel;
+    QRLabelQt: TQRLabel;
 
   private
 
@@ -57,6 +58,7 @@ type
     procedure SetTotal(const Value: String);
     procedure SetTotalBC(const Value: String);
     procedure SetTotalICMS(const Value: String);
+    procedure SetQtRegistros(const Value: String);
     procedure GerarRelatorio();
   end;
 
@@ -80,6 +82,11 @@ begin
         QuickNotas.Preview
     else
         raise Exception.Create('Sem registros no banco de dados!');
+end;
+
+procedure TFormRelatorios.SetQtRegistros(const Value: String);
+begin
+  QRLabelQt.Caption := Trim(Value);
 end;
 
 procedure TFormRelatorios.SetTotal(const Value: String);

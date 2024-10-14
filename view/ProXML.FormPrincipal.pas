@@ -109,7 +109,6 @@ type
     GerarPDF1: TMenuItem;
     Loading: TTabSheet;
     SkAnimatedImage1: TSkAnimatedImage;
-    ProgressBar: TProgressBar;
     FormRelatorio: TFormRelatorios;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
@@ -159,21 +158,15 @@ end;
 
 procedure TFormPrincipal.FinalizaRelatorio(Sender: TObject);
 begin
-   //
-   while Not DMConfig.QryNotas.RecordCount = FDMemTable1.RecordCount do
-   begin
-      ProgressBar.Position := DMConfig.QryNotas.RecordCount;
-   end;
-
-   ProgressBar.Position := DMConfig.QryNotas.RecordCount;
-   PageControl1.ActivePageIndex := 0;
-
+   //Finaliza o relatório
    FormRelatorio := TFormRelatorios.Create(Nil);
    try
         FormRelatorio.SetTotal(LabelValorTotal.Caption);
         FormRelatorio.SetTotalBC(LabelbaseICMS.Caption);
         FormRelatorio.SetTotalICMS(LabelValorICMS.Caption);
+        FormRelatorio.SetQtRegistros(IntToStr(FDMemTable1.RecordCount));
         FormRelatorio.GerarRelatorio;
+        PageControl1.ActivePageIndex := 0;
    finally
         FreeAndNil(FormRelatorio);
    end
@@ -182,8 +175,6 @@ end;
 
 procedure TFormPrincipal.CategoryButtons1Categories0Items2Click(
   Sender: TObject);
-var
-    T : TThread;
 begin
     //Geração de relatóeio
     if DataSource1.DataSet.RecordCount <= 0 then
@@ -261,9 +252,6 @@ begin
   PageControl1.ActivePageIndex := 2;
   SkAnimatedImage1.Animation.Start;
 
-
-  ProgressBar.Max := FDMemTable1.RecordCount;
-
   T:= TThread.CreateAnonymousThread(procedure
   begin
       while not FDMemTable1.Eof do
@@ -273,9 +261,9 @@ begin
           FDMemTable1.FieldByName('numero').AsString,
           FDMemTable1.FieldByName('chave').AsString,
           FDMemTable1.FieldByName('data').AsString,
-          FDMemTable1.FieldByName('vtotal').AsString,
-          FDMemTable1.FieldByName('vlicms').AsString,
-          FDMemTable1.FieldByName('bcicms').AsString
+          FormatFloat('0.00',FDMemTable1.FieldByName('vtotal').AsFloat),
+          FormatFloat('0.00',FDMemTable1.FieldByName('vlicms').AsFloat),
+          FormatFloat('0.00',FDMemTable1.FieldByName('bcicms').AsFloat)
         );
 
         FDMemTable1.Next;
@@ -283,9 +271,9 @@ begin
   end
   );
 
+  //Ao terminar de executar chama a função FinalizarRelatorio
   T.OnTerminate := FinalizaRelatorio;
   T.Start;
-
 
 end;
 

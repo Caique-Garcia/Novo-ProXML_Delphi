@@ -761,8 +761,6 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Loading'
               ImageIndex = 2
               TabVisible = False
-              ExplicitTop = 28
-              ExplicitHeight = 397
               object SkAnimatedImage1: TSkAnimatedImage
                 Left = 208
                 Top = 110
@@ -944,13 +942,6 @@ object FormPrincipal: TFormPrincipal
                   222C226E70223A332C22636978223A322C226978223A312C226D6E223A224144
                   424520566563746F722047726F7570227D5D2C226970223A302C226F70223A36
                   30302C227374223A302C22626D223A302C227372223A317D5D7D}
-              end
-              object ProgressBar: TProgressBar
-                Left = 9
-                Top = 392
-                Width = 598
-                Height = 17
-                TabOrder = 1
               end
             end
           end
@@ -1185,7 +1176,7 @@ object FormPrincipal: TFormPrincipal
     Left = 872
     Top = 537
     Content = {
-      414442530F00B7336F020000FF00010001FF02FF03040016000000460044004D
+      414442530F00F5396F020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
