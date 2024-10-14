@@ -148,15 +148,15 @@ object FormRelatorios: TFormRelatorios
         FontSize = 36
       end
       object QRLabel602: TQRLabel
-        Left = 6
+        Left = 40
         Top = 173
-        Width = 707
+        Width = 673
         Height = 17
         Size.Values = (
           44.979166666666670000
-          15.875000000000000000
-          457.729166666666600000
-          1870.604166666667000000)
+          105.833333333333300000
+          457.729166666666700000
+          1780.645833333333000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -183,7 +183,7 @@ object FormRelatorios: TFormRelatorios
         Width = 44
         Height = 16
         Size.Values = (
-          42.333333333333340000
+          42.333333333333330000
           21.166666666666670000
           571.500000000000000000
           116.416666666666700000)
@@ -207,13 +207,13 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRLabel607: TQRLabel
-        Left = 182
+        Left = 206
         Top = 216
         Width = 33
         Height = 16
         Size.Values = (
-          42.333333333333340000
-          481.541666666666700000
+          42.333333333333330000
+          545.041666666666700000
           571.500000000000000000
           87.312500000000000000)
         XLColumn = 0
@@ -236,13 +236,13 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRLabel608: TQRLabel
-        Left = 610
+        Left = 624
         Top = 216
         Width = 85
         Height = 16
         Size.Values = (
-          42.333333333333340000
-          1613.958333333333000000
+          42.333333333333330000
+          1651.000000000000000000
           571.500000000000000000
           224.895833333333300000)
         XLColumn = 0
@@ -270,10 +270,10 @@ object FormRelatorios: TFormRelatorios
         Width = 28
         Height = 16
         Size.Values = (
-          42.333333333333340000
+          42.333333333333330000
           1180.041666666667000000
           571.500000000000000000
-          74.083333333333340000)
+          74.083333333333330000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -294,15 +294,15 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRLabel612: TQRLabel
-        Left = 543
+        Left = 533
         Top = 216
         Width = 28
         Height = 16
         Size.Values = (
-          42.333333333333340000
-          1436.687500000000000000
+          42.333333333333330000
+          1410.229166666667000000
           571.500000000000000000
-          74.083333333333340000)
+          74.083333333333330000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -321,6 +321,36 @@ object FormRelatorios: TFormRelatorios
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
         FontSize = 8
+      end
+      object QRLabelQt: TQRLabel
+        Left = 8
+        Top = 173
+        Width = 25
+        Height = 17
+        Size.Values = (
+          44.979166666666670000
+          21.166666666666670000
+          457.729166666666700000
+          66.145833333333330000)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = '19'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clGray
+        Font.Height = -13
+        Font.Name = 'Courier New'
+        Font.Style = []
+        ParentFont = False
+        Transparent = False
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 10
       end
     end
     object QRBand167: TQRBand
@@ -344,7 +374,7 @@ object FormRelatorios: TFormRelatorios
         Width = 49
         Height = 16
         Size.Values = (
-          42.333333333333340000
+          42.333333333333330000
           15.875000000000000000
           18.520833333333330000
           129.645833333333300000)
@@ -376,7 +406,7 @@ object FormRelatorios: TFormRelatorios
         Width = 36
         Height = 16
         Size.Values = (
-          42.333333333333340000
+          42.333333333333330000
           306.916666666666700000
           15.875000000000000000
           95.250000000000000000)
@@ -403,13 +433,13 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRDBText250: TQRDBText
-        Left = 650
+        Left = 642
         Top = 6
         Width = 40
         Height = 16
         Size.Values = (
-          42.333333333333340000
-          1719.791666666667000000
+          42.333333333333330000
+          1698.625000000000000000
           15.875000000000000000
           105.833333333333300000)
         XLColumn = 0
@@ -435,13 +465,13 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRDBText252: TQRDBText
-        Left = 543
+        Left = 523
         Top = 5
         Width = 39
         Height = 16
         Size.Values = (
-          42.333333333333340000
-          1436.687500000000000000
+          42.333333333333330000
+          1383.770833333333000000
           13.229166666666670000
           103.187500000000000000)
         XLColumn = 0
@@ -472,7 +502,7 @@ object FormRelatorios: TFormRelatorios
         Width = 36
         Height = 16
         Size.Values = (
-          42.333333333333340000
+          42.333333333333330000
           1180.041666666667000000
           13.229166666666670000
           95.250000000000000000)
@@ -509,7 +539,7 @@ object FormRelatorios: TFormRelatorios
       ForceNewColumn = False
       ForceNewPage = False
       Size.Values = (
-        89.958333333333340000
+        89.958333333333330000
         1899.708333333333000000)
       PreCaluculateBandHeight = False
       KeepOnOnePage = False
@@ -520,7 +550,7 @@ object FormRelatorios: TFormRelatorios
         Width = 78
         Height = 16
         Size.Values = (
-          42.333333333333340000
+          42.333333333333330000
           13.229166666666670000
           15.875000000000000000
           206.375000000000000000)
@@ -549,7 +579,7 @@ object FormRelatorios: TFormRelatorios
         Width = 50
         Height = 16
         Size.Values = (
-          42.333333333333340000
+          42.333333333333330000
           1746.250000000000000000
           15.875000000000000000
           132.291666666666700000)
@@ -615,7 +645,7 @@ object FormRelatorios: TFormRelatorios
       ForceNewColumn = False
       ForceNewPage = False
       Size.Values = (
-        526.520833333333400000
+        526.520833333333300000
         1899.708333333333000000)
       PreCaluculateBandHeight = False
       KeepOnOnePage = False
@@ -705,7 +735,7 @@ object FormRelatorios: TFormRelatorios
           100.541666666666700000
           841.375000000000000000
           354.541666666666700000
-          412.750000000000100000)
+          412.750000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -731,7 +761,7 @@ object FormRelatorios: TFormRelatorios
         Width = 57
         Height = 26
         Size.Values = (
-          68.791666666666680000
+          68.791666666666670000
           1587.500000000000000000
           134.937500000000000000
           150.812500000000000000)
@@ -760,7 +790,7 @@ object FormRelatorios: TFormRelatorios
         Width = 57
         Height = 26
         Size.Values = (
-          68.791666666666680000
+          68.791666666666670000
           1587.500000000000000000
           251.354166666666700000
           150.812500000000000000)
@@ -789,7 +819,7 @@ object FormRelatorios: TFormRelatorios
         Width = 57
         Height = 26
         Size.Values = (
-          68.791666666666680000
+          68.791666666666670000
           1587.500000000000000000
           354.541666666666700000
           150.812500000000000000)
