@@ -109,7 +109,7 @@ begin
     Conexao.ExecSQL('DELETE FROM nf ;');
 end;
 
-procedure TDMConfig.InserirNotaDB(const SMTP, EMAIL, Data, Valor, ICMS, BC, XML: String);
+procedure TDMConfig.InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String);
 begin
     Query.Active := False;
     Query.SQL.Clear;
