@@ -13,6 +13,7 @@ private
     FSSL: Boolean;
     FTSL: Boolean;
     FPorta: String;
+    FMensagem: String;
     constructor Create(); // Construtor
 public
    class var FInstance : TConfig;
@@ -22,6 +23,7 @@ public
    property Porta: String read FPorta write FPorta;
    property SSL: Boolean read FSSL write FSSL;
    property TSL: Boolean read FTSL write FTSL;
+   property Mensagem: String read FMensagem write FMensagem;
 
    destructor Destroy; override; // Destrutor
    class function New: TConfig; static;
