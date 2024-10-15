@@ -127,6 +127,30 @@ type
     ACBrNFeDANFEFR: TACBrNFeDANFEFR;
     GerarDANFe1: TMenuItem;
     ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF;
+    Enviar: TTabSheet;
+    Config: TTabSheet;
+    PanelCorpoConfig: TPanel;
+    Label1: TLabel;
+    Label2: TLabel;
+    Shape2: TShape;
+    Shape3: TShape;
+    Shape4: TShape;
+    Shape9: TShape;
+    Shape10: TShape;
+    Shape11: TShape;
+    Shape12: TShape;
+    Label4: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    Label10: TLabel;
+    CheckBoxSSL: TCheckBox;
+    CheckBoxTSL: TCheckBox;
+    EditSMTP: TEdit;
+    EditPorta: TEdit;
+    EditEmail: TEdit;
+    EditPass: TEdit;
+    MemoMsg: TMemo;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -303,7 +327,6 @@ begin
         CopyFile(PChar(FDMemTable1.FieldByName('xml').AsString), PChar(varDestino), False);
         FDMemTable1.Next;
     end;
-
 
     if FileExists(varPath + 'NFCe\NFCe_ProXML.rar') then
         DeleteFile(varPath + 'NFCe\NFCe_ProXML.rar');
