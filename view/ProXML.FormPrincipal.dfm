@@ -1199,7 +1199,7 @@ object FormPrincipal: TFormPrincipal
     Left = 976
     Top = 385
     Content = {
-      414442530F00B61FBE020000FF00010001FF02FF03040016000000460044004D
+      414442530F006A40BE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
@@ -1293,12 +1293,12 @@ object FormPrincipal: TFormPrincipal
     Configuracoes.WebServices.QuebradeLinha = '|'
     Configuracoes.RespTec.IdCSRT = 0
     DANFE = ACBrNFeDANFEFR
-    Left = 1041
+    Left = 969
     Top = 508
   end
   object ACBrNFeDANFEFR: TACBrNFeDANFEFR
     Sistema = 'Desenvolvido por Caique Garcia'
-    Site = 'caique.garciatst@gmail.com'
+    Site = 'github.com/Caique-Garcia'
     MargemInferior = 0.800000000000000000
     MargemSuperior = 0.800000000000000000
     MargemEsquerda = 0.600000000000000000
@@ -1317,11 +1317,35 @@ object FormPrincipal: TFormPrincipal
     CasasDecimais.Aliquota = 2
     CasasDecimais.MaskAliquota = ',0.00'
     ACBrNFe = ACBrNFe
-    TipoDANFE = tiSemGeracao
+    TipoDANFE = tiNFCe
     EspessuraBorda = 1
     BorderIcon = [biSystemMenu, biMinimize, biMaximize]
     ThreadSafe = False
-    Left = 984
-    Top = 507
+    Left = 688
+    Top = 499
+  end
+  object ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF
+    Sistema = 'Desenvolvido por Caique Garcia'
+    Site = 'github.com/Caique-Garcia'
+    MargemInferior = 8.000000000000000000
+    MargemSuperior = 8.000000000000000000
+    MargemEsquerda = 6.000000000000000000
+    MargemDireita = 5.099999999999999000
+    ExpandeLogoMarcaConfig.Altura = 0
+    ExpandeLogoMarcaConfig.Esquerda = 0
+    ExpandeLogoMarcaConfig.Topo = 0
+    ExpandeLogoMarcaConfig.Largura = 0
+    ExpandeLogoMarcaConfig.Dimensionar = False
+    ExpandeLogoMarcaConfig.Esticar = True
+    CasasDecimais.Formato = tdetInteger
+    CasasDecimais.qCom = 2
+    CasasDecimais.vUnCom = 2
+    CasasDecimais.MaskqCom = ',0.00'
+    CasasDecimais.MaskvUnCom = ',0.00'
+    CasasDecimais.Aliquota = 2
+    CasasDecimais.MaskAliquota = ',0.00'
+    TipoDANFE = tiNFCe
+    Left = 1039
+    Top = 534
   end
 end

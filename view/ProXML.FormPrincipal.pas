@@ -56,7 +56,9 @@ uses
   ACBrNFeDANFEFR,
   ACBrBase,
   ACBrDFe,
-  ACBrNFe;
+  ACBrNFe,
+  ACBrNFeDANFeFPDF,
+  ShellAPI;
 
 type
   TFormPrincipal = class(TForm)
@@ -125,6 +127,7 @@ type
     ACBrNFe: TACBrNFe;
     ACBrNFeDANFEFR: TACBrNFeDANFEFR;
     GerarDANFe1: TMenuItem;
+    ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -240,40 +243,42 @@ procedure TFormPrincipal.ConfigACBR();
 var
   varPath: string;
 begin
-   //Configurações ACBR
-    ACBrNFe.Configuracoes.Geral.FormaEmissao := teNormal;
+    //Configurações ACBR
+    //ACBrNFe.Configuracoes.Geral.FormaEmissao := teNormal;
     varPath := ExtractFilePath(ParamStr(0));;
 
     if not DirectoryExists(varPath + 'NFCe\EnvioResposta') then ForceDirectories(varPath + '\NFCe\EnvioResposta');
-    ACBrNFe.Configuracoes.Arquivos.PathSalvar      := varPath + '\NFCe\EnvioResposta';
-    ACBrNFe.Configuracoes.Arquivos.PathNFe         := varPath + '\NFCe\Emissao';
-    ACBrNFe.Configuracoes.Arquivos.PathInu         := varPath + '\NFCe\Inutilzacao';
-    ACBrNFe.Configuracoes.Arquivos.PathEvento      := varPath + '\NFCe\Evento';
-    ACBrNFe.DANFE.PathPDF                          := varPath + '\NFCe\danfePDF';
+    if not DirectoryExists(varPath + '\NFCe\danfePDF') then ForceDirectories(varPath + '\NFCe\danfePDF');
+
+    ACBrNFe.Configuracoes.Arquivos.PathSalvar      := varPath + 'NFCe\EnvioResposta';
+    ACBrNFe.DANFE.PathPDF                          := varPath + 'NFCe\danfePDF';
     ACBrNFe.Configuracoes.Arquivos.PathSchemas     := varPath + 'Schemas\NFe';
-    ACBrNFe.Configuracoes.Geral.Salvar             := false;
-    ACBrNFe.Configuracoes.Arquivos.EmissaoPathNFe  := true;
-    ACBrNFe.Configuracoes.Arquivos.SepararPorMes   := true;
-    ACBrNFe.Configuracoes.Arquivos.SalvarEvento    := false;
-    ACBrNFe.Configuracoes.Arquivos.Salvar          := true;
 
-    ACBrNFe.Configuracoes.Geral.Salvar        := True;
-    ACBrNFe.Configuracoes.Geral.ModeloDF      := moNFCe;
-    ACBrNFe.Configuracoes.Geral.VersaoDF      := ve400;
-    ACBrNFe.Configuracoes.Geral.VersaoQRCode  := veqr200;
+    ACBrNFe.Configuracoes.Geral.Salvar             := False;
+    ACBrNFe.Configuracoes.Arquivos.EmissaoPathNFe  := True;
+    ACBrNFe.Configuracoes.Arquivos.SepararPorMes   := True;
+    ACBrNFe.Configuracoes.Arquivos.SalvarEvento    := False;
+    ACBrNFe.Configuracoes.Arquivos.Salvar          := True;
 
-    ACBrNFe.Configuracoes.Geral.ExibirErroSchema := False;
+//    ACBrNFe.Configuracoes.Geral.Salvar        := True;
+//    ACBrNFe.Configuracoes.Geral.ModeloDF      := moNFCe;
+//    ACBrNFe.Configuracoes.Geral.VersaoDF      := ve400;
+//    ACBrNFe.Configuracoes.Geral.VersaoQRCode  := veqr200;
+
+    ACBrNFe.Configuracoes.Geral.ExibirErroSchema := True;
     ACBrNFe.Configuracoes.Geral.FormatoAlerta    := '[ %TAGNIVEL%%TAG% ] %DESCRICAO% - %MSG%';
 
     ACBrNFeDANFEFR.ExibeCampoDePagamento := eipQuadro;
     AcbrNfeDanfeFR.FastFile        := varPath + 'Report\NFe\DANFeNFCeA4.fr3'; //DANFeNFCe5_00.fr3 // DANFeNFCeA4.fr3
     AcbrNfeDanfeFR.FastFileEvento  := varPath + 'Report\NFe\EventosNFCe.fr3';
 
-    if ACBrNFe.DANFE <> nil then
-    begin
-        ACBrNFe.DANFE.TipoDANFE  := tiNFCe;
-        ACBrNFe.DANFE.Logo       := '';
-    end;
+//    ACBrNFeDANFeFPDF1.ExibeCampoDePagamento := eipQuadro;
+
+    ACBrNFeDANFeFPDF1.PathPDF := varPath + '\NFCe\danfePDF';
+    //ACBrNFeDANFeFPDF1.        := varPath + 'Report\NFe\DANFeNFCeA4.fr3'; //DANFeNFCe5_00.fr3 // DANFeNFCeA4.fr3
+    //ACBrNFeDANFeFPDF1.FastFileEvento  := varPath + 'Report\NFe\EventosNFCe.fr3';
+
+    ACBrNFe.DANFE.TipoDANFE  := tiNFCe;
 end;
 
 procedure TFormPrincipal.FormShow(Sender: TObject);
@@ -294,15 +299,39 @@ end;
 procedure TFormPrincipal.GerarDanfe(const CaminhoArq: String);
 var
     Result :Boolean;
+    CaminhoPDF : String;
+    NomeArqPDF : String;
 begin
     //Gera danfe do arquivo da nfce
+    NomeArqPDF :=  ExtractFileName(CaminhoArq);
+    NomeArqPDF :=  ChangeFileExt(NomeArqPDF, '.pdf');
+    CaminhoPDF :=  ACBrNFe.DANFE.PathPDF + NomeArqPDF;
+
+    if FileExists(CaminhoPDF) then
+    begin
+        try
+            DeleteFile(CaminhoPDF);
+        except
+        end
+    end;
+
     ACBrNFe.NotasFiscais.Clear;
 
     //ACBrNFe.NotasFiscais.LoadFromString('');
-    Result := ACBrNFe.NotasFiscais.LoadFromFile(CaminhoArq);
+    Result := ACBrNFe.NotasFiscais.LoadFromFile(CaminhoArq, False);
 
     if Result then
-        ACBrNFe.DANFE.ImprimirDANFE();
+        ACBrNFe.NotasFiscais.ImprimirPDF
+    else
+        Exit;
+
+    if FileExists(CaminhoPDF) then
+    begin
+        try
+            ShellExecute(0, 'open', PChar(CaminhoPDF), nil, nil, SW_SHOWNORMAL);
+        except
+        end
+    end;
 end;
 
 procedure TFormPrincipal.GerarDANFe1Click(Sender: TObject);
