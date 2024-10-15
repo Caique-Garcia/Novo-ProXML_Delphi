@@ -43,7 +43,7 @@ type
   private
 
   public
-    procedure InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC: String);
+    procedure InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String);
     procedure DeleteDados;
   end;
 
@@ -64,7 +64,8 @@ begin
                                 'VALOR            TEXT (20), '  +
                                 'DATA             TEXT (36), '  +
                                 'BCICMS           TEXT (30), '  +
-                                'VLICMS           TEXT (30)  '  +
+                                'VLICMS           TEXT (30), '  +
+                                'XML              TEXT (200) '  +
                                 ' ); ');
 end;
 
@@ -98,19 +99,20 @@ begin
     Conexao.ExecSQL('DELETE FROM nf ;');
 end;
 
-procedure TDMConfig.InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC: String);
+procedure TDMConfig.InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String);
 begin
     Query.Active := False;
     Query.SQL.Clear;
 
     Query.SQL.Add('insert into nf ');
-    Query.SQL.Add('values( :NUMERO, :CHAVE, :VALOR, :DATA, :BCICMS, :VLICMS )');
+    Query.SQL.Add('values( :NUMERO, :CHAVE, :VALOR, :DATA, :BCICMS, :VLICMS, :XML )');
     Query.Params.ParamByName('NUMERO').AsString         := Trim(Numero);
     Query.Params.ParamByName('CHAVE').AsString          := Trim(Chave);
     Query.Params.ParamByName('VALOR').AsString          := Trim(Valor);
     Query.Params.ParamByName('DATA').AsString           := Trim(Data);
     Query.Params.ParamByName('BCICMS').AsString         := Trim(BC);
     Query.Params.ParamByName('VLICMS').AsString         := Trim(ICMS);
+    Query.Params.ParamByName('XML').AsString            := Trim(XML);
 
     try
         Query.ExecSQL;

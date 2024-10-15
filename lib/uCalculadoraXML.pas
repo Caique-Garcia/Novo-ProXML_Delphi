@@ -150,6 +150,8 @@ begin
       TFloatField(FormPrincipal.FDMemTable1.FieldByName('vtotal')).DisplayFormat := '#,##0.00';
       FormPrincipal.FDMemTable1.FieldByName('vtotal').AsFloat := BValorFloat;
 
+      FormPrincipal.FDMemTable1.FieldByName('xml').AsString := CaminhoXML;
+
       FormPrincipal.FDMemTable1.Post;
       FormPrincipal.DataSource1.DataSet.First;
     end
