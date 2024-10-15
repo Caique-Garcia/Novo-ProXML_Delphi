@@ -18,6 +18,20 @@ object FormPrincipal: TFormPrincipal
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
+  object Shape4: TShape
+    Left = 344
+    Top = 97
+    Width = 232
+    Height = 40
+    Pen.Color = clGray
+  end
+  object Shape9: TShape
+    Left = 32
+    Top = 97
+    Width = 232
+    Height = 40
+    Pen.Color = clGray
+  end
   object PnlContainer: TPanel
     Left = 0
     Top = 0
@@ -266,7 +280,7 @@ object FormPrincipal: TFormPrincipal
       Padding.Right = 30
       Padding.Bottom = 15
       TabOrder = 1
-      ExplicitWidth = 1161
+      ExplicitTop = 116
       object PnlInfo: TPanel
         Left = 904
         Top = 15
@@ -646,10 +660,9 @@ object FormPrincipal: TFormPrincipal
             Margins.Top = 15
             Margins.Right = 5
             Margins.Bottom = 15
-            ActivePage = TabSheet2
+            ActivePage = Config
             Align = alClient
             TabOrder = 0
-            ExplicitWidth = 625
             object TabSheet1: TTabSheet
               Caption = 'TabSheet1'
               TabVisible = False
@@ -973,6 +986,214 @@ object FormPrincipal: TFormPrincipal
                   30302C227374223A302C22626D223A302C227372223A317D5D7D}
               end
             end
+            object Enviar: TTabSheet
+              Caption = 'Enviar'
+              ImageIndex = 3
+              TabVisible = False
+              ExplicitTop = 28
+              ExplicitHeight = 397
+            end
+            object Config: TTabSheet
+              Caption = 'Config'
+              ImageIndex = 4
+              TabVisible = False
+              ExplicitTop = 28
+              ExplicitHeight = 397
+              object PanelCorpoConfig: TPanel
+                Left = 0
+                Top = 0
+                Width = 622
+                Height = 419
+                Align = alClient
+                BevelOuter = bvNone
+                Font.Charset = DEFAULT_CHARSET
+                Font.Color = clGray
+                Font.Height = -13
+                Font.Name = 'Segoe UI'
+                Font.Style = []
+                ParentFont = False
+                ShowCaption = False
+                TabOrder = 0
+                ExplicitLeft = 96
+                ExplicitTop = 128
+                ExplicitWidth = 185
+                ExplicitHeight = 41
+                object Label1: TLabel
+                  AlignWithMargins = True
+                  Left = 10
+                  Top = 3
+                  Width = 609
+                  Height = 25
+                  Margins.Left = 10
+                  Align = alTop
+                  Caption = 'Configura'#231#245'es'
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clGray
+                  Font.Height = -19
+                  Font.Name = 'Segoe UI'
+                  Font.Style = []
+                  ParentFont = False
+                  ExplicitWidth = 122
+                end
+                object Label2: TLabel
+                  AlignWithMargins = True
+                  Left = 10
+                  Top = 34
+                  Width = 609
+                  Height = 17
+                  Margins.Left = 10
+                  Align = alTop
+                  Caption = 'Dados para envio por email'
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clGray
+                  Font.Height = -13
+                  Font.Name = 'Segoe UI'
+                  Font.Style = []
+                  ParentFont = False
+                  ExplicitWidth = 164
+                end
+                object Shape2: TShape
+                  Left = 24
+                  Top = 89
+                  Width = 297
+                  Height = 40
+                  Pen.Color = clGray
+                end
+                object Shape3: TShape
+                  Left = 344
+                  Top = 89
+                  Width = 145
+                  Height = 40
+                  Pen.Color = clGray
+                end
+                object Shape10: TShape
+                  Left = 24
+                  Top = 177
+                  Width = 297
+                  Height = 40
+                  Pen.Color = clGray
+                end
+                object Shape11: TShape
+                  Left = 344
+                  Top = 177
+                  Width = 217
+                  Height = 40
+                  Pen.Color = clGray
+                end
+                object Shape12: TShape
+                  Left = 24
+                  Top = 260
+                  Width = 537
+                  Height = 112
+                  Pen.Color = clGray
+                end
+                object Label4: TLabel
+                  Left = 24
+                  Top = 66
+                  Width = 33
+                  Height = 17
+                  Caption = 'SMTP'
+                end
+                object Label7: TLabel
+                  Left = 344
+                  Top = 66
+                  Width = 31
+                  Height = 17
+                  Caption = 'Porta'
+                end
+                object Label8: TLabel
+                  Left = 24
+                  Top = 154
+                  Width = 31
+                  Height = 17
+                  Caption = 'Email'
+                end
+                object Label9: TLabel
+                  Left = 344
+                  Top = 154
+                  Width = 35
+                  Height = 17
+                  Caption = 'Senha'
+                end
+                object Label10: TLabel
+                  Left = 24
+                  Top = 237
+                  Width = 65
+                  Height = 17
+                  Caption = 'Mensagem'
+                end
+                object CheckBoxSSL: TCheckBox
+                  Left = 512
+                  Top = 89
+                  Width = 97
+                  Height = 17
+                  Caption = 'SSL'
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clGray
+                  Font.Height = -16
+                  Font.Name = 'Segoe UI'
+                  Font.Style = []
+                  ParentFont = False
+                  TabOrder = 5
+                end
+                object CheckBoxTSL: TCheckBox
+                  Left = 512
+                  Top = 112
+                  Width = 97
+                  Height = 17
+                  Caption = 'TSL'
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clGray
+                  Font.Height = -16
+                  Font.Name = 'Segoe UI'
+                  Font.Style = []
+                  ParentFont = False
+                  TabOrder = 6
+                end
+                object EditSMTP: TEdit
+                  Left = 32
+                  Top = 97
+                  Width = 281
+                  Height = 25
+                  BorderStyle = bsNone
+                  TabOrder = 0
+                end
+                object EditPorta: TEdit
+                  Left = 352
+                  Top = 97
+                  Width = 129
+                  Height = 25
+                  BorderStyle = bsNone
+                  NumbersOnly = True
+                  TabOrder = 1
+                end
+                object EditEmail: TEdit
+                  Left = 32
+                  Top = 185
+                  Width = 281
+                  Height = 25
+                  BorderStyle = bsNone
+                  TabOrder = 2
+                end
+                object EditPass: TEdit
+                  Left = 352
+                  Top = 185
+                  Width = 201
+                  Height = 25
+                  BorderStyle = bsNone
+                  PasswordChar = '*'
+                  TabOrder = 3
+                end
+                object MemoMsg: TMemo
+                  Left = 31
+                  Top = 272
+                  Width = 521
+                  Height = 89
+                  BorderStyle = bsNone
+                  TabOrder = 4
+                end
+              end
+            end
           end
           object PanelMenus: TPanel
             AlignWithMargins = True
@@ -1224,7 +1445,7 @@ object FormPrincipal: TFormPrincipal
     Left = 976
     Top = 385
     Content = {
-      414442530F002239BE020000FF00010001FF02FF03040016000000460044004D
+      414442530F006F40BE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
@@ -1346,8 +1567,8 @@ object FormPrincipal: TFormPrincipal
     EspessuraBorda = 1
     BorderIcon = [biSystemMenu, biMinimize, biMaximize]
     ThreadSafe = False
-    Left = 688
-    Top = 499
+    Left = 976
+    Top = 587
   end
   object ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF
     Sistema = 'Desenvolvido por Caique Garcia'
