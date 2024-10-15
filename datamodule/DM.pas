@@ -42,12 +42,11 @@ type
     procedure ConexaoAfterConnect(Sender: TObject);
   private
     procedure GravarConfig(const Config: TConfig);
-    function GetConfig: TConfig;
-    procedure UpdateConfig(const Config: TConfig);
-
   public
     procedure InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String);
     procedure DeleteDados;
+    function GetConfig: TConfig;
+    procedure UpdateConfig(const Config: TConfig);
   end;
 
 var

@@ -15,6 +15,7 @@ object FormPrincipal: TFormPrincipal
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
+  OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -1084,7 +1085,7 @@ object FormPrincipal: TFormPrincipal
                   Left = 24
                   Top = 260
                   Width = 537
-                  Height = 112
+                  Height = 101
                   Pen.Color = clGray
                 end
                 object Label4: TLabel
@@ -1188,7 +1189,7 @@ object FormPrincipal: TFormPrincipal
                   Left = 31
                   Top = 272
                   Width = 521
-                  Height = 89
+                  Height = 77
                   BorderStyle = bsNone
                   TabOrder = 4
                 end
@@ -1449,7 +1450,7 @@ object FormPrincipal: TFormPrincipal
     Left = 976
     Top = 385
     Content = {
-      414442530F00C531BE020000FF00010001FF02FF03040016000000460044004D
+      414442530F00C931BE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
