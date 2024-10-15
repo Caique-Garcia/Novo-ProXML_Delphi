@@ -45,7 +45,18 @@ uses
   FireDAC.Stan.StorageBin,
   Vcl.Samples.Gauges,
   Vcl.CategoryButtons,
-  Vcl.Menus, DM, ProXML.FormRelatorios;
+  Vcl.Menus,
+  DM,
+  ProXML.FormRelatorios,
+  System.ImageList,
+  Vcl.ImgList,
+  ACBrDFeReport,
+  ACBrDFeDANFeReport,
+  ACBrNFeDANFEClass,
+  ACBrNFeDANFEFR,
+  ACBrBase,
+  ACBrDFe,
+  ACBrNFe;
 
 type
   TFormPrincipal = class(TForm)
@@ -110,6 +121,10 @@ type
     Loading: TTabSheet;
     SkAnimatedImage1: TSkAnimatedImage;
     FormRelatorio: TFormRelatorios;
+    FDMemTable1xml: TStringField;
+    ACBrNFe: TACBrNFe;
+    ACBrNFeDANFEFR: TACBrNFeDANFEFR;
+    GerarDANFe1: TMenuItem;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -122,9 +137,12 @@ type
     procedure GravarNotasDB();
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure CategoryButtons1Categories0Items3Click(Sender: TObject);
+    procedure GerarDANFe1Click(Sender: TObject);
   private
     procedure SetTextoTranferencia(const Text: String);
     procedure FinalizaRelatorio(Sender: TObject);
+    procedure ConfigACBR;
+    procedure GerarDanfe(const CaminhoArq: String);
     { Private declarations }
   public
     { Public declarations }
@@ -139,7 +157,7 @@ var
 implementation
 
 uses
-  uCalculadoraXML, Vcl.Clipbrd;
+  uCalculadoraXML, Vcl.Clipbrd, pcnConversao, pcnConversaoNFe;
 
 {$R *.dfm}
 
@@ -218,18 +236,78 @@ begin
   action := cafree;
 end;
 
+procedure TFormPrincipal.ConfigACBR();
+var
+  varPath: string;
+begin
+   //Configurações ACBR
+    ACBrNFe.Configuracoes.Geral.FormaEmissao := teNormal;
+    varPath := ExtractFilePath(ParamStr(0));;
+
+    if not DirectoryExists(varPath + 'NFCe\EnvioResposta') then ForceDirectories(varPath + '\NFCe\EnvioResposta');
+    ACBrNFe.Configuracoes.Arquivos.PathSalvar      := varPath + '\NFCe\EnvioResposta';
+    ACBrNFe.Configuracoes.Arquivos.PathNFe         := varPath + '\NFCe\Emissao';
+    ACBrNFe.Configuracoes.Arquivos.PathInu         := varPath + '\NFCe\Inutilzacao';
+    ACBrNFe.Configuracoes.Arquivos.PathEvento      := varPath + '\NFCe\Evento';
+    ACBrNFe.DANFE.PathPDF                          := varPath + '\NFCe\danfePDF';
+    ACBrNFe.Configuracoes.Arquivos.PathSchemas     := varPath + 'Schemas\NFe';
+    ACBrNFe.Configuracoes.Geral.Salvar             := false;
+    ACBrNFe.Configuracoes.Arquivos.EmissaoPathNFe  := true;
+    ACBrNFe.Configuracoes.Arquivos.SepararPorMes   := true;
+    ACBrNFe.Configuracoes.Arquivos.SalvarEvento    := false;
+    ACBrNFe.Configuracoes.Arquivos.Salvar          := true;
+
+    ACBrNFe.Configuracoes.Geral.Salvar        := True;
+    ACBrNFe.Configuracoes.Geral.ModeloDF      := moNFCe;
+    ACBrNFe.Configuracoes.Geral.VersaoDF      := ve400;
+    ACBrNFe.Configuracoes.Geral.VersaoQRCode  := veqr200;
+
+    ACBrNFe.Configuracoes.Geral.ExibirErroSchema := False;
+    ACBrNFe.Configuracoes.Geral.FormatoAlerta    := '[ %TAGNIVEL%%TAG% ] %DESCRICAO% - %MSG%';
+
+    ACBrNFeDANFEFR.ExibeCampoDePagamento := eipQuadro;
+    AcbrNfeDanfeFR.FastFile        := varPath + 'Report\NFe\DANFeNFCeA4.fr3'; //DANFeNFCe5_00.fr3 // DANFeNFCeA4.fr3
+    AcbrNfeDanfeFR.FastFileEvento  := varPath + 'Report\NFe\EventosNFCe.fr3';
+
+    if ACBrNFe.DANFE <> nil then
+    begin
+        ACBrNFe.DANFE.TipoDANFE  := tiNFCe;
+        ACBrNFe.DANFE.Logo       := '';
+    end;
+end;
+
 procedure TFormPrincipal.FormShow(Sender: TObject);
 begin
    //Ajustar linhas DBGrid
    TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
    DataSource1.DataSet.First;
    PageControl1.ActivePageIndex := 0;
+   ConfigACBR();
 end;
 
 procedure TFormPrincipal.SetTextoTranferencia(const Text: String);
 begin
     //Setar texto do NCM na area de transferencia
     Clipboard.AsText := Text;
+end;
+
+procedure TFormPrincipal.GerarDanfe(const CaminhoArq: String);
+var
+    Result :Boolean;
+begin
+    //Gera danfe do arquivo da nfce
+    ACBrNFe.NotasFiscais.Clear;
+
+    //ACBrNFe.NotasFiscais.LoadFromString('');
+    Result := ACBrNFe.NotasFiscais.LoadFromFile(CaminhoArq);
+
+    if Result then
+        ACBrNFe.DANFE.ImprimirDANFE();
+end;
+
+procedure TFormPrincipal.GerarDANFe1Click(Sender: TObject);
+begin
+  GerarDanfe(DBGrid1.DataSource.DataSet.FieldByName('xml').Value);
 end;
 
 procedure TFormPrincipal.GerarPDF1Click(Sender: TObject);
@@ -263,7 +341,8 @@ begin
           FDMemTable1.FieldByName('data').AsString,
           FormatFloat('0.00',FDMemTable1.FieldByName('vtotal').AsFloat),
           FormatFloat('0.00',FDMemTable1.FieldByName('vlicms').AsFloat),
-          FormatFloat('0.00',FDMemTable1.FieldByName('bcicms').AsFloat)
+          FormatFloat('0.00',FDMemTable1.FieldByName('bcicms').AsFloat),
+          FDMemTable1.FieldByName('xml').AsString
         );
 
         FDMemTable1.Next;

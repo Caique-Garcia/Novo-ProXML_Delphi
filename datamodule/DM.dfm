@@ -7,7 +7,6 @@ object DMConfig: TDMConfig
     Params.Strings = (
       'DriverID=SQLite'
       'Database=D:\PROJETOS\Novo-ProXML_Delphi\bin\db\notas.db')
-    Connected = True
     LoginPrompt = False
     AfterConnect = ConexaoAfterConnect
     BeforeConnect = ConexaoBeforeConnect
