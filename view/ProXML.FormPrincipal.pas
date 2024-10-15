@@ -164,6 +164,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure CategoryButtons1Categories0Items3Click(Sender: TObject);
     procedure GerarDANFe1Click(Sender: TObject);
+    procedure CategoryButtons1Categories0Items4Click(Sender: TObject);
   private
     procedure SetTextoTranferencia(const Text: String);
     procedure FinalizaRelatorio(Sender: TObject);
@@ -276,6 +277,13 @@ begin
     //PageControl1.ActivePageIndex := 2;
     //SkAnimatedImage1.Animation.Start;
     ComprimirArquivos();
+end;
+
+procedure TFormPrincipal.CategoryButtons1Categories0Items4Click(
+  Sender: TObject);
+begin
+  //Configurações
+  PageControl1.ActivePageIndex := 4;
 end;
 
 procedure TFormPrincipal.DBGrid1DrawColumnCell(Sender: TObject;

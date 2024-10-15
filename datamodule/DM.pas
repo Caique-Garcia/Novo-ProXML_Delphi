@@ -67,6 +67,16 @@ begin
                                 'VLICMS           TEXT (30), '  +
                                 'XML              TEXT (200) '  +
                                 ' ); ');
+
+   Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS config ( ' +
+                                'SMTP             TEXT (32), '  +
+                                'EMAIL            TEXT (54), '  +
+                                'SENHA            TEXT (32), '  +
+                                'PORTA            TEXT (36), '  +
+                                'SSL              TEXT (36), '  +
+                                'TSL              TEXT (36), '  +
+                                'MSG              TEXT (200) '  +
+                                ' ); ');
 end;
 
 procedure TDMConfig.ConexaoBeforeConnect(Sender: TObject);
@@ -99,7 +109,7 @@ begin
     Conexao.ExecSQL('DELETE FROM nf ;');
 end;
 
-procedure TDMConfig.InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String);
+procedure TDMConfig.InserirNotaDB(const SMTP, EMAIL, Data, Valor, ICMS, BC, XML: String);
 begin
     Query.Active := False;
     Query.SQL.Clear;
