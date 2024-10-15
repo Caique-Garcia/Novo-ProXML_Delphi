@@ -146,9 +146,11 @@ type
     procedure FinalizaRelatorio(Sender: TObject);
     procedure ConfigACBR;
     procedure GerarDanfe(const CaminhoArq: String);
-    { Private declarations }
+    function CreateProcessSimple(cmd: string): boolean;
+    procedure ComprimirArquivos();
+
   public
-    { Public declarations }
+
   end;
 
 Type
@@ -175,6 +177,38 @@ procedure TFormPrincipal.CategoryButtons1Categories0Items1Click(
   Sender: TObject);
 begin
    PageControl1.ActivePageIndex := 1;
+end;
+
+function TFormPrincipal.CreateProcessSimple(cmd: string): boolean;
+var
+  SUInfo: TStartupInfo;
+  ProcInfo: TProcessInformation;
+begin
+  FillChar(SUInfo, SizeOf(SUInfo), #0);
+  SUInfo.cb      := SizeOf(SUInfo);
+  SUInfo.dwFlags := STARTF_USESHOWWINDOW;
+  SUInfo.wShowWindow := SW_HIDE;
+
+  Result := CreateProcess(nil,
+                          PChar(cmd),
+                          nil,
+                          nil,
+                          false,
+                          CREATE_NEW_CONSOLE or
+                          NORMAL_PRIORITY_CLASS,
+                          nil,
+                          nil,
+                          SUInfo,
+                          ProcInfo);
+
+  if (Result) then
+  begin
+    WaitForSingleObject(ProcInfo.hProcess, INFINITE);
+
+    CloseHandle(ProcInfo.hProcess);
+    CloseHandle(ProcInfo.hThread);
+  end;
+
 end;
 
 procedure TFormPrincipal.FinalizaRelatorio(Sender: TObject);
@@ -240,13 +274,33 @@ begin
   Application.Terminate;
 end;
 
+procedure TFormPrincipal.ComprimirArquivos();
+var
+  varPath: string;
+begin
+    //Comprime os arquivos XML
+    varPath := ExtractFilePath(ParamStr(0));
+    if not DirectoryExists(varPath + 'NFCe\ProXML') then ForceDirectories(varPath + '\NFCe\ProXML');
+
+    FDMemTable1.First;
+    while not FDMemTable1.Eof do
+    begin
+
+
+
+        FDMemTable1.Next;
+    end;
+
+
+end;
+
 procedure TFormPrincipal.ConfigACBR();
 var
   varPath: string;
 begin
     //Configurações ACBR
     //ACBrNFe.Configuracoes.Geral.FormaEmissao := teNormal;
-    varPath := ExtractFilePath(ParamStr(0));;
+    varPath := ExtractFilePath(ParamStr(0));
 
     if not DirectoryExists(varPath + 'NFCe\EnvioResposta') then ForceDirectories(varPath + '\NFCe\EnvioResposta');
     if not DirectoryExists(varPath + '\NFCe\danfePDF') then ForceDirectories(varPath + '\NFCe\danfePDF');
