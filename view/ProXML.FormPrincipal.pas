@@ -153,6 +153,7 @@ type
     MemoMsg: TMemo;
     Panel9: TPanel;
     btnSalvarConfig: TSpeedButton;
+    SkSvg5: TSkSvg;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -169,6 +170,7 @@ type
     procedure CategoryButtons1Categories0Items4Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnSalvarConfigClick(Sender: TObject);
+    procedure SkSvg5Click(Sender: TObject);
   private
     procedure SetTextoTranferencia(const Text: String);
     procedure FinalizaRelatorio(Sender: TObject);
@@ -290,9 +292,9 @@ begin
     begin
        messagedlg('Sem dados para gerar relatório !!', mtInformation	, [mbOk], 0);
        Exit;
-    end;
-
-    GravarNotasDB;
+    end
+    else
+        GravarNotasDB;
 
 end;
 
@@ -549,6 +551,15 @@ begin
   //Selecionando a pasta de arquivos
   FileOpenDialog1.Execute;
   EditCaminho.Text := FileOpenDialog1.FileName;
+end;
+
+procedure TFormPrincipal.SkSvg5Click(Sender: TObject);
+begin
+   //Ver senha
+   if EditPass.PasswordChar = '*' then
+        EditPass.PasswordChar := #0
+    else
+        EditPass.PasswordChar := '*';
 end;
 
 procedure TFormPrincipal.SpeedButton1Click(Sender: TObject);
