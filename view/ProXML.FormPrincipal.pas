@@ -237,6 +237,7 @@ end;
 procedure TFormPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   action := cafree;
+  Application.Terminate;
 end;
 
 procedure TFormPrincipal.ConfigACBR();
@@ -303,6 +304,9 @@ var
     NomeArqPDF : String;
 begin
     //Gera danfe do arquivo da nfce
+    PageControl1.ActivePageIndex := 2;
+    SkAnimatedImage1.Animation.Start;
+
     NomeArqPDF :=  ExtractFileName(CaminhoArq);
     NomeArqPDF :=  ChangeFileExt(NomeArqPDF, '.pdf');
     CaminhoPDF :=  ACBrNFe.DANFE.PathPDF + NomeArqPDF;
@@ -323,12 +327,21 @@ begin
     if Result then
         ACBrNFe.NotasFiscais.ImprimirPDF
     else
+    begin
+        PageControl1.ActivePageIndex := 1;
         Exit;
+    end;
+
+    while Not FileExists(CaminhoPDF) do
+    begin
+
+    end;
 
     if FileExists(CaminhoPDF) then
     begin
         try
             ShellExecute(0, 'open', PChar(CaminhoPDF), nil, nil, SW_SHOWNORMAL);
+            PageControl1.ActivePageIndex := 1;
         except
         end
     end;
