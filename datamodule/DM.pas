@@ -43,6 +43,7 @@ type
   private
     procedure GravarConfig(const Config: TConfig);
     function GetConfig: TConfig;
+    procedure UpdateConfig(const Config: TConfig);
 
   public
     procedure InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String);
@@ -163,6 +164,60 @@ begin
     end;
 end;
 
+procedure TDMConfig.UpdateConfig(const Config: TConfig);
+var
+    TSL, SSL: String;
+    QryAux: TFDQuery;
+begin
+    Query.Active := False;
+    Query.SQL.Clear;
+
+    TSL := '0';
+    SSL := '0';
+
+    if Config.TSL then TSL := '1';
+    if Config.SSL then SSL := '1';
+
+    QryAux := TFDQuery.Create(Nil);
+    try
+        QryAux.Active := False;
+        QryAux.Connection := Conexao;
+        QryAux.SQL.Clear;
+        QryAux.SQL.Add('SELECT SMTP, EMAIL, SENHA, PORTA, SSL, TSL, MSG FROM CONFIG ');
+        try
+           QryAux.Active := True;
+
+           if QryAux.IsEmpty then
+           begin
+               GravarConfig(Config);
+               Exit;
+           end;
+        except
+
+        end;
+
+    finally
+       FreeAndNil(QryAux);
+    end;
+
+
+    Query.SQL.Add('UPDATE CONFIG SET SMTP = :SMTP, EMAIL = :EMAIL, SENHA = :SENHA, ');
+    Query.SQL.Add('PORTA = :PORTA, SSL = :SSL , TSL = :TSL, MSG = :MSG ');
+    Query.Params.ParamByName('SMTP').AsString    := Trim(Config.SMTP);
+    Query.Params.ParamByName('EMAIL').AsString   := Trim(Config.Email);
+    Query.Params.ParamByName('SENHA').AsString   := Trim(Config.Senha);
+    Query.Params.ParamByName('PORTA').AsString   := Trim(Config.Porta);
+    Query.Params.ParamByName('SSL').AsString     := Trim(SSL);
+    Query.Params.ParamByName('TSL').AsString     := Trim(TSL);
+    Query.Params.ParamByName('MSG').AsString     := Trim(Config.Mensagem);
+
+    try
+        Query.ExecSQL;
+    except on e: Exception do
+        raise Exception.Create('Erro na gravação de dados: '+ e.message);
+    end;
+end;
+
 function TDMConfig.GetConfig(): TConfig;
 var
     TSL, SSL: String;
@@ -172,22 +227,22 @@ begin
     Query.Active := False;
     Query.SQL.Clear;
 
-    Query.SQL.Add('insert into nf ');
-    Query.SQL.Add('values( :SMTP, :EMAIL, :SENHA, :PORTA, :SSL, :TSL, :MSG )');
-    Query.Params.ParamByName('SMTP').AsString    := Trim(Config.SMTP);
-    Query.Params.ParamByName('EMAIL').AsString   := Trim(Config.Email);
-    Query.Params.ParamByName('SENHA').AsString   := Trim(Config.Senha);
-    Query.Params.ParamByName('PORTA').AsString   := Trim(Config.Porta);
-    Query.Params.ParamByName('SSL').AsString     := Trim(SSL);
-    Query.Params.ParamByName('TSL').AsString     := Trim(TSL);
-    Query.Params.ParamByName('MSG').AsString     := Trim(Config.Mensagem);
-
-
-    if Config.TSL then TSL := '1';
-    if Config.SSL then SSL := '1';
+    Query.SQL.Add('SELECT SMTP, EMAIL, SENHA, PORTA, SSL, TSL, MSG FROM CONFIG ');
 
     try
-        Query.ExecSQL;
+        Query.Active := True;
+        if Not Query.IsEmpty then
+        begin
+            Result.SMTP     := Query.FieldByName('SMTP').AsString;
+            Result.Email    := Query.FieldByName('EMAIL').AsString;
+            Result.Senha    := Query.FieldByName('SENHA').AsString;
+            Result.Porta    := Query.FieldByName('PORTA').AsString;
+            Result.Mensagem := Query.FieldByName('MSG').AsString;
+            if Query.FieldByName('SSL').AsString = '1' then Result.SSL := True;
+            if Query.FieldByName('TSL').AsString = '1' then Result.TSL := True;
+
+        end;
+
     except on e: Exception do
         raise Exception.Create('Erro na gravação de dados: '+ e.message);
     end;
