@@ -13,7 +13,7 @@ uses
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
-  AApplication.CreateForm(TDMConfig, DMConfig);
-  AApplication.CreateForm(TFormPrincipal, FormPrincipal);
-  plication.Run;
+  Application.CreateForm(TDMConfig, DMConfig);
+  Application.CreateForm(TFormPrincipal, FormPrincipal);
+  Application.Run;
 end.
