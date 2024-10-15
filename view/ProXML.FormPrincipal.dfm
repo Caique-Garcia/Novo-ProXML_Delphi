@@ -1241,6 +1241,10 @@ object FormPrincipal: TFormPrincipal
                     item
                       Caption = 'Enviar'
                       OnClick = CategoryButtons1Categories0Items3Click
+                    end
+                    item
+                      Caption = 'Configura'#231#245'es'
+                      OnClick = CategoryButtons1Categories0Items4Click
                     end>
                   TextColor = 2169367
                 end>
@@ -1445,7 +1449,7 @@ object FormPrincipal: TFormPrincipal
     Left = 976
     Top = 385
     Content = {
-      414442530F006F40BE020000FF00010001FF02FF03040016000000460044004D
+      414442530F00C531BE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
