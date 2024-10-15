@@ -5,7 +5,7 @@ object FormPrincipal: TFormPrincipal
   BorderStyle = bsSingle
   Caption = 'Pro XML'
   ClientHeight = 699
-  ClientWidth = 1161
+  ClientWidth = 1142
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,7 +21,7 @@ object FormPrincipal: TFormPrincipal
   object PnlContainer: TPanel
     Left = 0
     Top = 0
-    Width = 1161
+    Width = 1142
     Height = 699
     Align = alClient
     BevelOuter = bvNone
@@ -34,16 +34,18 @@ object FormPrincipal: TFormPrincipal
     ParentBackground = False
     ParentFont = False
     TabOrder = 0
+    ExplicitWidth = 1161
     object PnlCabecalho: TPanel
       Left = 0
       Top = 0
-      Width = 1161
+      Width = 1142
       Height = 113
       Align = alTop
       BevelOuter = bvNone
       Color = 2169367
       ParentBackground = False
       TabOrder = 0
+      ExplicitWidth = 1161
       object PnlLogo: TPanel
         AlignWithMargins = True
         Left = 20
@@ -238,7 +240,7 @@ object FormPrincipal: TFormPrincipal
       end
       object PnlImg: TPanel
         AlignWithMargins = True
-        Left = 979
+        Left = 960
         Top = 30
         Width = 152
         Height = 53
@@ -249,12 +251,13 @@ object FormPrincipal: TFormPrincipal
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 1
+        ExplicitLeft = 979
       end
     end
     object PnlCorpo: TPanel
       Left = 0
       Top = 113
-      Width = 1161
+      Width = 1142
       Height = 586
       Align = alClient
       BevelOuter = bvNone
@@ -263,10 +266,11 @@ object FormPrincipal: TFormPrincipal
       Padding.Right = 30
       Padding.Bottom = 15
       TabOrder = 1
+      ExplicitWidth = 1161
       object PnlInfo: TPanel
-        Left = 899
+        Left = 904
         Top = 15
-        Width = 232
+        Width = 208
         Height = 556
         Align = alRight
         BevelOuter = bvNone
@@ -279,19 +283,21 @@ object FormPrincipal: TFormPrincipal
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
+        ExplicitLeft = 920
         object PanelVaorICMS: TPanel
           Left = 0
           Top = 160
-          Width = 232
+          Width = 208
           Height = 80
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitWidth = 232
           object Shape7: TShape
             AlignWithMargins = True
             Left = 20
             Top = 79
-            Width = 192
+            Width = 168
             Height = 1
             Margins.Left = 20
             Margins.Top = 0
@@ -300,6 +306,7 @@ object FormPrincipal: TFormPrincipal
             Align = alBottom
             Pen.Color = 15460841
             ExplicitLeft = 28
+            ExplicitWidth = 192
           end
           object Panel2: TPanel
             Left = 0
@@ -311,14 +318,14 @@ object FormPrincipal: TFormPrincipal
             TabOrder = 0
             object SkSvg4: TSkSvg
               AlignWithMargins = True
-              Left = 10
-              Top = 10
-              Width = 50
-              Height = 59
-              Margins.Left = 10
-              Margins.Top = 10
-              Margins.Right = 10
-              Margins.Bottom = 10
+              Left = 20
+              Top = 20
+              Width = 30
+              Height = 39
+              Margins.Left = 20
+              Margins.Top = 20
+              Margins.Right = 20
+              Margins.Bottom = 20
               Align = alClient
               Svg.OverrideColor = xFAADADAD
               Svg.Source = 
@@ -338,21 +345,23 @@ object FormPrincipal: TFormPrincipal
                 ',1.346,3,3h-2c0-.551-.449-1-1-1h-2c-.551,0-1,.449-1,1Z"/></svg>'
               ExplicitLeft = 18
               ExplicitTop = 18
+              ExplicitWidth = 50
               ExplicitHeight = 60
             end
           end
           object Panel4: TPanel
             Left = 70
             Top = 0
-            Width = 162
+            Width = 138
             Height = 79
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
+            ExplicitWidth = 162
             object Label6: TLabel
               Left = 0
               Top = 0
-              Width = 162
+              Width = 138
               Height = 30
               Align = alTop
               Caption = 'Valor ICMS'
@@ -367,12 +376,12 @@ object FormPrincipal: TFormPrincipal
             object LabelValorICMS: TLabel
               Left = 0
               Top = 30
-              Width = 162
+              Width = 138
               Height = 25
               Align = alTop
               Caption = 'R$ 0,00'
               Font.Charset = DEFAULT_CHARSET
-              Font.Color = 5258295
+              Font.Color = clInfoBk
               Font.Height = -19
               Font.Name = 'Segoe UI'
               Font.Style = []
@@ -384,16 +393,17 @@ object FormPrincipal: TFormPrincipal
         object PanelValorBaseICMS: TPanel
           Left = 0
           Top = 80
-          Width = 232
+          Width = 208
           Height = 80
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 1
+          ExplicitWidth = 232
           object Shape6: TShape
             AlignWithMargins = True
             Left = 20
             Top = 79
-            Width = 192
+            Width = 168
             Height = 1
             Margins.Left = 20
             Margins.Top = 0
@@ -402,6 +412,7 @@ object FormPrincipal: TFormPrincipal
             Align = alBottom
             Pen.Color = 15460841
             ExplicitLeft = 28
+            ExplicitWidth = 192
           end
           object Panel1: TPanel
             Left = 0
@@ -413,14 +424,14 @@ object FormPrincipal: TFormPrincipal
             TabOrder = 0
             object SkSvg3: TSkSvg
               AlignWithMargins = True
-              Left = 10
-              Top = 10
-              Width = 50
-              Height = 59
-              Margins.Left = 10
-              Margins.Top = 10
-              Margins.Right = 10
-              Margins.Bottom = 10
+              Left = 20
+              Top = 20
+              Width = 30
+              Height = 39
+              Margins.Left = 20
+              Margins.Top = 20
+              Margins.Right = 20
+              Margins.Bottom = 20
               Align = alClient
               Svg.OverrideColor = xFAADADAD
               Svg.Source = 
@@ -446,21 +457,23 @@ object FormPrincipal: TFormPrincipal
                 '2.5-5.5,2.5Z"/></svg>'
               ExplicitLeft = 18
               ExplicitTop = 18
+              ExplicitWidth = 50
               ExplicitHeight = 60
             end
           end
           object Panel3: TPanel
             Left = 70
             Top = 0
-            Width = 162
+            Width = 138
             Height = 79
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
+            ExplicitWidth = 162
             object Label5: TLabel
               Left = 0
               Top = 0
-              Width = 162
+              Width = 138
               Height = 30
               Align = alTop
               Caption = 'Base ICMS'
@@ -475,12 +488,12 @@ object FormPrincipal: TFormPrincipal
             object LabelbaseICMS: TLabel
               Left = 0
               Top = 30
-              Width = 162
+              Width = 138
               Height = 25
               Align = alTop
               Caption = 'R$ 0,00'
               Font.Charset = DEFAULT_CHARSET
-              Font.Color = 5258295
+              Font.Color = clInfoBk
               Font.Height = -19
               Font.Name = 'Segoe UI'
               Font.Style = []
@@ -492,16 +505,17 @@ object FormPrincipal: TFormPrincipal
         object PanelValorTotal: TPanel
           Left = 0
           Top = 0
-          Width = 232
+          Width = 208
           Height = 80
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 2
+          ExplicitWidth = 232
           object Shape5: TShape
             AlignWithMargins = True
             Left = 20
             Top = 79
-            Width = 192
+            Width = 168
             Height = 1
             Margins.Left = 20
             Margins.Top = 0
@@ -523,14 +537,14 @@ object FormPrincipal: TFormPrincipal
             TabOrder = 0
             object SkSvg2: TSkSvg
               AlignWithMargins = True
-              Left = 10
-              Top = 10
-              Width = 50
-              Height = 59
-              Margins.Left = 10
-              Margins.Top = 10
-              Margins.Right = 10
-              Margins.Bottom = 10
+              Left = 20
+              Top = 20
+              Width = 30
+              Height = 39
+              Margins.Left = 20
+              Margins.Top = 20
+              Margins.Right = 20
+              Margins.Bottom = 20
               Align = alClient
               Svg.OverrideColor = xFAADADAD
               Svg.Source = 
@@ -545,21 +559,23 @@ object FormPrincipal: TFormPrincipal
                 '8,9.521A2.314,2.314,0,0,1,9.313,5H10.5Z"/></svg>'
               ExplicitLeft = 16
               ExplicitTop = 16
+              ExplicitWidth = 50
               ExplicitHeight = 50
             end
           end
           object PanelTextoValorTotal: TPanel
             Left = 70
             Top = 0
-            Width = 162
+            Width = 138
             Height = 79
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
+            ExplicitWidth = 162
             object Label3: TLabel
               Left = 0
               Top = 0
-              Width = 162
+              Width = 138
               Height = 30
               Align = alTop
               Caption = 'Valor Total'
@@ -574,12 +590,12 @@ object FormPrincipal: TFormPrincipal
             object LabelValorTotal: TLabel
               Left = 0
               Top = 30
-              Width = 162
+              Width = 138
               Height = 25
               Align = alTop
               Caption = 'R$ 0,00'
               Font.Charset = DEFAULT_CHARSET
-              Font.Color = 5258295
+              Font.Color = clInfoBk
               Font.Height = -19
               Font.Name = 'Segoe UI'
               Font.Style = []
@@ -593,7 +609,7 @@ object FormPrincipal: TFormPrincipal
         AlignWithMargins = True
         Left = 30
         Top = 15
-        Width = 859
+        Width = 864
         Height = 556
         Margins.Left = 0
         Margins.Top = 0
@@ -604,10 +620,11 @@ object FormPrincipal: TFormPrincipal
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
+        ExplicitWidth = 859
         object PnlInfoLocal: TPanel
           Left = 0
           Top = 97
-          Width = 859
+          Width = 864
           Height = 459
           Align = alClient
           BevelOuter = bvNone
@@ -618,11 +635,12 @@ object FormPrincipal: TFormPrincipal
           Font.Style = []
           ParentFont = False
           TabOrder = 0
+          ExplicitWidth = 859
           object PageControl1: TPageControl
             AlignWithMargins = True
             Left = 229
             Top = 15
-            Width = 625
+            Width = 630
             Height = 429
             Margins.Left = 5
             Margins.Top = 15
@@ -631,13 +649,15 @@ object FormPrincipal: TFormPrincipal
             ActivePage = TabSheet2
             Align = alClient
             TabOrder = 0
+            ExplicitWidth = 625
             object TabSheet1: TTabSheet
               Caption = 'TabSheet1'
               TabVisible = False
+              ExplicitWidth = 617
               object Gauge1: TGauge
                 Left = 0
                 Top = 387
-                Width = 617
+                Width = 622
                 Height = 32
                 Align = alBottom
                 BorderStyle = bsNone
@@ -654,7 +674,7 @@ object FormPrincipal: TFormPrincipal
               object Memo1: TMemo
                 Left = 0
                 Top = 0
-                Width = 617
+                Width = 622
                 Height = 387
                 Align = alClient
                 BevelInner = bvNone
@@ -668,26 +688,29 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ReadOnly = True
                 TabOrder = 0
+                ExplicitWidth = 617
               end
             end
             object TabSheet2: TTabSheet
               Caption = 'TabSheet2'
               ImageIndex = 1
               TabVisible = False
+              ExplicitWidth = 617
               object Panel5: TPanel
                 Left = 0
                 Top = 0
-                Width = 617
+                Width = 622
                 Height = 419
                 Align = alClient
                 BevelOuter = bvNone
                 Color = clWhite
                 ParentBackground = False
                 TabOrder = 0
+                ExplicitWidth = 617
                 object DBGrid1: TDBGrid
                   Left = 0
                   Top = 0
-                  Width = 617
+                  Width = 622
                   Height = 419
                   Align = alClient
                   BorderStyle = bsNone
@@ -766,6 +789,7 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Loading'
               ImageIndex = 2
               TabVisible = False
+              ExplicitWidth = 617
               object SkAnimatedImage1: TSkAnimatedImage
                 Left = 208
                 Top = 110
@@ -1032,17 +1056,18 @@ object FormPrincipal: TFormPrincipal
         object Panel6: TPanel
           Left = 0
           Top = 0
-          Width = 859
+          Width = 864
           Height = 97
           Align = alTop
           BevelOuter = bvNone
           ShowCaption = False
           TabOrder = 1
+          ExplicitWidth = 859
           object Shape8: TShape
             AlignWithMargins = True
             Left = 10
             Top = 96
-            Width = 839
+            Width = 844
             Height = 1
             Margins.Left = 10
             Margins.Top = 0
@@ -1199,7 +1224,7 @@ object FormPrincipal: TFormPrincipal
     Left = 976
     Top = 385
     Content = {
-      414442530F006C40BE020000FF00010001FF02FF03040016000000460044004D
+      414442530F003033BE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
