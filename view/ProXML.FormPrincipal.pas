@@ -57,7 +57,7 @@ uses
   ACBrDFe,
   ACBrNFe,
   ACBrNFeDANFeFPDF,
-  ShellAPI;
+  ShellAPI, ProXML.Classes;
 
 type
   TFormPrincipal = class(TForm)
@@ -165,6 +165,7 @@ type
     procedure CategoryButtons1Categories0Items3Click(Sender: TObject);
     procedure GerarDANFe1Click(Sender: TObject);
     procedure CategoryButtons1Categories0Items4Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     procedure SetTextoTranferencia(const Text: String);
     procedure FinalizaRelatorio(Sender: TObject);
@@ -309,6 +310,22 @@ procedure TFormPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   action := cafree;
   Application.Terminate;
+end;
+
+procedure TFormPrincipal.FormCreate(Sender: TObject);
+var
+    ConfigEmail : TConfig;
+begin
+   //Create do Form
+   ConfigEmail := DMConfig.GetConfig;
+
+   EditSMTP.Text        := ConfigEmail.SMTP;
+   EditPorta.Text       := ConfigEmail.Porta;
+   EditEmail.Text       := ConfigEmail.Email;
+   EditPass.Text        := ConfigEmail.Senha;
+   MemoMsg.Text         := ConfigEmail.Mensagem;
+   CheckBoxSSL.Checked  := ConfigEmail.SSL;
+   CheckBoxTSl.Checked  := ConfigEmail.TSL;
 end;
 
 procedure TFormPrincipal.ComprimirArquivos();
