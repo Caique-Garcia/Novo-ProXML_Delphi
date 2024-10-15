@@ -146,7 +146,7 @@ begin
     if Config.TSL then TSL := '1';
     if Config.SSL then SSL := '1';
 
-    Query.SQL.Add('insert into nf ');
+    Query.SQL.Add('insert into config ');
     Query.SQL.Add('values( :SMTP, :EMAIL, :SENHA, :PORTA, :SSL, :TSL, :MSG )');
     Query.Params.ParamByName('SMTP').AsString    := Trim(Config.SMTP);
     Query.Params.ParamByName('EMAIL').AsString   := Trim(Config.Email);
@@ -191,8 +191,8 @@ begin
                GravarConfig(Config);
                Exit;
            end;
-        except
-
+        except on e:Exception do
+           raise Exception.Create('Erro na gravação de dados: '+ e.message);
         end;
 
     finally
