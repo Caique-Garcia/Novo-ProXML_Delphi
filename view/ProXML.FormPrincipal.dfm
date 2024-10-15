@@ -381,7 +381,7 @@ object FormPrincipal: TFormPrincipal
               Align = alTop
               Caption = 'R$ 0,00'
               Font.Charset = DEFAULT_CHARSET
-              Font.Color = clInfoBk
+              Font.Color = clInactiveCaptionText
               Font.Height = -19
               Font.Name = 'Segoe UI'
               Font.Style = []
@@ -493,7 +493,7 @@ object FormPrincipal: TFormPrincipal
               Align = alTop
               Caption = 'R$ 0,00'
               Font.Charset = DEFAULT_CHARSET
-              Font.Color = clInfoBk
+              Font.Color = clInactiveCaptionText
               Font.Height = -19
               Font.Name = 'Segoe UI'
               Font.Style = []
@@ -595,7 +595,7 @@ object FormPrincipal: TFormPrincipal
               Align = alTop
               Caption = 'R$ 0,00'
               Font.Charset = DEFAULT_CHARSET
-              Font.Color = clInfoBk
+              Font.Color = clInactiveCaptionText
               Font.Height = -19
               Font.Name = 'Segoe UI'
               Font.Style = []
@@ -1224,7 +1224,7 @@ object FormPrincipal: TFormPrincipal
     Left = 976
     Top = 385
     Content = {
-      414442530F003033BE020000FF00010001FF02FF03040016000000460044004D
+      414442530F007940BE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
