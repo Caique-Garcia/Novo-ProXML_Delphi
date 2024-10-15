@@ -3,18 +3,62 @@ unit ProXML.Classes;
 interface
 
 type
-TConfig = class(TObject)
-private
-    { private declarations }
-protected
-    { protected declarations }
-public
-    { public declarations }
 
-published
-    { published declarations }
+TConfig = class(TObject)
+
+private
+    FEmail: String;
+    FSenha: String;
+    FSMTP: String;
+    FSSL: Boolean;
+    FTSL: Boolean;
+    FPorta: String;
+    constructor Create(); // Construtor
+public
+   class var FInstance : TConfig;
+   property SMTP: String read FSMTP write FSMTP;
+   property Email: String read FEmail write FEmail;
+   property Senha: String read FSenha write FSenha;
+   property Porta: String read FPorta write FPorta;
+   property SSL: Boolean read FSSL write FSSL;
+   property TSL: Boolean read FTSL write FTSL;
+
+   destructor Destroy; override; // Destrutor
+   class function New: TConfig; static;
 end;
 
 implementation
 
+uses
+  System.SysUtils;
+
+{ TConfig }
+
+constructor TConfig.Create;
+begin
+   SSL := False;
+   TSL := False;
+end;
+
+destructor TConfig.Destroy;
+begin
+
+  inherited;
+end;
+
+class function TConfig.New: TConfig;
+begin
+     if FInstance = nil then
+        FInstance := TConfig.Create;
+
+    Result := FInstance;
+end;
+
+
+initialization
+
+
+finalization
+  // Libera a instância quando a aplicação terminar, para liberar recursos
+  FreeAndNil(TConfig.FInstance);
 end.
