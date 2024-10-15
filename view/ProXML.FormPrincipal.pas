@@ -16,7 +16,6 @@ uses
   Vcl.StdCtrls,
   Skia,
   Skia.Vcl,
-  Vcl.FileCtrl,
   Vcl.Buttons,
   Vcl.Imaging.pngimage,
   FireDAC.Stan.Intf,
@@ -162,7 +161,12 @@ var
 implementation
 
 uses
-  uCalculadoraXML, Vcl.Clipbrd, pcnConversao, pcnConversaoNFe;
+  uCalculadoraXML,
+  Vcl.Clipbrd,
+  pcnConversao,
+  pcnConversaoNFe,
+  Vcl.FileCtrl,
+  System.IOUtils;
 
 {$R *.dfm}
 
@@ -247,6 +251,7 @@ procedure TFormPrincipal.CategoryButtons1Categories0Items3Click(
 begin
     //PageControl1.ActivePageIndex := 2;
     //SkAnimatedImage1.Animation.Start;
+    ComprimirArquivos();
 end;
 
 procedure TFormPrincipal.DBGrid1DrawColumnCell(Sender: TObject;
@@ -277,20 +282,35 @@ end;
 procedure TFormPrincipal.ComprimirArquivos();
 var
   varPath: string;
+  varDestino: string;
 begin
     //Comprime os arquivos XML
     varPath := ExtractFilePath(ParamStr(0));
+
+    if TDirectory.Exists(varPath + 'NFCe\ProXML') then
+    begin
+      // Deleta a pasta e todo o seu conteúdo
+      TDirectory.Delete(varPath + 'NFCe\ProXML', True);  // O segundo parâmetro True indica exclusão recursiva
+    end;
+
     if not DirectoryExists(varPath + 'NFCe\ProXML') then ForceDirectories(varPath + '\NFCe\ProXML');
 
     FDMemTable1.First;
     while not FDMemTable1.Eof do
     begin
+        varDestino := varPath + 'NFCe\ProXML\'+FDMemTable1.FieldByName('chave').AsString+'-nfe.xml';
 
-
-
+        CopyFile(PChar(FDMemTable1.FieldByName('xml').AsString), PChar(varDestino), False);
         FDMemTable1.Next;
     end;
 
+
+    if FileExists(varPath + 'NFCe\NFCe_ProXML.rar') then
+        DeleteFile(varPath + 'NFCe\NFCe_ProXML.rar');
+
+    createProcessSimple('cmd.exe /c' + varPath + 'WinRAR.exe a -ep '
+                + varPath + 'NFCe\NFCe_ProXML.rar '
+                + varPath + 'NFCe\ProXML\*-nfe.xml' );
 
 end;
 
