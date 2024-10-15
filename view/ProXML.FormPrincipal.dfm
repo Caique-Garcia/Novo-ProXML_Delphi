@@ -1015,10 +1015,8 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ShowCaption = False
                 TabOrder = 0
-                ExplicitLeft = 96
-                ExplicitTop = 128
-                ExplicitWidth = 185
-                ExplicitHeight = 41
+                ExplicitLeft = -6
+                ExplicitTop = 3
                 object Label1: TLabel
                   AlignWithMargins = True
                   Left = 10
@@ -1192,6 +1190,35 @@ object FormPrincipal: TFormPrincipal
                   Height = 77
                   BorderStyle = bsNone
                   TabOrder = 4
+                end
+                object Panel9: TPanel
+                  Left = 427
+                  Top = 371
+                  Width = 167
+                  Height = 36
+                  BevelOuter = bvNone
+                  Color = 13264672
+                  ParentBackground = False
+                  ShowCaption = False
+                  TabOrder = 7
+                  object btnSalvarConfig: TSpeedButton
+                    Left = 0
+                    Top = 0
+                    Width = 167
+                    Height = 36
+                    Cursor = crHandPoint
+                    Align = alClient
+                    Caption = 'Salvar'
+                    Flat = True
+                    Font.Charset = DEFAULT_CHARSET
+                    Font.Color = clWhite
+                    Font.Height = -13
+                    Font.Name = 'Segoe UI'
+                    Font.Style = []
+                    ParentFont = False
+                    OnClick = btnSalvarConfigClick
+                    ExplicitTop = -8
+                  end
                 end
               end
             end
@@ -1450,7 +1477,7 @@ object FormPrincipal: TFormPrincipal
     Left = 976
     Top = 385
     Content = {
-      414442530F00C931BE020000FF00010001FF02FF03040016000000460044004D
+      414442530F00941CBE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000

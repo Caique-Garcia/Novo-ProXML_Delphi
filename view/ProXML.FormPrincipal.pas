@@ -151,6 +151,8 @@ type
     EditEmail: TEdit;
     EditPass: TEdit;
     MemoMsg: TMemo;
+    Panel9: TPanel;
+    btnSalvarConfig: TSpeedButton;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -166,6 +168,7 @@ type
     procedure GerarDANFe1Click(Sender: TObject);
     procedure CategoryButtons1Categories0Items4Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure btnSalvarConfigClick(Sender: TObject);
   private
     procedure SetTextoTranferencia(const Text: String);
     procedure FinalizaRelatorio(Sender: TObject);
@@ -196,6 +199,27 @@ uses
 
 {$R *.dfm}
 
+
+procedure TFormPrincipal.btnSalvarConfigClick(Sender: TObject);
+var
+    ConfigEmail : TConfig;
+begin
+    //Salvar dados Config
+    ConfigEmail := TConfig.New;
+    ConfigEmail.SMTP        := EditSMTP.Text;
+    ConfigEmail.Porta       := EditPorta.Text;
+    ConfigEmail.Email       := EditEmail.Text;
+    ConfigEmail.Senha       := EditPass.Text;
+    ConfigEmail.Mensagem    := MemoMsg.Text;
+    ConfigEmail.SSL         := CheckBoxSSL.Checked;
+    ConfigEmail.TSL         := CheckBoxTSl.Checked;
+    try
+        DMConfig.UpdateConfig(ConfigEmail);
+        messagedlg('Configuração salva com sucesso !!', mtInformation	, [mbOk], 0);
+        PageControl1.ActivePageIndex := 0;
+    except
+    end;
+end;
 
 procedure TFormPrincipal.CategoryButtons1Categories0Items0Click(
   Sender: TObject);
@@ -541,7 +565,7 @@ begin
   CalculadoraXML:=  TCalculadoraXML.Create;
   try
 
-    if EditCaminho.Text <> '' then
+    if EditCaminho.Text <> 'Selecione uma pasta contendo XMLs de NFCe' then
     begin
       CalculadoraXML.CaminhoDiretorio := EditCaminho.Text;
       CalculadoraXML.ProcessarXMLs;
