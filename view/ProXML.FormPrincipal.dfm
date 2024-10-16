@@ -991,6 +991,7 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ShowCaption = False
                 TabOrder = 0
+                ExplicitLeft = -6
                 object Label11: TLabel
                   AlignWithMargins = True
                   Left = 10
@@ -1053,7 +1054,7 @@ object FormPrincipal: TFormPrincipal
                   Height = 17
                   Caption = 'Mensagem'
                 end
-                object Edit3: TEdit
+                object EditEmailEnviar: TEdit
                   Left = 24
                   Top = 105
                   Width = 385
@@ -1061,7 +1062,7 @@ object FormPrincipal: TFormPrincipal
                   BorderStyle = bsNone
                   TabOrder = 0
                 end
-                object Memo2: TMemo
+                object MemoMensagem: TMemo
                   Left = 23
                   Top = 196
                   Width = 517
@@ -1094,7 +1095,7 @@ object FormPrincipal: TFormPrincipal
                     Font.Name = 'Segoe UI'
                     Font.Style = []
                     ParentFont = False
-                    OnClick = btnSalvarConfigClick
+                    OnClick = btnEnviarEmailClick
                     ExplicitTop = -4
                     ExplicitWidth = 167
                     ExplicitHeight = 36
@@ -1615,7 +1616,7 @@ object FormPrincipal: TFormPrincipal
     Left = 1000
     Top = 385
     Content = {
-      414442530F00051BBE020000FF00010001FF02FF03040016000000460044004D
+      414442530F002A40BE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000

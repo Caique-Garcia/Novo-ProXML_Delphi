@@ -164,8 +164,8 @@ type
     Shape17: TShape;
     Label15: TLabel;
     Label17: TLabel;
-    Edit3: TEdit;
-    Memo2: TMemo;
+    EditEmailEnviar: TEdit;
+    MemoMensagem: TMemo;
     Panel11: TPanel;
     btnEnviarEmail: TSpeedButton;
     procedure SkSvg1Click(Sender: TObject);
@@ -185,6 +185,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure btnSalvarConfigClick(Sender: TObject);
     procedure SkSvg5Click(Sender: TObject);
+    procedure btnEnviarEmailClick(Sender: TObject);
   private
     procedure SetTextoTranferencia(const Text: String);
     procedure FinalizaRelatorio(Sender: TObject);
@@ -193,7 +194,7 @@ type
     function CreateProcessSimple(cmd: string): boolean;
     procedure ComprimirArquivos();
     procedure LerConfigEmail();
-    procedure EnviaArquivo;
+    procedure EnviaArquivo(const Email, Assunto: string);
 
   public
 
@@ -217,6 +218,12 @@ uses
 
 {$R *.dfm}
 
+
+procedure TFormPrincipal.btnEnviarEmailClick(Sender: TObject);
+begin
+    //Enviar Email com arquivos compactados
+    EnviaArquivo(Trim(EditEmailEnviar.Text), 'Projeto Pro XML - NFCe XMLs');
+end;
 
 procedure TFormPrincipal.btnSalvarConfigClick(Sender: TObject);
 var
@@ -582,9 +589,10 @@ begin
     ACBrMail1.UseThread := False;           // Aguarda Envio do Email(nao usa thread)
     ACBrMail1.FromName := 'Projeto Pro XML';
 
+    MemoMensagem.Text := ConfigEmail.Mensagem;
 end;
 
-procedure TFormPrincipal.EnviaArquivo();
+procedure TFormPrincipal.EnviaArquivo(const Email, Assunto: string);
 var
     ListaArquivos : TStringList;
     varPath: String;
@@ -597,7 +605,10 @@ begin
             ListaArquivos.Add(varPath + 'NFCe\NFCe_ProXML.rar');
 
         if ListaArquivos.Count > 0 then
-           //ACBrNFe.EnviarEmail(PrePara, assu, MensgEmail.Lines, nil, ListaArquivos, nil, '', nil);
+        begin
+            ACBrNFe.EnviarEmail(Email, Assunto, MemoMensagem.Lines, nil, ListaArquivos, nil, '', nil);
+            messagedlg('Email enviado com sucesso!!', mtInformation	, [mbOk], 0);
+        end
         else
             messagedlg('Sem arquivos para enviar!', mtInformation	, [mbOk], 0);
     finally
