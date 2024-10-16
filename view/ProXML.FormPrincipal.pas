@@ -475,19 +475,31 @@ var
     Result :Boolean;
     CaminhoPDF : String;
     NomeArqPDF : String;
+  AuxNomeArqPDF: string;
+  AuxCaminhoPDF: string;
 begin
     //Gera danfe do arquivo da nfce
     PageControl1.ActivePageIndex := 2;
     SkAnimatedImage1.Animation.Start;
 
-    NomeArqPDF :=  ExtractFileName(CaminhoArq);
-    NomeArqPDF :=  ChangeFileExt(NomeArqPDF, '.pdf');
-    CaminhoPDF :=  ACBrNFe.DANFE.PathPDF + NomeArqPDF;
+    NomeArqPDF      :=  ExtractFileName(CaminhoArq);
+    NomeArqPDF      :=  ChangeFileExt(NomeArqPDF, '.pdf');
+    AuxNomeArqPDF   := ChangeFileExt(NomeArqPDF, '-nfe.pdf');
+    CaminhoPDF      :=  ACBrNFe.DANFE.PathPDF + NomeArqPDF;
+    AuxCaminhoPDF   :=  ACBrNFe.DANFE.PathPDF + AuxNomeArqPDF;
 
     if FileExists(CaminhoPDF) then
     begin
         try
             DeleteFile(CaminhoPDF);
+        except
+        end
+    end;
+
+    if FileExists(AuxCaminhoPDF) then
+    begin
+        try
+            DeleteFile(AuxCaminhoPDF);
         except
         end
     end;
@@ -505,7 +517,7 @@ begin
         Exit;
     end;
 
-    while Not FileExists(CaminhoPDF) do
+    while (Not FileExists(CaminhoPDF)) and (Not FileExists(AuxCaminhoPDF)) do
     begin
 
     end;
@@ -514,6 +526,15 @@ begin
     begin
         try
             ShellExecute(0, 'open', PChar(CaminhoPDF), nil, nil, SW_SHOWNORMAL);
+            PageControl1.ActivePageIndex := 1;
+        except
+        end
+    end;
+
+    if FileExists(AuxCaminhoPDF) then
+    begin
+        try
+            ShellExecute(0, 'open', PChar(AuxCaminhoPDF), nil, nil, SW_SHOWNORMAL);
             PageControl1.ActivePageIndex := 1;
         except
         end
