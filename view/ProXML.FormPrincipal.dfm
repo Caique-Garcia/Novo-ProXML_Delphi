@@ -49,7 +49,6 @@ object FormPrincipal: TFormPrincipal
     ParentBackground = False
     ParentFont = False
     TabOrder = 0
-    ExplicitWidth = 1161
     object PnlCabecalho: TPanel
       Left = 0
       Top = 0
@@ -60,7 +59,6 @@ object FormPrincipal: TFormPrincipal
       Color = 2169367
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 1161
       object PnlLogo: TPanel
         AlignWithMargins = True
         Left = 20
@@ -266,7 +264,6 @@ object FormPrincipal: TFormPrincipal
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitLeft = 979
       end
     end
     object PnlCorpo: TPanel
@@ -281,7 +278,6 @@ object FormPrincipal: TFormPrincipal
       Padding.Right = 30
       Padding.Bottom = 15
       TabOrder = 1
-      ExplicitTop = 116
       object PnlInfo: TPanel
         Left = 904
         Top = 15
@@ -298,7 +294,8 @@ object FormPrincipal: TFormPrincipal
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitLeft = 920
+        ExplicitLeft = 900
+        ExplicitTop = 14
         object PanelVaorICMS: TPanel
           Left = 0
           Top = 160
@@ -307,7 +304,6 @@ object FormPrincipal: TFormPrincipal
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitWidth = 232
           object Shape7: TShape
             AlignWithMargins = True
             Left = 20
@@ -372,7 +368,6 @@ object FormPrincipal: TFormPrincipal
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitWidth = 162
             object Label6: TLabel
               Left = 0
               Top = 0
@@ -413,7 +408,6 @@ object FormPrincipal: TFormPrincipal
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 1
-          ExplicitWidth = 232
           object Shape6: TShape
             AlignWithMargins = True
             Left = 20
@@ -484,7 +478,6 @@ object FormPrincipal: TFormPrincipal
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitWidth = 162
             object Label5: TLabel
               Left = 0
               Top = 0
@@ -525,7 +518,6 @@ object FormPrincipal: TFormPrincipal
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 2
-          ExplicitWidth = 232
           object Shape5: TShape
             AlignWithMargins = True
             Left = 20
@@ -586,7 +578,6 @@ object FormPrincipal: TFormPrincipal
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitWidth = 162
             object Label3: TLabel
               Left = 0
               Top = 0
@@ -635,7 +626,6 @@ object FormPrincipal: TFormPrincipal
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
-        ExplicitWidth = 859
         object PnlInfoLocal: TPanel
           Left = 0
           Top = 97
@@ -650,7 +640,6 @@ object FormPrincipal: TFormPrincipal
           Font.Style = []
           ParentFont = False
           TabOrder = 0
-          ExplicitWidth = 859
           object PageControl1: TPageControl
             AlignWithMargins = True
             Left = 229
@@ -661,13 +650,12 @@ object FormPrincipal: TFormPrincipal
             Margins.Top = 15
             Margins.Right = 5
             Margins.Bottom = 15
-            ActivePage = Config
+            ActivePage = Enviar
             Align = alClient
             TabOrder = 0
             object TabSheet1: TTabSheet
               Caption = 'TabSheet1'
               TabVisible = False
-              ExplicitWidth = 617
               object Gauge1: TGauge
                 Left = 0
                 Top = 387
@@ -702,14 +690,12 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ReadOnly = True
                 TabOrder = 0
-                ExplicitWidth = 617
               end
             end
             object TabSheet2: TTabSheet
               Caption = 'TabSheet2'
               ImageIndex = 1
               TabVisible = False
-              ExplicitWidth = 617
               object Panel5: TPanel
                 Left = 0
                 Top = 0
@@ -720,7 +706,6 @@ object FormPrincipal: TFormPrincipal
                 Color = clWhite
                 ParentBackground = False
                 TabOrder = 0
-                ExplicitWidth = 617
                 object DBGrid1: TDBGrid
                   Left = 0
                   Top = 0
@@ -803,7 +788,6 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Loading'
               ImageIndex = 2
               TabVisible = False
-              ExplicitWidth = 617
               object SkAnimatedImage1: TSkAnimatedImage
                 Left = 208
                 Top = 110
@@ -991,15 +975,137 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Enviar'
               ImageIndex = 3
               TabVisible = False
-              ExplicitTop = 28
-              ExplicitHeight = 397
+              ExplicitTop = 10
+              object Panel10: TPanel
+                Left = 0
+                Top = 0
+                Width = 622
+                Height = 419
+                Align = alClient
+                BevelOuter = bvNone
+                Font.Charset = DEFAULT_CHARSET
+                Font.Color = clGray
+                Font.Height = -13
+                Font.Name = 'Segoe UI'
+                Font.Style = []
+                ParentFont = False
+                ShowCaption = False
+                TabOrder = 0
+                object Label11: TLabel
+                  AlignWithMargins = True
+                  Left = 10
+                  Top = 3
+                  Width = 609
+                  Height = 25
+                  Margins.Left = 10
+                  Align = alTop
+                  Caption = 'Enviar '
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clGray
+                  Font.Height = -19
+                  Font.Name = 'Segoe UI'
+                  Font.Style = []
+                  ParentFont = False
+                  ExplicitWidth = 57
+                end
+                object Label12: TLabel
+                  AlignWithMargins = True
+                  Left = 10
+                  Top = 34
+                  Width = 609
+                  Height = 17
+                  Margins.Left = 10
+                  Align = alTop
+                  Caption = 'Enviar arquivos por email'
+                  Font.Charset = DEFAULT_CHARSET
+                  Font.Color = clGray
+                  Font.Height = -13
+                  Font.Name = 'Segoe UI'
+                  Font.Style = []
+                  ParentFont = False
+                  ExplicitWidth = 149
+                end
+                object Shape15: TShape
+                  Left = 16
+                  Top = 97
+                  Width = 409
+                  Height = 40
+                  Pen.Color = clGray
+                end
+                object Shape17: TShape
+                  Left = 16
+                  Top = 184
+                  Width = 532
+                  Height = 101
+                  Pen.Color = clGray
+                end
+                object Label15: TLabel
+                  Left = 16
+                  Top = 74
+                  Width = 31
+                  Height = 17
+                  Caption = 'Email'
+                end
+                object Label17: TLabel
+                  Left = 16
+                  Top = 161
+                  Width = 76
+                  Height = 17
+                  Caption = 'Mensagem'
+                end
+                object Edit3: TEdit
+                  Left = 24
+                  Top = 105
+                  Width = 385
+                  Height = 25
+                  BorderStyle = bsNone
+                  TabOrder = 0
+                end
+                object Memo2: TMemo
+                  Left = 23
+                  Top = 196
+                  Width = 517
+                  Height = 77
+                  BorderStyle = bsNone
+                  TabOrder = 1
+                end
+                object Panel11: TPanel
+                  Left = 438
+                  Top = 97
+                  Width = 110
+                  Height = 40
+                  BevelOuter = bvNone
+                  Color = 13264672
+                  ParentBackground = False
+                  ShowCaption = False
+                  TabOrder = 2
+                  object btnEnviarEmail: TSpeedButton
+                    Left = 0
+                    Top = 0
+                    Width = 110
+                    Height = 40
+                    Cursor = crHandPoint
+                    Align = alClient
+                    Caption = 'Enviar'
+                    Flat = True
+                    Font.Charset = DEFAULT_CHARSET
+                    Font.Color = clWhite
+                    Font.Height = -13
+                    Font.Name = 'Segoe UI'
+                    Font.Style = []
+                    ParentFont = False
+                    OnClick = btnSalvarConfigClick
+                    ExplicitTop = -4
+                    ExplicitWidth = 167
+                    ExplicitHeight = 36
+                  end
+                end
+              end
             end
             object Config: TTabSheet
               Caption = 'Config'
               ImageIndex = 4
               TabVisible = False
-              ExplicitTop = 28
-              ExplicitHeight = 397
               object PanelCorpoConfig: TPanel
                 Left = 0
                 Top = 0
@@ -1015,8 +1121,6 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ShowCaption = False
                 TabOrder = 0
-                ExplicitLeft = -6
-                ExplicitTop = 3
                 object Label1: TLabel
                   AlignWithMargins = True
                   Left = 10
@@ -1350,7 +1454,6 @@ object FormPrincipal: TFormPrincipal
           BevelOuter = bvNone
           ShowCaption = False
           TabOrder = 1
-          ExplicitWidth = 859
           object Shape8: TShape
             AlignWithMargins = True
             Left = 10
@@ -1457,8 +1560,8 @@ object FormPrincipal: TFormPrincipal
   end
   object DataSource1: TDataSource
     DataSet = FDMemTable1
-    Left = 976
-    Top = 449
+    Left = 1000
+    Top = 433
   end
   object FDMemTable1: TFDMemTable
     Active = True
@@ -1509,10 +1612,10 @@ object FormPrincipal: TFormPrincipal
     UpdateOptions.CheckRequired = False
     UpdateOptions.AutoCommitUpdates = True
     StoreDefs = True
-    Left = 976
+    Left = 1000
     Top = 385
     Content = {
-      414442530F00FD31BE020000FF00010001FF02FF03040016000000460044004D
+      414442530F00051BBE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
@@ -1581,8 +1684,8 @@ object FormPrincipal: TFormPrincipal
     end
   end
   object PopupMenu: TPopupMenu
-    Left = 1032
-    Top = 445
+    Left = 1040
+    Top = 429
     object GerarPDF1: TMenuItem
       Caption = 'Copiar Chave'
       OnClick = GerarPDF1Click
@@ -1593,6 +1696,7 @@ object FormPrincipal: TFormPrincipal
     end
   end
   object ACBrNFe: TACBrNFe
+    MAIL = ACBrMail1
     Configuracoes.Geral.SSLLib = libNone
     Configuracoes.Geral.SSLCryptLib = cryNone
     Configuracoes.Geral.SSLHttpLib = httpNone
@@ -1606,8 +1710,8 @@ object FormPrincipal: TFormPrincipal
     Configuracoes.WebServices.QuebradeLinha = '|'
     Configuracoes.RespTec.IdCSRT = 0
     DANFE = ACBrNFeDANFEFR
-    Left = 969
-    Top = 508
+    Left = 929
+    Top = 468
   end
   object ACBrNFeDANFEFR: TACBrNFeDANFEFR
     Sistema = 'Desenvolvido por Caique Garcia'
@@ -1634,8 +1738,8 @@ object FormPrincipal: TFormPrincipal
     EspessuraBorda = 1
     BorderIcon = [biSystemMenu, biMinimize, biMaximize]
     ThreadSafe = False
-    Left = 976
-    Top = 587
+    Left = 1008
+    Top = 539
   end
   object ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF
     Sistema = 'Desenvolvido por Caique Garcia'
@@ -1659,6 +1763,17 @@ object FormPrincipal: TFormPrincipal
     CasasDecimais.MaskAliquota = ',0.00'
     TipoDANFE = tiNFCe
     Left = 1039
-    Top = 534
+    Top = 478
+  end
+  object ACBrMail1: TACBrMail
+    Host = '127.0.0.1'
+    Port = '25'
+    SetSSL = False
+    SetTLS = False
+    Attempts = 3
+    DefaultCharset = UTF_8
+    IDECharset = CP1252
+    Left = 951
+    Top = 526
   end
 end
