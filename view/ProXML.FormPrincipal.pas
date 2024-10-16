@@ -641,8 +641,6 @@ begin
   CategoryButtons1Categories0Items0Click(Self);
 
   Memo1.Lines.Clear;
-
-
   CalculadoraXML:=  TCalculadoraXML.Create;
   try
 
