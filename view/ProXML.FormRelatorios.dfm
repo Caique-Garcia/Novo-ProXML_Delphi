@@ -148,15 +148,15 @@ object FormRelatorios: TFormRelatorios
         FontSize = 36
       end
       object QRLabel602: TQRLabel
-        Left = 40
+        Left = 56
         Top = 173
-        Width = 673
+        Width = 657
         Height = 17
         Size.Values = (
           44.979166666666670000
-          105.833333333333300000
+          148.166666666666700000
           457.729166666666700000
-          1780.645833333333000000)
+          1738.312500000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -325,17 +325,17 @@ object FormRelatorios: TFormRelatorios
       object QRLabelQt: TQRLabel
         Left = 8
         Top = 173
-        Width = 25
+        Width = 42
         Height = 17
         Size.Values = (
           44.979166666666670000
           21.166666666666670000
           457.729166666666700000
-          66.145833333333320000)
+          111.125000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
-        Alignment = taLeftJustify
+        Alignment = taCenter
         AlignToBand = False
         AutoSize = False
         Caption = '19'
