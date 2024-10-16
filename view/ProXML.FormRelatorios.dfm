@@ -183,7 +183,7 @@ object FormRelatorios: TFormRelatorios
         Width = 44
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           21.166666666666670000
           571.500000000000000000
           116.416666666666700000)
@@ -212,7 +212,7 @@ object FormRelatorios: TFormRelatorios
         Width = 33
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           545.041666666666700000
           571.500000000000000000
           87.312500000000000000)
@@ -241,7 +241,7 @@ object FormRelatorios: TFormRelatorios
         Width = 85
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           1651.000000000000000000
           571.500000000000000000
           224.895833333333300000)
@@ -270,10 +270,10 @@ object FormRelatorios: TFormRelatorios
         Width = 28
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           1180.041666666667000000
           571.500000000000000000
-          74.083333333333330000)
+          74.083333333333340000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -299,10 +299,10 @@ object FormRelatorios: TFormRelatorios
         Width = 28
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           1410.229166666667000000
           571.500000000000000000
-          74.083333333333330000)
+          74.083333333333340000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -331,7 +331,7 @@ object FormRelatorios: TFormRelatorios
           44.979166666666670000
           21.166666666666670000
           457.729166666666700000
-          66.145833333333330000)
+          66.145833333333320000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -374,7 +374,7 @@ object FormRelatorios: TFormRelatorios
         Width = 49
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           15.875000000000000000
           18.520833333333330000
           129.645833333333300000)
@@ -406,7 +406,7 @@ object FormRelatorios: TFormRelatorios
         Width = 36
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           306.916666666666700000
           15.875000000000000000
           95.250000000000000000)
@@ -438,7 +438,7 @@ object FormRelatorios: TFormRelatorios
         Width = 40
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           1698.625000000000000000
           15.875000000000000000
           105.833333333333300000)
@@ -470,7 +470,7 @@ object FormRelatorios: TFormRelatorios
         Width = 39
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           1383.770833333333000000
           13.229166666666670000
           103.187500000000000000)
@@ -502,7 +502,7 @@ object FormRelatorios: TFormRelatorios
         Width = 36
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           1180.041666666667000000
           13.229166666666670000
           95.250000000000000000)
@@ -539,7 +539,7 @@ object FormRelatorios: TFormRelatorios
       ForceNewColumn = False
       ForceNewPage = False
       Size.Values = (
-        89.958333333333330000
+        89.958333333333320000
         1899.708333333333000000)
       PreCaluculateBandHeight = False
       KeepOnOnePage = False
@@ -550,7 +550,7 @@ object FormRelatorios: TFormRelatorios
         Width = 78
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           13.229166666666670000
           15.875000000000000000
           206.375000000000000000)
@@ -579,7 +579,7 @@ object FormRelatorios: TFormRelatorios
         Width = 50
         Height = 16
         Size.Values = (
-          42.333333333333330000
+          42.333333333333340000
           1746.250000000000000000
           15.875000000000000000
           132.291666666666700000)
@@ -603,15 +603,15 @@ object FormRelatorios: TFormRelatorios
         FontSize = 8
       end
       object QRLabel609: TQRLabel
-        Left = 100
+        Left = 160
         Top = 6
-        Width = 525
+        Width = 465
         Height = 16
         Size.Values = (
           42.333333333333340000
-          264.583333333333400000
+          423.333333333333300000
           15.875000000000000000
-          1389.062500000000000000)
+          1230.312500000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -619,8 +619,8 @@ object FormRelatorios: TFormRelatorios
         AlignToBand = False
         AutoSize = False
         Caption = 
-          'ProXML - Desenvolvido por Caique Garcia | Email caique.garciatst' +
-          '@gmail.com'
+          'Desenvolvido por Caique Garcia | Email caique.garciatst@gmail.co' +
+          'm'
         Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -645,7 +645,7 @@ object FormRelatorios: TFormRelatorios
       ForceNewColumn = False
       ForceNewPage = False
       Size.Values = (
-        526.520833333333300000
+        526.520833333333400000
         1899.708333333333000000)
       PreCaluculateBandHeight = False
       KeepOnOnePage = False
@@ -761,7 +761,7 @@ object FormRelatorios: TFormRelatorios
         Width = 57
         Height = 26
         Size.Values = (
-          68.791666666666670000
+          68.791666666666680000
           1587.500000000000000000
           134.937500000000000000
           150.812500000000000000)
@@ -790,7 +790,7 @@ object FormRelatorios: TFormRelatorios
         Width = 57
         Height = 26
         Size.Values = (
-          68.791666666666670000
+          68.791666666666680000
           1587.500000000000000000
           251.354166666666700000
           150.812500000000000000)
@@ -819,7 +819,7 @@ object FormRelatorios: TFormRelatorios
         Width = 57
         Height = 26
         Size.Values = (
-          68.791666666666670000
+          68.791666666666680000
           1587.500000000000000000
           354.541666666666700000
           150.812500000000000000)
