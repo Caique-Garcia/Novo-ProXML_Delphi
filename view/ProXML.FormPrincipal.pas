@@ -57,7 +57,9 @@ uses
   ACBrDFe,
   ACBrNFe,
   ACBrNFeDANFeFPDF,
-  ShellAPI, ProXML.Classes;
+  ShellAPI,
+  ProXML.Classes,
+  ACBrMail;
 
 type
   TFormPrincipal = class(TForm)
@@ -154,6 +156,18 @@ type
     Panel9: TPanel;
     btnSalvarConfig: TSpeedButton;
     SkSvg5: TSkSvg;
+    ACBrMail1: TACBrMail;
+    Panel10: TPanel;
+    Label11: TLabel;
+    Label12: TLabel;
+    Shape15: TShape;
+    Shape17: TShape;
+    Label15: TLabel;
+    Label17: TLabel;
+    Edit3: TEdit;
+    Memo2: TMemo;
+    Panel11: TPanel;
+    btnEnviarEmail: TSpeedButton;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -178,6 +192,8 @@ type
     procedure GerarDanfe(const CaminhoArq: String);
     function CreateProcessSimple(cmd: string): boolean;
     procedure ComprimirArquivos();
+    procedure LerConfigEmail();
+    procedure EnviaArquivo;
 
   public
 
@@ -304,6 +320,8 @@ begin
     //PageControl1.ActivePageIndex := 2;
     //SkAnimatedImage1.Animation.Start;
     ComprimirArquivos();
+    LerConfigEmail();
+    PageControl1.ActivePageIndex := 3;
 end;
 
 procedure TFormPrincipal.CategoryButtons1Categories0Items4Click(
@@ -544,6 +562,47 @@ begin
   T.OnTerminate := FinalizaRelatorio;
   T.Start;
 
+end;
+
+procedure TFormPrincipal.LerConfigEmail;
+var
+    ConfigEmail: TConfig;
+begin
+    //Configurações do email
+    ConfigEmail := DMConfig.GetConfig;
+
+    ACBrMail1.Host        := ConfigEmail.SMTP;
+    ACBrMail1.Port        := ConfigEmail.Porta;
+    ACBrMail1.Username    := ConfigEmail.Email;
+    ACBrMail1.Password    := ConfigEmail.Senha;
+    ACBrMail1.From        := ConfigEmail.Email;
+    ACBrMail1.SetSSL      := ConfigEmail.SSL; // SSL - Conexao Segura
+    ACBrMail1.SetTLS      := ConfigEmail.TSL; // Auto TLS
+    ACBrMail1.ReadingConfirmation := False; // Pede confirmacao de leitura do email
+    ACBrMail1.UseThread := False;           // Aguarda Envio do Email(nao usa thread)
+    ACBrMail1.FromName := 'Projeto Pro XML';
+
+end;
+
+procedure TFormPrincipal.EnviaArquivo();
+var
+    ListaArquivos : TStringList;
+    varPath: String;
+begin
+    //Envia arquivos
+    varPath := ExtractFilePath(ParamStr(0));
+    ListaArquivos := TStringList.Create;
+    try
+        if FileExists(varPath + 'NFCe\NFCe_ProXML.rar') then
+            ListaArquivos.Add(varPath + 'NFCe\NFCe_ProXML.rar');
+
+        if ListaArquivos.Count > 0 then
+           //ACBrNFe.EnviarEmail(PrePara, assu, MensgEmail.Lines, nil, ListaArquivos, nil, '', nil);
+        else
+            messagedlg('Sem arquivos para enviar!', mtInformation	, [mbOk], 0);
+    finally
+        ListaArquivos.Free;
+    end;
 end;
 
 procedure TFormPrincipal.SkSvg1Click(Sender: TObject);
