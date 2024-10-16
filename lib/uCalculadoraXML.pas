@@ -61,6 +61,7 @@ procedure TCalculadoraXML.GetTagValueFromXML(var CaminhoXML: string);
     BValorString, TagAutorizado, NumeroNF, DataEm, ModeloXML: String;
     AValorFloat, BValorFloat, AValorFloatBC, AValorFloatICMS: Double;
     posicao: Integer;
+  Chave: String;
 begin
     //Função que trabalha os dados do arquivo
    XMLDocument := TXMLDocument.Create(Nil);
@@ -137,7 +138,12 @@ begin
       FormPrincipal.FDMemTable1.Append;
 
       FormPrincipal.FDMemTable1.FieldByName('numero').AsInteger := StrToInt(NumeroNF);
-      FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Copy(ExtractFileName(CaminhoXML), 1, posicao - 1);;
+
+      Chave := ExtractFileName(CaminhoXML);
+      Chave := ChangeFileExt(Chave, '');
+
+      //FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Copy(ExtractFileName(CaminhoXML), 1, posicao - 1);
+      FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Chave;
 
       FormPrincipal.FDMemTable1.FieldByName('data').AsString := FormataDataStr(Copy(DataEm, 1, 10));
 
