@@ -578,11 +578,11 @@ begin
     //Configurações do email
     ConfigEmail := DMConfig.GetConfig;
 
-    ACBrMail1.Host        := ConfigEmail.SMTP;
-    ACBrMail1.Port        := ConfigEmail.Porta;
-    ACBrMail1.Username    := ConfigEmail.Email;
-    ACBrMail1.Password    := ConfigEmail.Senha;
-    ACBrMail1.From        := ConfigEmail.Email;
+    ACBrMail1.Host        := Trim(ConfigEmail.SMTP);
+    ACBrMail1.Port        := Trim(ConfigEmail.Porta);
+    ACBrMail1.Username    := Trim(ConfigEmail.Email);
+    ACBrMail1.Password    := Trim(ConfigEmail.Senha);
+    ACBrMail1.From        := Trim(ConfigEmail.Email);
     ACBrMail1.SetSSL      := ConfigEmail.SSL; // SSL - Conexao Segura
     ACBrMail1.SetTLS      := ConfigEmail.TSL; // Auto TLS
     ACBrMail1.ReadingConfirmation := False; // Pede confirmacao de leitura do email
