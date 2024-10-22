@@ -294,8 +294,6 @@ object FormPrincipal: TFormPrincipal
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitLeft = 900
-        ExplicitTop = 14
         object PanelVaorICMS: TPanel
           Left = 0
           Top = 160
@@ -656,6 +654,10 @@ object FormPrincipal: TFormPrincipal
             object TabSheet1: TTabSheet
               Caption = 'TabSheet1'
               TabVisible = False
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Gauge1: TGauge
                 Left = 0
                 Top = 387
@@ -696,6 +698,10 @@ object FormPrincipal: TFormPrincipal
               Caption = 'TabSheet2'
               ImageIndex = 1
               TabVisible = False
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Panel5: TPanel
                 Left = 0
                 Top = 0
@@ -788,6 +794,10 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Loading'
               ImageIndex = 2
               TabVisible = False
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object SkAnimatedImage1: TSkAnimatedImage
                 Left = 208
                 Top = 110
@@ -975,7 +985,6 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Enviar'
               ImageIndex = 3
               TabVisible = False
-              ExplicitTop = 10
               object Panel10: TPanel
                 Left = 0
                 Top = 0
@@ -991,7 +1000,6 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ShowCaption = False
                 TabOrder = 0
-                ExplicitLeft = -6
                 object Label11: TLabel
                   AlignWithMargins = True
                   Left = 10
@@ -1050,7 +1058,7 @@ object FormPrincipal: TFormPrincipal
                 object Label17: TLabel
                   Left = 16
                   Top = 161
-                  Width = 76
+                  Width = 65
                   Height = 17
                   Caption = 'Mensagem'
                 end
@@ -1107,6 +1115,10 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Config'
               ImageIndex = 4
               TabVisible = False
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object PanelCorpoConfig: TPanel
                 Left = 0
                 Top = 0
@@ -1126,7 +1138,7 @@ object FormPrincipal: TFormPrincipal
                   AlignWithMargins = True
                   Left = 10
                   Top = 3
-                  Width = 609
+                  Width = 122
                   Height = 25
                   Margins.Left = 10
                   Align = alTop
@@ -1137,13 +1149,12 @@ object FormPrincipal: TFormPrincipal
                   Font.Name = 'Segoe UI'
                   Font.Style = []
                   ParentFont = False
-                  ExplicitWidth = 122
                 end
                 object Label2: TLabel
                   AlignWithMargins = True
                   Left = 10
                   Top = 34
-                  Width = 609
+                  Width = 164
                   Height = 17
                   Margins.Left = 10
                   Align = alTop
@@ -1154,7 +1165,6 @@ object FormPrincipal: TFormPrincipal
                   Font.Name = 'Segoe UI'
                   Font.Style = []
                   ParentFont = False
-                  ExplicitWidth = 164
                 end
                 object Shape2: TShape
                   Left = 24
@@ -1616,7 +1626,7 @@ object FormPrincipal: TFormPrincipal
     Left = 1000
     Top = 385
     Content = {
-      414442530F005640BE020000FF00010001FF02FF03040016000000460044004D
+      414442530F00613DBE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000

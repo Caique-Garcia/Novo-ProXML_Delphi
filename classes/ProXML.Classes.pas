@@ -14,8 +14,9 @@ private
     FTSL: Boolean;
     FPorta: String;
     FMensagem: String;
-    constructor Create(); // Construtor
+
 public
+   constructor Create(); // Construtor
    class var FInstance : TConfig;
    property SMTP: String read FSMTP write FSMTP;
    property Email: String read FEmail write FEmail;
@@ -50,17 +51,11 @@ end;
 
 class function TConfig.New: TConfig;
 begin
-     if FInstance = nil then
+    if FInstance = nil then
         FInstance := TConfig.Create;
 
     Result := FInstance;
+
 end;
 
-
-initialization
-
-
-finalization
-  // Libera a instância quando a aplicação terminar, para liberar recursos
-  FreeAndNil(TConfig.FInstance);
 end.

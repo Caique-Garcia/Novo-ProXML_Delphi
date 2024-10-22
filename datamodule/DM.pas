@@ -24,7 +24,10 @@ uses
   FireDAC.DatS,
   FireDAC.DApt.Intf,
   FireDAC.DApt,
-  FireDAC.Comp.DataSet, ProXML.Classes;
+  FireDAC.Comp.DataSet,
+  ProXML.Classes,
+  FireDAC.Phys.MySQLDef,
+  FireDAC.Phys.MySQL;
 
 type
   TDMConfig = class(TDataModule)
@@ -37,6 +40,7 @@ type
     QryNotasBCICMS: TWideStringField;
     QryNotasVLICMS: TWideStringField;
     QryNotasNUMERO: TWideStringField;
+    FDPhysSQLiteDriverLink1: TFDPhysSQLiteDriverLink;
     procedure DataModuleCreate(Sender: TObject);
     procedure ConexaoBeforeConnect(Sender: TObject);
     procedure ConexaoAfterConnect(Sender: TObject);
@@ -54,13 +58,18 @@ var
 
 implementation
 
+uses
+  Vcl.Dialogs, Vcl.Forms, ProXML.FormPrincipal;
+
 {%CLASSGROUP 'Vcl.Controls.TControl'}
 
 {$R *.dfm}
 
 procedure TDMConfig.ConexaoAfterConnect(Sender: TObject);
 begin
-     Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS nf ( ' +
+
+    try
+        Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS nf ( ' +
                                 'NUMERO           TEXT (20), '  +
                                 'CHAVE            TEXT (50), '  +
                                 'VALOR            TEXT (20), '  +
@@ -69,8 +78,14 @@ begin
                                 'VLICMS           TEXT (30), '  +
                                 'XML              TEXT (200) '  +
                                 ' ); ');
+    except
 
-   Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS config ( ' +
+    end;
+
+
+
+    try
+         Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS config ( ' +
                                 'SMTP             TEXT (32), '  +
                                 'EMAIL            TEXT (54), '  +
                                 'SENHA            TEXT (32), '  +
@@ -79,18 +94,20 @@ begin
                                 'TSL              TEXT (36), '  +
                                 'MSG              TEXT (200) '  +
                                 ' ); ');
+    except
+
+    end;
+
+
 end;
 
 procedure TDMConfig.ConexaoBeforeConnect(Sender: TObject);
 begin
-   Conexao.DriverName := 'SQLite';
-
-  {$IFDEF MSWINDOWS}
-   Conexao.Params.Values['Database'] := System.SysUtils.GetCurrentDir + '\db\notas.db';
-  {$ELSE}
-   Conxao.Params.Values['Database'] := TPath.Combine( TPath.GetDocumentsPath, '\notas.db');
-  {$ENDIF}
-
+  Conexao.DriverName := 'SQLite';
+  try
+    Conexao.Params.Values['Database'] := System.SysUtils.GetCurrentDir + '\db\notas.db';
+  except
+  end;
 
 end;
 
@@ -98,12 +115,28 @@ procedure TDMConfig.DataModuleCreate(Sender: TObject);
 var
   Diretorio: string;
 begin
-    Diretorio := System.SysUtils.GetCurrentDir + '\db';
+
+    try
+        FDPhysSQLiteDriverLink1.VendorLib := System.SysUtils.GetCurrentDir + '\SQLite3.dll';
+    except
+    end;
+
+    try
+        Diretorio := System.SysUtils.GetCurrentDir + '\db';
+    except
+
+    end;
+
 
     if not DirectoryExists(Diretorio) then
         CreateDir(Diretorio);
 
-    Conexao.Connected := True;
+    try
+        Conexao.Connected := True;
+    except
+
+    end;
+
 end;
 
 procedure TDMConfig.DeleteDados();
@@ -221,7 +254,13 @@ function TDMConfig.GetConfig(): TConfig;
 var
     TSL, SSL: String;
 begin
-    Result := TConfig.New;
+    Result := Nil;
+
+    try
+       Result := TConfig.New;
+    except
+       Exit;
+    end;
 
     Query.Active := False;
     Query.SQL.Clear;

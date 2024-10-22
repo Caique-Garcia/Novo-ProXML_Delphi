@@ -10,20 +10,20 @@ object DMConfig: TDMConfig
     LoginPrompt = False
     AfterConnect = ConexaoAfterConnect
     BeforeConnect = ConexaoBeforeConnect
-    Left = 136
-    Top = 88
+    Left = 152
+    Top = 48
   end
   object Query: TFDQuery
     Connection = Conexao
-    Left = 136
+    Left = 120
     Top = 144
   end
   object QryNotas: TFDQuery
     Connection = Conexao
     SQL.Strings = (
       'SELECT NUMERO, CHAVE, VALOR, DATA, BCICMS, VLICMS FROM NF')
-    Left = 232
-    Top = 120
+    Left = 224
+    Top = 72
     object QryNotasCHAVE: TWideStringField
       FieldName = 'CHAVE'
       Origin = 'CHAVE'
@@ -52,5 +52,10 @@ object DMConfig: TDMConfig
       FieldName = 'NUMERO'
       Origin = 'NUMERO'
     end
+  end
+  object FDPhysSQLiteDriverLink1: TFDPhysSQLiteDriverLink
+    VendorLib = 'D:\PROJETOS\Novo-ProXML_Delphi\bin\SQLite3.dll'
+    Left = 184
+    Top = 168
   end
 end
