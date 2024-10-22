@@ -1,8 +1,8 @@
 object FormRelatorios: TFormRelatorios
   Left = 0
   Top = 0
-  ClientHeight = 600
-  ClientWidth = 923
+  ClientHeight = 778
+  ClientWidth = 973
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -539,7 +539,7 @@ object FormRelatorios: TFormRelatorios
       ForceNewColumn = False
       ForceNewPage = False
       Size.Values = (
-        89.958333333333320000
+        89.958333333333340000
         1899.708333333333000000)
       PreCaluculateBandHeight = False
       KeepOnOnePage = False
@@ -727,21 +727,21 @@ object FormRelatorios: TFormRelatorios
         VertAdjust = 0
       end
       object QRLabel621: TQRLabel
-        Left = 318
+        Left = 308
         Top = 134
-        Width = 156
+        Width = 166
         Height = 38
         Size.Values = (
           100.541666666666700000
-          841.375000000000000000
+          814.916666666666800000
           354.541666666666700000
-          412.750000000000000000)
+          439.208333333333400000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taLeftJustify
         AlignToBand = False
-        Caption = 'BASE DE C'#193'CULO'
+        Caption = 'BASE DE C'#193'LCULO'
         Color = clWhite
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
