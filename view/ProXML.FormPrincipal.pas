@@ -200,6 +200,7 @@ type
 
   end;
 
+Type
   TDBGridPadrao = class(TDBGrid);
 
 var
@@ -322,19 +323,9 @@ end;
 
 procedure TFormPrincipal.CategoryButtons1Categories0Items3Click(
   Sender: TObject);
-var
-    ConfigEmail : TConfig;
 begin
     //PageControl1.ActivePageIndex := 2;
     //SkAnimatedImage1.Animation.Start;
-    ConfigEmail   := TConfig.New;
-    if Trim(ConfigEmail.SMTP) = ''  then
-    begin
-        messagedlg('Sem e-mail configurado!!', mtInformation	, [mbOk], 0);
-        PageControl1.ActivePageIndex := 4;
-        Abort;
-    end;
-
     ComprimirArquivos();
     LerConfigEmail();
     PageControl1.ActivePageIndex := 3;
@@ -363,11 +354,7 @@ begin
 //    //Alinha textos na linha do grid
 //   DBGrid1.Canvas.TextRect(Rect, Rect.Left + 28, Rect.Top + 6, Column.Field.DisplayText);
  //Ajustar linhas DBGrid
- try
-    TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
- except
- end;
-
+   TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
 end;
 
 procedure TFormPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -381,26 +368,20 @@ var
     ConfigEmail : TConfig;
 begin
    //Create do Form
-   //ShowMEssage('Começou a criação do Form');
-   if Not Assigned(DMConfig) then Exit;
-   try
-    ConfigEmail := DMConfig.GetConfig;
+   ConfigEmail := DMConfig.GetConfig;
 
-    EditSMTP.Text        := ConfigEmail.SMTP;
-    EditPorta.Text       := ConfigEmail.Porta;
-    EditEmail.Text       := ConfigEmail.Email;
-    EditPass.Text        := ConfigEmail.Senha;
-    MemoMsg.Text         := ConfigEmail.Mensagem;
-    CheckBoxSSL.Checked  := ConfigEmail.SSL;
-    CheckBoxTSl.Checked  := ConfigEmail.TSL;
-   except
-   end;
-
+   EditSMTP.Text        := ConfigEmail.SMTP;
+   EditPorta.Text       := ConfigEmail.Porta;
+   EditEmail.Text       := ConfigEmail.Email;
+   EditPass.Text        := ConfigEmail.Senha;
+   MemoMsg.Text         := ConfigEmail.Mensagem;
+   CheckBoxSSL.Checked  := ConfigEmail.SSL;
+   CheckBoxTSl.Checked  := ConfigEmail.TSL;
 end;
 
 procedure TFormPrincipal.ComprimirArquivos();
 var
-  varPath   : string;
+  varPath: string;
   varDestino: string;
 begin
     //Comprime os arquivos XML
@@ -476,16 +457,11 @@ end;
 
 procedure TFormPrincipal.FormShow(Sender: TObject);
 begin
-
    //Ajustar linhas DBGrid
-   try
-    TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
-    DataSource1.DataSet.First;
-    PageControl1.ActivePageIndex := 0;
-    ConfigACBR();
-   except
-   end;
-
+   TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
+   DataSource1.DataSet.First;
+   PageControl1.ActivePageIndex := 0;
+   ConfigACBR();
 end;
 
 procedure TFormPrincipal.SetTextoTranferencia(const Text: String);
@@ -499,8 +475,8 @@ var
     Result :Boolean;
     CaminhoPDF : String;
     NomeArqPDF : String;
-    AuxNomeArqPDF: string;
-    AuxCaminhoPDF: string;
+  AuxNomeArqPDF: string;
+  AuxCaminhoPDF: string;
 begin
     //Gera danfe do arquivo da nfce
     PageControl1.ActivePageIndex := 2;
@@ -640,7 +616,7 @@ end;
 procedure TFormPrincipal.EnviaArquivo(const Email, Assunto: string);
 var
     ListaArquivos : TStringList;
-    varPath       : String;
+    varPath: String;
 begin
     //Envia arquivos
     varPath := ExtractFilePath(ParamStr(0));
