@@ -69,7 +69,6 @@ type
     PnlInfo: TPanel;
     PnlLocal: TPanel;
     PnlLogo: TPanel;
-    PnlImg: TPanel;
     PnlInfoLocal: TPanel;
     FileOpenDialog1: TFileOpenDialog;
     PanelVaorICMS: TPanel;
@@ -136,8 +135,6 @@ type
     Label2: TLabel;
     Shape2: TShape;
     Shape3: TShape;
-    Shape4: TShape;
-    Shape9: TShape;
     Shape10: TShape;
     Shape11: TShape;
     Shape12: TShape;

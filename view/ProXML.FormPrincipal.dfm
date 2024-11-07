@@ -19,20 +19,6 @@ object FormPrincipal: TFormPrincipal
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object Shape4: TShape
-    Left = 344
-    Top = 97
-    Width = 232
-    Height = 40
-    Pen.Color = clGray
-  end
-  object Shape9: TShape
-    Left = 32
-    Top = 97
-    Width = 232
-    Height = 40
-    Pen.Color = clGray
-  end
   object PnlContainer: TPanel
     Left = 0
     Top = 0
@@ -251,20 +237,6 @@ object FormPrincipal: TFormPrincipal
           ExplicitHeight = 51
         end
       end
-      object PnlImg: TPanel
-        AlignWithMargins = True
-        Left = 960
-        Top = 30
-        Width = 152
-        Height = 53
-        Margins.Left = 0
-        Margins.Top = 30
-        Margins.Right = 30
-        Margins.Bottom = 30
-        Align = alRight
-        BevelOuter = bvNone
-        TabOrder = 1
-      end
     end
     object PnlCorpo: TPanel
       Left = 0
@@ -294,8 +266,6 @@ object FormPrincipal: TFormPrincipal
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitLeft = 900
-        ExplicitTop = 14
         object PanelVaorICMS: TPanel
           Left = 0
           Top = 160
@@ -650,7 +620,7 @@ object FormPrincipal: TFormPrincipal
             Margins.Top = 15
             Margins.Right = 5
             Margins.Bottom = 15
-            ActivePage = Enviar
+            ActivePage = Config
             Align = alClient
             TabOrder = 0
             object TabSheet1: TTabSheet
@@ -975,7 +945,6 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Enviar'
               ImageIndex = 3
               TabVisible = False
-              ExplicitTop = 10
               object Panel10: TPanel
                 Left = 0
                 Top = 0
@@ -991,7 +960,6 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ShowCaption = False
                 TabOrder = 0
-                ExplicitLeft = -6
                 object Label11: TLabel
                   AlignWithMargins = True
                   Left = 10
@@ -1050,7 +1018,7 @@ object FormPrincipal: TFormPrincipal
                 object Label17: TLabel
                   Left = 16
                   Top = 161
-                  Width = 76
+                  Width = 65
                   Height = 17
                   Caption = 'Mensagem'
                 end
@@ -1616,7 +1584,7 @@ object FormPrincipal: TFormPrincipal
     Left = 1000
     Top = 385
     Content = {
-      414442530F005640BE020000FF00010001FF02FF03040016000000460044004D
+      414442530F00901DBE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
