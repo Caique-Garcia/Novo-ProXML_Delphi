@@ -14,8 +14,8 @@ object FormRelatorios: TFormRelatorios
   PixelsPerInch = 96
   TextHeight = 13
   object QuickNotas: TQuickRep
-    Left = 70
-    Top = 37
+    Left = 62
+    Top = 21
     Width = 794
     Height = 1123
     ShowingPreview = False
@@ -550,7 +550,7 @@ object FormRelatorios: TFormRelatorios
         Width = 78
         Height = 16
         Size.Values = (
-          42.333333333333340000
+          42.333333333333330000
           13.229166666666670000
           15.875000000000000000
           206.375000000000000000)
@@ -579,7 +579,7 @@ object FormRelatorios: TFormRelatorios
         Width = 50
         Height = 16
         Size.Values = (
-          42.333333333333340000
+          42.333333333333330000
           1746.250000000000000000
           15.875000000000000000
           132.291666666666700000)

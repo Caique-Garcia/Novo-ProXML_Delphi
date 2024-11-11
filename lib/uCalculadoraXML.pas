@@ -42,7 +42,10 @@ type
 implementation
 
 uses
-  Vcl.FileCtrl,
+
+  {$IFDEF MSWINDOWS}
+    Vcl.FileCtrl,
+  {$ENDIF}
   Xml.XMLIntf,
   Xml.XMLDoc,
   System.IOUtils,
@@ -60,7 +63,7 @@ procedure TCalculadoraXML.GetTagValueFromXML(var CaminhoXML: string);
     NodeinfNFe, NodeprotNFe, NodeIde : IXMLNode;
     BValorString, TagAutorizado, NumeroNF, DataEm, ModeloXML: String;
     AValorFloat, BValorFloat, AValorFloatBC, AValorFloatICMS: Double;
-    posicao: Integer;
+    //posicao: Integer;
   Chave: String;
 begin
     //Função que trabalha os dados do arquivo
@@ -132,7 +135,7 @@ begin
 
       ValorTotalICMSFloat := ValorTotalICMSFloat + AValorFloatICMS;
 
-      posicao := Pos('-nfe', ExtractFileName(CaminhoXML));
+      //posicao := Pos('-nfe', ExtractFileName(CaminhoXML));
 
       //Aqui exibimos os registros no grid
       FormPrincipal.FDMemTable1.Append;
@@ -176,7 +179,7 @@ end;
 function TCalculadoraXML.FormataDataStr(const DataStr: String): String;
 var
   DateStr       : string;
-  FormattedDate : string;
+  //FormattedDate : string;
   Dia           : string;
   Mes           : string;
   Ano           : string;

@@ -16,6 +16,7 @@ uses
   QuickRpt,
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
+  Data.DB,
   DM;
 
 type

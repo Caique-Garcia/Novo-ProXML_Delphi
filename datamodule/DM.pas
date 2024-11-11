@@ -4,7 +4,6 @@ interface
 
 uses
   System.SysUtils,
-  System.Classes,
   FireDAC.Stan.Intf,
   FireDAC.Stan.Option,
   FireDAC.Stan.Error,
@@ -24,7 +23,9 @@ uses
   FireDAC.DatS,
   FireDAC.DApt.Intf,
   FireDAC.DApt,
-  FireDAC.Comp.DataSet, ProXML.Classes;
+  FireDAC.Comp.DataSet,
+  ProXML.Classes,
+  System.Classes;
 
 type
   TDMConfig = class(TDataModule)
@@ -218,17 +219,15 @@ begin
 end;
 
 function TDMConfig.GetConfig(): TConfig;
-var
-    TSL, SSL: String;
 begin
-    Result := TConfig.New;
-
-    Query.Active := False;
-    Query.SQL.Clear;
-
-    Query.SQL.Add('SELECT SMTP, EMAIL, SENHA, PORTA, SSL, TSL, MSG FROM CONFIG ');
-
+    Result := TConfig.Create;
     try
+      Query.Active := False;
+      Query.SQL.Clear;
+
+      Query.SQL.Add('SELECT SMTP, EMAIL, SENHA, PORTA, SSL, TSL, MSG FROM CONFIG ');
+
+      try
         Query.Active := True;
         if Not Query.IsEmpty then
         begin
@@ -242,9 +241,14 @@ begin
 
         end;
 
-    except on e: Exception do
+      except on e: Exception do
         raise Exception.Create('Erro na gravação de dados: '+ e.message);
+      end;
+
+    finally
+
     end;
+
 end;
 
 end.

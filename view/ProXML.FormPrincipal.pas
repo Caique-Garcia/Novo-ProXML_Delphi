@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows,
   Winapi.Messages,
-  System.SysUtils,
+  //System.SysUtils,
   System.Variants,
   System.Classes,
   Vcl.Graphics,
@@ -59,6 +59,8 @@ uses
   ACBrNFeDANFeFPDF,
   ShellAPI,
   ProXML.Classes,
+  System.UITypes,    
+  SysUtils,  
   ACBrMail;
 
 type
@@ -70,7 +72,9 @@ type
     PnlLocal: TPanel;
     PnlLogo: TPanel;
     PnlInfoLocal: TPanel;
-    FileOpenDialog1: TFileOpenDialog;
+    {$IFDEF MSWINDOWS}
+      FileOpenDialog1: TFileOpenDialog;
+    {$ENDIF}
     PanelVaorICMS: TPanel;
     PanelValorBaseICMS: TPanel;
     PanelValorTotal: TPanel;
@@ -121,11 +125,9 @@ type
     PopupMenu: TPopupMenu;
     GerarPDF1: TMenuItem;
     Loading: TTabSheet;
-    SkAnimatedImage1: TSkAnimatedImage;
     FormRelatorio: TFormRelatorios;
     FDMemTable1xml: TStringField;
     ACBrNFe: TACBrNFe;
-    ACBrNFeDANFEFR: TACBrNFeDANFEFR;
     GerarDANFe1: TMenuItem;
     ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF;
     Enviar: TTabSheet;
@@ -165,6 +167,7 @@ type
     MemoMensagem: TMemo;
     Panel11: TPanel;
     btnEnviarEmail: TSpeedButton;
+    ACBrNFeDANFEFR: TACBrNFeDANFEFR;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
@@ -183,7 +186,9 @@ type
     procedure btnSalvarConfigClick(Sender: TObject);
     procedure SkSvg5Click(Sender: TObject);
     procedure btnEnviarEmailClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
+    ConfigEmail : TConfig;
     procedure SetTextoTranferencia(const Text: String);
     procedure FinalizaRelatorio(Sender: TObject);
     procedure ConfigACBR;
@@ -210,11 +215,12 @@ uses
   Vcl.Clipbrd,
   pcnConversao,
   pcnConversaoNFe,
-  Vcl.FileCtrl,
+  {$IFDEF MSWINDOWS}
+    Vcl.FileCtrl,
+  {$ENDIF}
   System.IOUtils;
 
 {$R *.dfm}
-
 
 procedure TFormPrincipal.btnEnviarEmailClick(Sender: TObject);
 begin
@@ -223,11 +229,8 @@ begin
 end;
 
 procedure TFormPrincipal.btnSalvarConfigClick(Sender: TObject);
-var
-    ConfigEmail : TConfig;
 begin
-    //Salvar dados Config
-    ConfigEmail := TConfig.New;
+    //Salvar dados Config       
     ConfigEmail.SMTP        := EditSMTP.Text;
     ConfigEmail.Porta       := EditPorta.Text;
     ConfigEmail.Email       := EditEmail.Text;
@@ -332,7 +335,10 @@ procedure TFormPrincipal.CategoryButtons1Categories0Items4Click(
   Sender: TObject);
 begin
   //Configurações
-  PageControl1.ActivePageIndex := 4;
+  try
+    PageControl1.ActivePageIndex := 4;
+  except
+  end;
 end;
 
 procedure TFormPrincipal.DBGrid1DrawColumnCell(Sender: TObject;
@@ -351,29 +357,44 @@ begin
 //    //Alinha textos na linha do grid
 //   DBGrid1.Canvas.TextRect(Rect, Rect.Left + 28, Rect.Top + 6, Column.Field.DisplayText);
  //Ajustar linhas DBGrid
-   TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
+ try
+    TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
+ except
+ end;
+
 end;
 
 procedure TFormPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  action := cafree;
+
+  try
+    action := cafree;
+  except
+  end;
   Application.Terminate;
 end;
 
 procedure TFormPrincipal.FormCreate(Sender: TObject);
-var
-    ConfigEmail : TConfig;
 begin
    //Create do Form
-   ConfigEmail := DMConfig.GetConfig;
+   try          
+    ConfigEmail := DMConfig.GetConfig;
 
-   EditSMTP.Text        := ConfigEmail.SMTP;
-   EditPorta.Text       := ConfigEmail.Porta;
-   EditEmail.Text       := ConfigEmail.Email;
-   EditPass.Text        := ConfigEmail.Senha;
-   MemoMsg.Text         := ConfigEmail.Mensagem;
-   CheckBoxSSL.Checked  := ConfigEmail.SSL;
-   CheckBoxTSl.Checked  := ConfigEmail.TSL;
+    EditSMTP.Text        := ConfigEmail.SMTP;
+    EditPorta.Text       := ConfigEmail.Porta;
+    EditEmail.Text       := ConfigEmail.Email;
+    EditPass.Text        := ConfigEmail.Senha;
+    MemoMsg.Text         := ConfigEmail.Mensagem;
+    CheckBoxSSL.Checked  := ConfigEmail.SSL;
+    CheckBoxTSl.Checked  := ConfigEmail.TSL;
+   except
+   end;
+
+end;
+
+procedure TFormPrincipal.FormDestroy(Sender: TObject);
+begin
+  //ConfigEmail.Free;
 end;
 
 procedure TFormPrincipal.ComprimirArquivos();
@@ -390,7 +411,7 @@ begin
       TDirectory.Delete(varPath + 'NFCe\ProXML', True);  // O segundo parâmetro True indica exclusão recursiva
     end;
 
-    if not DirectoryExists(varPath + 'NFCe\ProXML') then ForceDirectories(varPath + '\NFCe\ProXML');
+    if not SysUtils.DirectoryExists(varPath + 'NFCe\ProXML') then SysUtils.ForceDirectories(varPath + '\NFCe\ProXML');
 
     FDMemTable1.First;
     while not FDMemTable1.Eof do
@@ -418,8 +439,8 @@ begin
     //ACBrNFe.Configuracoes.Geral.FormaEmissao := teNormal;
     varPath := ExtractFilePath(ParamStr(0));
 
-    if not DirectoryExists(varPath + 'NFCe\EnvioResposta') then ForceDirectories(varPath + '\NFCe\EnvioResposta');
-    if not DirectoryExists(varPath + '\NFCe\danfePDF') then ForceDirectories(varPath + '\NFCe\danfePDF');
+    if not SysUtils.DirectoryExists(varPath + 'NFCe\EnvioResposta') then SysUtils.ForceDirectories(varPath + '\NFCe\EnvioResposta');
+    if not SysUtils.DirectoryExists(varPath + '\NFCe\danfePDF') then SysUtils.ForceDirectories(varPath + '\NFCe\danfePDF');
 
     ACBrNFe.Configuracoes.Arquivos.PathSalvar      := varPath + 'NFCe\EnvioResposta';
     ACBrNFe.DANFE.PathPDF                          := varPath + 'NFCe\danfePDF';
@@ -455,10 +476,25 @@ end;
 procedure TFormPrincipal.FormShow(Sender: TObject);
 begin
    //Ajustar linhas DBGrid
-   TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
-   DataSource1.DataSet.First;
-   PageControl1.ActivePageIndex := 0;
-   ConfigACBR();
+   try
+    TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
+   except
+   end;
+
+   try
+    DataSource1.DataSet.First;
+   except
+   end;
+
+   try
+    PageControl1.ActivePageIndex := 0;
+   except
+   end;
+
+   try
+    ConfigACBR();
+   except
+   end;
 end;
 
 procedure TFormPrincipal.SetTextoTranferencia(const Text: String);
@@ -472,12 +508,12 @@ var
     Result :Boolean;
     CaminhoPDF : String;
     NomeArqPDF : String;
-  AuxNomeArqPDF: string;
-  AuxCaminhoPDF: string;
+    AuxNomeArqPDF: string;
+    AuxCaminhoPDF: string;
 begin
     //Gera danfe do arquivo da nfce
     PageControl1.ActivePageIndex := 2;
-    SkAnimatedImage1.Animation.Start;
+    //SkAnimatedImage1.Animation.Start;
 
     NomeArqPDF      :=  ExtractFileName(CaminhoArq);
     NomeArqPDF      :=  ChangeFileExt(NomeArqPDF, '.pdf');
@@ -561,7 +597,7 @@ begin
 
   FDMemTable1.First;
   PageControl1.ActivePageIndex := 2;
-  SkAnimatedImage1.Animation.Start;
+  //SkAnimatedImage1.Animation.Start;
 
   T:= TThread.CreateAnonymousThread(procedure
   begin
@@ -589,9 +625,7 @@ begin
 
 end;
 
-procedure TFormPrincipal.LerConfigEmail;
-var
-    ConfigEmail: TConfig;
+procedure TFormPrincipal.LerConfigEmail;             
 begin
     //Configurações do email
     ConfigEmail := DMConfig.GetConfig;
@@ -605,7 +639,7 @@ begin
     ACBrMail1.SetTLS      := ConfigEmail.TSL; // Auto TLS
     ACBrMail1.ReadingConfirmation := False; // Pede confirmacao de leitura do email
     ACBrMail1.UseThread := False;           // Aguarda Envio do Email(nao usa thread)
-    ACBrMail1.FromName := 'Projeto Pro XML';
+    ACBrMail1.FromName  := 'Projeto Pro XML';
 
     MemoMensagem.Text := ConfigEmail.Mensagem;
 end;
@@ -637,8 +671,10 @@ end;
 procedure TFormPrincipal.SkSvg1Click(Sender: TObject);
 begin
   //Selecionando a pasta de arquivos
-  FileOpenDialog1.Execute;
-  EditCaminho.Text := FileOpenDialog1.FileName;
+  {$IFDEF MSWINDOWS}
+    FileOpenDialog1.Execute;   
+    EditCaminho.Text := FileOpenDialog1.FileName;
+  {$ENDIF}
 end;
 
 procedure TFormPrincipal.SkSvg5Click(Sender: TObject);
