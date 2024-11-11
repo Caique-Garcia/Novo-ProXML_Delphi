@@ -5,7 +5,7 @@ object FormPrincipal: TFormPrincipal
   BorderStyle = bsSingle
   Caption = 'Pro XML'
   ClientHeight = 699
-  ClientWidth = 1142
+  ClientWidth = 1139
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,13 +16,14 @@ object FormPrincipal: TFormPrincipal
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object PnlContainer: TPanel
     Left = 0
     Top = 0
-    Width = 1142
+    Width = 1139
     Height = 699
     Align = alClient
     BevelOuter = bvNone
@@ -35,16 +36,18 @@ object FormPrincipal: TFormPrincipal
     ParentBackground = False
     ParentFont = False
     TabOrder = 0
+    ExplicitWidth = 1142
     object PnlCabecalho: TPanel
       Left = 0
       Top = 0
-      Width = 1142
+      Width = 1139
       Height = 113
       Align = alTop
       BevelOuter = bvNone
       Color = 2169367
       ParentBackground = False
       TabOrder = 0
+      ExplicitWidth = 1142
       object PnlLogo: TPanel
         AlignWithMargins = True
         Left = 20
@@ -241,7 +244,7 @@ object FormPrincipal: TFormPrincipal
     object PnlCorpo: TPanel
       Left = 0
       Top = 113
-      Width = 1142
+      Width = 1139
       Height = 586
       Align = alClient
       BevelOuter = bvNone
@@ -250,8 +253,9 @@ object FormPrincipal: TFormPrincipal
       Padding.Right = 30
       Padding.Bottom = 15
       TabOrder = 1
+      ExplicitWidth = 1142
       object PnlInfo: TPanel
-        Left = 904
+        Left = 901
         Top = 15
         Width = 208
         Height = 556
@@ -266,6 +270,7 @@ object FormPrincipal: TFormPrincipal
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
+        ExplicitLeft = 904
         object PanelVaorICMS: TPanel
           Left = 0
           Top = 160
@@ -585,7 +590,7 @@ object FormPrincipal: TFormPrincipal
         AlignWithMargins = True
         Left = 30
         Top = 15
-        Width = 864
+        Width = 861
         Height = 556
         Margins.Left = 0
         Margins.Top = 0
@@ -596,10 +601,11 @@ object FormPrincipal: TFormPrincipal
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
+        ExplicitWidth = 864
         object PnlInfoLocal: TPanel
           Left = 0
           Top = 97
-          Width = 864
+          Width = 861
           Height = 459
           Align = alClient
           BevelOuter = bvNone
@@ -610,11 +616,12 @@ object FormPrincipal: TFormPrincipal
           Font.Style = []
           ParentFont = False
           TabOrder = 0
+          ExplicitWidth = 864
           object PageControl1: TPageControl
             AlignWithMargins = True
             Left = 229
             Top = 15
-            Width = 630
+            Width = 627
             Height = 429
             Margins.Left = 5
             Margins.Top = 15
@@ -623,13 +630,15 @@ object FormPrincipal: TFormPrincipal
             ActivePage = Config
             Align = alClient
             TabOrder = 0
+            ExplicitWidth = 630
             object TabSheet1: TTabSheet
               Caption = 'TabSheet1'
               TabVisible = False
+              ExplicitWidth = 622
               object Gauge1: TGauge
                 Left = 0
                 Top = 387
-                Width = 622
+                Width = 619
                 Height = 32
                 Align = alBottom
                 BorderStyle = bsNone
@@ -646,7 +655,7 @@ object FormPrincipal: TFormPrincipal
               object Memo1: TMemo
                 Left = 0
                 Top = 0
-                Width = 622
+                Width = 619
                 Height = 387
                 Align = alClient
                 BevelInner = bvNone
@@ -660,26 +669,29 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ReadOnly = True
                 TabOrder = 0
+                ExplicitWidth = 622
               end
             end
             object TabSheet2: TTabSheet
               Caption = 'TabSheet2'
               ImageIndex = 1
               TabVisible = False
+              ExplicitWidth = 622
               object Panel5: TPanel
                 Left = 0
                 Top = 0
-                Width = 622
+                Width = 619
                 Height = 419
                 Align = alClient
                 BevelOuter = bvNone
                 Color = clWhite
                 ParentBackground = False
                 TabOrder = 0
+                ExplicitWidth = 622
                 object DBGrid1: TDBGrid
                   Left = 0
                   Top = 0
-                  Width = 622
+                  Width = 619
                   Height = 419
                   Align = alClient
                   BorderStyle = bsNone
@@ -758,197 +770,17 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Loading'
               ImageIndex = 2
               TabVisible = False
-              object SkAnimatedImage1: TSkAnimatedImage
-                Left = 208
-                Top = 110
-                Width = 185
-                Height = 145
-                Data = {
-                  7B2276223A22342E362E38222C226672223A36302C226970223A302C226F7022
-                  3A3130362C2277223A3530302C2268223A3530302C226E6D223A22436F6D7020
-                  31222C22646464223A302C22617373657473223A5B5D2C226C6179657273223A
-                  5B7B22646464223A302C22696E64223A322C227479223A342C226E6D223A2253
-                  68617065204C617965722035222C226B73223A7B226F223A7B2261223A302C22
-                  6B223A3130307D2C2272223A7B2261223A312C226B223A5B7B2269223A7B2278
-                  223A5B302E3636375D2C2279223A5B315D7D2C226F223A7B2278223A5B302E33
-                  33335D2C2279223A5B305D7D2C226E223A5B2230703636375F315F3070333333
-                  5F30225D2C2274223A32302C2273223A5B305D2C2265223A5B3336305D7D2C7B
-                  2274223A3131307D5D7D2C2270223A7B2261223A302C226B223A5B3235312C32
-                  35302C305D7D2C2261223A7B2261223A302C226B223A5B302C302C305D7D2C22
-                  73223A7B2261223A302C226B223A5B3130302C3130302C3130305D7D7D2C2261
-                  6F223A302C22736861706573223A5B7B227479223A226772222C226974223A5B
-                  7B2264223A312C227479223A22656C222C2273223A7B2261223A302C226B223A
-                  5B31302C31305D7D2C2270223A7B2261223A302C226B223A5B302C2D3130305D
-                  7D2C226E6D223A22456C6C6970736520506174682031222C226D6E223A224144
-                  424520566563746F72205368617065202D20456C6C69707365227D2C7B227479
-                  223A227374222C2263223A7B2261223A302C226B223A5B302C302C302C315D7D
-                  2C226F223A7B2261223A302C226B223A3130307D2C2277223A7B2261223A302C
-                  226B223A307D2C226C63223A312C226C6A223A312C226D6C223A342C226E6D22
-                  3A225374726F6B652031222C226D6E223A224144424520566563746F72204772
-                  6170686963202D205374726F6B65227D2C7B227479223A22666C222C2263223A
-                  7B2261223A302C226B223A5B302C302E373239343131382C312C315D7D2C226F
-                  223A7B2261223A302C226B223A3130307D2C2272223A312C226E6D223A224669
-                  6C6C2031222C226D6E223A224144424520566563746F72204772617068696320
-                  2D2046696C6C227D2C7B227479223A227472222C2270223A7B2261223A302C22
-                  6B223A5B302C305D2C226978223A327D2C2261223A7B2261223A302C226B223A
-                  5B302C305D2C226978223A317D2C2273223A7B2261223A302C226B223A5B3130
-                  302C3130305D2C226978223A337D2C2272223A7B2261223A302C226B223A302C
-                  226978223A367D2C226F223A7B2261223A302C226B223A3130302C226978223A
-                  377D2C22736B223A7B2261223A302C226B223A302C226978223A347D2C227361
-                  223A7B2261223A302C226B223A302C226978223A357D2C226E6D223A22547261
-                  6E73666F726D227D5D2C226E6D223A22456C6C697073652031222C226E70223A
-                  332C22636978223A322C226978223A312C226D6E223A22414442452056656374
-                  6F722047726F7570227D5D2C226970223A32302C226F70223A3632302C227374
-                  223A32302C22626D223A302C227372223A317D2C7B22646464223A302C22696E
-                  64223A332C227479223A342C226E6D223A225368617065204C61796572203422
-                  2C226B73223A7B226F223A7B2261223A302C226B223A3130307D2C2272223A7B
-                  2261223A312C226B223A5B7B2269223A7B2278223A5B302E3636375D2C227922
-                  3A5B315D7D2C226F223A7B2278223A5B302E3333335D2C2279223A5B305D7D2C
-                  226E223A5B2230703636375F315F30703333335F30225D2C2274223A31352C22
-                  73223A5B305D2C2265223A5B3336305D7D2C7B2274223A3130357D5D7D2C2270
-                  223A7B2261223A302C226B223A5B3235312C3235302C305D7D2C2261223A7B22
-                  61223A302C226B223A5B302C302C305D7D2C2273223A7B2261223A302C226B22
-                  3A5B3130302C3130302C3130305D7D7D2C22616F223A302C2273686170657322
-                  3A5B7B227479223A226772222C226974223A5B7B2264223A312C227479223A22
-                  656C222C2273223A7B2261223A302C226B223A5B32302C32305D7D2C2270223A
-                  7B2261223A302C226B223A5B302C2D3130305D7D2C226E6D223A22456C6C6970
-                  736520506174682031222C226D6E223A224144424520566563746F7220536861
-                  7065202D20456C6C69707365227D2C7B227479223A227374222C2263223A7B22
-                  61223A302C226B223A5B302C302C302C315D7D2C226F223A7B2261223A302C22
-                  6B223A3130307D2C2277223A7B2261223A302C226B223A307D2C226C63223A31
-                  2C226C6A223A312C226D6C223A342C226E6D223A225374726F6B652031222C22
-                  6D6E223A224144424520566563746F722047726170686963202D205374726F6B
-                  65227D2C7B227479223A22666C222C2263223A7B2261223A302C226B223A5B30
-                  2C302E373239343131382C312C315D7D2C226F223A7B2261223A302C226B223A
-                  3130307D2C2272223A312C226E6D223A2246696C6C2031222C226D6E223A2241
-                  44424520566563746F722047726170686963202D2046696C6C227D2C7B227479
-                  223A227472222C2270223A7B2261223A302C226B223A5B302C305D2C22697822
-                  3A327D2C2261223A7B2261223A302C226B223A5B302C305D2C226978223A317D
-                  2C2273223A7B2261223A302C226B223A5B3130302C3130305D2C226978223A33
-                  7D2C2272223A7B2261223A302C226B223A302C226978223A367D2C226F223A7B
-                  2261223A302C226B223A3130302C226978223A377D2C22736B223A7B2261223A
-                  302C226B223A302C226978223A347D2C227361223A7B2261223A302C226B223A
-                  302C226978223A357D2C226E6D223A225472616E73666F726D227D5D2C226E6D
-                  223A22456C6C697073652031222C226E70223A332C22636978223A322C226978
-                  223A312C226D6E223A224144424520566563746F722047726F7570227D5D2C22
-                  6970223A31352C226F70223A3631352C227374223A31352C22626D223A302C22
-                  7372223A317D2C7B22646464223A302C22696E64223A342C227479223A342C22
-                  6E6D223A225368617065204C617965722033222C226B73223A7B226F223A7B22
-                  61223A302C226B223A3130307D2C2272223A7B2261223A312C226B223A5B7B22
-                  69223A7B2278223A5B302E3636375D2C2279223A5B315D7D2C226F223A7B2278
-                  223A5B302E3333335D2C2279223A5B305D7D2C226E223A5B2230703636375F31
-                  5F30703333335F30225D2C2274223A31302C2273223A5B305D2C2265223A5B33
-                  36305D7D2C7B2274223A3130307D5D7D2C2270223A7B2261223A302C226B223A
-                  5B3235312C3235302C305D7D2C2261223A7B2261223A302C226B223A5B302C30
-                  2C305D7D2C2273223A7B2261223A302C226B223A5B3130302C3130302C313030
-                  5D7D7D2C22616F223A302C22736861706573223A5B7B227479223A226772222C
-                  226974223A5B7B2264223A312C227479223A22656C222C2273223A7B2261223A
-                  302C226B223A5B33302C33305D7D2C2270223A7B2261223A302C226B223A5B30
-                  2C2D3130305D7D2C226E6D223A22456C6C6970736520506174682031222C226D
-                  6E223A224144424520566563746F72205368617065202D20456C6C6970736522
-                  7D2C7B227479223A227374222C2263223A7B2261223A302C226B223A5B302C30
-                  2C302C315D7D2C226F223A7B2261223A302C226B223A3130307D2C2277223A7B
-                  2261223A302C226B223A307D2C226C63223A312C226C6A223A312C226D6C223A
-                  342C226E6D223A225374726F6B652031222C226D6E223A224144424520566563
-                  746F722047726170686963202D205374726F6B65227D2C7B227479223A22666C
-                  222C2263223A7B2261223A302C226B223A5B302C302E373239343131382C312C
-                  315D7D2C226F223A7B2261223A302C226B223A3130307D2C2272223A312C226E
-                  6D223A2246696C6C2031222C226D6E223A224144424520566563746F72204772
-                  6170686963202D2046696C6C227D2C7B227479223A227472222C2270223A7B22
-                  61223A302C226B223A5B302C305D2C226978223A327D2C2261223A7B2261223A
-                  302C226B223A5B302C305D2C226978223A317D2C2273223A7B2261223A302C22
-                  6B223A5B3130302C3130305D2C226978223A337D2C2272223A7B2261223A302C
-                  226B223A302C226978223A367D2C226F223A7B2261223A302C226B223A313030
-                  2C226978223A377D2C22736B223A7B2261223A302C226B223A302C226978223A
-                  347D2C227361223A7B2261223A302C226B223A302C226978223A357D2C226E6D
-                  223A225472616E73666F726D227D5D2C226E6D223A22456C6C69707365203122
-                  2C226E70223A332C22636978223A322C226978223A312C226D6E223A22414442
-                  4520566563746F722047726F7570227D5D2C226970223A31302C226F70223A36
-                  31302C227374223A31302C22626D223A302C227372223A317D2C7B2264646422
-                  3A302C22696E64223A352C227479223A342C226E6D223A225368617065204C61
-                  7965722032222C226B73223A7B226F223A7B2261223A302C226B223A3130307D
-                  2C2272223A7B2261223A312C226B223A5B7B2269223A7B2278223A5B302E3636
-                  375D2C2279223A5B315D7D2C226F223A7B2278223A5B302E3333335D2C227922
-                  3A5B305D7D2C226E223A5B2230703636375F315F30703333335F30225D2C2274
-                  223A352C2273223A5B305D2C2265223A5B3336305D7D2C7B2274223A39357D5D
-                  7D2C2270223A7B2261223A302C226B223A5B3235312C3235302C305D7D2C2261
-                  223A7B2261223A302C226B223A5B302C302C305D7D2C2273223A7B2261223A30
-                  2C226B223A5B3130302C3130302C3130305D7D7D2C22616F223A302C22736861
-                  706573223A5B7B227479223A226772222C226974223A5B7B2264223A312C2274
-                  79223A22656C222C2273223A7B2261223A302C226B223A5B34302C34305D7D2C
-                  2270223A7B2261223A302C226B223A5B302C2D3130305D7D2C226E6D223A2245
-                  6C6C6970736520506174682031222C226D6E223A224144424520566563746F72
-                  205368617065202D20456C6C69707365227D2C7B227479223A227374222C2263
-                  223A7B2261223A302C226B223A5B302C302C302C315D7D2C226F223A7B226122
-                  3A302C226B223A3130307D2C2277223A7B2261223A302C226B223A307D2C226C
-                  63223A312C226C6A223A312C226D6C223A342C226E6D223A225374726F6B6520
-                  31222C226D6E223A224144424520566563746F722047726170686963202D2053
-                  74726F6B65227D2C7B227479223A22666C222C2263223A7B2261223A302C226B
-                  223A5B302C302E373239343131382C312C315D7D2C226F223A7B2261223A302C
-                  226B223A3130307D2C2272223A312C226E6D223A2246696C6C2031222C226D6E
-                  223A224144424520566563746F722047726170686963202D2046696C6C227D2C
-                  7B227479223A227472222C2270223A7B2261223A302C226B223A5B302C305D2C
-                  226978223A327D2C2261223A7B2261223A302C226B223A5B302C305D2C226978
-                  223A317D2C2273223A7B2261223A302C226B223A5B3130302C3130305D2C2269
-                  78223A337D2C2272223A7B2261223A302C226B223A302C226978223A367D2C22
-                  6F223A7B2261223A302C226B223A3130302C226978223A377D2C22736B223A7B
-                  2261223A302C226B223A302C226978223A347D2C227361223A7B2261223A302C
-                  226B223A302C226978223A357D2C226E6D223A225472616E73666F726D227D5D
-                  2C226E6D223A22456C6C697073652031222C226E70223A332C22636978223A32
-                  2C226978223A312C226D6E223A224144424520566563746F722047726F757022
-                  7D5D2C226970223A352C226F70223A3630352C227374223A352C22626D223A30
-                  2C227372223A317D2C7B22646464223A302C22696E64223A362C227479223A34
-                  2C226E6D223A225368617065204C617965722031222C226B73223A7B226F223A
-                  7B2261223A302C226B223A3130307D2C2272223A7B2261223A312C226B223A5B
-                  7B2269223A7B2278223A5B302E3636375D2C2279223A5B315D7D2C226F223A7B
-                  2278223A5B302E3333335D2C2279223A5B305D7D2C226E223A5B223070363637
-                  5F315F30703333335F30225D2C2274223A302C2273223A5B305D2C2265223A5B
-                  3336305D7D2C7B2274223A39307D5D7D2C2270223A7B2261223A302C226B223A
-                  5B3235302C3235302C305D7D2C2261223A7B2261223A302C226B223A5B302C30
-                  2C305D7D2C2273223A7B2261223A302C226B223A5B3130302C3130302C313030
-                  5D7D7D2C22616F223A302C22736861706573223A5B7B227479223A226772222C
-                  226974223A5B7B2264223A312C227479223A22656C222C2273223A7B2261223A
-                  312C226B223A5B7B2269223A7B2278223A5B302E3636372C302E3636375D2C22
-                  79223A5B312C315D7D2C226F223A7B2278223A5B302E3333332C302E3333335D
-                  2C2279223A5B302C305D7D2C226E223A5B2230703636375F315F30703333335F
-                  30222C2230703636375F315F30703333335F30225D2C2274223A302C2273223A
-                  5B35302C35305D2C2265223A5B34302C34305D7D2C7B2269223A7B2278223A5B
-                  302E3636372C302E3636375D2C2279223A5B312C315D7D2C226F223A7B227822
-                  3A5B302E3333332C302E3333335D2C2279223A5B302C305D7D2C226E223A5B22
-                  30703636375F315F30703333335F30222C2230703636375F315F30703333335F
-                  30225D2C2274223A38342C2273223A5B34302C34305D2C2265223A5B35302C35
-                  305D7D2C7B2274223A3130307D5D7D2C2270223A7B2261223A302C226B223A5B
-                  302C2D3130305D7D2C226E6D223A22456C6C6970736520506174682031222C22
-                  6D6E223A224144424520566563746F72205368617065202D20456C6C69707365
-                  227D2C7B227479223A227374222C2263223A7B2261223A302C226B223A5B302C
-                  302C302C315D7D2C226F223A7B2261223A302C226B223A3130307D2C2277223A
-                  7B2261223A302C226B223A307D2C226C63223A312C226C6A223A312C226D6C22
-                  3A342C226E6D223A225374726F6B652031222C226D6E223A2241444245205665
-                  63746F722047726170686963202D205374726F6B65227D2C7B227479223A2266
-                  6C222C2263223A7B2261223A302C226B223A5B302C302E373239343131382C31
-                  2C315D7D2C226F223A7B2261223A302C226B223A3130307D2C2272223A312C22
-                  6E6D223A2246696C6C2031222C226D6E223A224144424520566563746F722047
-                  726170686963202D2046696C6C227D2C7B227479223A227472222C2270223A7B
-                  2261223A302C226B223A5B302C305D2C226978223A327D2C2261223A7B226122
-                  3A302C226B223A5B302C305D2C226978223A317D2C2273223A7B2261223A302C
-                  226B223A5B3130302C3130305D2C226978223A337D2C2272223A7B2261223A30
-                  2C226B223A302C226978223A367D2C226F223A7B2261223A302C226B223A3130
-                  302C226978223A377D2C22736B223A7B2261223A302C226B223A302C22697822
-                  3A347D2C227361223A7B2261223A302C226B223A302C226978223A357D2C226E
-                  6D223A225472616E73666F726D227D5D2C226E6D223A22456C6C697073652031
-                  222C226E70223A332C22636978223A322C226978223A312C226D6E223A224144
-                  424520566563746F722047726F7570227D5D2C226970223A302C226F70223A36
-                  30302C227374223A302C22626D223A302C227372223A317D5D7D}
-              end
+              ExplicitWidth = 622
             end
             object Enviar: TTabSheet
               Caption = 'Enviar'
               ImageIndex = 3
               TabVisible = False
+              ExplicitWidth = 622
               object Panel10: TPanel
                 Left = 0
                 Top = 0
-                Width = 622
+                Width = 619
                 Height = 419
                 Align = alClient
                 BevelOuter = bvNone
@@ -960,11 +792,12 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ShowCaption = False
                 TabOrder = 0
+                ExplicitWidth = 622
                 object Label11: TLabel
                   AlignWithMargins = True
                   Left = 10
                   Top = 3
-                  Width = 609
+                  Width = 606
                   Height = 25
                   Margins.Left = 10
                   Align = alTop
@@ -981,7 +814,7 @@ object FormPrincipal: TFormPrincipal
                   AlignWithMargins = True
                   Left = 10
                   Top = 34
-                  Width = 609
+                  Width = 606
                   Height = 17
                   Margins.Left = 10
                   Align = alTop
@@ -1075,10 +908,11 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Config'
               ImageIndex = 4
               TabVisible = False
+              ExplicitWidth = 622
               object PanelCorpoConfig: TPanel
                 Left = 0
                 Top = 0
-                Width = 622
+                Width = 619
                 Height = 419
                 Align = alClient
                 BevelOuter = bvNone
@@ -1090,11 +924,12 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ShowCaption = False
                 TabOrder = 0
+                ExplicitWidth = 622
                 object Label1: TLabel
                   AlignWithMargins = True
                   Left = 10
                   Top = 3
-                  Width = 609
+                  Width = 606
                   Height = 25
                   Margins.Left = 10
                   Align = alTop
@@ -1111,7 +946,7 @@ object FormPrincipal: TFormPrincipal
                   AlignWithMargins = True
                   Left = 10
                   Top = 34
-                  Width = 609
+                  Width = 606
                   Height = 17
                   Margins.Left = 10
                   Align = alTop
@@ -1199,6 +1034,7 @@ object FormPrincipal: TFormPrincipal
                   Top = 187
                   Width = 25
                   Height = 20
+                  Cursor = crHandPoint
                   OnClick = SkSvg5Click
                   Svg.OverrideColor = claSlategray
                   Svg.Source = 
@@ -1233,11 +1069,13 @@ object FormPrincipal: TFormPrincipal
                   Width = 97
                   Height = 17
                   Caption = 'SSL'
+                  Color = clGray
                   Font.Charset = DEFAULT_CHARSET
                   Font.Color = clGray
                   Font.Height = -16
                   Font.Name = 'Segoe UI'
                   Font.Style = []
+                  ParentColor = False
                   ParentFont = False
                   TabOrder = 5
                 end
@@ -1247,11 +1085,13 @@ object FormPrincipal: TFormPrincipal
                   Width = 97
                   Height = 17
                   Caption = 'TSL'
+                  Color = clGray
                   Font.Charset = DEFAULT_CHARSET
                   Font.Color = clGray
                   Font.Height = -16
                   Font.Name = 'Segoe UI'
                   Font.Style = []
+                  ParentColor = False
                   ParentFont = False
                   TabOrder = 6
                 end
@@ -1417,17 +1257,18 @@ object FormPrincipal: TFormPrincipal
         object Panel6: TPanel
           Left = 0
           Top = 0
-          Width = 864
+          Width = 861
           Height = 97
           Align = alTop
           BevelOuter = bvNone
           ShowCaption = False
           TabOrder = 1
+          ExplicitWidth = 864
           object Shape8: TShape
             AlignWithMargins = True
             Left = 10
             Top = 96
-            Width = 844
+            Width = 841
             Height = 1
             Margins.Left = 10
             Margins.Top = 0
@@ -1524,13 +1365,13 @@ object FormPrincipal: TFormPrincipal
     FileTypes = <>
     Options = [fdoPickFolders]
     Title = 'Selecione uma pasta'
-    Left = 1038
-    Top = 384
+    Left = 1006
+    Top = 408
   end
   object DataSource1: TDataSource
     DataSet = FDMemTable1
-    Left = 1000
-    Top = 433
+    Left = 952
+    Top = 377
   end
   object FDMemTable1: TFDMemTable
     Active = True
@@ -1581,10 +1422,10 @@ object FormPrincipal: TFormPrincipal
     UpdateOptions.CheckRequired = False
     UpdateOptions.AutoCommitUpdates = True
     StoreDefs = True
-    Left = 1000
-    Top = 385
+    Left = 1048
+    Top = 361
     Content = {
-      414442530F00901DBE020000FF00010001FF02FF03040016000000460044004D
+      414442530F004239BE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
@@ -1653,8 +1494,8 @@ object FormPrincipal: TFormPrincipal
     end
   end
   object PopupMenu: TPopupMenu
-    Left = 1040
-    Top = 429
+    Left = 1000
+    Top = 357
     object GerarPDF1: TMenuItem
       Caption = 'Copiar Chave'
       OnClick = GerarPDF1Click
@@ -1679,8 +1520,43 @@ object FormPrincipal: TFormPrincipal
     Configuracoes.WebServices.QuebradeLinha = '|'
     Configuracoes.RespTec.IdCSRT = 0
     DANFE = ACBrNFeDANFEFR
-    Left = 929
-    Top = 468
+    Left = 1065
+    Top = 516
+  end
+  object ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF
+    Sistema = 'Desenvolvido por Caique Garcia'
+    Site = 'github.com/Caique-Garcia'
+    MargemInferior = 8.000000000000000000
+    MargemSuperior = 8.000000000000000000
+    MargemEsquerda = 6.000000000000000000
+    MargemDireita = 5.099999999999999000
+    ExpandeLogoMarcaConfig.Altura = 0
+    ExpandeLogoMarcaConfig.Esquerda = 0
+    ExpandeLogoMarcaConfig.Topo = 0
+    ExpandeLogoMarcaConfig.Largura = 0
+    ExpandeLogoMarcaConfig.Dimensionar = False
+    ExpandeLogoMarcaConfig.Esticar = True
+    CasasDecimais.Formato = tdetInteger
+    CasasDecimais.qCom = 2
+    CasasDecimais.vUnCom = 2
+    CasasDecimais.MaskqCom = ',0.00'
+    CasasDecimais.MaskvUnCom = ',0.00'
+    CasasDecimais.Aliquota = 2
+    CasasDecimais.MaskAliquota = ',0.00'
+    TipoDANFE = tiNFCe
+    Left = 1063
+    Top = 470
+  end
+  object ACBrMail1: TACBrMail
+    Host = '127.0.0.1'
+    Port = '25'
+    SetSSL = False
+    SetTLS = False
+    Attempts = 3
+    DefaultCharset = UTF_8
+    IDECharset = CP1252
+    Left = 975
+    Top = 470
   end
   object ACBrNFeDANFEFR: TACBrNFeDANFEFR
     Sistema = 'Desenvolvido por Caique Garcia'
@@ -1707,42 +1583,7 @@ object FormPrincipal: TFormPrincipal
     EspessuraBorda = 1
     BorderIcon = [biSystemMenu, biMinimize, biMaximize]
     ThreadSafe = False
-    Left = 1008
-    Top = 539
-  end
-  object ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF
-    Sistema = 'Desenvolvido por Caique Garcia'
-    Site = 'github.com/Caique-Garcia'
-    MargemInferior = 8.000000000000000000
-    MargemSuperior = 8.000000000000000000
-    MargemEsquerda = 6.000000000000000000
-    MargemDireita = 5.099999999999999000
-    ExpandeLogoMarcaConfig.Altura = 0
-    ExpandeLogoMarcaConfig.Esquerda = 0
-    ExpandeLogoMarcaConfig.Topo = 0
-    ExpandeLogoMarcaConfig.Largura = 0
-    ExpandeLogoMarcaConfig.Dimensionar = False
-    ExpandeLogoMarcaConfig.Esticar = True
-    CasasDecimais.Formato = tdetInteger
-    CasasDecimais.qCom = 2
-    CasasDecimais.vUnCom = 2
-    CasasDecimais.MaskqCom = ',0.00'
-    CasasDecimais.MaskvUnCom = ',0.00'
-    CasasDecimais.Aliquota = 2
-    CasasDecimais.MaskAliquota = ',0.00'
-    TipoDANFE = tiNFCe
-    Left = 1039
-    Top = 478
-  end
-  object ACBrMail1: TACBrMail
-    Host = '127.0.0.1'
-    Port = '25'
-    SetSSL = False
-    SetTLS = False
-    Attempts = 3
-    DefaultCharset = UTF_8
-    IDECharset = CP1252
-    Left = 951
-    Top = 526
+    Left = 1064
+    Top = 419
   end
 end
