@@ -12,6 +12,7 @@ uses
 
 begin
   Application.Initialize;
+  //Application.OnException := GravaLog;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TDMConfig, DMConfig);
   Application.CreateForm(TFormPrincipal, FormPrincipal);

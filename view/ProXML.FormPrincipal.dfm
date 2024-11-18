@@ -5,7 +5,7 @@ object FormPrincipal: TFormPrincipal
   BorderStyle = bsSingle
   Caption = 'Pro XML'
   ClientHeight = 699
-  ClientWidth = 1139
+  ClientWidth = 1136
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -23,7 +23,7 @@ object FormPrincipal: TFormPrincipal
   object PnlContainer: TPanel
     Left = 0
     Top = 0
-    Width = 1139
+    Width = 1136
     Height = 699
     Align = alClient
     BevelOuter = bvNone
@@ -36,18 +36,16 @@ object FormPrincipal: TFormPrincipal
     ParentBackground = False
     ParentFont = False
     TabOrder = 0
-    ExplicitWidth = 1142
     object PnlCabecalho: TPanel
       Left = 0
       Top = 0
-      Width = 1139
+      Width = 1136
       Height = 113
       Align = alTop
       BevelOuter = bvNone
       Color = 2169367
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 1142
       object PnlLogo: TPanel
         AlignWithMargins = True
         Left = 20
@@ -244,7 +242,7 @@ object FormPrincipal: TFormPrincipal
     object PnlCorpo: TPanel
       Left = 0
       Top = 113
-      Width = 1139
+      Width = 1136
       Height = 586
       Align = alClient
       BevelOuter = bvNone
@@ -253,9 +251,8 @@ object FormPrincipal: TFormPrincipal
       Padding.Right = 30
       Padding.Bottom = 15
       TabOrder = 1
-      ExplicitWidth = 1142
       object PnlInfo: TPanel
-        Left = 901
+        Left = 898
         Top = 15
         Width = 208
         Height = 556
@@ -270,7 +267,6 @@ object FormPrincipal: TFormPrincipal
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitLeft = 904
         object PanelVaorICMS: TPanel
           Left = 0
           Top = 160
@@ -590,7 +586,7 @@ object FormPrincipal: TFormPrincipal
         AlignWithMargins = True
         Left = 30
         Top = 15
-        Width = 861
+        Width = 858
         Height = 556
         Margins.Left = 0
         Margins.Top = 0
@@ -601,11 +597,10 @@ object FormPrincipal: TFormPrincipal
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
-        ExplicitWidth = 864
         object PnlInfoLocal: TPanel
           Left = 0
           Top = 97
-          Width = 861
+          Width = 858
           Height = 459
           Align = alClient
           BevelOuter = bvNone
@@ -616,12 +611,11 @@ object FormPrincipal: TFormPrincipal
           Font.Style = []
           ParentFont = False
           TabOrder = 0
-          ExplicitWidth = 864
           object PageControl1: TPageControl
             AlignWithMargins = True
             Left = 229
             Top = 15
-            Width = 627
+            Width = 624
             Height = 429
             Margins.Left = 5
             Margins.Top = 15
@@ -630,15 +624,13 @@ object FormPrincipal: TFormPrincipal
             ActivePage = Config
             Align = alClient
             TabOrder = 0
-            ExplicitWidth = 630
             object TabSheet1: TTabSheet
               Caption = 'TabSheet1'
               TabVisible = False
-              ExplicitWidth = 622
               object Gauge1: TGauge
                 Left = 0
                 Top = 387
-                Width = 619
+                Width = 616
                 Height = 32
                 Align = alBottom
                 BorderStyle = bsNone
@@ -655,7 +647,7 @@ object FormPrincipal: TFormPrincipal
               object Memo1: TMemo
                 Left = 0
                 Top = 0
-                Width = 619
+                Width = 616
                 Height = 387
                 Align = alClient
                 BevelInner = bvNone
@@ -669,29 +661,26 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ReadOnly = True
                 TabOrder = 0
-                ExplicitWidth = 622
               end
             end
             object TabSheet2: TTabSheet
               Caption = 'TabSheet2'
               ImageIndex = 1
               TabVisible = False
-              ExplicitWidth = 622
               object Panel5: TPanel
                 Left = 0
                 Top = 0
-                Width = 619
+                Width = 616
                 Height = 419
                 Align = alClient
                 BevelOuter = bvNone
                 Color = clWhite
                 ParentBackground = False
                 TabOrder = 0
-                ExplicitWidth = 622
                 object DBGrid1: TDBGrid
                   Left = 0
                   Top = 0
-                  Width = 619
+                  Width = 616
                   Height = 419
                   Align = alClient
                   BorderStyle = bsNone
@@ -770,17 +759,15 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Loading'
               ImageIndex = 2
               TabVisible = False
-              ExplicitWidth = 622
             end
             object Enviar: TTabSheet
               Caption = 'Enviar'
               ImageIndex = 3
               TabVisible = False
-              ExplicitWidth = 622
               object Panel10: TPanel
                 Left = 0
                 Top = 0
-                Width = 619
+                Width = 616
                 Height = 419
                 Align = alClient
                 BevelOuter = bvNone
@@ -792,12 +779,11 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ShowCaption = False
                 TabOrder = 0
-                ExplicitWidth = 622
                 object Label11: TLabel
                   AlignWithMargins = True
                   Left = 10
                   Top = 3
-                  Width = 606
+                  Width = 603
                   Height = 25
                   Margins.Left = 10
                   Align = alTop
@@ -814,7 +800,7 @@ object FormPrincipal: TFormPrincipal
                   AlignWithMargins = True
                   Left = 10
                   Top = 34
-                  Width = 606
+                  Width = 603
                   Height = 17
                   Margins.Left = 10
                   Align = alTop
@@ -908,11 +894,10 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Config'
               ImageIndex = 4
               TabVisible = False
-              ExplicitWidth = 622
               object PanelCorpoConfig: TPanel
                 Left = 0
                 Top = 0
-                Width = 619
+                Width = 616
                 Height = 419
                 Align = alClient
                 BevelOuter = bvNone
@@ -924,12 +909,11 @@ object FormPrincipal: TFormPrincipal
                 ParentFont = False
                 ShowCaption = False
                 TabOrder = 0
-                ExplicitWidth = 622
                 object Label1: TLabel
                   AlignWithMargins = True
                   Left = 10
                   Top = 3
-                  Width = 606
+                  Width = 603
                   Height = 25
                   Margins.Left = 10
                   Align = alTop
@@ -946,7 +930,7 @@ object FormPrincipal: TFormPrincipal
                   AlignWithMargins = True
                   Left = 10
                   Top = 34
-                  Width = 606
+                  Width = 603
                   Height = 17
                   Margins.Left = 10
                   Align = alTop
@@ -1257,18 +1241,17 @@ object FormPrincipal: TFormPrincipal
         object Panel6: TPanel
           Left = 0
           Top = 0
-          Width = 861
+          Width = 858
           Height = 97
           Align = alTop
           BevelOuter = bvNone
           ShowCaption = False
           TabOrder = 1
-          ExplicitWidth = 864
           object Shape8: TShape
             AlignWithMargins = True
             Left = 10
             Top = 96
-            Width = 841
+            Width = 838
             Height = 1
             Margins.Left = 10
             Margins.Top = 0
@@ -1365,8 +1348,8 @@ object FormPrincipal: TFormPrincipal
     FileTypes = <>
     Options = [fdoPickFolders]
     Title = 'Selecione uma pasta'
-    Left = 1006
-    Top = 408
+    Left = 950
+    Top = 424
   end
   object DataSource1: TDataSource
     DataSet = FDMemTable1
@@ -1422,10 +1405,10 @@ object FormPrincipal: TFormPrincipal
     UpdateOptions.CheckRequired = False
     UpdateOptions.AutoCommitUpdates = True
     StoreDefs = True
-    Left = 1048
-    Top = 361
+    Left = 1040
+    Top = 377
     Content = {
-      414442530F004239BE020000FF00010001FF02FF03040016000000460044004D
+      414442530F009F30BE020000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
@@ -1494,8 +1477,8 @@ object FormPrincipal: TFormPrincipal
     end
   end
   object PopupMenu: TPopupMenu
-    Left = 1000
-    Top = 357
+    Left = 992
+    Top = 373
     object GerarPDF1: TMenuItem
       Caption = 'Copiar Chave'
       OnClick = GerarPDF1Click
@@ -1520,8 +1503,8 @@ object FormPrincipal: TFormPrincipal
     Configuracoes.WebServices.QuebradeLinha = '|'
     Configuracoes.RespTec.IdCSRT = 0
     DANFE = ACBrNFeDANFEFR
-    Left = 1065
-    Top = 516
+    Left = 993
+    Top = 468
   end
   object ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF
     Sistema = 'Desenvolvido por Caique Garcia'
@@ -1544,8 +1527,8 @@ object FormPrincipal: TFormPrincipal
     CasasDecimais.Aliquota = 2
     CasasDecimais.MaskAliquota = ',0.00'
     TipoDANFE = tiNFCe
-    Left = 1063
-    Top = 470
+    Left = 1039
+    Top = 422
   end
   object ACBrMail1: TACBrMail
     Host = '127.0.0.1'
@@ -1555,7 +1538,7 @@ object FormPrincipal: TFormPrincipal
     Attempts = 3
     DefaultCharset = UTF_8
     IDECharset = CP1252
-    Left = 975
+    Left = 951
     Top = 470
   end
   object ACBrNFeDANFEFR: TACBrNFeDANFEFR
@@ -1583,7 +1566,7 @@ object FormPrincipal: TFormPrincipal
     EspessuraBorda = 1
     BorderIcon = [biSystemMenu, biMinimize, biMaximize]
     ThreadSafe = False
-    Left = 1064
+    Left = 1000
     Top = 419
   end
 end
