@@ -44,16 +44,22 @@ type
   private
     procedure GravarConfig(const Config: TConfig);
   public
+    procedure CreateLog(const Classe, Msg: String);
     procedure InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String);
     procedure DeleteDados;
     function GetConfig: TConfig;
     procedure UpdateConfig(const Config: TConfig);
+    procedure GravaLog(Sender: TObject; E: Exception);
   end;
 
 var
   DMConfig: TDMConfig;
 
 implementation
+
+uses
+  System.IOUtils,
+  Vcl.Forms;
 
 {%CLASSGROUP 'Vcl.Controls.TControl'}
 
@@ -80,6 +86,12 @@ begin
                                 'TSL              TEXT (36), '  +
                                 'MSG              TEXT (200) '  +
                                 ' ); ');
+
+  Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS LOG ( ' +
+                                'CLASSE           TEXT (200), '  +
+                                'MSG              TEXT (2000), '  +
+                                'DT               TEXT (32) '  +
+                                ' ); ');
 end;
 
 procedure TDMConfig.ConexaoBeforeConnect(Sender: TObject);
@@ -99,6 +111,9 @@ procedure TDMConfig.DataModuleCreate(Sender: TObject);
 var
   Diretorio: string;
 begin
+    //Create do Form
+    Application.OnException := GravaLog;
+
     Diretorio := System.SysUtils.GetCurrentDir + '\db';
 
     if not DirectoryExists(Diretorio) then
@@ -132,6 +147,32 @@ begin
     except on e: Exception do
         raise Exception.Create('Erro na gravação de dados: '+ e.message);
     end;
+end;
+
+procedure TDMConfig.CreateLog(const Classe, Msg: String);
+begin
+    Query.Active := False;
+    Query.SQL.Clear;
+
+    Query.SQL.Add('insert into LOG ');
+    Query.SQL.Add('values( :CLASSE, :MSG, :DT )');
+    Query.Params.ParamByName('CLASSE').AsString         := Trim(Classe);
+    Query.Params.ParamByName('MSG').AsString            := Trim(Msg);
+    Query.Params.ParamByName('DT').AsString             := FormatDateTime('dd/mm/yyyy hh:nn:ss', Now);
+
+
+    try
+        Query.ExecSQL;
+    except on e: Exception do
+        raise Exception.Create('Erro na gravação de dados: '+ e.message);
+    end;
+end;
+
+procedure TDMConfig.GravaLog(Sender: TObject; E: Exception);
+begin
+    // Grava no log o erro com detalhes
+    //DMConfig.CreateLog(E.ClassName, E.Message);
+    TFile.AppendAllText(System.SysUtils.GetCurrentDir +'\ErroLog.txt', Format('%s: %s%s', [DateTimeToStr(Now), E.Message, sLineBreak]));
 end;
 
 procedure TDMConfig.GravarConfig(const Config: TConfig);

@@ -109,16 +109,13 @@
         </DelphiCompile>
         <DCCReference Include="view\ProXML.FormPrincipal.pas">
             <Form>FormPrincipal</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="lib\uCalculadoraXML.pas"/>
         <DCCReference Include="view\ProXML.FormRelatorios.pas">
             <Form>FormRelatorios</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="datamodule\DM.pas">
             <Form>DMConfig</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="classes\ProXML.Classes.pas"/>
@@ -952,6 +949,7 @@
                 <Platform value="Win32">True</Platform>
                 <Platform value="Win64">False</Platform>
             </Platforms>
+            <ModelSupport>False</ModelSupport>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>

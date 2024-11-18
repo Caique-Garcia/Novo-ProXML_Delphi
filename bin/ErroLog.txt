@@ -1,0 +1,4 @@
+18/11/2024 14:37:14: SMTP Error: Unable to Login.
+11001 - Host not found
+18/11/2024 14:37:28: SMTP Error: Unable to Login.
+11001 - Host not found

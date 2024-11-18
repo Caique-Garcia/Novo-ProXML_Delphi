@@ -61,7 +61,9 @@ uses
   ProXML.Classes,
   System.UITypes,    
   SysUtils,  
-  ACBrMail;
+  ACBrMail,
+  Midas,
+  MidasLib;
 
 type
   TFormPrincipal = class(TForm)
@@ -170,8 +172,6 @@ type
     ACBrNFeDANFEFR: TACBrNFeDANFEFR;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
-    procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
-      DataCol: Integer; Column: TColumn; State: TGridDrawState);
     procedure FormShow(Sender: TObject);
     procedure CategoryButtons1Categories0Items0Click(Sender: TObject);
     procedure CategoryButtons1Categories0Items1Click(Sender: TObject);
@@ -187,16 +187,19 @@ type
     procedure SkSvg5Click(Sender: TObject);
     procedure btnEnviarEmailClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
+      DataCol: Integer; Column: TColumn; State: TGridDrawState);
   private
     ConfigEmail : TConfig;
     procedure SetTextoTranferencia(const Text: String);
     procedure FinalizaRelatorio(Sender: TObject);
     procedure ConfigACBR;
     procedure GerarDanfe(const CaminhoArq: String);
-    function CreateProcessSimple(cmd: string): boolean;
     procedure ComprimirArquivos();
     procedure LerConfigEmail();
     procedure EnviaArquivo(const Email, Assunto: string);
+    procedure ApplicationException(Sender: TObject; E: Exception);
+    function  CreateProcessSimple(cmd: string): boolean;
 
   public
 
@@ -221,6 +224,12 @@ uses
   System.IOUtils;
 
 {$R *.dfm}
+
+procedure TFormPrincipal.ApplicationException(Sender: TObject; E: Exception);
+begin
+  // Grava no log o erro com detalhes
+  DMConfig.CreateLog(E.ClassName, E.Message);
+end;
 
 procedure TFormPrincipal.btnEnviarEmailClick(Sender: TObject);
 begin
@@ -377,6 +386,8 @@ end;
 procedure TFormPrincipal.FormCreate(Sender: TObject);
 begin
    //Create do Form
+   Application.OnException := DMConfig.GravaLog;
+
    try          
     ConfigEmail := DMConfig.GetConfig;
 
