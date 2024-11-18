@@ -112,7 +112,7 @@ var
   Diretorio: string;
 begin
     //Create do Form
-    Application.OnException := GravaLog;
+    //Application.OnException := GravaLog;
 
     Diretorio := System.SysUtils.GetCurrentDir + '\db';
 

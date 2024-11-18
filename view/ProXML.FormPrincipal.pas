@@ -386,7 +386,7 @@ end;
 procedure TFormPrincipal.FormCreate(Sender: TObject);
 begin
    //Create do Form
-   Application.OnException := DMConfig.GravaLog;
+   //Application.OnException := DMConfig.GravaLog;
 
    try          
     ConfigEmail := DMConfig.GetConfig;
