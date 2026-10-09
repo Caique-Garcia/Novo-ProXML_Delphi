@@ -53,9 +53,15 @@ uses
   Vcl.Dialogs,
   ProXML.FormPrincipal,
   System.Types,
+  System.StrUtils,
   DB;
 
 { TCalculadoraXML }
+
+function NFeAutorizada(const Texto: string): Boolean;
+begin
+  Result := ContainsText(Texto, 'Autorizado o uso da NF-e');
+end;
 
 procedure TCalculadoraXML.GetTagValueFromXML(var CaminhoXML: string);
   var
@@ -108,7 +114,7 @@ begin
 
 
     //Aqui vamos verificar se existe a tag de autorização no XML
-    if TagAutorizado = 'Autorizado o uso da NF-e' then
+    if NFeAutorizada(TagAutorizado) then
     begin
 
       //Aqui Selecionamos e recuperando o valor da tag(nó)
@@ -218,7 +224,14 @@ begin
   //Pegando arquivos e jogando num array de nomes de arquivos
   files := TDirectory.GetFiles(CaminhoDiretorio + '\', '*.xml');
 
-  FormPrincipal.Gauge1.MaxValue := High(files);
+  try
+    FormPrincipal.Gauge1.MaxValue := High(files);
+  except
+    begin
+      FormPrincipal.Memo1.Lines.Add('Não encontrado arquivos XMLs no diretótio selecionado!');
+      Exit;
+    end;
+  end;
 
     //Passando pelo Arraay com os nomes dos XMLs
     for  i := 0 to High(files) do
