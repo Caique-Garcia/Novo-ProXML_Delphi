@@ -69,3 +69,6 @@ __recovery/
 modules/
 /bin/NFCe/danfePDF
 /bin/NFCe
+
+# Pacote de distribuicao (publicado nas Releases do GitHub)
+/bin/ProXML.rar
