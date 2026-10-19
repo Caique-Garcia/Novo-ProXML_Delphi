@@ -267,6 +267,198 @@ object FormPrincipal: TFormPrincipal
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
+        object PanelValorCBS: TPanel
+          Left = 0
+          Top = 320
+          Width = 208
+          Height = 80
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 4
+          object ShapeValorCBS: TShape
+            AlignWithMargins = True
+            Left = 20
+            Top = 79
+            Width = 168
+            Height = 1
+            Margins.Left = 20
+            Margins.Top = 0
+            Margins.Right = 20
+            Margins.Bottom = 0
+            Align = alBottom
+            Pen.Color = 15460841
+          end
+          object PanelIMGValorCBS: TPanel
+            Left = 0
+            Top = 0
+            Width = 70
+            Height = 79
+            Align = alLeft
+            BevelOuter = bvNone
+            TabOrder = 0
+            object SkSvgValorCBS: TSkSvg
+              AlignWithMargins = True
+              Left = 20
+              Top = 20
+              Width = 30
+              Height = 39
+              Margins.Left = 20
+              Margins.Top = 20
+              Margins.Right = 20
+              Margins.Bottom = 20
+              Align = alClient
+              Svg.OverrideColor = xFAADADAD
+              Svg.Source = 
+                '<?xml version="1.0" encoding="UTF-8"?>'#13#10'<svg xmlns="http://www.w' +
+                '3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24' +
+                ' 24" width="512" height="512"><path d="M14.541,5.472c1.196-1.02,' +
+                '2.459-2.548,2.459-4.472V0H7V1c0,1.924,1.263,3.451,2.459,4.472C4.' +
+                '754,7.149,1,13.124,1,18c0,3.309,2.691,6,6,6h10c3.309,0,6-2.691,6' +
+                '-6,0-4.876-3.754-10.851-8.459-12.528Zm-5.334-3.472h5.583c-.521,1' +
+                '.256-1.89,2.31-2.783,2.852-.752-.46-2.251-1.512-2.799-2.852Zm7.7' +
+                '93,20H7c-2.206,0-4-1.794-4-4,0-5.161,4.59-10.983,8.998-10.983s9.' +
+                '002,5.823,9.002,10.983c0,2.206-1.794,4-4,4Zm-7-9c0,.378,.271,.69' +
+                '8,.644,.76l3.042,.507c1.341,.223,2.315,1.373,2.315,2.733,0,1.654' +
+                '-1.346,3-3,3v1h-2v-1c-1.654,0-3-1.346-3-3h2c0,.551,.449,1,1,1h2c' +
+                '.551,0,1-.449,1-1,0-.378-.271-.698-.644-.76l-3.042-.507c-1.341-.' +
+                '223-2.315-1.373-2.315-2.733,0-1.654,1.346-3,3-3v-1h2v1c1.654,0,3' +
+                ',1.346,3,3h-2c0-.551-.449-1-1-1h-2c-.551,0-1,.449-1,1Z"/></svg>'
+            end
+          end
+          object PanelTextoValorCBS: TPanel
+            Left = 70
+            Top = 0
+            Width = 138
+            Height = 79
+            Align = alClient
+            BevelOuter = bvNone
+            TabOrder = 1
+            object LabelTituloCBS: TLabel
+              Left = 0
+              Top = 0
+              Width = 138
+              Height = 30
+              Align = alTop
+              Caption = 'Total CBS'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = 11382189
+              Font.Height = -21
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              ParentFont = False
+            end
+            object LabelValorCBS: TLabel
+              Left = 0
+              Top = 30
+              Width = 138
+              Height = 25
+              Align = alTop
+              Caption = 'R$ 0,00'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clInactiveCaptionText
+              Font.Height = -19
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              ParentFont = False
+            end
+          end
+        end
+        object PanelValorIBS: TPanel
+          Left = 0
+          Top = 240
+          Width = 208
+          Height = 80
+          Align = alTop
+          BevelOuter = bvNone
+          TabOrder = 3
+          object ShapeValorIBS: TShape
+            AlignWithMargins = True
+            Left = 20
+            Top = 79
+            Width = 168
+            Height = 1
+            Margins.Left = 20
+            Margins.Top = 0
+            Margins.Right = 20
+            Margins.Bottom = 0
+            Align = alBottom
+            Pen.Color = 15460841
+          end
+          object PanelIMGValorIBS: TPanel
+            Left = 0
+            Top = 0
+            Width = 70
+            Height = 79
+            Align = alLeft
+            BevelOuter = bvNone
+            TabOrder = 0
+            object SkSvgValorIBS: TSkSvg
+              AlignWithMargins = True
+              Left = 20
+              Top = 20
+              Width = 30
+              Height = 39
+              Margins.Left = 20
+              Margins.Top = 20
+              Margins.Right = 20
+              Margins.Bottom = 20
+              Align = alClient
+              Svg.OverrideColor = xFAADADAD
+              Svg.Source = 
+                '<?xml version="1.0" encoding="UTF-8"?>'#13#10'<svg xmlns="http://www.w' +
+                '3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24' +
+                ' 24" width="512" height="512"><path d="M14.541,5.472c1.196-1.02,' +
+                '2.459-2.548,2.459-4.472V0H7V1c0,1.924,1.263,3.451,2.459,4.472C4.' +
+                '754,7.149,1,13.124,1,18c0,3.309,2.691,6,6,6h10c3.309,0,6-2.691,6' +
+                '-6,0-4.876-3.754-10.851-8.459-12.528Zm-5.334-3.472h5.583c-.521,1' +
+                '.256-1.89,2.31-2.783,2.852-.752-.46-2.251-1.512-2.799-2.852Zm7.7' +
+                '93,20H7c-2.206,0-4-1.794-4-4,0-5.161,4.59-10.983,8.998-10.983s9.' +
+                '002,5.823,9.002,10.983c0,2.206-1.794,4-4,4Zm-7-9c0,.378,.271,.69' +
+                '8,.644,.76l3.042,.507c1.341,.223,2.315,1.373,2.315,2.733,0,1.654' +
+                '-1.346,3-3,3v1h-2v-1c-1.654,0-3-1.346-3-3h2c0,.551,.449,1,1,1h2c' +
+                '.551,0,1-.449,1-1,0-.378-.271-.698-.644-.76l-3.042-.507c-1.341-.' +
+                '223-2.315-1.373-2.315-2.733,0-1.654,1.346-3,3-3v-1h2v1c1.654,0,3' +
+                ',1.346,3,3h-2c0-.551-.449-1-1-1h-2c-.551,0-1,.449-1,1Z"/></svg>'
+            end
+          end
+          object PanelTextoValorIBS: TPanel
+            Left = 70
+            Top = 0
+            Width = 138
+            Height = 79
+            Align = alClient
+            BevelOuter = bvNone
+            TabOrder = 1
+            object LabelTituloIBS: TLabel
+              Left = 0
+              Top = 0
+              Width = 138
+              Height = 30
+              Align = alTop
+              Caption = 'Total IBS'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = 11382189
+              Font.Height = -21
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              ParentFont = False
+            end
+            object LabelValorIBS: TLabel
+              Left = 0
+              Top = 30
+              Width = 138
+              Height = 25
+              Align = alTop
+              Caption = 'R$ 0,00'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clInactiveCaptionText
+              Font.Height = -19
+              Font.Name = 'Segoe UI'
+              Font.Style = []
+              ParentFont = False
+            end
+          end
+        end
         object PanelVaorICMS: TPanel
           Left = 0
           Top = 160
@@ -708,7 +900,6 @@ object FormPrincipal: TFormPrincipal
                   TitleFont.Height = -13
                   TitleFont.Name = 'Segoe UI'
                   TitleFont.Style = []
-                  OnDrawColumnCell = DBGrid1DrawColumnCell
                   Columns = <
                     item
                       Expanded = False
@@ -1329,6 +1520,43 @@ object FormPrincipal: TFormPrincipal
             TabOrder = 0
             Text = 'Selecione uma pasta contendo XMLs de Nota Fiscal'
             TextHint = 'Selecione uma pasta contendo XMLs de Nota Fiscal'
+          end
+          object LabelFiltroModelo: TLabel
+            Left = 630
+            Top = 70
+            Width = 46
+            Height = 17
+            Alignment = taRightJustify
+            AutoSize = False
+            Caption = 'Modelo'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = 11382189
+            Font.Height = -13
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentFont = False
+          end
+          object ComboFiltroModelo: TComboBox
+            Left = 682
+            Top = 66
+            Width = 167
+            Height = 25
+            Cursor = crHandPoint
+            Style = csDropDownList
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = 2169367
+            Font.Height = -13
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ItemIndex = 0
+            ParentFont = False
+            TabOrder = 2
+            Text = 'Todos'
+            OnChange = ComboFiltroModeloChange
+            Items.Strings = (
+              'Todos'
+              'NF-e 55'
+              'NFC-e 65')
           end
           object Panel7: TPanel
             Left = 682

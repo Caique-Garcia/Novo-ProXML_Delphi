@@ -38,6 +38,10 @@
 | Gravação no banco | Na **thread principal, com transação** (a mesma conexão FireDAC é usada pela tela; ~0,2 s para 1000 notas) |
 | Somatórios dos relatórios | Rodapé usa os **totais calculados em memória** (`FormPrincipal.Totais`, respeitando o filtro); os valores continuam como texto no banco |
 | Ordem das notas nos relatórios | **Manter** a ordem de leitura dos arquivos (sem `ORDER BY`) |
+| Filtro ao processar nova pasta | Volta para **Todos** |
+| Envio por e-mail | **Respeita o filtro** de modelo (envia só as notas visíveis na grade) |
+| Repintura contínua da grade (`DBGrid1DrawColumnCell`) | **Corrigir na 1.4**: ajustar a altura das linhas uma única vez |
+| Valores ≥ R$ 10 milhões nos cards / ícones próprios de IBS e CBS | Ficam para o **Plano 4** |
 | Amostras faltantes | XMLs **sintéticos** gerados pelo `nfe-fiscal` em `exemple\sinteticos\` (fora do git): NF-e 55 com `tpImp=2`, nota de entrada e nota com `vICMS` > 0 |
 
 ## Etapas

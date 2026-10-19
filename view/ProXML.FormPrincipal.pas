@@ -178,6 +178,22 @@ type
     Panel11: TPanel;
     btnEnviarEmail: TSpeedButton;
     ACBrNFeDANFEFR: TACBrNFeDANFEFR;
+    PanelValorIBS: TPanel;
+    ShapeValorIBS: TShape;
+    PanelIMGValorIBS: TPanel;
+    SkSvgValorIBS: TSkSvg;
+    PanelTextoValorIBS: TPanel;
+    LabelTituloIBS: TLabel;
+    LabelValorIBS: TLabel;
+    PanelValorCBS: TPanel;
+    ShapeValorCBS: TShape;
+    PanelIMGValorCBS: TPanel;
+    SkSvgValorCBS: TSkSvg;
+    PanelTextoValorCBS: TPanel;
+    LabelTituloCBS: TLabel;
+    LabelValorCBS: TLabel;
+    LabelFiltroModelo: TLabel;
+    ComboFiltroModelo: TComboBox;
     procedure SkSvg1Click(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -195,12 +211,12 @@ type
     procedure SkSvg5Click(Sender: TObject);
     procedure btnEnviarEmailClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure DBGrid1DrawColumnCell(Sender: TObject; const Rect: TRect;
-      DataCol: Integer; Column: TColumn; State: TGridDrawState);
+    procedure ComboFiltroModeloChange(Sender: TObject);
   private
     ConfigEmail : TConfig;
     FTotais : TTotaisNotas;
     procedure SetTextoTranferencia(const Text: String);
+    procedure AjustarAlturaLinhasGrade;
     procedure FinalizaRelatorio(Sender: TObject);
     procedure ConfigACBR;
     procedure GerarDanfe(const CaminhoArq: String);
@@ -212,6 +228,10 @@ type
 
   public
     procedure AtualizarTotais;
+    //Modelo escolhido no seletor (FILTRO_MODELO_TODOS, FILTRO_MODELO_NFE ou FILTRO_MODELO_NFCE)
+    function  ModeloSelecionado: Integer;
+    //Aplica o modelo escolhido na grade, nos cards e nos relatórios
+    procedure AplicarFiltroModelo;
     //Totais das notas da grade (respeitando o filtro), inclusive IBS/CBS
     property Totais : TTotaisNotas read FTotais;
   end;
@@ -255,6 +275,67 @@ begin
     LabelValorTotal.Caption := 'R$ ' + FloatToStrF(FTotais.ValorTotal, ffFixed, 15, 2);
     LabelbaseICMS.Caption   := 'R$ ' + FloatToStrF(FTotais.BaseICMS, ffFixed, 15, 2);
     LabelValorICMS.Caption  := 'R$ ' + FloatToStrF(FTotais.ValorICMS, ffFixed, 15, 2);
+    LabelValorIBS.Caption   := 'R$ ' + FloatToStrF(FTotais.IBS, ffFixed, 15, 2);
+    LabelValorCBS.Caption   := 'R$ ' + FloatToStrF(FTotais.CBS, ffFixed, 15, 2);
+end;
+
+procedure TFormPrincipal.AjustarAlturaLinhasGrade;
+begin
+    //Linhas da grade com 25 px. Não chamar no OnDrawColumnCell: alterar DefaultRowHeight
+    //invalida a grade e ela fica se repintando sem parar.
+    //O DBGrid recalcula a altura quando o layout muda (ex.: abrir o DataSet), por isso
+    //reaplica depois de processar e de trocar o filtro.
+    if TDBGridPadrao(DBGrid1).DefaultRowHeight <> 25 then
+        TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
+end;
+
+function TFormPrincipal.ModeloSelecionado: Integer;
+begin
+    //Itens do seletor: 0 = Todos, 1 = NF-e 55, 2 = NFC-e 65
+    case ComboFiltroModelo.ItemIndex of
+        1: Result := FILTRO_MODELO_NFE;
+        2: Result := FILTRO_MODELO_NFCE;
+    else
+        Result := FILTRO_MODELO_TODOS;
+    end;
+end;
+
+procedure TFormPrincipal.AplicarFiltroModelo;
+var
+    Modelo: Integer;
+begin
+    //Filtra a grade pelo modelo escolhido e recalcula todos os cards.
+    //O mesmo filtro vai para o DMConfig, usado pelos relatórios (QryNotas e QryNotasIBSCBS).
+    Modelo := ModeloSelecionado;
+
+    FDMemTable1.DisableControls;
+    try
+        if Modelo = FILTRO_MODELO_TODOS then
+        begin
+            FDMemTable1.Filtered := False;
+            FDMemTable1.Filter   := '';
+        end
+        else
+        begin
+            FDMemTable1.Filter   := 'modelo = ' + IntToStr(Modelo);
+            FDMemTable1.Filtered := True;
+        end;
+
+        if FDMemTable1.Active then
+            FDMemTable1.First;
+    finally
+        FDMemTable1.EnableControls;
+    end;
+
+    DMConfig.FiltroModelo := Modelo;
+    AtualizarTotais;
+    AjustarAlturaLinhasGrade;
+end;
+
+procedure TFormPrincipal.ComboFiltroModeloChange(Sender: TObject);
+begin
+    //Troca do modelo no seletor
+    AplicarFiltroModelo;
 end;
 
 procedure TFormPrincipal.btnSalvarConfigClick(Sender: TObject);
@@ -322,6 +403,9 @@ end;
 procedure TFormPrincipal.FinalizaRelatorio(Sender: TObject);
 begin
    //Finaliza o relatório
+   //Garante que o relatório use o mesmo modelo da grade e dos cards
+   DMConfig.FiltroModelo := ModeloSelecionado;
+
    FormRelatorio := TFormRelatorios.Create(Nil);
    try
         FormRelatorio.SetTotal(LabelValorTotal.Caption);
@@ -370,29 +454,6 @@ begin
   end;
 end;
 
-procedure TFormPrincipal.DBGrid1DrawColumnCell(Sender: TObject;
-  const Rect: TRect; DataCol: Integer; Column: TColumn; State: TGridDrawState);
-begin
-//    //Mudando cor da seleção
-//    if (gdSelected in State) then
-//    begin
-//      //Cor da Seleção
-//      DBGrid1.Canvas.Brush.Color :=$00FCDDC9; //$00E9E5E4;
-//
-//      //Cor da Fonte
-//      //DBGCaixa.Canvas.Font.Color := clHighlightText;
-//    end;
-//
-//    //Alinha textos na linha do grid
-//   DBGrid1.Canvas.TextRect(Rect, Rect.Left + 28, Rect.Top + 6, Column.Field.DisplayText);
- //Ajustar linhas DBGrid
- try
-    TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
- except
- end;
-
-end;
-
 procedure TFormPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
 
@@ -421,6 +482,9 @@ begin
    except
    end;
 
+   //Seletor de modelo começa em "Todos"
+   ComboFiltroModelo.ItemIndex := 0;
+   AplicarFiltroModelo;
 end;
 
 procedure TFormPrincipal.FormDestroy(Sender: TObject);
@@ -508,7 +572,7 @@ procedure TFormPrincipal.FormShow(Sender: TObject);
 begin
    //Ajustar linhas DBGrid
    try
-    TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
+    AjustarAlturaLinhasGrade;
    except
    end;
 
@@ -725,8 +789,13 @@ begin
 
     if EditCaminho.Text <> 'Selecione uma pasta contendo XMLs de Nota Fiscal' then
     begin
+      //Nova pasta: o seletor de modelo volta para "Todos" (grade, cards e relatórios)
+      ComboFiltroModelo.ItemIndex := 0;
+      AplicarFiltroModelo;
+
       CalculadoraXML.CaminhoDiretorio := EditCaminho.Text;
       CalculadoraXML.ProcessarXMLs;
+      AjustarAlturaLinhasGrade;
       DBGrid1.Refresh;
     end else
     begin
