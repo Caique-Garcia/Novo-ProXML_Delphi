@@ -72,3 +72,6 @@ modules/
 
 # Pacote de distribuicao (publicado nas Releases do GitHub)
 /bin/ProXML.rar
+
+# XMLs reais de teste (dados fiscais - nunca versionar)
+/exemple/
