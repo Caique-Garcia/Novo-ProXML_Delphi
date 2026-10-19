@@ -5,6 +5,7 @@ uses
   ProXML.FormPrincipal in 'view\ProXML.FormPrincipal.pas' {FormPrincipal},
   uCalculadoraXML in 'lib\uCalculadoraXML.pas',
   ProXML.FormRelatorios in 'view\ProXML.FormRelatorios.pas' {FormRelatorios},
+  ProXML.FormRelatorioIBSCBS in 'view\ProXML.FormRelatorioIBSCBS.pas' {FormRelatorioIBSCBS},
   DM in 'datamodule\DM.pas' {DMConfig: TDataModule},
   ProXML.Classes in 'classes\ProXML.Classes.pas';
 

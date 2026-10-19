@@ -163,7 +163,7 @@ object FormRelatorios: TFormRelatorios
         Alignment = taLeftJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'XMLs de notas modelos 65 processados pelo programa'
+        Caption = 'XMLs de Nota Fiscal processados pelo programa'
         Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clGray
@@ -178,13 +178,13 @@ object FormRelatorios: TFormRelatorios
         FontSize = 10
       end
       object QRLabel606: TQRLabel
-        Left = 8
+        Left = 56
         Top = 216
         Width = 44
         Height = 16
         Size.Values = (
           42.333333333333340000
-          21.166666666666670000
+          148.166666666666700000
           571.500000000000000000
           116.416666666666700000)
         XLColumn = 0
@@ -352,6 +352,35 @@ object FormRelatorios: TFormRelatorios
         VerticalAlignment = tlTop
         FontSize = 10
       end
+      object QRLabelModelo: TQRLabel
+        Left = 8
+        Top = 216
+        Width = 39
+        Height = 16
+        Size.Values = (
+          42.333333333333340000
+          21.166666666666670000
+          571.500000000000000000
+          103.187500000000000000)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        Caption = 'Modelo'
+        Color = 12369084
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        Transparent = False
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 8
+      end
     end
     object QRBand167: TQRBand
       Left = 38
@@ -369,13 +398,13 @@ object FormRelatorios: TFormRelatorios
       KeepOnOnePage = False
       BandType = rbDetail
       object QRDBText248: TQRDBText
-        Left = 6
+        Left = 56
         Top = 7
         Width = 49
         Height = 16
         Size.Values = (
           42.333333333333340000
-          15.875000000000000000
+          148.166666666666700000
           18.520833333333330000
           129.645833333333300000)
         XLColumn = 0
@@ -514,6 +543,38 @@ object FormRelatorios: TFormRelatorios
         Color = clWhite
         DataSet = DMConfig.QryNotas
         DataField = 'VALOR'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        Transparent = False
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        FullJustify = False
+        MaxBreakChars = 0
+        VerticalAlignment = tlTop
+        FontSize = 8
+      end
+      object QRDBTextModelo: TQRDBText
+        Left = 8
+        Top = 7
+        Width = 13
+        Height = 16
+        Size.Values = (
+          42.333333333333340000
+          21.166666666666670000
+          18.520833333333330000
+          34.395833333333330000)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        Color = clWhite
+        DataSet = DMConfig.QryNotas
+        DataField = 'MODELO'
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -727,21 +788,21 @@ object FormRelatorios: TFormRelatorios
         VertAdjust = 0
       end
       object QRLabel621: TQRLabel
-        Left = 318
+        Left = 307
         Top = 134
-        Width = 156
+        Width = 167
         Height = 38
         Size.Values = (
           100.541666666666700000
-          841.375000000000000000
+          812.270833333333300000
           354.541666666666700000
-          412.750000000000000000)
+          441.854166666666700000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taLeftJustify
         AlignToBand = False
-        Caption = 'BASE DE C'#193'CULO'
+        Caption = 'BASE DE C'#193'LCULO'
         Color = clWhite
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
