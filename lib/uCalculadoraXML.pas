@@ -42,21 +42,12 @@ type
 
   TCalculadoraXML = class
   private
-    FValorTotal: String;
-    FValorBaseICMS: String;
-    FValorICMS: String;
     FCaminhoDiretorio: String;
-    procedure SetValorTotal(const Value: String);
-    procedure SetValorBaseICMS(const Value: String);
-    procedure SetValorICMS(const Value: String);
     procedure SetCaminhoDiretorio(const Value: String);
     function FormataDataStr(const DataStr: String): String;
 
 
   public
-    property ValorTotal : String read FValorTotal write SetValorTotal;
-    property ValorICMS : String read FValorICMS write SetValorICMS;
-    property ValorBaseICMS : String read FValorBaseICMS write SetValorBaseICMS;
     property CaminhoDiretorio : String read FCaminhoDiretorio write SetCaminhoDiretorio;
     procedure ProcessarXMLs;
     procedure GetTagValueFromXML(var CaminhoXML: string);
@@ -72,8 +63,7 @@ type
   function CalcularTotais(DataSet: TDataSet): TTotaisNotas;
 
   var
-     AValorTotal: String;
-     ContadorXML, ContadorXMLErro, ErroNaLeitura: Integer;
+     ContadorXML, ErroNaLeitura: Integer;
 
 
 implementation
@@ -168,10 +158,17 @@ begin
 
   //Aqui carregamos o arquivo XML no objeto XMLDocument
   XMLDocument.LoadFromFile(CaminhoXML);
+  //Sem nfeProc (ou sem NFe/infNFe/ide) o arquivo não é processado: a exceção vira
+  //"Arquivo não processado" em ProcessarXMLs
   NodenfeProc := XMLDocument.ChildNodes.FindNode('nfeProc');
-  NodeinfNFe  := NodenfeProc.ChildNodes.FindNode('NFe').ChildNodes.FindNode('infNFe');
-  NodeIde     := NodeinfNFe.ChildNodes.FindNode('ide');
-  Result.NumeroNF := NodeIde.ChildValues['nNF'];
+  if NodenfeProc = nil then
+    raise Exception.Create('Tag nfeProc não encontrada no XML');
+  NodeinfNFe  := NoFilhoObrigatorio(NoFilhoObrigatorio(NodenfeProc, 'NFe'), 'infNFe');
+  NodeIde     := NoFilhoObrigatorio(NodeinfNFe, 'ide');
+  //nNF obrigatório: tag ausente ou vazia gera exceção ("Arquivo não processado")
+  Result.NumeroNF := Trim(NoFilhoObrigatorio(NodeIde, 'nNF').Text);
+  if Result.NumeroNF = '' then
+    raise Exception.Create('Tag nNF vazia no XML');
 
   //Tentando recuperar a data do XML
   try
@@ -191,15 +188,14 @@ begin
   if not Result.ModeloValido then
     Exit;
 
-  //Aqui vamos tentar pegar o cStat do protocolo de autorização
-  NodeprotNFe := NodenfeProc.ChildNodes.FindNode('protNFe');
-  try
-    Result.cStat := NodeprotNFe.ChildNodes.FindNode('infProt').ChildValues['cStat'];
-    Result.cStat := Trim(Result.cStat);
-  except
-    //Caso não consiga acessar o nó atribui vazio
-    Result.cStat := '';
-  end;
+  //Aqui vamos pegar o cStat do protocolo de autorização.
+  //nfeProc sem protNFe: nota sem protocolo (cStat vazio, não autorizada).
+  //protNFe sem infProt/cStat é XML fora da estrutura esperada: gera exceção
+  NodeprotNFe := NoFilho(NodenfeProc, 'protNFe');
+  if NodeprotNFe = nil then
+    Result.cStat := ''
+  else
+    Result.cStat := Trim(NoFilhoObrigatorio(NoFilhoObrigatorio(NodeprotNFe, 'infProt'), 'cStat').Text);
 
   Result.Autorizada := NFeAutorizada(Result.cStat);
   if not Result.Autorizada then
@@ -305,8 +301,6 @@ begin
     //Aqui vamos verificar se a nota foi autorizada (cStat 100 ou 150)
     if Dados.Autorizada then
     begin
-      ContadorXML := ContadorXML + 1;
-
       //Conversões antes do Append para não deixar registro pela metade em caso de erro
       Numero := StrToInt(Dados.NumeroNF);
       Modelo := StrToInt(Dados.Modelo);
@@ -316,40 +310,48 @@ begin
 
       //Aqui exibimos os registros no grid
       FormPrincipal.FDMemTable1.Append;
+      try
+          FormPrincipal.FDMemTable1.FieldByName('numero').AsInteger := Numero;
+          FormPrincipal.FDMemTable1.FieldByName('modelo').AsInteger := Modelo;
 
-      FormPrincipal.FDMemTable1.FieldByName('numero').AsInteger := Numero;
-      FormPrincipal.FDMemTable1.FieldByName('modelo').AsInteger := Modelo;
+          FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Chave;
 
-      FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Chave;
+          FormPrincipal.FDMemTable1.FieldByName('data').AsString := FormataDataStr(Copy(Dados.DataEmissao, 1, 10));
 
-      FormPrincipal.FDMemTable1.FieldByName('data').AsString := FormataDataStr(Copy(Dados.DataEmissao, 1, 10));
+          TFloatField(FormPrincipal.FDMemTable1.FieldByName('vlicms')).DisplayFormat := '#,##0.00';
+          FormPrincipal.FDMemTable1.FieldByName('vlicms').AsFloat := Dados.vICMS;
 
-      TFloatField(FormPrincipal.FDMemTable1.FieldByName('vlicms')).DisplayFormat := '#,##0.00';
-      FormPrincipal.FDMemTable1.FieldByName('vlicms').AsFloat := Dados.vICMS;
+          TFloatField(FormPrincipal.FDMemTable1.FieldByName('bcicms')).DisplayFormat := '#,##0.00';
+          FormPrincipal.FDMemTable1.FieldByName('bcicms').AsFloat := Dados.vBC;
 
-      TFloatField(FormPrincipal.FDMemTable1.FieldByName('bcicms')).DisplayFormat := '#,##0.00';
-      FormPrincipal.FDMemTable1.FieldByName('bcicms').AsFloat := Dados.vBC;
+          TFloatField(FormPrincipal.FDMemTable1.FieldByName('vtotal')).DisplayFormat := '#,##0.00';
+          FormPrincipal.FDMemTable1.FieldByName('vtotal').AsFloat := Dados.vNF;
 
-      TFloatField(FormPrincipal.FDMemTable1.FieldByName('vtotal')).DisplayFormat := '#,##0.00';
-      FormPrincipal.FDMemTable1.FieldByName('vtotal').AsFloat := Dados.vNF;
+          FormPrincipal.FDMemTable1.FieldByName('xml').AsString := CaminhoXML;
 
-      FormPrincipal.FDMemTable1.FieldByName('xml').AsString := CaminhoXML;
+          //IBS/CBS (zerados quando a nota não tem o grupo IBSCBSTot)
+          FormPrincipal.FDMemTable1.FieldByName('tem_ibscbs').AsBoolean := Dados.TemIBSCBS;
+          FormPrincipal.FDMemTable1.FieldByName('vbcibscbs').AsFloat   := Dados.vBCIBSCBS;
+          FormPrincipal.FDMemTable1.FieldByName('vibsuf').AsFloat      := Dados.vIBSUF;
+          FormPrincipal.FDMemTable1.FieldByName('vibsmun').AsFloat     := Dados.vIBSMun;
+          FormPrincipal.FDMemTable1.FieldByName('vibs').AsFloat        := Dados.vIBS;
+          FormPrincipal.FDMemTable1.FieldByName('vcbs').AsFloat        := Dados.vCBS;
 
-      //IBS/CBS (zerados quando a nota não tem o grupo IBSCBSTot)
-      FormPrincipal.FDMemTable1.FieldByName('tem_ibscbs').AsBoolean := Dados.TemIBSCBS;
-      FormPrincipal.FDMemTable1.FieldByName('vbcibscbs').AsFloat   := Dados.vBCIBSCBS;
-      FormPrincipal.FDMemTable1.FieldByName('vibsuf').AsFloat      := Dados.vIBSUF;
-      FormPrincipal.FDMemTable1.FieldByName('vibsmun').AsFloat     := Dados.vIBSMun;
-      FormPrincipal.FDMemTable1.FieldByName('vibs').AsFloat        := Dados.vIBS;
-      FormPrincipal.FDMemTable1.FieldByName('vcbs').AsFloat        := Dados.vCBS;
+          FormPrincipal.FDMemTable1.Post;
+      except
+          //Não deixa a linha em edição: desfaz o Append e o arquivo vira "Arquivo não processado"
+          FormPrincipal.FDMemTable1.Cancel;
+          raise;
+      end;
 
-      FormPrincipal.FDMemTable1.Post;
+      //Só conta como processado depois que o registro foi gravado na grade
+      ContadorXML := ContadorXML + 1;
+
       FormPrincipal.DataSource1.DataSet.First;
     end
     else
     begin
       // Aqui executamos caso a nota não esteja autorizada (cStat diferente de 100/150)
-      ContadorXMLErro := ContadorXMLErro +1;
       if Dados.cStat = '' then
         FormPrincipal.Memo1.Lines.Add('Nota Fiscal ' +Dados.NumeroNF + ' - não autorizada (sem protocolo)')
       else
@@ -389,7 +391,6 @@ begin
   //Função que processar XMLS no diretorio
   ContadorXML           := 0;
   ErroNaLeitura         := 0;
-  ValorTotal            := '0.00';
 
   //Limpa a grade: cards e relatório refletem só a pasta atual
   if FormPrincipal.FDMemTable1.Active then
@@ -433,21 +434,6 @@ end;
 procedure TCalculadoraXML.SetCaminhoDiretorio(const Value: String);
 begin
   FCaminhoDiretorio := Value;
-end;
-
-procedure TCalculadoraXML.SetValorBaseICMS(const Value: String);
-begin
-  FValorBaseICMS := Value;
-end;
-
-procedure TCalculadoraXML.SetValorICMS(const Value: String);
-begin
-  FValorICMS := Value;
-end;
-
-procedure TCalculadoraXML.SetValorTotal(const Value: String);
-begin
-  FValorTotal := Value;
 end;
 
 initialization

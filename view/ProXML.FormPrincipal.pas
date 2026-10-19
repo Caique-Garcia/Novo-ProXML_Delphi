@@ -279,7 +279,15 @@ end;
 
 procedure TFormPrincipal.btnEnviarEmailClick(Sender: TObject);
 begin
-    //Enviar Email com arquivos compactados
+    //Enviar Email com arquivos compactados.
+    //Os XMLs são separados e compactados agora, com o filtro de modelo atual da grade
+    if (not FDMemTable1.Active) or FDMemTable1.IsEmpty then
+    begin
+        messagedlg('Sem arquivos para enviar!', mtInformation	, [mbOk], 0);
+        Exit;
+    end;
+
+    ComprimirArquivos();
     EnviaArquivo(Trim(EditEmailEnviar.Text), 'Projeto Pro XML - XMLs de Nota Fiscal');
 end;
 
@@ -451,7 +459,8 @@ begin
         FormRelatorio.SetQtRegistros(IntToStr(FDMemTable1.RecordCount));
         FormRelatorio.SetDescricaoFiltro(DescricaoFiltroModelo);
         FormRelatorio.GerarRelatorio;
-        PageControl1.ActivePageIndex := 0;
+        //Relatório fechado: volta para a aba Notas
+        PageControl1.ActivePageIndex := 1;
    finally
         FreeAndNil(FormRelatorio);
    end
@@ -477,11 +486,12 @@ begin
         if not FormIBSCBS.GerarRelatorio then
         begin
             //Nenhuma nota do filtro atual tem IBS/CBS: não abre a visualização
-            PageControl1.ActivePageIndex := 0;
+            PageControl1.ActivePageIndex := 1;
             messagedlg('Nenhuma nota com IBS/CBS', mtInformation, [mbOk], 0);
         end;
 
-        PageControl1.ActivePageIndex := 0;
+        //Relatório fechado: volta para a aba Notas
+        PageControl1.ActivePageIndex := 1;
     finally
         FreeAndNil(FormIBSCBS);
     end;
@@ -518,7 +528,8 @@ procedure TFormPrincipal.CategoryButtons1Categories0Items3Click(
 begin
     //PageControl1.ActivePageIndex := 2;
     //SkAnimatedImage1.Animation.Start;
-    ComprimirArquivos();
+    //Só abre a aba e carrega a configuração do email: os XMLs são separados e
+    //compactados no clique em "Enviar Email" (btnEnviarEmailClick)
     LerConfigEmail();
     PageControl1.ActivePageIndex := 3;
 end;
@@ -575,6 +586,7 @@ procedure TFormPrincipal.ComprimirArquivos();
 var
   varPath: string;
   varDestino: string;
+  Marcador: TBookmark;
 begin
     //Comprime os arquivos XML
     varPath := ExtractFilePath(ParamStr(0));
@@ -587,13 +599,27 @@ begin
 
     if not SysUtils.DirectoryExists(varPath + 'NFCe\ProXML') then SysUtils.ForceDirectories(varPath + '\NFCe\ProXML');
 
-    FDMemTable1.First;
-    while not FDMemTable1.Eof do
-    begin
-        varDestino := varPath + 'NFCe\ProXML\'+FDMemTable1.FieldByName('chave').AsString+'-nfe.xml';
+    //Copia as notas visíveis na grade (filtro atual) sem mexer na tela e
+    //sem perder o registro selecionado
+    FDMemTable1.DisableControls;
+    try
+        Marcador := FDMemTable1.GetBookmark;
+        try
+            FDMemTable1.First;
+            while not FDMemTable1.Eof do
+            begin
+                varDestino := varPath + 'NFCe\ProXML\'+FDMemTable1.FieldByName('chave').AsString+'-nfe.xml';
 
-        CopyFile(PChar(FDMemTable1.FieldByName('xml').AsString), PChar(varDestino), False);
-        FDMemTable1.Next;
+                CopyFile(PChar(FDMemTable1.FieldByName('xml').AsString), PChar(varDestino), False);
+                FDMemTable1.Next;
+            end;
+        finally
+            if (Marcador <> nil) and FDMemTable1.BookmarkValid(Marcador) then
+                FDMemTable1.GotoBookmark(Marcador);
+            FDMemTable1.FreeBookmark(Marcador);
+        end;
+    finally
+        FDMemTable1.EnableControls;
     end;
 
     if FileExists(varPath + 'NFCe\NFCe_ProXML.rar') then
@@ -893,7 +919,7 @@ begin
       begin
         //GravarNotas já desfez a transação: o banco continua como estava
         Screen.Cursor := crDefault;
-        PageControl1.ActivePageIndex := 0;
+        PageControl1.ActivePageIndex := 1;
         messagedlg('Erro ao gravar as notas no banco de dados. O relatório não foi gerado.' + sLineBreak +
                    E.Message, mtError, [mbOk], 0);
         Exit;
@@ -903,8 +929,19 @@ begin
     Screen.Cursor := crDefault;
   end;
 
-  //Gravação concluída: abre o relatório
-  FinalizaRelatorio(Relatorio);
+  //Gravação concluída: abre o relatório.
+  //Se a geração ou a prévia falhar (ex.: 'Sem registros no banco de dados!'),
+  //sai da aba Loading, volta para a aba Notas e mostra o erro
+  try
+    FinalizaRelatorio(Relatorio);
+  except
+    on E: Exception do
+    begin
+      PageControl1.ActivePageIndex := 1;
+      messagedlg('Erro ao gerar o relatório:' + sLineBreak + sLineBreak + E.Message, mtError, [mbOk], 0);
+      DMConfig.CreateLog(E.ClassName, E.Message);
+    end;
+  end;
 end;
 
 procedure TFormPrincipal.LerConfigEmail;             
