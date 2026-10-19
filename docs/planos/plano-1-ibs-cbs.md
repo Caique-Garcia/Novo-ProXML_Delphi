@@ -35,6 +35,9 @@
 | Grade entre processamentos | **Limpar** a `FDMemTable1` a cada clique em Processar: cards e relatório mostram só a pasta atual |
 | Log de nota não autorizada | `Nota Fiscal <nNF> - não autorizada (cStat <código>)`; XML sem protocolo continua como "Arquivo não processado" |
 | `IBSCBSTot` sem `vBCIBSCBS` | Base = 0 e a nota é mantida; tag presente com valor inválido → arquivo não processado |
+| Gravação no banco | Na **thread principal, com transação** (a mesma conexão FireDAC é usada pela tela; ~0,2 s para 1000 notas) |
+| Somatórios dos relatórios | Rodapé usa os **totais calculados em memória** (`FormPrincipal.Totais`, respeitando o filtro); os valores continuam como texto no banco |
+| Ordem das notas nos relatórios | **Manter** a ordem de leitura dos arquivos (sem `ORDER BY`) |
 | Amostras faltantes | XMLs **sintéticos** gerados pelo `nfe-fiscal` em `exemple\sinteticos\` (fora do git): NF-e 55 com `tpImp=2`, nota de entrada e nota com `vICMS` > 0 |
 
 ## Etapas

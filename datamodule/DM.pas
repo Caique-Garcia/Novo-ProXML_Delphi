@@ -27,6 +27,12 @@ uses
   ProXML.Classes,
   System.Classes;
 
+const
+  //Valores do filtro de modelo (FiltroModelo)
+  FILTRO_MODELO_TODOS = 0;
+  FILTRO_MODELO_NFE   = 55;
+  FILTRO_MODELO_NFCE  = 65;
+
 type
   TDMConfig = class(TDataModule)
     Conexao: TFDConnection;
@@ -38,18 +44,39 @@ type
     QryNotasBCICMS: TWideStringField;
     QryNotasVLICMS: TWideStringField;
     QryNotasNUMERO: TWideStringField;
+    QryNotasMODELO: TIntegerField;
+    QryNotasIBSCBS: TFDQuery;
+    QryNotasIBSCBSNUMERO: TWideStringField;
+    QryNotasIBSCBSCHAVE: TWideStringField;
+    QryNotasIBSCBSDATA: TWideStringField;
+    QryNotasIBSCBSMODELO: TIntegerField;
+    QryNotasIBSCBSVBCIBSCBS: TWideStringField;
+    QryNotasIBSCBSVIBSUF: TWideStringField;
+    QryNotasIBSCBSVIBSMUN: TWideStringField;
+    QryNotasIBSCBSVIBS: TWideStringField;
+    QryNotasIBSCBSVCBS: TWideStringField;
     procedure DataModuleCreate(Sender: TObject);
     procedure ConexaoBeforeConnect(Sender: TObject);
     procedure ConexaoAfterConnect(Sender: TObject);
+    procedure QryNotasBeforeOpen(DataSet: TDataSet);
   private
+    FFiltroModelo: Integer;
     procedure GravarConfig(const Config: TConfig);
+    procedure MigrarTabelaNF;
+    procedure SetFiltroModelo(const Value: Integer);
   public
     procedure CreateLog(const Classe, Msg: String);
-    procedure InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String);
+    procedure InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String;
+      const Modelo: Integer; const TemIBSCBS: Boolean;
+      const BCIBSCBS, IBSUF, IBSMun, IBS, CBS: String);
+    procedure GravarNotas(DataSet: TDataSet);
     procedure DeleteDados;
     function GetConfig: TConfig;
     procedure UpdateConfig(const Config: TConfig);
     procedure GravaLog(Sender: TObject; E: Exception);
+    //Filtro de modelo usado por QryNotas e QryNotasIBSCBS: 0 = Todos, 55 = NF-e, 65 = NFC-e
+    //Vale na próxima abertura das queries
+    property FiltroModelo: Integer read FFiltroModelo write SetFiltroModelo;
   end;
 
 var
@@ -74,8 +101,18 @@ begin
                                 'DATA             TEXT (36), '  +
                                 'BCICMS           TEXT (30), '  +
                                 'VLICMS           TEXT (30), '  +
-                                'XML              TEXT (200) '  +
+                                'XML              TEXT (200), '  +
+                                'MODELO           INTEGER, '  +
+                                'TEM_IBSCBS       INTEGER DEFAULT 0, '  +
+                                'VBCIBSCBS        TEXT (30), '  +
+                                'VIBSUF           TEXT (30), '  +
+                                'VIBSMUN          TEXT (30), '  +
+                                'VIBS             TEXT (30), '  +
+                                'VCBS             TEXT (30) '  +
                                 ' ); ');
+
+   //Bancos criados pela versão 1.0 não têm as colunas novas
+   MigrarTabelaNF;
 
    Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS config ( ' +
                                 'SMTP             TEXT (32), '  +
@@ -92,6 +129,42 @@ begin
                                 'MSG              TEXT (2000), '  +
                                 'DT               TEXT (32) '  +
                                 ' ); ');
+end;
+
+procedure TDMConfig.MigrarTabelaNF;
+const
+  //Colunas novas da tabela nf (versão 1.1) e suas definições
+  ColunasNovas: array[0..6] of String = ('MODELO', 'TEM_IBSCBS', 'VBCIBSCBS', 'VIBSUF', 'VIBSMUN', 'VIBS', 'VCBS');
+  DefColunas: array[0..6] of String = ('INTEGER', 'INTEGER DEFAULT 0', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)');
+var
+  QryAux: TFDQuery;
+  ColunasExistentes: TStringList;
+  I: Integer;
+begin
+  //Migração idempotente: só adiciona as colunas que ainda não existem
+  ColunasExistentes := TStringList.Create;
+  QryAux := TFDQuery.Create(Nil);
+  try
+    ColunasExistentes.CaseSensitive := False;
+
+    QryAux.Connection := Conexao;
+    QryAux.Open('PRAGMA table_info(nf)');
+    while not QryAux.Eof do
+    begin
+      ColunasExistentes.Add(QryAux.FieldByName('name').AsString);
+      QryAux.Next;
+    end;
+    QryAux.Close;
+
+    for I := Low(ColunasNovas) to High(ColunasNovas) do
+    begin
+      if ColunasExistentes.IndexOf(ColunasNovas[I]) < 0 then
+        Conexao.ExecSQL('ALTER TABLE nf ADD COLUMN ' + ColunasNovas[I] + ' ' + DefColunas[I]);
+    end;
+  finally
+    FreeAndNil(QryAux);
+    FreeAndNil(ColunasExistentes);
+  end;
 end;
 
 procedure TDMConfig.ConexaoBeforeConnect(Sender: TObject);
@@ -114,6 +187,8 @@ begin
     //Create do Form
     //Application.OnException := GravaLog;
 
+    FFiltroModelo := FILTRO_MODELO_TODOS;
+
     Diretorio := System.SysUtils.GetCurrentDir + '\db';
 
     if not DirectoryExists(Diretorio) then
@@ -127,13 +202,17 @@ begin
     Conexao.ExecSQL('DELETE FROM nf ;');
 end;
 
-procedure TDMConfig.InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String);
+procedure TDMConfig.InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String;
+  const Modelo: Integer; const TemIBSCBS: Boolean;
+  const BCIBSCBS, IBSUF, IBSMun, IBS, CBS: String);
 begin
     Query.Active := False;
     Query.SQL.Clear;
 
-    Query.SQL.Add('insert into nf ');
-    Query.SQL.Add('values( :NUMERO, :CHAVE, :VALOR, :DATA, :BCICMS, :VLICMS, :XML )');
+    Query.SQL.Add('insert into nf ( NUMERO, CHAVE, VALOR, DATA, BCICMS, VLICMS, XML, ');
+    Query.SQL.Add('                 MODELO, TEM_IBSCBS, VBCIBSCBS, VIBSUF, VIBSMUN, VIBS, VCBS ) ');
+    Query.SQL.Add('values( :NUMERO, :CHAVE, :VALOR, :DATA, :BCICMS, :VLICMS, :XML, ');
+    Query.SQL.Add('        :MODELO, :TEM_IBSCBS, :VBCIBSCBS, :VIBSUF, :VIBSMUN, :VIBS, :VCBS )');
     Query.Params.ParamByName('NUMERO').AsString         := Trim(Numero);
     Query.Params.ParamByName('CHAVE').AsString          := Trim(Chave);
     Query.Params.ParamByName('VALOR').AsString          := Trim(Valor);
@@ -141,12 +220,95 @@ begin
     Query.Params.ParamByName('BCICMS').AsString         := Trim(BC);
     Query.Params.ParamByName('VLICMS').AsString         := Trim(ICMS);
     Query.Params.ParamByName('XML').AsString            := Trim(XML);
+    Query.Params.ParamByName('MODELO').AsInteger        := Modelo;
+    if TemIBSCBS then
+        Query.Params.ParamByName('TEM_IBSCBS').AsInteger := 1
+    else
+        Query.Params.ParamByName('TEM_IBSCBS').AsInteger := 0;
+    Query.Params.ParamByName('VBCIBSCBS').AsString      := Trim(BCIBSCBS);
+    Query.Params.ParamByName('VIBSUF').AsString         := Trim(IBSUF);
+    Query.Params.ParamByName('VIBSMUN').AsString        := Trim(IBSMun);
+    Query.Params.ParamByName('VIBS').AsString           := Trim(IBS);
+    Query.Params.ParamByName('VCBS').AsString           := Trim(CBS);
 
     try
         Query.ExecSQL;
     except on e: Exception do
         raise Exception.Create('Erro na gravação de dados: '+ e.message);
     end;
+end;
+
+procedure TDMConfig.GravarNotas(DataSet: TDataSet);
+var
+    Marcador: TBookmark;
+    FiltroAtivo: Boolean;
+begin
+    //Grava as notas do DataSet (grade de notas) na tabela nf, numa transação.
+    //Deve ser chamada na thread principal: a conexão também é usada pela tela.
+    //Grava todas as notas, mesmo com filtro ativo: o filtro de modelo é aplicado nas queries (FiltroModelo).
+    //Em caso de erro desfaz tudo (inclusive a limpeza da tabela) e repassa a exceção.
+    DataSet.DisableControls;
+    try
+        Marcador    := DataSet.GetBookmark;
+        FiltroAtivo := DataSet.Filtered;
+        try
+            DataSet.Filtered := False;
+
+            Conexao.StartTransaction;
+            try
+                DeleteDados;
+
+                DataSet.First;
+                while not DataSet.Eof do
+                begin
+                    InserirNotaDB(
+                        DataSet.FieldByName('numero').AsString,
+                        DataSet.FieldByName('chave').AsString,
+                        DataSet.FieldByName('data').AsString,
+                        FormatFloat('0.00', DataSet.FieldByName('vtotal').AsFloat),
+                        FormatFloat('0.00', DataSet.FieldByName('vlicms').AsFloat),
+                        FormatFloat('0.00', DataSet.FieldByName('bcicms').AsFloat),
+                        DataSet.FieldByName('xml').AsString,
+                        DataSet.FieldByName('modelo').AsInteger,
+                        DataSet.FieldByName('tem_ibscbs').AsBoolean,
+                        FormatFloat('0.00', DataSet.FieldByName('vbcibscbs').AsFloat),
+                        FormatFloat('0.00', DataSet.FieldByName('vibsuf').AsFloat),
+                        FormatFloat('0.00', DataSet.FieldByName('vibsmun').AsFloat),
+                        FormatFloat('0.00', DataSet.FieldByName('vibs').AsFloat),
+                        FormatFloat('0.00', DataSet.FieldByName('vcbs').AsFloat)
+                    );
+
+                    DataSet.Next;
+                end;
+
+                Conexao.Commit;
+            except
+                Conexao.Rollback;
+                raise;
+            end;
+        finally
+            DataSet.Filtered := FiltroAtivo;
+            if (Marcador <> nil) and DataSet.BookmarkValid(Marcador) then
+                DataSet.GotoBookmark(Marcador);
+            DataSet.FreeBookmark(Marcador);
+        end;
+    finally
+        DataSet.EnableControls;
+    end;
+end;
+
+procedure TDMConfig.QryNotasBeforeOpen(DataSet: TDataSet);
+begin
+    //Aplica o filtro de modelo (0 = Todos) em QryNotas e QryNotasIBSCBS
+    TFDQuery(DataSet).ParamByName('MODELO').AsInteger := FFiltroModelo;
+end;
+
+procedure TDMConfig.SetFiltroModelo(const Value: Integer);
+begin
+    if (Value <> FILTRO_MODELO_TODOS) and (Value <> FILTRO_MODELO_NFE) and (Value <> FILTRO_MODELO_NFCE) then
+        raise Exception.Create('Filtro de modelo inválido: ' + IntToStr(Value));
+
+    FFiltroModelo := Value;
 end;
 
 procedure TDMConfig.CreateLog(const Classe, Msg: String);
