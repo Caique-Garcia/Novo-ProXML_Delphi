@@ -33,7 +33,7 @@
 | Sintéticos | Servem só para testar leitura e soma; não precisam ser fiscalmente coerentes. Um caso extra prova a regra do `cStat` |
 | Espera do PDF em `GerarDanfe` | **Corrigir na 1.5**: trocar o laço infinito por espera com tempo limite (~15 s) e mensagem de erro clara |
 | Grade entre processamentos | **Limpar** a `FDMemTable1` a cada clique em Processar: cards e relatório mostram só a pasta atual |
-| Log de nota não autorizada | `Nota Fiscal <nNF> - não autorizada (cStat <código>)`; XML sem protocolo continua como "Arquivo não processado" |
+| Log de nota não autorizada | `Nota Fiscal <nNF> - não autorizada (cStat <código>)`; com `nfeProc` mas sem `protNFe` → `(sem protocolo)`; sem `nfeProc` continua "Arquivo não processado" |
 | `IBSCBSTot` sem `vBCIBSCBS` | Base = 0 e a nota é mantida; tag presente com valor inválido → arquivo não processado |
 | Gravação no banco | Na **thread principal, com transação** (a mesma conexão FireDAC é usada pela tela; ~0,2 s para 1000 notas) |
 | Somatórios dos relatórios | Rodapé usa os **totais calculados em memória** (`FormPrincipal.Totais`, respeitando o filtro); os valores continuam como texto no banco |
@@ -45,6 +45,11 @@
 | Filtro no papel | Os dois relatórios indicam o modelo no subtítulo quando o filtro não é "Todos" (ex.: "XMLs de Nota Fiscal (NF-e 55) …") |
 | Rodapé do relatório de notas | Corrigir "BASE DE CÁCULO" → "BASE DE CÁLCULO" |
 | Quantidade no relatório IBS/CBS | Mantida no cabeçalho **e** nos totais |
+| E-mail: momento da seleção | Os XMLs são separados e compactados **no clique em "Enviar Email"**, com o filtro atual |
+| Achados menores do QA (1.7) | Corrigir antes da v1.1.0: detecção explícita de nó ausente na leitura, contador/código morto, tela presa em "Loading" se a prévia falhar, seleção da grade preservada no envio. Ficam como estão: `ProcessMessages` na espera do DANFE e `insert into LOG/config` sem colunas |
+| Aba após relatório | Volta para **Notas** em todos os casos (sucesso, erro na prévia ou erro na gravação) |
+| `protNFe` incompleto (sem `infProt`/`cStat`) | "Arquivo não processado" (`nfeProc` sem `protNFe` continua "(sem protocolo)") |
+| Extras pós-QA | Cancelar a linha da grade se o `Post` falhar; checar `nNF` ausente explicitamente |
 | Amostras faltantes | XMLs **sintéticos** gerados pelo `nfe-fiscal` em `exemple\sinteticos\` (fora do git): NF-e 55 com `tpImp=2`, nota de entrada e nota com `vICMS` > 0 |
 
 ## Etapas
