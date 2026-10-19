@@ -616,44 +616,38 @@ begin
 end;
 
 procedure TFormPrincipal.GravarNotasDB;
-var
-    T: TThread;
 begin
-  //Grava as notas no banco de dados SQLIte
+  //Grava as notas no banco de dados SQLite e abre o relatório.
+  //A gravação roda na thread principal, numa transação: a conexão DMConfig.Conexao também
+  //é usada pela tela e o FireDAC não permite usar a mesma conexão em duas threads ao mesmo tempo.
 
   if not FDMemTable1.Active then
     FDMemTable1.Open;
 
-  DMConfig.DeleteDados;
-
-  FDMemTable1.First;
+  //Mostra a tela de carregamento antes de começar a gravar
   PageControl1.ActivePageIndex := 2;
-  //SkAnimatedImage1.Animation.Start;
-
-  T:= TThread.CreateAnonymousThread(procedure
-  begin
-      while not FDMemTable1.Eof do
+  PageControl1.Update;
+  Screen.Cursor := crHourGlass;
+  try
+    try
+      DMConfig.GravarNotas(FDMemTable1);
+    except
+      on E: Exception do
       begin
-
-         DMConfig.InserirNotaDB(
-          FDMemTable1.FieldByName('numero').AsString,
-          FDMemTable1.FieldByName('chave').AsString,
-          FDMemTable1.FieldByName('data').AsString,
-          FormatFloat('0.00',FDMemTable1.FieldByName('vtotal').AsFloat),
-          FormatFloat('0.00',FDMemTable1.FieldByName('vlicms').AsFloat),
-          FormatFloat('0.00',FDMemTable1.FieldByName('bcicms').AsFloat),
-          FDMemTable1.FieldByName('xml').AsString
-        );
-
-        FDMemTable1.Next;
+        //GravarNotas já desfez a transação: o banco continua como estava
+        Screen.Cursor := crDefault;
+        PageControl1.ActivePageIndex := 0;
+        messagedlg('Erro ao gravar as notas no banco de dados. O relatório não foi gerado.' + sLineBreak +
+                   E.Message, mtError, [mbOk], 0);
+        Exit;
       end;
-  end
-  );
+    end;
+  finally
+    Screen.Cursor := crDefault;
+  end;
 
-  //Ao terminar de executar chama a função FinalizarRelatorio
-  T.OnTerminate := FinalizaRelatorio;
-  T.Start;
-
+  //Gravação concluída: abre o relatório
+  FinalizaRelatorio(Self);
 end;
 
 procedure TFormPrincipal.LerConfigEmail;             
