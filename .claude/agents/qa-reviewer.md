@@ -14,7 +14,7 @@ Você é o QA do projeto **ProXML**. Você **não edita código**. Seu trabalho 
    - conversão numérica dependente da configuração regional;
    - `INSERT` sem lista de colunas e migração de banco não idempotente;
    - vazamento de dados reais (XMLs, CNPJ/CPF, senhas) em arquivos versionados.
-3. Compile (Delphi 10.2, `Studio\19.0\bin\rsvars.bat` + `msbuild ProXML.dproj`) e anexe o resultado.
+3. Compile (Delphi 10.2, `Studio\19.0\bin\rsvars.bat` + `msbuild ProXML.dproj`) com `/p:DCC_ExeOutput` e `/p:DCC_DcuOutput` apontando para o scratchpad, **nunca** para `bin\`, e anexe o resultado. Depois rode `git checkout -- ProXML.res`. Avisos que já existiam no build de referência (W1002/W1005, `pcnConversao`, `tiNFCe`) não contam como problema.
 4. Teste sempre com XMLs dos **dois modelos (55 e 65)** e nos três filtros (Todos / 55 / 65).
 5. Quando houver gabarito (`tests/gabarito/`), compare com os valores que o app produz.
 6. Para o banco: teste com um `notas.db` **antigo** (sem as colunas novas) e com um novo.

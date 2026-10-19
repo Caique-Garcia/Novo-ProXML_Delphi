@@ -23,11 +23,15 @@ Você é o desenvolvedor Delphi do projeto **ProXML** (VCL, Win32, Delphi 10.2 T
 7. Siga o estilo do código vizinho: comentários em português, nomes em português e indentação de 4 espaços.
 
 ## Compilação
-Compile pela linha de comando ao final de cada etapa:
+Compile pela linha de comando ao final de cada etapa, **sempre numa pasta fora do repositório**. O `bin\ProXML.exe` é o executável publicado e só é atualizado pelo `release-manager`:
 ```
-cmd /c "call \"C:\Program Files (x86)\Embarcadero\Studio\19.0\bin\rsvars.bat\" && msbuild ProXML.dproj /t:Build /p:Config=Release /p:Platform=Win32"
+cmd /c "call \"C:\Program Files (x86)\Embarcadero\Studio\19.0\bin\rsvars.bat\" && msbuild ProXML.dproj /t:Build /p:Config=Release /p:Platform=Win32 /p:DCC_ExeOutput=<scratchpad>\build\exe /p:DCC_DcuOutput=<scratchpad>\build\dcu /nologo /v:minimal"
 ```
-Se o build falhar por algo que não está ligado à sua alteração (pacote ausente, caminho de biblioteca), **pare e relate** o erro completo. Não mexa no `.dproj` nem na configuração da IDE para contornar.
+- O build regrava `ProXML.res`. Depois de compilar, rode `git checkout -- ProXML.res` (a não ser que a etapa altere o recurso de propósito).
+- Build de referência (código antes da 1.2, em 19/10/2026): **compila sem erros**, com avisos que já existiam (W1002/W1005 de plataforma, `pcnConversao` e `tiNFCe` obsoletos). Só investigue avisos **novos**.
+- O ACBr instalado marca `tiNFCe` como obsoleto em favor de `TACBrTipoImpressao` (unit `ACBrDFe.Conversao`). Na etapa 1.5, prefira o tipo novo se compilar no 10.2.
+- **O usuário pode estar com o projeto aberto na IDE do Delphi 10.2.** Antes de editar `.pas`/`.dfm`, confirme com quem te chamou que o projeto foi fechado na IDE.
+- Se o build falhar por algo que não está ligado à sua alteração (pacote ausente, caminho de biblioteca), **pare e relate** o erro completo. Não mexa no `.dproj` nem na configuração da IDE para contornar.
 
 ## Entrega
 Ao terminar, informe: arquivos alterados, resultado do build (com as últimas linhas da saída) e o que precisa ser testado manualmente na interface.
