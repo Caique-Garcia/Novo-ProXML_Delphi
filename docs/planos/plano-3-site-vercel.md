@@ -23,7 +23,10 @@ Página pública que apresenta o ProXML, ensina a usar o app e leva ao download.
 ### 3.2 Prints — usuário → `web-landing`
 - O usuário entrega os prints (com dados fictícios). O agente otimiza as imagens (WebP/PNG) e substitui os espaços reservados.
 
-#### Lista de prints (tirar **depois** dos Planos 1 e 2)
+#### Lista de prints (tirar **depois** dos Planos 1, 4 e 2, já com o visual novo do Plano 4)
+
+> Atualizado em 19/10/2026: o redesign (Plano 4) vem antes do site, então a antiga etapa 4.11 ("prints do site") virou parte deste plano. As telas abaixo podem mudar de nome com o redesign (ex.: a tela "Relatórios" com 2 botões substitui os itens "Relatório" e "Relatório IBS/CBS"); o `web-landing` ajusta a lista conforme os mockups aprovados em `docs/ui/`.
+> Ao publicar o site, incluir o link dele na **tela Sobre** do app (combinado no Plano 4).
 
 | # | Arquivo | O que capturar |
 |---|---------|----------------|

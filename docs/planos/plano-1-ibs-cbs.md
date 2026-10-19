@@ -51,7 +51,7 @@
 | `protNFe` incompleto (sem `infProt`/`cStat`) | "Arquivo não processado" (`nfeProc` sem `protNFe` continua "(sem protocolo)") |
 | Extras pós-QA | Cancelar a linha da grade se o `Post` falhar; checar `nNF` ausente explicitamente |
 | `<cStat>` presente mas vazio | Mantém "(sem protocolo)" |
-| Release v1.1.0 | VersionInfo do executável = **1.1.0**; publicação só depois de o usuário revisar README, notas e pacote; Plano 4/`ux-designer` ficam fora do push |
+| Release v1.1.0 | VersionInfo do executável = **1.1.0**; publicação só depois de o usuário revisar README, notas e pacote. **Atualizado em 19/10/2026:** a publicação foi adiada; os Planos 1 e 4 saem juntos como v1.1.0 (etapa 4.12) |
 | Amostras faltantes | XMLs **sintéticos** gerados pelo `nfe-fiscal` em `exemple\sinteticos\` (fora do git): NF-e 55 com `tpImp=2`, nota de entrada e nota com `vICMS` > 0 |
 
 ## Etapas
@@ -123,7 +123,8 @@
   - requisito de Delphi corrigido para **10.2 Tokyo** (hoje diz 10.4);
   - descrição do repositório atualizada.
 - Empacotar o `ProXML.rar`, publicar a Release v1.1.0 e validar o download.
-- ⏳ 19/10/2026: **pronta para publicação, aguardando OK do usuário**. VersionInfo 1.1.0 (Release/Win32), README, rascunho das notas e `ProXML.rar` preparados; commit apenas local, sem push, tag ou Release.
+- ⏳ 19/10/2026: preparada (VersionInfo 1.1.0, README, rascunho das notas e `ProXML.rar`; commit local `b593076`, sem push, tag ou Release).
+- ⏸️ **Publicação adiada por decisão do usuário:** o Plano 4 (redesign) é executado antes e a v1.1.0 sai com os Planos 1 e 4 juntos, na etapa 4.12. O README, as notas e o pacote serão refeitos lá.
 
 ## Pendências (decidir com o usuário)
 - **P2.** Detalhes visuais dos layouts do ACBr (achados na 1.5): "Folha 1/0" no cabeçalho do `DANFePaisagem.fr3` e uma linha cortando "Emissão … Via Consumidor" no `DANFeNFCeA4.fr3`. Corrigir numa etapa própria, levar ao Plano 4 ou manter?
