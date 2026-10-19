@@ -215,11 +215,14 @@ type
   private
     ConfigEmail : TConfig;
     FTotais : TTotaisNotas;
+    FGerandoDanfe : Boolean;   //evita gerar dois DANFEs ao mesmo tempo (a espera do PDF processa mensagens)
     procedure SetTextoTranferencia(const Text: String);
     procedure AjustarAlturaLinhasGrade;
     procedure FinalizaRelatorio(Sender: TObject);
     procedure ConfigACBR;
     procedure GerarDanfe(const CaminhoArq: String);
+    function  ConfigurarLayoutDanfe(out Mensagem: string): Boolean;
+    function  AguardarArquivoPDF(const Caminhos: array of string; out CaminhoGerado: string): Boolean;
     procedure ComprimirArquivos();
     procedure LerConfigEmail();
     procedure EnviaArquivo(const Email, Assunto: string);
@@ -246,7 +249,7 @@ implementation
 
 uses
   Vcl.Clipbrd,
-  pcnConversao,
+  ACBrDFe.Conversao,
   pcnConversaoNFe,
   {$IFDEF MSWINDOWS}
     Vcl.FileCtrl,
@@ -254,6 +257,10 @@ uses
   System.IOUtils;
 
 {$R *.dfm}
+
+const
+  //Tempo máximo de espera pelo PDF do DANFE (milissegundos)
+  TEMPO_LIMITE_PDF_MS = 15000;
 
 procedure TFormPrincipal.ApplicationException(Sender: TObject; E: Exception);
 begin
@@ -556,16 +563,14 @@ begin
     ACBrNFe.Configuracoes.Geral.FormatoAlerta    := '[ %TAGNIVEL%%TAG% ] %DESCRICAO% - %MSG%';
 
     ACBrNFeDANFEFR.ExibeCampoDePagamento := eipQuadro;
-    AcbrNfeDanfeFR.FastFile        := varPath + 'Report\NFe\DANFeNFCeA4.fr3'; //DANFeNFCe5_00.fr3 // DANFeNFCeA4.fr3
-    AcbrNfeDanfeFR.FastFileEvento  := varPath + 'Report\NFe\EventosNFCe.fr3';
+    //O layout do DANFE (FastFile, FastFileEvento e TipoDANFE) é escolhido por nota em
+    //GerarDanfe (ConfigurarLayoutDanfe), conforme o modelo e o tpImp do XML
 
 //    ACBrNFeDANFeFPDF1.ExibeCampoDePagamento := eipQuadro;
 
     ACBrNFeDANFeFPDF1.PathPDF := varPath + '\NFCe\danfePDF';
     //ACBrNFeDANFeFPDF1.        := varPath + 'Report\NFe\DANFeNFCeA4.fr3'; //DANFeNFCe5_00.fr3 // DANFeNFCeA4.fr3
     //ACBrNFeDANFeFPDF1.FastFileEvento  := varPath + 'Report\NFe\EventosNFCe.fr3';
-
-    ACBrNFe.DANFE.TipoDANFE  := tiNFCe;
 end;
 
 procedure TFormPrincipal.FormShow(Sender: TObject);
@@ -598,80 +603,196 @@ begin
     Clipboard.AsText := Text;
 end;
 
-procedure TFormPrincipal.GerarDanfe(const CaminhoArq: String);
+function TFormPrincipal.ConfigurarLayoutDanfe(out Mensagem: string): Boolean;
 var
-    Result :Boolean;
-    CaminhoPDF : String;
-    NomeArqPDF : String;
-    AuxNomeArqPDF: string;
-    AuxCaminhoPDF: string;
+    PathReport : string;
+    Modelo     : Integer;
+    TipoImp    : TACBrTipoImpressao;
 begin
-    //Gera danfe do arquivo da nfce
-    PageControl1.ActivePageIndex := 2;
-    //SkAnimatedImage1.Animation.Start;
+    //Escolhe o layout do DANFE pela nota carregada no ACBr (NotasFiscais.Items[0]):
+    //  modelo 65 -> NFC-e (DANFeNFCeA4.fr3);
+    //  modelo 55 -> segue o tpImp do XML: 1 retrato (DANFeRetrato.fr3), 2 paisagem (DANFePaisagem.fr3).
+    //Outro tpImp no modelo 55 (3 simplificado, 4, 5 ...) não tem layout definido: a geração é recusada.
+    //Obs.: o DM do FastReport decide o que montar pelo Ide.modelo/Ide.tpImp do XML e não usa
+    //Configuracoes.Geral.ModeloDF; o FastFileEvento só é usado na impressão de eventos.
+    Result     := False;
+    Mensagem   := '';
+    PathReport := ExtractFilePath(ParamStr(0)) + 'Report\NFe\';
+    Modelo     := ACBrNFe.NotasFiscais.Items[0].NFe.Ide.modelo;
+    TipoImp    := ACBrNFe.NotasFiscais.Items[0].NFe.Ide.tpImp;
 
-    NomeArqPDF      :=  ExtractFileName(CaminhoArq);
-    NomeArqPDF      :=  ChangeFileExt(NomeArqPDF, '.pdf');
-    AuxNomeArqPDF   := ChangeFileExt(NomeArqPDF, '-nfe.pdf');
-    CaminhoPDF      :=  ACBrNFe.DANFE.PathPDF + NomeArqPDF;
-    AuxCaminhoPDF   :=  ACBrNFe.DANFE.PathPDF + AuxNomeArqPDF;
+    case Modelo of
+        65:
+        begin
+            ACBrNFeDANFEFR.FastFile       := PathReport + 'DANFeNFCeA4.fr3';
+            ACBrNFeDANFEFR.FastFileEvento := PathReport + 'EventosNFCe.fr3';
+            ACBrNFe.DANFE.TipoDANFE       := tiNFCe;
+        end;
 
-    if FileExists(CaminhoPDF) then
-    begin
-        try
-            DeleteFile(CaminhoPDF);
-        except
-        end
-    end;
+        55:
+        begin
+            case TipoImp of
+                tiRetrato:
+                begin
+                    ACBrNFeDANFEFR.FastFile := PathReport + 'DANFeRetrato.fr3';
+                    ACBrNFe.DANFE.TipoDANFE := tiRetrato;
+                end;
 
-    if FileExists(AuxCaminhoPDF) then
-    begin
-        try
-            DeleteFile(AuxCaminhoPDF);
-        except
-        end
-    end;
+                tiPaisagem:
+                begin
+                    ACBrNFeDANFEFR.FastFile := PathReport + 'DANFePaisagem.fr3';
+                    ACBrNFe.DANFE.TipoDANFE := tiPaisagem;
+                end;
+            else
+                Mensagem := 'Layout de DANFE não suportado (tpImp ' + TpImpToStr(TipoImp) + ').' + sLineBreak +
+                            'O ProXML gera o DANFE da NF-e (modelo 55) apenas nos layouts retrato (tpImp 1) ' +
+                            'e paisagem (tpImp 2).';
+                Exit;
+            end;
 
-    ACBrNFe.NotasFiscais.Clear;
-
-    //ACBrNFe.NotasFiscais.LoadFromString('');
-    Result := ACBrNFe.NotasFiscais.LoadFromFile(CaminhoArq, False);
-
-    if Result then
-        ACBrNFe.NotasFiscais.ImprimirPDF
+            ACBrNFeDANFEFR.FastFileEvento := PathReport + 'EVENTOS.fr3';
+        end;
     else
-    begin
-        PageControl1.ActivePageIndex := 1;
+        Mensagem := 'Modelo de documento não suportado para gerar o DANFE (modelo ' + IntToStr(Modelo) + ').';
         Exit;
     end;
 
-    while (Not FileExists(CaminhoPDF)) and (Not FileExists(AuxCaminhoPDF)) do
-    begin
+    Result := True;
+end;
 
+function TFormPrincipal.AguardarArquivoPDF(const Caminhos: array of string; out CaminhoGerado: string): Boolean;
+var
+    Inicio : Cardinal;
+    I      : Integer;
+begin
+    //Espera o PDF aparecer em um dos caminhos, processando as mensagens da tela,
+    //por no máximo TEMPO_LIMITE_PDF_MS
+    Result        := False;
+    CaminhoGerado := '';
+    Inicio        := GetTickCount;
+
+    while True do
+    begin
+        for I := Low(Caminhos) to High(Caminhos) do
+        begin
+            if (Caminhos[I] <> '') and FileExists(Caminhos[I]) then
+            begin
+                CaminhoGerado := Caminhos[I];
+                Result := True;
+                Exit;
+            end;
+        end;
+
+        if ((GetTickCount - Inicio) >= TEMPO_LIMITE_PDF_MS) or Application.Terminated then
+            Exit;
+
+        Application.ProcessMessages;
+        Sleep(50);
     end;
+end;
 
-    if FileExists(CaminhoPDF) then
-    begin
-        try
-            ShellExecute(0, 'open', PChar(CaminhoPDF), nil, nil, SW_SHOWNORMAL);
-            PageControl1.ActivePageIndex := 1;
-        except
-        end
-    end;
+procedure TFormPrincipal.GerarDanfe(const CaminhoArq: String);
+var
+    Chave         : string;
+    Mensagem      : string;
+    CaminhoGerado : string;
+    CaminhosPDF   : array[0..2] of string;
+    I             : Integer;
+begin
+    //Gera o DANFE (PDF) do XML da nota e abre o arquivo gerado.
+    //A espera do PDF processa mensagens da tela: não deixa iniciar outra geração no meio.
+    if FGerandoDanfe then
+        Exit;
 
-    if FileExists(AuxCaminhoPDF) then
-    begin
+    FGerandoDanfe := True;
+    GerarDANFe1.Enabled := False;
+    try
+        PageControl1.ActivePageIndex := 2;
+        //SkAnimatedImage1.Animation.Start;
+
+        //Carrega o XML (sem validar a assinatura)
+        ACBrNFe.NotasFiscais.Clear;
         try
-            ShellExecute(0, 'open', PChar(AuxCaminhoPDF), nil, nil, SW_SHOWNORMAL);
-            PageControl1.ActivePageIndex := 1;
+            if (not ACBrNFe.NotasFiscais.LoadFromFile(CaminhoArq, False)) or
+               (ACBrNFe.NotasFiscais.Count = 0) then
+                raise Exception.Create('O arquivo não contém uma Nota Fiscal válida.');
         except
-        end
+            on E: Exception do
+            begin
+                DMConfig.CreateLog(E.ClassName, E.Message);
+                PageControl1.ActivePageIndex := 1;
+                messagedlg('Não foi possível carregar o XML da nota:' + sLineBreak + CaminhoArq + sLineBreak +
+                           sLineBreak + E.Message, mtError, [mbOk], 0);
+                Exit;
+            end;
+        end;
+
+        //Escolhe o layout pelo modelo e pelo tpImp da nota
+        if not ConfigurarLayoutDanfe(Mensagem) then
+        begin
+            PageControl1.ActivePageIndex := 1;
+            messagedlg(Mensagem, mtWarning, [mbOk], 0);
+            Exit;
+        end;
+
+        //Caminhos possíveis do PDF. O ACBr grava '<chave>-nfe.pdf', com a chave do Id da nota
+        //(não depende do nome do arquivo XML); os outros dois são os nomes usados até a versão 1.0
+        Chave := Trim(ACBrNFe.NotasFiscais.Items[0].NFe.infNFe.ID);
+        if UpperCase(Copy(Chave, 1, 3)) = 'NFE' then
+            Delete(Chave, 1, 3);
+
+        CaminhosPDF[0] := '';
+        if Chave <> '' then
+            CaminhosPDF[0] := ACBrNFe.DANFE.PathPDF + Chave + '-nfe.pdf';
+        CaminhosPDF[1] := ACBrNFe.DANFE.PathPDF + ChangeFileExt(ExtractFileName(CaminhoArq), '.pdf');
+        CaminhosPDF[2] := ACBrNFe.DANFE.PathPDF + ChangeFileExt(ExtractFileName(CaminhoArq), '-nfe.pdf');
+
+        //Apaga PDFs de gerações anteriores para não abrir um arquivo antigo
+        for I := Low(CaminhosPDF) to High(CaminhosPDF) do
+        begin
+            if (CaminhosPDF[I] <> '') and FileExists(CaminhosPDF[I]) then
+                DeleteFile(CaminhosPDF[I]);
+        end;
+
+        try
+            ACBrNFe.NotasFiscais.ImprimirPDF;
+        except
+            on E: Exception do
+            begin
+                DMConfig.CreateLog(E.ClassName, E.Message);
+                PageControl1.ActivePageIndex := 1;
+                messagedlg('Erro ao gerar o DANFE:' + sLineBreak + sLineBreak + E.Message, mtError, [mbOk], 0);
+                Exit;
+            end;
+        end;
+
+        if not AguardarArquivoPDF(CaminhosPDF, CaminhoGerado) then
+        begin
+            if Application.Terminated then
+                Exit;
+
+            DMConfig.CreateLog('GerarDanfe', 'PDF do DANFE não gerado: ' + CaminhoArq);
+            PageControl1.ActivePageIndex := 1;
+            messagedlg('O PDF do DANFE não foi gerado em ' + IntToStr(TEMPO_LIMITE_PDF_MS div 1000) +
+                       ' segundos.' + sLineBreak + sLineBreak + 'Pasta esperada: ' + ACBrNFe.DANFE.PathPDF,
+                       mtError, [mbOk], 0);
+            Exit;
+        end;
+
+        ShellExecute(0, 'open', PChar(CaminhoGerado), nil, nil, SW_SHOWNORMAL);
+        PageControl1.ActivePageIndex := 1;
+    finally
+        GerarDANFe1.Enabled := True;
+        FGerandoDanfe := False;
     end;
 end;
 
 procedure TFormPrincipal.GerarDANFe1Click(Sender: TObject);
 begin
-  GerarDanfe(DBGrid1.DataSource.DataSet.FieldByName('xml').Value);
+  if DBGrid1.DataSource.DataSet.IsEmpty then
+    Exit;
+
+  GerarDanfe(DBGrid1.DataSource.DataSet.FieldByName('xml').AsString);
 end;
 
 procedure TFormPrincipal.GerarPDF1Click(Sender: TObject);

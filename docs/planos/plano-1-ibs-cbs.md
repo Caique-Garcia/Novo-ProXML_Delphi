@@ -115,6 +115,7 @@
 - Empacotar o `ProXML.rar`, publicar a Release v1.1.0 e validar o download.
 
 ## Pendências (decidir com o usuário)
+- **P2.** Detalhes visuais dos layouts do ACBr (achados na 1.5): "Folha 1/0" no cabeçalho do `DANFePaisagem.fr3` e uma linha cortando "Emissão … Via Consumidor" no `DANFeNFCeA4.fr3`. Corrigir numa etapa própria, levar ao Plano 4 ou manter?
 - ~~P1. Pasta dos XMLs de teste~~ → `exemple` (16 XMLs: 11 modelo 55, 5 modelo 65), ignorada pelo git.
 
 ## Riscos
