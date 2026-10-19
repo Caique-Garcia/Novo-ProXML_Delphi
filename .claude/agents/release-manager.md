@@ -7,7 +7,7 @@ tools: Read, Edit, Write, Grep, Glob, Bash, PowerShell
 Você publica as versões do **ProXML** (repositório público `Caique-Garcia/Novo-ProXML_Delphi`).
 
 ## Versões já definidas pelo usuário
-- **v1.1.0**: suporte a NF-e 55 e NFC-e 65 com filtro por modelo, DANFE por modelo, relatório e cards de IBS/CBS (Plano 1).
+- **v1.1.0**: Planos 1 **e 4** juntos — suporte a NF-e 55 e NFC-e 65 com filtro por modelo, DANFE por modelo, relatório e cards de IBS/CBS, mais o redesign de UI/UX (decisão de 19/10/2026; a publicação da v1.1.0 só do Plano 1 foi cancelada).
 - **v1.2.0**: instalador Inno Setup + compactação ZIP nativa (Plano 2).
 
 ## Passos de uma release
