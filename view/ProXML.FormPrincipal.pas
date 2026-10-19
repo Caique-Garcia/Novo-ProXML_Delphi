@@ -63,7 +63,8 @@ uses
   SysUtils,  
   ACBrMail,
   Midas,
-  MidasLib;
+  MidasLib,
+  uCalculadoraXML;
 
 type
   TFormPrincipal = class(TForm)
@@ -129,6 +130,13 @@ type
     Loading: TTabSheet;
     FormRelatorio: TFormRelatorios;
     FDMemTable1xml: TStringField;
+    FDMemTable1modelo: TIntegerField;
+    FDMemTable1tem_ibscbs: TBooleanField;
+    FDMemTable1vbcibscbs: TFloatField;
+    FDMemTable1vibsuf: TFloatField;
+    FDMemTable1vibsmun: TFloatField;
+    FDMemTable1vibs: TFloatField;
+    FDMemTable1vcbs: TFloatField;
     ACBrNFe: TACBrNFe;
     GerarDANFe1: TMenuItem;
     ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF;
@@ -191,6 +199,7 @@ type
       DataCol: Integer; Column: TColumn; State: TGridDrawState);
   private
     ConfigEmail : TConfig;
+    FTotais : TTotaisNotas;
     procedure SetTextoTranferencia(const Text: String);
     procedure FinalizaRelatorio(Sender: TObject);
     procedure ConfigACBR;
@@ -202,7 +211,9 @@ type
     function  CreateProcessSimple(cmd: string): boolean;
 
   public
-
+    procedure AtualizarTotais;
+    //Totais das notas da grade (respeitando o filtro), inclusive IBS/CBS
+    property Totais : TTotaisNotas read FTotais;
   end;
 
 Type
@@ -214,7 +225,6 @@ var
 implementation
 
 uses
-  uCalculadoraXML,
   Vcl.Clipbrd,
   pcnConversao,
   pcnConversaoNFe,
@@ -234,7 +244,17 @@ end;
 procedure TFormPrincipal.btnEnviarEmailClick(Sender: TObject);
 begin
     //Enviar Email com arquivos compactados
-    EnviaArquivo(Trim(EditEmailEnviar.Text), 'Projeto Pro XML - NFCe XMLs');
+    EnviaArquivo(Trim(EditEmailEnviar.Text), 'Projeto Pro XML - XMLs de Nota Fiscal');
+end;
+
+procedure TFormPrincipal.AtualizarTotais;
+begin
+    //Recalcula os totais a partir das notas da grade (respeita o filtro ativo)
+    FTotais := CalcularTotais(FDMemTable1);
+
+    LabelValorTotal.Caption := 'R$ ' + FloatToStrF(FTotais.ValorTotal, ffFixed, 15, 2);
+    LabelbaseICMS.Caption   := 'R$ ' + FloatToStrF(FTotais.BaseICMS, ffFixed, 15, 2);
+    LabelValorICMS.Caption  := 'R$ ' + FloatToStrF(FTotais.ValorICMS, ffFixed, 15, 2);
 end;
 
 procedure TFormPrincipal.btnSalvarConfigClick(Sender: TObject);
@@ -709,7 +729,7 @@ begin
   CalculadoraXML:=  TCalculadoraXML.Create;
   try
 
-    if EditCaminho.Text <> 'Selecione uma pasta contendo XMLs de NFCe' then
+    if EditCaminho.Text <> 'Selecione uma pasta contendo XMLs de Nota Fiscal' then
     begin
       CalculadoraXML.CaminhoDiretorio := EditCaminho.Text;
       CalculadoraXML.ProcessarXMLs;

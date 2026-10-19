@@ -627,6 +627,10 @@ object FormPrincipal: TFormPrincipal
             object TabSheet1: TTabSheet
               Caption = 'TabSheet1'
               TabVisible = False
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Gauge1: TGauge
                 Left = 0
                 Top = 387
@@ -667,6 +671,10 @@ object FormPrincipal: TFormPrincipal
               Caption = 'TabSheet2'
               ImageIndex = 1
               TabVisible = False
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Panel5: TPanel
                 Left = 0
                 Top = 0
@@ -711,6 +719,15 @@ object FormPrincipal: TFormPrincipal
                       Visible = True
                     end
                     item
+                      Alignment = taCenter
+                      Expanded = False
+                      FieldName = 'modelo'
+                      Title.Alignment = taCenter
+                      Title.Caption = 'Modelo'
+                      Width = 50
+                      Visible = True
+                    end
+                    item
                       Expanded = False
                       FieldName = 'chave'
                       Title.Alignment = taCenter
@@ -732,7 +749,7 @@ object FormPrincipal: TFormPrincipal
                       FieldName = 'data'
                       Title.Alignment = taCenter
                       Title.Caption = 'Data'
-                      Width = 106
+                      Width = 80
                       Visible = True
                     end
                     item
@@ -759,11 +776,19 @@ object FormPrincipal: TFormPrincipal
               Caption = 'Loading'
               ImageIndex = 2
               TabVisible = False
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
             end
             object Enviar: TTabSheet
               Caption = 'Enviar'
               ImageIndex = 3
               TabVisible = False
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object Panel10: TPanel
                 Left = 0
                 Top = 0
@@ -783,7 +808,7 @@ object FormPrincipal: TFormPrincipal
                   AlignWithMargins = True
                   Left = 10
                   Top = 3
-                  Width = 603
+                  Width = 57
                   Height = 25
                   Margins.Left = 10
                   Align = alTop
@@ -794,13 +819,12 @@ object FormPrincipal: TFormPrincipal
                   Font.Name = 'Segoe UI'
                   Font.Style = []
                   ParentFont = False
-                  ExplicitWidth = 57
                 end
                 object Label12: TLabel
                   AlignWithMargins = True
                   Left = 10
                   Top = 34
-                  Width = 603
+                  Width = 149
                   Height = 17
                   Margins.Left = 10
                   Align = alTop
@@ -811,7 +835,6 @@ object FormPrincipal: TFormPrincipal
                   Font.Name = 'Segoe UI'
                   Font.Style = []
                   ParentFont = False
-                  ExplicitWidth = 149
                 end
                 object Shape15: TShape
                   Left = 16
@@ -1304,8 +1327,8 @@ object FormPrincipal: TFormPrincipal
             ReadOnly = True
             ShowHint = True
             TabOrder = 0
-            Text = 'Selecione uma pasta contendo XMLs de NFCe'
-            TextHint = 'Selecione uma pasta contendo XMLs de NFCe'
+            Text = 'Selecione uma pasta contendo XMLs de Nota Fiscal'
+            TextHint = 'Selecione uma pasta contendo XMLs de Nota Fiscal'
           end
           object Panel7: TPanel
             Left = 682
@@ -1389,6 +1412,34 @@ object FormPrincipal: TFormPrincipal
         Name = 'xml'
         DataType = ftString
         Size = 200
+      end
+      item
+        Name = 'modelo'
+        DataType = ftInteger
+      end
+      item
+        Name = 'tem_ibscbs'
+        DataType = ftBoolean
+      end
+      item
+        Name = 'vbcibscbs'
+        DataType = ftFloat
+      end
+      item
+        Name = 'vibsuf'
+        DataType = ftFloat
+      end
+      item
+        Name = 'vibsmun'
+        DataType = ftFloat
+      end
+      item
+        Name = 'vibs'
+        DataType = ftFloat
+      end
+      item
+        Name = 'vcbs'
+        DataType = ftFloat
       end>
     IndexDefs = <>
     FetchOptions.AssignedValues = [evMode, evUnidirectional]
@@ -1408,7 +1459,7 @@ object FormPrincipal: TFormPrincipal
     Left = 1040
     Top = 377
     Content = {
-      414442530F00801FBE020000FF00010001FF02FF03040016000000460044004D
+      414442530F005E0229050000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
@@ -1429,29 +1480,49 @@ object FormPrincipal: TFormPrincipal
       13000114000115000C000000760074006F00740061006C00FEFF0B0400060000
       0078006D006C0005000600000078006D006C000C00070000000E001A001700C8
       0000000F000110000111000112000113000114000115000600000078006D006C
-      001800C8000000FEFEFF1BFEFF1CFEFF1DFEFEFEFF1EFEFF1FFF20FEFEFE0E00
-      4D0061006E0061006700650072001E0055007000640061007400650073005200
-      650067006900730074007200790012005400610062006C0065004C0069007300
-      74000A005400610062006C00650008004E0061006D006500140053006F007500
-      7200630065004E0061006D0065000A0054006100620049004400240045006E00
-      66006F0072006300650043006F006E00730074007200610069006E0074007300
-      1E004D0069006E0069006D0075006D0043006100700061006300690074007900
-      180043006800650063006B004E006F0074004E0075006C006C00140043006F00
-      6C0075006D006E004C006900730074000C0043006F006C0075006D006E001000
-      53006F007500720063006500490044000E006400740049006E00740033003200
-      1000440061007400610054007900700065001400530065006100720063006800
-      610062006C006500120041006C006C006F0077004E0075006C006C0008004200
-      61007300650014004F0041006C006C006F0077004E0075006C006C0012004F00
-      49006E0055007000640061007400650010004F0049006E005700680065007200
-      65001A004F0072006900670069006E0043006F006C004E0061006D0065001800
-      64007400570069006400650053007400720069006E0067000800530069007A00
-      6500140053006F007500720063006500530069007A0065001000640074004400
-      6F00750062006C00650018006400740041006E00730069005300740072006900
-      6E0067001C0043006F006E00730074007200610069006E0074004C0069007300
-      7400100056006900650077004C006900730074000E0052006F0077004C006900
-      730074001800520065006C006100740069006F006E004C006900730074001C00
-      55007000640061007400650073004A006F00750072006E0061006C000E004300
-      680061006E00670065007300}
+      001800C8000000FEFF0B04000C0000006D006F00640065006C006F0005000C00
+      00006D006F00640065006C006F000C00080000000E000D000F00011000011100
+      0112000113000114000115000C0000006D006F00640065006C006F00FEFF0B04
+      0014000000740065006D005F0069006200730063006200730005001400000074
+      0065006D005F006900620073006300620073000C00090000000E001B000F0001
+      100001110001120001130001140001150014000000740065006D005F00690062
+      007300630062007300FEFF0B0400120000007600620063006900620073006300
+      620073000500120000007600620063006900620073006300620073000C000A00
+      00000E0019000F00011000011100011200011300011400011500120000007600
+      62006300690062007300630062007300FEFF0B04000C00000076006900620073
+      007500660005000C0000007600690062007300750066000C000B0000000E0019
+      000F000110000111000112000113000114000115000C00000076006900620073
+      0075006600FEFF0B04000E00000076006900620073006D0075006E0005000E00
+      000076006900620073006D0075006E000C000C0000000E0019000F0001100001
+      11000112000113000114000115000E00000076006900620073006D0075006E00
+      FEFF0B040008000000760069006200730005000800000076006900620073000C
+      000D0000000E0019000F00011000011100011200011300011400011500080000
+      007600690062007300FEFF0B0400080000007600630062007300050008000000
+      76006300620073000C000E0000000E0019000F00011000011100011200011300
+      011400011500080000007600630062007300FEFEFF1CFEFF1DFEFF1EFEFEFEFF
+      1FFEFF20FF21FEFEFE0E004D0061006E0061006700650072001E005500700064
+      0061007400650073005200650067006900730074007200790012005400610062
+      006C0065004C006900730074000A005400610062006C00650008004E0061006D
+      006500140053006F0075007200630065004E0061006D0065000A005400610062
+      0049004400240045006E0066006F0072006300650043006F006E007300740072
+      00610069006E00740073001E004D0069006E0069006D0075006D004300610070
+      0061006300690074007900180043006800650063006B004E006F0074004E0075
+      006C006C00140043006F006C0075006D006E004C006900730074000C0043006F
+      006C0075006D006E00100053006F007500720063006500490044000E00640074
+      0049006E00740033003200100044006100740061005400790070006500140053
+      0065006100720063006800610062006C006500120041006C006C006F0077004E
+      0075006C006C000800420061007300650014004F0041006C006C006F0077004E
+      0075006C006C0012004F0049006E0055007000640061007400650010004F0049
+      006E00570068006500720065001A004F0072006900670069006E0043006F006C
+      004E0061006D006500180064007400570069006400650053007400720069006E
+      0067000800530069007A006500140053006F007500720063006500530069007A
+      00650010006400740044006F00750062006C00650018006400740041006E0073
+      00690053007400720069006E00670012006400740042006F006F006C00650061
+      006E001C0043006F006E00730074007200610069006E0074004C006900730074
+      00100056006900650077004C006900730074000E0052006F0077004C00690073
+      0074001800520065006C006100740069006F006E004C006900730074001C0055
+      007000640061007400650073004A006F00750072006E0061006C000E00430068
+      0061006E00670065007300}
     object FDMemTable1numero: TIntegerField
       FieldName = 'numero'
     end
@@ -1474,6 +1545,32 @@ object FormPrincipal: TFormPrincipal
     object FDMemTable1xml: TStringField
       FieldName = 'xml'
       Size = 200
+    end
+    object FDMemTable1modelo: TIntegerField
+      FieldName = 'modelo'
+    end
+    object FDMemTable1tem_ibscbs: TBooleanField
+      FieldName = 'tem_ibscbs'
+    end
+    object FDMemTable1vbcibscbs: TFloatField
+      FieldName = 'vbcibscbs'
+      DisplayFormat = '#,##0.00'
+    end
+    object FDMemTable1vibsuf: TFloatField
+      FieldName = 'vibsuf'
+      DisplayFormat = '#,##0.00'
+    end
+    object FDMemTable1vibsmun: TFloatField
+      FieldName = 'vibsmun'
+      DisplayFormat = '#,##0.00'
+    end
+    object FDMemTable1vibs: TFloatField
+      FieldName = 'vibs'
+      DisplayFormat = '#,##0.00'
+    end
+    object FDMemTable1vcbs: TFloatField
+      FieldName = 'vcbs'
+      DisplayFormat = '#,##0.00'
     end
   end
   object PopupMenu: TPopupMenu

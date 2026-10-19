@@ -32,6 +32,9 @@
 | Nota não autorizada (ex.: denegada 110) | Fica **fora de todos os totais**, inclusive IBS/CBS |
 | Sintéticos | Servem só para testar leitura e soma; não precisam ser fiscalmente coerentes. Um caso extra prova a regra do `cStat` |
 | Espera do PDF em `GerarDanfe` | **Corrigir na 1.5**: trocar o laço infinito por espera com tempo limite (~15 s) e mensagem de erro clara |
+| Grade entre processamentos | **Limpar** a `FDMemTable1` a cada clique em Processar: cards e relatório mostram só a pasta atual |
+| Log de nota não autorizada | `Nota Fiscal <nNF> - não autorizada (cStat <código>)`; XML sem protocolo continua como "Arquivo não processado" |
+| `IBSCBSTot` sem `vBCIBSCBS` | Base = 0 e a nota é mantida; tag presente com valor inválido → arquivo não processado |
 | Amostras faltantes | XMLs **sintéticos** gerados pelo `nfe-fiscal` em `exemple\sinteticos\` (fora do git): NF-e 55 com `tpImp=2`, nota de entrada e nota com `vICMS` > 0 |
 
 ## Etapas

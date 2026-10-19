@@ -2,37 +2,74 @@ unit uCalculadoraXML;
 
 interface
 
+uses
+  Data.DB;
+
 type
+  //Dados lidos de um XML de Nota Fiscal (NF-e modelo 55 ou NFC-e modelo 65)
+  TDadosNotaXML = record
+    NumeroNF     : String;
+    DataEmissao  : String;   //ide/dhEmi como veio no XML
+    Modelo       : String;   //ide/mod
+    FalhaModelo  : Boolean;  //não foi possível ler ide/mod
+    ModeloValido : Boolean;  //modelo 55 ou 65
+    cStat        : String;   //protNFe/infProt/cStat
+    Autorizada   : Boolean;  //cStat 100 ou 150
+    vNF          : Double;
+    vBC          : Double;
+    vICMS        : Double;
+    TemIBSCBS    : Boolean;  //existe o grupo total/IBSCBSTot
+    vBCIBSCBS    : Double;
+    vIBSUF       : Double;
+    vIBSMun      : Double;
+    vIBS         : Double;
+    vCBS         : Double;
+  end;
+
+  //Totais das notas da grade (respeitando o filtro ativo)
+  TTotaisNotas = record
+    Quantidade       : Integer;
+    ValorTotal       : Double;
+    BaseICMS         : Double;
+    ValorICMS        : Double;
+    QuantidadeIBSCBS : Integer;
+    BaseIBSCBS       : Double;
+    IBSUF            : Double;
+    IBSMun           : Double;
+    IBS              : Double;
+    CBS              : Double;
+  end;
+
   TCalculadoraXML = class
   private
     FValorTotal: String;
     FValorBaseICMS: String;
     FValorICMS: String;
     FCaminhoDiretorio: String;
-    FValorTotalFloat: Double;
-    FValorTotalBCFloat: Double;
-    FValorTotalICMSFloat: Double;
     procedure SetValorTotal(const Value: String);
     procedure SetValorBaseICMS(const Value: String);
     procedure SetValorICMS(const Value: String);
     procedure SetCaminhoDiretorio(const Value: String);
-    procedure SetValorTotalFloat(const Value: Double);
-    procedure SetValorTotalBCFloat(const Value: Double);
-    procedure SetValorTotalICMSFloat(const Value: Double);
     function FormataDataStr(const DataStr: String): String;
 
 
   public
     property ValorTotal : String read FValorTotal write SetValorTotal;
-    property ValorTotalFloat : Double read FValorTotalFloat Write SetValorTotalFloat;
-    property ValorTotalBCFloat : Double read FValorTotalBCFloat Write SetValorTotalBCFloat;
-    property ValorTotalICMSFloat : Double read FValorTotalICMSFloat Write SetValorTotalICMSFloat;
     property ValorICMS : String read FValorICMS write SetValorICMS;
     property ValorBaseICMS : String read FValorBaseICMS write SetValorBaseICMS;
     property CaminhoDiretorio : String read FCaminhoDiretorio write SetCaminhoDiretorio;
     procedure ProcessarXMLs;
     procedure GetTagValueFromXML(var CaminhoXML: string);
   end;
+
+  //Converte um valor numérico do XML (sempre com ponto decimal), sem depender do idioma do Windows
+  function XMLParaFloat(const Valor: String): Double;
+
+  //Lê os dados de um XML de Nota Fiscal, sem acessar a tela
+  function LerNotaXML(const CaminhoXML: String): TDadosNotaXML;
+
+  //Soma as notas do DataSet (só os registros visíveis pelo filtro ativo)
+  function CalcularTotais(DataSet: TDataSet): TTotaisNotas;
 
   var
      AValorTotal: String;
@@ -53,133 +90,271 @@ uses
   Vcl.Dialogs,
   ProXML.FormPrincipal,
   System.Types,
-  System.StrUtils,
-  DB;
+  System.StrUtils;
+
+var
+  //Formato dos números no XML: ponto decimal e sem separador de milhar
+  FormatoNumeroXML: TFormatSettings;
 
 { TCalculadoraXML }
 
-function NFeAutorizada(const Texto: string): Boolean;
+function NFeAutorizada(const cStat: string): Boolean;
 begin
-  Result := ContainsText(Texto, 'Autorizado o uso da NF-e');
+  //Nota autorizada: cStat 100 (autorizado o uso) ou 150 (autorizado fora de prazo)
+  Result := (cStat = '100') or (cStat = '150');
+end;
+
+function XMLParaFloat(const Valor: String): Double;
+begin
+  Result := StrToFloat(Trim(Valor), FormatoNumeroXML);
+end;
+
+function NoFilho(Node: IXMLNode; const Nome: String): IXMLNode;
+begin
+  //Retorna o nó filho ou nil (também quando o pai não existe)
+  Result := nil;
+  if Node <> nil then
+    Result := Node.ChildNodes.FindNode(Nome);
+end;
+
+function NoFilhoObrigatorio(Node: IXMLNode; const Nome: String): IXMLNode;
+begin
+  Result := NoFilho(Node, Nome);
+  if Result = nil then
+    raise Exception.Create('Tag ' + Nome + ' não encontrada no XML');
+end;
+
+function ValorObrigatorio(Node: IXMLNode; const Nome: String): Double;
+begin
+  Result := XMLParaFloat(NoFilhoObrigatorio(Node, Nome).Text);
+end;
+
+function ValorOpcional(Node: IXMLNode; const Nome: String): Double;
+var
+  NodeValor: IXMLNode;
+begin
+  //Tag ausente (ou grupo pai ausente) vale 0
+  Result := 0;
+  NodeValor := NoFilho(Node, Nome);
+  if NodeValor <> nil then
+    Result := XMLParaFloat(NodeValor.Text);
+end;
+
+function LerNotaXML(const CaminhoXML: String): TDadosNotaXML;
+var
+  XMLDocument: IXMLDocument;
+  NodenfeProc, NodeinfNFe, NodeprotNFe, NodeIde, NodeTotal, NodeICMSTot, NodeIBSCBSTot, NodegIBS : IXMLNode;
+begin
+  //Função que lê os dados do arquivo XML
+  //XML fora da estrutura esperada (ex.: sem nfeProc) gera exceção
+  Result.NumeroNF     := '';
+  Result.DataEmissao  := '';
+  Result.Modelo       := '';
+  Result.FalhaModelo  := False;
+  Result.ModeloValido := False;
+  Result.cStat        := '';
+  Result.Autorizada   := False;
+  Result.vNF          := 0;
+  Result.vBC          := 0;
+  Result.vICMS        := 0;
+  Result.TemIBSCBS    := False;
+  Result.vBCIBSCBS    := 0;
+  Result.vIBSUF       := 0;
+  Result.vIBSMun      := 0;
+  Result.vIBS         := 0;
+  Result.vCBS         := 0;
+
+  XMLDocument := TXMLDocument.Create(Nil);
+
+  //Aqui carregamos o arquivo XML no objeto XMLDocument
+  XMLDocument.LoadFromFile(CaminhoXML);
+  NodenfeProc := XMLDocument.ChildNodes.FindNode('nfeProc');
+  NodeinfNFe  := NodenfeProc.ChildNodes.FindNode('NFe').ChildNodes.FindNode('infNFe');
+  NodeIde     := NodeinfNFe.ChildNodes.FindNode('ide');
+  Result.NumeroNF := NodeIde.ChildValues['nNF'];
+
+  //Tentando recuperar a data do XML
+  try
+    Result.DataEmissao := NodeIde.ChildValues['dhEmi'];
+  except
+    Result.DataEmissao := '0000-00-00';
+  end;
+
+  try
+    Result.Modelo := NodeIde.ChildValues['mod'];
+  except
+    Result.FalhaModelo := True;
+    Exit;
+  end;
+
+  Result.ModeloValido := (Result.Modelo = '55') or (Result.Modelo = '65');
+  if not Result.ModeloValido then
+    Exit;
+
+  //Aqui vamos tentar pegar o cStat do protocolo de autorização
+  NodeprotNFe := NodenfeProc.ChildNodes.FindNode('protNFe');
+  try
+    Result.cStat := NodeprotNFe.ChildNodes.FindNode('infProt').ChildValues['cStat'];
+    Result.cStat := Trim(Result.cStat);
+  except
+    //Caso não consiga acessar o nó atribui vazio
+    Result.cStat := '';
+  end;
+
+  Result.Autorizada := NFeAutorizada(Result.cStat);
+  if not Result.Autorizada then
+    Exit;
+
+  //Totais do ICMS (obrigatórios)
+  NodeTotal   := NoFilhoObrigatorio(NodeinfNFe, 'total');
+  NodeICMSTot := NoFilhoObrigatorio(NodeTotal, 'ICMSTot');
+  Result.vNF   := ValorObrigatorio(NodeICMSTot, 'vNF');
+  Result.vBC   := ValorObrigatorio(NodeICMSTot, 'vBC');
+  Result.vICMS := ValorObrigatorio(NodeICMSTot, 'vICMS');
+
+  //Totais do IBS/CBS (Reforma Tributária). gIBS, gIBSUF, gIBSMun e gCBS são opcionais: ausentes valem 0
+  NodeIBSCBSTot := NoFilho(NodeTotal, 'IBSCBSTot');
+  if NodeIBSCBSTot <> nil then
+  begin
+    Result.TemIBSCBS := True;
+    Result.vBCIBSCBS := ValorOpcional(NodeIBSCBSTot, 'vBCIBSCBS');
+
+    NodegIBS := NoFilho(NodeIBSCBSTot, 'gIBS');
+    Result.vIBSUF  := ValorOpcional(NoFilho(NodegIBS, 'gIBSUF'), 'vIBSUF');
+    Result.vIBSMun := ValorOpcional(NoFilho(NodegIBS, 'gIBSMun'), 'vIBSMun');
+    Result.vIBS    := ValorOpcional(NodegIBS, 'vIBS');
+
+    Result.vCBS    := ValorOpcional(NoFilho(NodeIBSCBSTot, 'gCBS'), 'vCBS');
+  end;
+end;
+
+function CalcularTotais(DataSet: TDataSet): TTotaisNotas;
+var
+  Marcador: TBookmark;
+begin
+  Result.Quantidade       := 0;
+  Result.ValorTotal       := 0;
+  Result.BaseICMS         := 0;
+  Result.ValorICMS        := 0;
+  Result.QuantidadeIBSCBS := 0;
+  Result.BaseIBSCBS       := 0;
+  Result.IBSUF            := 0;
+  Result.IBSMun           := 0;
+  Result.IBS              := 0;
+  Result.CBS              := 0;
+
+  if (DataSet = nil) or (not DataSet.Active) then
+    Exit;
+
+  DataSet.DisableControls;
+  try
+    //Guarda o registro corrente para voltar a ele no final
+    Marcador := DataSet.GetBookmark;
+    try
+      DataSet.First;
+      while not DataSet.Eof do
+      begin
+        Result.Quantidade := Result.Quantidade + 1;
+        Result.ValorTotal := Result.ValorTotal + DataSet.FieldByName('vtotal').AsFloat;
+        Result.BaseICMS   := Result.BaseICMS   + DataSet.FieldByName('bcicms').AsFloat;
+        Result.ValorICMS  := Result.ValorICMS  + DataSet.FieldByName('vlicms').AsFloat;
+
+        if DataSet.FieldByName('tem_ibscbs').AsBoolean then
+        begin
+          Result.QuantidadeIBSCBS := Result.QuantidadeIBSCBS + 1;
+          Result.BaseIBSCBS := Result.BaseIBSCBS + DataSet.FieldByName('vbcibscbs').AsFloat;
+          Result.IBSUF      := Result.IBSUF      + DataSet.FieldByName('vibsuf').AsFloat;
+          Result.IBSMun     := Result.IBSMun     + DataSet.FieldByName('vibsmun').AsFloat;
+          Result.IBS        := Result.IBS        + DataSet.FieldByName('vibs').AsFloat;
+          Result.CBS        := Result.CBS        + DataSet.FieldByName('vcbs').AsFloat;
+        end;
+
+        DataSet.Next;
+      end;
+    finally
+      if (Marcador <> nil) and DataSet.BookmarkValid(Marcador) then
+        DataSet.GotoBookmark(Marcador);
+      DataSet.FreeBookmark(Marcador);
+    end;
+  finally
+    DataSet.EnableControls;
+  end;
 end;
 
 procedure TCalculadoraXML.GetTagValueFromXML(var CaminhoXML: string);
   var
-    XMLDocument: IXMLDocument;
-    NodeinfNFe, NodeprotNFe, NodeIde : IXMLNode;
-    BValorString, TagAutorizado, NumeroNF, DataEm, ModeloXML: String;
-    AValorFloat, BValorFloat, AValorFloatBC, AValorFloatICMS: Double;
-    //posicao: Integer;
+    Dados: TDadosNotaXML;
+    Numero, Modelo: Integer;
   Chave: String;
 begin
     //Função que trabalha os dados do arquivo
-   XMLDocument := TXMLDocument.Create(Nil);
+    Dados := LerNotaXML(CaminhoXML);
 
-  try
-    //Aqui carregamos o arquivo XML no objeto XMLDocument
-    XMLDocument.LoadFromFile(CaminhoXML);
-    NodeIde  := XMLDocument.ChildNodes.FindNode('nfeProc').ChildNodes.FindNode('NFe').ChildNodes.FindNode('infNFe').ChildNodes.FindNode('ide');
-    NumeroNF := NodeIde.ChildValues['nNF'];
-
-    //Tentando recuperar a data do XML
-    try
-      DataEm := NodeIde.ChildValues['dhEmi'];
-    except
-      DataEm := '0000-00-00';
-    end;
-
-    try
-      ModeloXML := NodeIde.ChildValues['mod'];
-      if ModeloXML <> '65' then
-      begin
-          FormPrincipal.Memo1.Lines.Add('XML ' + ExtractFileName(CaminhoXML) + ' - modelo diferente de 65');
-          Exit;
-      end;
-
-    except on e: Exception do
-        begin
-            FormPrincipal.Memo1.Lines.Add('XML ' + ExtractFileName(CaminhoXML) + ' - Falha ao recuperar modelo');
-            Exit;
-        end;
-    end;
-
-    //Aqui vamos tentar pegar o Valor da Tag de Autorização
-    NodeprotNFe := XMLDocument.ChildNodes.FindNode('nfeProc').ChildNodes.FindNode('protNFe');
-    try
-      TagAutorizado := NodeprotNFe.ChildNodes.FindNode('infProt').ChildValues['xMotivo'];
-    except
-      //Caso não consiga acessar o nó atribui vazio
-      TagAutorizado := '';
-    end;
-
-
-    //Aqui vamos verificar se existe a tag de autorização no XML
-    if NFeAutorizada(TagAutorizado) then
+    if Dados.FalhaModelo then
     begin
+        FormPrincipal.Memo1.Lines.Add('XML ' + ExtractFileName(CaminhoXML) + ' - Falha ao recuperar modelo');
+        Exit;
+    end;
 
-      //Aqui Selecionamos e recuperando o valor da tag(nó)
-      NodeinfNFe := XMLDocument.ChildNodes.FindNode('nfeProc').ChildNodes.FindNode('NFe').ChildNodes.FindNode('infNFe');
-      AValorFloat := NodeinfNFe.ChildNodes.FindNode('total').ChildNodes.FindNode('ICMSTot').ChildValues['vNF'];
+    if not Dados.ModeloValido then
+    begin
+        FormPrincipal.Memo1.Lines.Add('XML ' + ExtractFileName(CaminhoXML) + ' - modelo diferente de 55/65');
+        Exit;
+    end;
 
+    //Aqui vamos verificar se a nota foi autorizada (cStat 100 ou 150)
+    if Dados.Autorizada then
+    begin
       ContadorXML := ContadorXML + 1;
-      BValorFloat := AValorFloat/100;
-      BValorString := FloatToStrF(BValorFloat, ffFixed, 15, 2);
 
-      //Aqui Vamos passar pra variavel global o valor somado
-      ValorTotalFloat := ValorTotalFloat + BValorFloat;
-
-
-      //Aqui estamos calculando o calor da base de ICMS
-      AValorFloatBC := NodeinfNFe.ChildNodes.FindNode('total').ChildNodes.FindNode('ICMSTot').ChildValues['vBC'];
-      AValorFloatBC := AValorFloatBC/100;
-
-      ValorTotalBCFloat := ValorTotalBCFloat + AValorFloatBC;
-
-      //Aqui estamos calculando o valor do ICMS
-      AValorFloatICMS := NodeinfNFe.ChildNodes.FindNode('total').ChildNodes.FindNode('ICMSTot').ChildValues['vICMS'];
-      AValorFloatICMS := AValorFloatICMS/100;
-
-      ValorTotalICMSFloat := ValorTotalICMSFloat + AValorFloatICMS;
-
-      //posicao := Pos('-nfe', ExtractFileName(CaminhoXML));
-
-      //Aqui exibimos os registros no grid
-      FormPrincipal.FDMemTable1.Append;
-
-      FormPrincipal.FDMemTable1.FieldByName('numero').AsInteger := StrToInt(NumeroNF);
+      //Conversões antes do Append para não deixar registro pela metade em caso de erro
+      Numero := StrToInt(Dados.NumeroNF);
+      Modelo := StrToInt(Dados.Modelo);
 
       Chave := ExtractFileName(CaminhoXML);
       Chave := ChangeFileExt(Chave, '');
 
-      //FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Copy(ExtractFileName(CaminhoXML), 1, posicao - 1);
+      //Aqui exibimos os registros no grid
+      FormPrincipal.FDMemTable1.Append;
+
+      FormPrincipal.FDMemTable1.FieldByName('numero').AsInteger := Numero;
+      FormPrincipal.FDMemTable1.FieldByName('modelo').AsInteger := Modelo;
+
       FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Chave;
 
-      FormPrincipal.FDMemTable1.FieldByName('data').AsString := FormataDataStr(Copy(DataEm, 1, 10));
+      FormPrincipal.FDMemTable1.FieldByName('data').AsString := FormataDataStr(Copy(Dados.DataEmissao, 1, 10));
 
       TFloatField(FormPrincipal.FDMemTable1.FieldByName('vlicms')).DisplayFormat := '#,##0.00';
-      FormPrincipal.FDMemTable1.FieldByName('vlicms').AsFloat := AValorFloatICMS;
+      FormPrincipal.FDMemTable1.FieldByName('vlicms').AsFloat := Dados.vICMS;
 
       TFloatField(FormPrincipal.FDMemTable1.FieldByName('bcicms')).DisplayFormat := '#,##0.00';
-      FormPrincipal.FDMemTable1.FieldByName('bcicms').AsFloat := AValorFloatBC;
+      FormPrincipal.FDMemTable1.FieldByName('bcicms').AsFloat := Dados.vBC;
 
       TFloatField(FormPrincipal.FDMemTable1.FieldByName('vtotal')).DisplayFormat := '#,##0.00';
-      FormPrincipal.FDMemTable1.FieldByName('vtotal').AsFloat := BValorFloat;
+      FormPrincipal.FDMemTable1.FieldByName('vtotal').AsFloat := Dados.vNF;
 
       FormPrincipal.FDMemTable1.FieldByName('xml').AsString := CaminhoXML;
+
+      //IBS/CBS (zerados quando a nota não tem o grupo IBSCBSTot)
+      FormPrincipal.FDMemTable1.FieldByName('tem_ibscbs').AsBoolean := Dados.TemIBSCBS;
+      FormPrincipal.FDMemTable1.FieldByName('vbcibscbs').AsFloat   := Dados.vBCIBSCBS;
+      FormPrincipal.FDMemTable1.FieldByName('vibsuf').AsFloat      := Dados.vIBSUF;
+      FormPrincipal.FDMemTable1.FieldByName('vibsmun').AsFloat     := Dados.vIBSMun;
+      FormPrincipal.FDMemTable1.FieldByName('vibs').AsFloat        := Dados.vIBS;
+      FormPrincipal.FDMemTable1.FieldByName('vcbs').AsFloat        := Dados.vCBS;
 
       FormPrincipal.FDMemTable1.Post;
       FormPrincipal.DataSource1.DataSet.First;
     end
     else
     begin
-      // Aqui executamos caso o XMl não tenha a tag de autorização
+      // Aqui executamos caso a nota não esteja autorizada (cStat diferente de 100/150)
       ContadorXMLErro := ContadorXMLErro +1;
-      FormPrincipal.Memo1.Lines.Add('NFCe ' +NumeroNF + ' - XML sem Tag de Autorização');
+      if Dados.cStat = '' then
+        FormPrincipal.Memo1.Lines.Add('Nota Fiscal ' +Dados.NumeroNF + ' - não autorizada (sem protocolo)')
+      else
+        FormPrincipal.Memo1.Lines.Add('Nota Fiscal ' +Dados.NumeroNF + ' - não autorizada (cStat ' + Dados.cStat + ')');
     end;
-
-  finally
-    //XMLDocument.Free;
-  end;
 end;
 
 function TCalculadoraXML.FormataDataStr(const DataStr: String): String;
@@ -210,16 +385,18 @@ var
   //files: TArray<string>;
   files: TStringDynArray;
   i: integer;
-  AValorTotal, AValorTotalBC, AValorTotalICMS: String;
 begin
   //Função que processar XMLS no diretorio
-  ValorTotalFloat       := 0.00;
-  ValorTotalBCFloat     := 0.00;
-  ValorTotalICMSFloat   := 0.00;
   ContadorXML           := 0;
   ErroNaLeitura         := 0;
   ValorTotal            := '0.00';
 
+  //Limpa a grade: cards e relatório refletem só a pasta atual
+  if FormPrincipal.FDMemTable1.Active then
+    FormPrincipal.FDMemTable1.EmptyDataSet
+  else
+    FormPrincipal.FDMemTable1.CreateDataSet;
+  FormPrincipal.AtualizarTotais;
 
   //Pegando arquivos e jogando num array de nomes de arquivos
   files := TDirectory.GetFiles(CaminhoDiretorio + '\', '*.xml');
@@ -246,15 +423,8 @@ begin
         FormPrincipal.Gauge1.Progress := FormPrincipal.Gauge1.Progress + 1;
     end;
 
-    //Aqui estamos transformando os valores Double em String
-    AValortotal := FloatToStrF(ValorTotalFloat, ffFixed, 15, 2);
-    AValorTotalBC := FloatToStrF(ValorTotalBCFloat, ffFixed, 15, 2);
-    AValorTotalICMS := FloatToStrF(ValorTotalICMSFloat, ffFixed, 15, 2);;
-
-    //Aqui vamos exibir a Soma
-    FormPrincipal.LabelValorTotal.Caption := 'R$ ' +AValorTotal;
-    FormPrincipal.LabelbaseICMS.Caption := 'R$ ' +AValorTotalBC;
-    FormPrincipal.LabelValorICMS.Caption := 'R$ ' +AValorTotalICMS;
+    //Aqui vamos exibir a Soma (calculada a partir das notas da grade)
+    FormPrincipal.AtualizarTotais;
 
     FormPrincipal.Memo1.Lines.Add('Foram processasdos ' + IntToSTr(ContadorXML) + ' Arquivos XMLs');
     FormPrincipal.Memo1.Lines.Add(IntToStr(ErroNaLeitura) + ' Arquivos com problemas para serem processados.');
@@ -280,19 +450,9 @@ begin
   FValorTotal := Value;
 end;
 
-procedure TCalculadoraXML.SetValorTotalBCFloat(const Value: Double);
-begin
-  FValorTotalBCFloat := Value;
-end;
-
-procedure TCalculadoraXML.SetValorTotalFloat(const Value: Double);
-begin
-  FValorTotalFloat := Value;
-end;
-
-procedure TCalculadoraXML.SetValorTotalICMSFloat(const Value: Double);
-begin
-  FValorTotalICMSFloat := Value;
-end;
+initialization
+  FormatoNumeroXML := TFormatSettings.Create;
+  FormatoNumeroXML.DecimalSeparator  := '.';
+  FormatoNumeroXML.ThousandSeparator := #0;
 
 end.
