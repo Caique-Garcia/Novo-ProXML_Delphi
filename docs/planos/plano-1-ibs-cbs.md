@@ -50,6 +50,8 @@
 | Aba após relatório | Volta para **Notas** em todos os casos (sucesso, erro na prévia ou erro na gravação) |
 | `protNFe` incompleto (sem `infProt`/`cStat`) | "Arquivo não processado" (`nfeProc` sem `protNFe` continua "(sem protocolo)") |
 | Extras pós-QA | Cancelar a linha da grade se o `Post` falhar; checar `nNF` ausente explicitamente |
+| `<cStat>` presente mas vazio | Mantém "(sem protocolo)" |
+| Release v1.1.0 | VersionInfo do executável = **1.1.0**; publicação só depois de o usuário revisar README, notas e pacote; Plano 4/`ux-designer` ficam fora do push |
 | Amostras faltantes | XMLs **sintéticos** gerados pelo `nfe-fiscal` em `exemple\sinteticos\` (fora do git): NF-e 55 com `tpImp=2`, nota de entrada e nota com `vICMS` > 0 |
 
 ## Etapas
@@ -121,6 +123,7 @@
   - requisito de Delphi corrigido para **10.2 Tokyo** (hoje diz 10.4);
   - descrição do repositório atualizada.
 - Empacotar o `ProXML.rar`, publicar a Release v1.1.0 e validar o download.
+- ⏳ 19/10/2026: **pronta para publicação, aguardando OK do usuário**. VersionInfo 1.1.0 (Release/Win32), README, rascunho das notas e `ProXML.rar` preparados; commit apenas local, sem push, tag ou Release.
 
 ## Pendências (decidir com o usuário)
 - **P2.** Detalhes visuais dos layouts do ACBr (achados na 1.5): "Folha 1/0" no cabeçalho do `DANFePaisagem.fr3` e uma linha cortando "Emissão … Via Consumidor" no `DANFeNFCeA4.fr3`. Corrigir numa etapa própria, levar ao Plano 4 ou manter?
