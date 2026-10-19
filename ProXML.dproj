@@ -114,6 +114,10 @@
         <DCCReference Include="view\ProXML.FormRelatorios.pas">
             <Form>FormRelatorios</Form>
         </DCCReference>
+        <DCCReference Include="view\ProXML.FormRelatorioIBSCBS.pas">
+            <Form>FormRelatorioIBSCBS</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <DCCReference Include="datamodule\DM.pas">
             <Form>DMConfig</Form>
             <DesignClass>TDataModule</DesignClass>

@@ -51,6 +51,8 @@ type
     QRLabelTotalICMS: TQRLabel;
     QRLabelTotalBC: TQRLabel;
     QRLabelQt: TQRLabel;
+    QRLabelModelo: TQRLabel;
+    QRDBTextModelo: TQRDBText;
 
   private
 
@@ -60,6 +62,8 @@ type
     procedure SetTotalBC(const Value: String);
     procedure SetTotalICMS(const Value: String);
     procedure SetQtRegistros(const Value: String);
+    //Modelo filtrado no subtítulo (ex.: 'NF-e 55'); vazio = todos os modelos
+    procedure SetDescricaoFiltro(const Descricao: String);
     procedure GerarRelatorio();
   end;
 
@@ -83,6 +87,14 @@ begin
         QuickNotas.Preview
     else
         raise Exception.Create('Sem registros no banco de dados!');
+end;
+
+procedure TFormRelatorios.SetDescricaoFiltro(const Descricao: String);
+begin
+    if Trim(Descricao) = '' then
+        QRLabel602.Caption := 'XMLs de Nota Fiscal processados pelo programa'
+    else
+        QRLabel602.Caption := 'XMLs de Nota Fiscal (' + Trim(Descricao) + ') processados pelo programa';
 end;
 
 procedure TFormRelatorios.SetQtRegistros(const Value: String);

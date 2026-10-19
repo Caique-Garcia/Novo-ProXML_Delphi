@@ -47,6 +47,7 @@ uses
   Vcl.Menus,
   DM,
   ProXML.FormRelatorios,
+  ProXML.FormRelatorioIBSCBS,
   System.ImageList,
   Vcl.ImgList,
   ACBrDFeReport,
@@ -67,6 +68,9 @@ uses
   uCalculadoraXML;
 
 type
+  //Relatório aberto depois de gravar as notas no banco (GravarNotasDB)
+  TTipoRelatorio = (trNotas, trIBSCBS);
+
   TFormPrincipal = class(TForm)
     PnlContainer: TPanel;
     PnlCabecalho: TPanel;
@@ -201,7 +205,7 @@ type
     procedure CategoryButtons1Categories0Items1Click(Sender: TObject);
     procedure GerarPDF1Click(Sender: TObject);
     procedure CategoryButtons1Categories0Items2Click(Sender: TObject);
-    procedure GravarNotasDB();
+    procedure GravarNotasDB(const Relatorio: TTipoRelatorio);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure CategoryButtons1Categories0Items3Click(Sender: TObject);
     procedure GerarDANFe1Click(Sender: TObject);
@@ -212,13 +216,18 @@ type
     procedure btnEnviarEmailClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure ComboFiltroModeloChange(Sender: TObject);
+    procedure CategoryButtons1RelatorioIBSCBSClick(Sender: TObject);
   private
     ConfigEmail : TConfig;
     FTotais : TTotaisNotas;
     FGerandoDanfe : Boolean;   //evita gerar dois DANFEs ao mesmo tempo (a espera do PDF processa mensagens)
     procedure SetTextoTranferencia(const Text: String);
     procedure AjustarAlturaLinhasGrade;
-    procedure FinalizaRelatorio(Sender: TObject);
+    procedure GerarRelatorio(const Relatorio: TTipoRelatorio);
+    procedure FinalizaRelatorio(const Relatorio: TTipoRelatorio);
+    procedure AbrirRelatorioIBSCBS;
+    function  FormatarValor(const Valor: Double): string;
+    function  DescricaoFiltroModelo: string;
     procedure ConfigACBR;
     procedure GerarDanfe(const CaminhoArq: String);
     function  ConfigurarLayoutDanfe(out Mensagem: string): Boolean;
@@ -279,11 +288,26 @@ begin
     //Recalcula os totais a partir das notas da grade (respeita o filtro ativo)
     FTotais := CalcularTotais(FDMemTable1);
 
-    LabelValorTotal.Caption := 'R$ ' + FloatToStrF(FTotais.ValorTotal, ffFixed, 15, 2);
-    LabelbaseICMS.Caption   := 'R$ ' + FloatToStrF(FTotais.BaseICMS, ffFixed, 15, 2);
-    LabelValorICMS.Caption  := 'R$ ' + FloatToStrF(FTotais.ValorICMS, ffFixed, 15, 2);
-    LabelValorIBS.Caption   := 'R$ ' + FloatToStrF(FTotais.IBS, ffFixed, 15, 2);
-    LabelValorCBS.Caption   := 'R$ ' + FloatToStrF(FTotais.CBS, ffFixed, 15, 2);
+    LabelValorTotal.Caption := FormatarValor(FTotais.ValorTotal);
+    LabelbaseICMS.Caption   := FormatarValor(FTotais.BaseICMS);
+    LabelValorICMS.Caption  := FormatarValor(FTotais.ValorICMS);
+    LabelValorIBS.Caption   := FormatarValor(FTotais.IBS);
+    LabelValorCBS.Caption   := FormatarValor(FTotais.CBS);
+end;
+
+function TFormPrincipal.DescricaoFiltroModelo: string;
+begin
+    //Texto do seletor de modelo para o subtítulo dos relatórios; vazio em "Todos"
+    if ModeloSelecionado = FILTRO_MODELO_TODOS then
+        Result := ''
+    else
+        Result := ComboFiltroModelo.Text;
+end;
+
+function TFormPrincipal.FormatarValor(const Valor: Double): string;
+begin
+    //Formato dos valores nos cards e nos totais dos relatórios
+    Result := 'R$ ' + FloatToStrF(Valor, ffFixed, 15, 2);
 end;
 
 procedure TFormPrincipal.AjustarAlturaLinhasGrade;
@@ -407,11 +431,17 @@ begin
 
 end;
 
-procedure TFormPrincipal.FinalizaRelatorio(Sender: TObject);
+procedure TFormPrincipal.FinalizaRelatorio(const Relatorio: TTipoRelatorio);
 begin
    //Finaliza o relatório
    //Garante que o relatório use o mesmo modelo da grade e dos cards
    DMConfig.FiltroModelo := ModeloSelecionado;
+
+   if Relatorio = trIBSCBS then
+   begin
+        AbrirRelatorioIBSCBS;
+        Exit;
+   end;
 
    FormRelatorio := TFormRelatorios.Create(Nil);
    try
@@ -419,6 +449,7 @@ begin
         FormRelatorio.SetTotalBC(LabelbaseICMS.Caption);
         FormRelatorio.SetTotalICMS(LabelValorICMS.Caption);
         FormRelatorio.SetQtRegistros(IntToStr(FDMemTable1.RecordCount));
+        FormRelatorio.SetDescricaoFiltro(DescricaoFiltroModelo);
         FormRelatorio.GerarRelatorio;
         PageControl1.ActivePageIndex := 0;
    finally
@@ -427,18 +458,59 @@ begin
 
 end;
 
-procedure TFormPrincipal.CategoryButtons1Categories0Items2Click(
-  Sender: TObject);
+procedure TFormPrincipal.AbrirRelatorioIBSCBS;
+var
+    FormIBSCBS: TFormRelatorioIBSCBS;
 begin
-    //Geração de relatóeio
+    //Relatório IBS/CBS: só as notas com o grupo IBSCBSTot, no modelo escolhido.
+    //Os totais do rodapé vêm de FTotais (calculados na grade filtrada), não de SUM no banco.
+    FormIBSCBS := TFormRelatorioIBSCBS.Create(Nil);
+    try
+        FormIBSCBS.SetTotalBaseIBSCBS(FormatarValor(FTotais.BaseIBSCBS));
+        FormIBSCBS.SetTotalIBSUF(FormatarValor(FTotais.IBSUF));
+        FormIBSCBS.SetTotalIBSMun(FormatarValor(FTotais.IBSMun));
+        FormIBSCBS.SetTotalIBS(FormatarValor(FTotais.IBS));
+        FormIBSCBS.SetTotalCBS(FormatarValor(FTotais.CBS));
+        FormIBSCBS.SetQtRegistros(IntToStr(FTotais.QuantidadeIBSCBS));
+        FormIBSCBS.SetDescricaoFiltro(DescricaoFiltroModelo);
+
+        if not FormIBSCBS.GerarRelatorio then
+        begin
+            //Nenhuma nota do filtro atual tem IBS/CBS: não abre a visualização
+            PageControl1.ActivePageIndex := 0;
+            messagedlg('Nenhuma nota com IBS/CBS', mtInformation, [mbOk], 0);
+        end;
+
+        PageControl1.ActivePageIndex := 0;
+    finally
+        FreeAndNil(FormIBSCBS);
+    end;
+end;
+
+procedure TFormPrincipal.GerarRelatorio(const Relatorio: TTipoRelatorio);
+begin
+    //Confere se a grade (filtrada) tem notas, grava no banco e abre o relatório escolhido
     if DataSource1.DataSet.RecordCount <= 0 then
     begin
        messagedlg('Sem dados para gerar relatório !!', mtInformation	, [mbOk], 0);
        Exit;
     end
     else
-        GravarNotasDB;
+        GravarNotasDB(Relatorio);
+end;
 
+procedure TFormPrincipal.CategoryButtons1Categories0Items2Click(
+  Sender: TObject);
+begin
+    //Geração de relatóeio
+    GerarRelatorio(trNotas);
+end;
+
+procedure TFormPrincipal.CategoryButtons1RelatorioIBSCBSClick(
+  Sender: TObject);
+begin
+    //Relatório IBS/CBS (item do menu lateral logo abaixo de "Relatório")
+    GerarRelatorio(trIBSCBS);
 end;
 
 procedure TFormPrincipal.CategoryButtons1Categories0Items3Click(
@@ -800,9 +872,9 @@ begin
    SetTextoTranferencia(DBGrid1.DataSource.DataSet.FieldByName('chave').Value);
 end;
 
-procedure TFormPrincipal.GravarNotasDB;
+procedure TFormPrincipal.GravarNotasDB(const Relatorio: TTipoRelatorio);
 begin
-  //Grava as notas no banco de dados SQLite e abre o relatório.
+  //Grava as notas no banco de dados SQLite e abre o relatório escolhido (notas ou IBS/CBS).
   //A gravação roda na thread principal, numa transação: a conexão DMConfig.Conexao também
   //é usada pela tela e o FireDAC não permite usar a mesma conexão em duas threads ao mesmo tempo.
 
@@ -832,7 +904,7 @@ begin
   end;
 
   //Gravação concluída: abre o relatório
-  FinalizaRelatorio(Self);
+  FinalizaRelatorio(Relatorio);
 end;
 
 procedure TFormPrincipal.LerConfigEmail;             

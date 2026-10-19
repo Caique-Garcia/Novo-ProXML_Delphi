@@ -42,6 +42,9 @@
 | Envio por e-mail | **Respeita o filtro** de modelo (envia só as notas visíveis na grade) |
 | Repintura contínua da grade (`DBGrid1DrawColumnCell`) | **Corrigir na 1.4**: ajustar a altura das linhas uma única vez |
 | Valores ≥ R$ 10 milhões nos cards / ícones próprios de IBS e CBS | Ficam para o **Plano 4** |
+| Filtro no papel | Os dois relatórios indicam o modelo no subtítulo quando o filtro não é "Todos" (ex.: "XMLs de Nota Fiscal (NF-e 55) …") |
+| Rodapé do relatório de notas | Corrigir "BASE DE CÁCULO" → "BASE DE CÁLCULO" |
+| Quantidade no relatório IBS/CBS | Mantida no cabeçalho **e** nos totais |
 | Amostras faltantes | XMLs **sintéticos** gerados pelo `nfe-fiscal` em `exemple\sinteticos\` (fora do git): NF-e 55 com `tpImp=2`, nota de entrada e nota com `vICMS` > 0 |
 
 ## Etapas

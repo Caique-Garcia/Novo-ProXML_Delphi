@@ -346,6 +346,7 @@ object FormPrincipal: TFormPrincipal
               Font.Name = 'Segoe UI'
               Font.Style = []
               ParentFont = False
+              ExplicitWidth = 86
             end
             object LabelValorCBS: TLabel
               Left = 0
@@ -360,6 +361,7 @@ object FormPrincipal: TFormPrincipal
               Font.Name = 'Segoe UI'
               Font.Style = []
               ParentFont = False
+              ExplicitWidth = 60
             end
           end
         end
@@ -442,6 +444,7 @@ object FormPrincipal: TFormPrincipal
               Font.Name = 'Segoe UI'
               Font.Style = []
               ParentFont = False
+              ExplicitWidth = 79
             end
             object LabelValorIBS: TLabel
               Left = 0
@@ -456,6 +459,7 @@ object FormPrincipal: TFormPrincipal
               Font.Name = 'Segoe UI'
               Font.Style = []
               ParentFont = False
+              ExplicitWidth = 60
             end
           end
         end
@@ -1413,6 +1417,10 @@ object FormPrincipal: TFormPrincipal
                       OnClick = CategoryButtons1Categories0Items2Click
                     end
                     item
+                      Caption = 'Relat'#243'rio IBS/CBS'
+                      OnClick = CategoryButtons1RelatorioIBSCBSClick
+                    end
+                    item
                       Caption = 'Enviar'
                       OnClick = CategoryButtons1Categories0Items3Click
                     end
@@ -1500,6 +1508,21 @@ object FormPrincipal: TFormPrincipal
             Height = 1
             Pen.Color = 15460841
           end
+          object LabelFiltroModelo: TLabel
+            Left = 630
+            Top = 70
+            Width = 46
+            Height = 17
+            Alignment = taRightJustify
+            AutoSize = False
+            Caption = 'Modelo'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = 11382189
+            Font.Height = -13
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentFont = False
+          end
           object EditCaminho: TEdit
             Left = 24
             Top = 30
@@ -1520,21 +1543,6 @@ object FormPrincipal: TFormPrincipal
             TabOrder = 0
             Text = 'Selecione uma pasta contendo XMLs de Nota Fiscal'
             TextHint = 'Selecione uma pasta contendo XMLs de Nota Fiscal'
-          end
-          object LabelFiltroModelo: TLabel
-            Left = 630
-            Top = 70
-            Width = 46
-            Height = 17
-            Alignment = taRightJustify
-            AutoSize = False
-            Caption = 'Modelo'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 11382189
-            Font.Height = -13
-            Font.Name = 'Segoe UI'
-            Font.Style = []
-            ParentFont = False
           end
           object ComboFiltroModelo: TComboBox
             Left = 682
@@ -1687,7 +1695,7 @@ object FormPrincipal: TFormPrincipal
     Left = 1040
     Top = 377
     Content = {
-      414442530F005E0229050000FF00010001FF02FF03040016000000460044004D
+      414442530F00781D29050000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
