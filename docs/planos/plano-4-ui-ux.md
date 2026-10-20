@@ -197,6 +197,13 @@ Legenda de severidade: 🔴 **Alta** (atrapalha o uso ou passa informação erra
 | **Dependências dos Planos 2 e 3** | **Adaptar:** a tela Enviar mostra o anexo `.rar` atual (o ZIP vem no Plano 2); a tela Sobre fica sem link do site até o Plano 3; os prints do site saem do Plano 4 (o site já nasce com o visual novo no Plano 3) |
 | **Itens herdados do Plano 1** | H1–H5 da seção 2.10 entram no Plano 4 |
 | **Pendências PD-1 a PD-6** | **Sugestões aceitas** (ver seção 8) |
+| **Etapa 4.1 (19/10/2026)** | Paleta (com `CorSucesso #18793A`, `CorAviso #8F5600` e `CorBordaCampo #878E9B`), tipografia (valor do card em **13 pt**), ícones **Lucide** (ISC/MIT, crédito na tela Sobre), mockups e glossário (`docs/ui/`) **aprovados** |
+| **D1–D12 do `ux-designer`** | **Sugestões aceitas:** D1 cards na área de conteúdo (13 pt) · D2 cards ocultos em Enviar/Configurações/Sobre · D3 colunas de valor aparecem conforme a largura · D4 chave com 44 dígitos (sem "-nfe") na grade e no "Copiar chave" · D5 busca não vale para Relatórios/Enviar · D6 seletor de modelo em botões segmentados · D7 "ProXML" em texto marinho no relatório · D8 totais em linha alinhada às colunas · D9 relatório IBS/CBS com **Nº antes de Modelo** (substitui a ordem do Plano 1) · D10 animação recolorida · D11 "(R$)" só no título da coluna · D12 grafia **DANFE** |
+| **Logo** | Versão **vetorial (SVG)** do logo atual, feita no Plano 4 e aprovada pelo usuário antes de entrar no app |
+| **Chave de acesso (D4)** | Vem de `NFe/infNFe/@Id` sem o prefixo "NFe" (44 dígitos), não do nome do arquivo. `protNFe/infProt/chNFe` só confere. **Id sem 44 dígitos ou `chNFe` diferente do `Id` → "Arquivo não processado"** com o motivo no log. No CSV a chave é gravada como texto (sem notação científica no Excel) |
+| **Texto 5.25 do glossário** | "o arquivo não é uma Nota Fiscal com protocolo de autorização (falta a tag nfeProc)" (vale também para eventos, CT-e etc.) |
+| **Avisos de homologação e de entrada** | O **Resumo** mostra uma linha de aviso quando a pasta tiver notas de homologação (`tpAmb=2`) e/ou de entrada (`tpNF=0`) somadas aos totais (texto a definir pelo `ux-designer` no glossário, com aprovação do usuário) |
+| **Notas canceladas** | **Fora do escopo** do Plano 4. Hoje a nota cancelada continua somada (o cancelamento é um evento separado e o `nfeProc` mantém cStat 100). Registrado como ideia para um plano futuro |
 | **Textos** | O `ux-designer` propõe um **glossário de mensagens** (antes → depois) e o usuário aprova junto com os mockups |
 
 ---
@@ -325,8 +332,9 @@ Ao fim de **cada** etapa do `delphi-dev`, o `qa-reviewer` revisa o diff e compil
 - `docs/ui/icones.md`: os ícones SVG escolhidos para o menu e os botões, com origem e licença.
 
 **Aceite:**
-- [ ] O usuário aprovou paleta, tipografia e cada mockup (aprovação registrada neste plano).
-- [ ] O usuário aprovou o glossário.
+- [x] O usuário aprovou paleta, tipografia e os mockups (19/10/2026, com as sugestões D1–D12).
+- [x] O usuário aprovou o glossário (19/10/2026; o `nfe-fiscal` confere os textos fiscais).
+- [x] Logo vetorial aprovado pelo usuário (19/10/2026): `docs/ui/logo/proxml-logo-escuro.svg` (cabeçalho) e `proxml-logo-claro.svg` (relatório e Sobre).
 - [ ] Os contrastes de texto passam de 4,5:1 (tabela no `tokens.md`).
 - [ ] Os ícones têm licença compatível com distribuição gratuita.
 

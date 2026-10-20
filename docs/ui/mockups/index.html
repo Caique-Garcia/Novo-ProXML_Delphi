@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>ProXML – mockups</title>
+<style>
+:root{
+  --CorMarinho:#171A21; --CorMarinhoTexto:#C9CED6;
+  --CorPrimaria:#2067CA; --CorPrimariaHover:#1A56AB; --CorPrimariaPressionada:#164A93; --CorPrimariaSuave:#E8F0FB;
+  --CorFundo:#F2F3F5; --CorSuperficie:#FFFFFF; --CorZebra:#F7F8FA;
+  --CorBorda:#DADDE3; --CorBordaCampo:#878E9B;
+  --CorTexto:#1F2430; --CorTextoSecundario:#5B6270; --CorTextoDesabilitado:#8C93A0; --CorFundoDesabilitado:#EDF0F4;
+  --CorSucesso:#18793A; --CorSucessoSuave:#E7F4EA;
+  --CorAviso:#8F5600; --CorAvisoSuave:#FFF4E0;
+  --CorErro:#C62828; --CorErroSuave:#FDECEA;
+  --CorSucessoSobreMarinho:#7FD99A;
+  --CorTextHintSistema:#6D6D6D;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#C9CDD3;font-family:"Segoe UI",sans-serif;color:var(--CorTexto);font-size:10pt}
+.doc{max-width:1400px;margin:0 auto;padding:24px}
+.doc h1{font-size:18pt;font-weight:600;margin:0 0 4px}
+.doc h2{font-size:14pt;font-weight:600;margin:32px 0 8px;padding-top:16px;border-top:2px solid #A8ADB6}
+.doc h3{font-size:10pt;font-weight:600;margin:16px 0 8px;color:#3A4050}
+.doc p,.doc li{font-size:10pt;line-height:1.45;max-width:1000px}
+.doc .nota{background:#FFFFFF;border-left:4px solid var(--CorPrimaria);padding:8px 16px;margin:8px 0 16px;max-width:1000px}
+.doc .nota ul{margin:4px 0;padding-left:20px}
+.doc nav a{color:var(--CorPrimariaHover);margin-right:16px}
+.doc .toc{display:flex;flex-wrap:wrap;gap:8px 16px;margin:8px 0}
+.doc .toc a{color:var(--CorPrimariaHover)}
+.ic{flex:none;display:block}
+/* ---------- janela ---------- */
+.win{border:1px solid #6E7480;background:var(--CorFundo);position:relative;overflow:hidden;margin-bottom:24px}
+.s1024{width:1010px}.s1024 .client{height:600px}
+.s1366{width:1352px}.s1366 .client{height:728px}
+.tb{height:31px;background:#FFFFFF;display:flex;align-items:center;font-size:9pt;border-bottom:1px solid #E1E3E7}
+.tb .appic{width:16px;height:16px;background:var(--CorMarinho);margin:0 8px 0 8px;display:grid;place-items:center}
+.tb .appic i{width:6px;height:6px;background:var(--CorPrimaria);display:block}
+.tb .ttl{flex:1}
+.tb .wb{width:46px;height:31px;display:grid;place-items:center;color:#1F2430}
+.client{display:flex;flex-direction:column;overflow:hidden}
+.hdr{height:48px;flex:none;background:var(--CorMarinho);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.hdr img{display:block;height:28px;width:152px}
+.hlink{display:flex;align-items:center;gap:8px;color:var(--CorMarinhoTexto);font-size:9pt;padding:6px 8px}
+.hlink.on{color:#FFFFFF;box-shadow:inset 0 -2px 0 var(--CorPrimaria)}
+.folder{height:56px;flex:none;background:var(--CorSuperficie);border-bottom:1px solid var(--CorBorda);display:flex;align-items:center;gap:8px;padding:0 16px}
+.body{flex:1;display:flex;min-height:0}
+.menu{width:200px;flex:none;background:var(--CorSuperficie);border-right:1px solid var(--CorBorda);padding-top:8px}
+.mi{height:40px;display:flex;align-items:center;gap:12px;padding:0 16px 0 16px;font-size:10pt;border-left:4px solid transparent;color:var(--CorTexto)}
+.mi .ic{color:var(--CorTextoSecundario)}
+.mi.on{background:var(--CorPrimariaSuave);border-left-color:var(--CorPrimaria);font-weight:600}
+.mi.on .ic{color:var(--CorPrimaria)}
+.mi.hov{background:var(--CorFundo)}
+.mi.dis,.mi.dis .ic{color:var(--CorTextoDesabilitado)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;padding:16px;gap:16px;min-height:0}
+/* ---------- cards ---------- */
+.cards{display:flex;gap:8px;flex:none}
+.card{flex:1 1 0;min-width:0;height:64px;background:var(--CorSuperficie);border:1px solid var(--CorBorda);padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between}
+.card .lbl{display:flex;align-items:center;gap:8px;font-size:9pt;color:var(--CorTextoSecundario);line-height:16px}
+.card .lbl .ic{color:var(--CorPrimaria)}
+.card .val{font-size:13pt;font-weight:600;white-space:nowrap;line-height:22px}
+.card .val.zero{color:var(--CorTextoSecundario);font-weight:400}
+/* ---------- botoes ---------- */
+.btn{height:32px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:10pt;font-weight:600;border:1px solid var(--CorBordaCampo);background:var(--CorSuperficie);color:var(--CorTexto);border-radius:4px;white-space:nowrap;flex:none;position:relative}
+.btn .ic{color:var(--CorPrimaria)}
+.btn.pri{background:var(--CorPrimaria);border-color:var(--CorPrimaria);color:#FFFFFF}
+.btn.pri .ic{color:#FFFFFF}
+.btn.pri.hov{background:var(--CorPrimariaHover);border-color:var(--CorPrimariaHover)}
+.btn.pri.pre{background:var(--CorPrimariaPressionada);border-color:var(--CorPrimariaPressionada)}
+.btn.sec.hov{background:var(--CorFundo)}
+.btn.sec.pre{background:var(--CorBorda)}
+.btn.foc{outline:2px solid var(--CorPrimaria);outline-offset:2px}
+.btn.dis{background:var(--CorFundoDesabilitado);border-color:var(--CorBorda);color:var(--CorTextoDesabilitado)}
+.btn.dis .ic{color:var(--CorTextoDesabilitado)}
+.btn.lnk{border-color:transparent;background:transparent;color:var(--CorPrimaria);padding:0 8px}
+.btn.w120{min-width:120px}
+/* ---------- campos ---------- */
+.fld{height:32px;border:1px solid var(--CorBordaCampo);background:var(--CorSuperficie);display:flex;align-items:center;gap:8px;padding:0 8px;font-size:10pt;min-width:0;white-space:nowrap;overflow:hidden}
+.fld .ic{color:var(--CorTextoSecundario)}
+.fld.foc{border:2px solid var(--CorPrimaria);padding:0 7px}
+.fld.err{border:2px solid var(--CorErro);padding:0 7px}
+.fld.dis{background:var(--CorFundoDesabilitado);border-color:var(--CorBorda);color:var(--CorTextoDesabilitado)}
+.fld .ph{color:var(--CorTextHintSistema)}
+.fld .tx{overflow:hidden;text-overflow:ellipsis}
+.fld.area{height:auto;align-items:flex-start;padding:8px;white-space:normal;line-height:1.4}
+.fld.area.foc{padding:7px}
+.flex1{flex:1}
+.caret{width:1px;height:16px;background:var(--CorTexto);display:inline-block;vertical-align:middle;margin-left:1px}
+.form{display:grid;gap:16px}
+.fg{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fg label,.flabel{font-size:9pt;font-weight:600;color:var(--CorTexto)}
+.help{font-size:9pt;color:var(--CorTextoSecundario)}
+.msgerr{font-size:9pt;color:var(--CorErro);display:flex;align-items:center;gap:4px}
+.chk{display:flex;align-items:center;gap:8px;font-size:10pt}
+.chk i{width:14px;height:14px;border:1px solid #333;background:#fff;display:grid;place-items:center;font-style:normal}
+.chk i.on{background:#005FB8;border-color:#005FB8}
+.chk.dis{color:var(--CorTextoDesabilitado)}.chk.dis i{border-color:var(--CorTextoDesabilitado)}
+/* segmentado */
+.seg{display:flex;flex:none}
+.seg span{height:32px;padding:0 12px;display:flex;align-items:center;border:1px solid var(--CorBordaCampo);margin-left:-1px;font-size:10pt;background:var(--CorSuperficie);white-space:nowrap}
+.seg span:first-child{margin-left:0;border-radius:4px 0 0 4px}.seg span:last-child{border-radius:0 4px 4px 0}
+.seg span.on{background:var(--CorPrimariaSuave);border-color:var(--CorPrimaria);font-weight:600;position:relative;z-index:1}
+.seg.dis span{background:var(--CorFundoDesabilitado);border-color:var(--CorBorda);color:var(--CorTextoDesabilitado)}
+.seg.dis span.on{background:var(--CorFundoDesabilitado)}
+.combo{height:32px;border:1px solid #7A7A7A;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 8px;width:128px;font-size:10pt}
+/* ---------- paineis e estados ---------- */
+.panel{background:var(--CorSuperficie);border:1px solid var(--CorBorda)}
+.trow{display:flex;align-items:center;gap:8px;flex:none;min-height:32px}
+.titulo{font-size:14pt;font-weight:600;line-height:32px;white-space:nowrap}
+.cont{font-size:9pt;color:var(--CorTextoSecundario);white-space:nowrap}
+.sp{flex:1}
+.banner{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-left:4px solid;font-size:10pt;line-height:1.4}
+.banner b{font-weight:600}
+.banner.ok{background:var(--CorSucessoSuave);border-color:var(--CorSucesso)}.banner.ok .ic{color:var(--CorSucesso)}
+.banner.av{background:var(--CorAvisoSuave);border-color:var(--CorAviso)}.banner.av .ic{color:var(--CorAviso)}
+.banner.er{background:var(--CorErroSuave);border-color:var(--CorErro)}.banner.er .ic{color:var(--CorErro)}
+.banner.in{background:var(--CorPrimariaSuave);border-color:var(--CorPrimaria)}.banner.in .ic{color:var(--CorPrimaria)}
+.vazio{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px}
+.vazio .ic{color:var(--CorTextoSecundario)}
+.vazio .t1{font-size:12pt;font-weight:600}
+.vazio .t2{font-size:10pt;color:var(--CorTextoSecundario);max-width:420px}
+.prog{height:8px;background:var(--CorBorda);width:100%}
+.prog i{display:block;height:8px;background:var(--CorPrimaria)}
+.tip{position:absolute;background:#FFFFFF;border:1px solid #767676;color:#1F2430;font-size:9pt;padding:4px 8px;white-space:nowrap;z-index:5;box-shadow:2px 2px 4px rgba(0,0,0,.18)}
+.toast{display:inline-flex;align-items:center;gap:4px;font-size:9pt;color:var(--CorSucesso);font-weight:600}
+.toastbox{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:var(--CorMarinho);color:#FFFFFF;font-size:9pt;font-weight:600;padding:8px 16px;display:flex;gap:8px;align-items:center;white-space:nowrap}
+.toastbox .ic{color:var(--CorSucessoSobreMarinho)}
+.cursor{position:absolute;z-index:6;width:12px;height:18px}
+/* contadores */
+.cnts{display:flex;gap:8px;flex:none}
+.cnt{flex:1;background:var(--CorSuperficie);border:1px solid var(--CorBorda);border-top:4px solid;padding:8px 12px;display:flex;align-items:center;gap:12px}
+.cnt .n{font-size:16pt;font-weight:600;line-height:1}
+.cnt .l{font-size:9pt;color:var(--CorTextoSecundario)}
+.cnt.ok{border-top-color:var(--CorSucesso)}.cnt.ok .n,.cnt.ok .ic{color:var(--CorSucesso)}
+.cnt.av{border-top-color:var(--CorAviso)}.cnt.av .n,.cnt.av .ic{color:var(--CorAviso)}
+.cnt.er{border-top-color:var(--CorErro)}.cnt.er .n,.cnt.er .ic{color:var(--CorErro)}
+.log{flex:1;min-height:0;overflow:hidden;padding:4px 0}
+.log div{display:flex;gap:8px;align-items:center;padding:3px 12px;font-size:9pt;white-space:nowrap}
+.log div .ic{flex:none}
+.log .lav .ic{color:var(--CorAviso)}.log .ler .ic{color:var(--CorErro)}.log .lok .ic{color:var(--CorSucesso)}.log .lin .ic{color:var(--CorTextoSecundario)}
+/* ---------- grade ---------- */
+.grid{flex:1;min-height:0;background:var(--CorSuperficie);border:1px solid var(--CorBorda);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.grid table{border-collapse:collapse;width:calc(100% - 17px);table-layout:fixed;font-size:10pt}
+.grid th{height:32px;background:var(--CorFundo);font-weight:600;text-align:left;padding:0 8px;border-bottom:1px solid var(--CorBorda);white-space:nowrap;overflow:hidden}
+.grid td{height:28px;padding:0 8px;border-bottom:1px solid var(--CorBorda);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid tr:nth-child(even) td{background:var(--CorZebra)}
+.grid tr.sel td{background:var(--CorPrimariaSuave)}
+.grid tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--CorPrimaria)}
+.grid .r{text-align:right}
+.grid .c{text-align:center}
+.grid th.ord{color:var(--CorPrimariaHover)}
+.s1024 .wx{display:none}
+.s1366 th.ch{width:340px}
+.grid.ns table{width:100%}
+.grid .sb{position:absolute;right:0;top:0;bottom:0;width:17px;background:#F0F0F0;border-left:1px solid #E3E3E3}
+.grid .sb i{position:absolute;left:4px;right:4px;top:22px;height:48px;background:#C2C2C2;display:block}
+.mono{font-variant-numeric:tabular-nums}
+/* tela relatorios */
+.opcs{display:flex;gap:16px}
+.opc{flex:1;background:var(--CorSuperficie);border:1px solid var(--CorBorda);padding:16px;display:flex;flex-direction:column;gap:8px}
+.opc .ot{font-size:12pt;font-weight:600;display:flex;align-items:center;gap:8px}
+.opc .ot .ic{color:var(--CorPrimaria)}
+.opc .od{font-size:10pt;color:var(--CorTextoSecundario);line-height:1.4;flex:1}
+.opc .rod{display:flex;align-items:center;gap:12px}
+.dica{font-size:9pt;color:var(--CorTextoSecundario);display:flex;align-items:center;gap:4px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:9pt;background:var(--CorFundo);border:1px solid var(--CorBorda);padding:2px 8px;color:var(--CorTexto)}
+.anexo{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--CorFundo);border:1px solid var(--CorBorda)}
+.anexo .ic{color:var(--CorPrimaria)}
+.anexo .a1{font-weight:600}
+.anexo .a2{font-size:9pt;color:var(--CorTextoSecundario)}
+.load{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.anim{width:160px;height:134px;border:1px dashed var(--CorBordaCampo);display:grid;place-items:center;position:relative}
+.anim .ring{width:56px;height:56px;border-radius:50%;border:6px solid var(--CorPrimariaSuave);border-top-color:var(--CorPrimaria)}
+.anim small{position:absolute;bottom:4px;font-size:8pt;color:var(--CorTextoSecundario)}
+.sobre{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center}
+.sobre .lg{background:var(--CorMarinho);padding:16px 24px;margin-bottom:8px}
+.sobre .lg img{display:block;width:152px;height:28px}
+.sobre .v{font-size:14pt;font-weight:600}
+.sobre a{color:var(--CorPrimaria);text-decoration:underline;display:inline-flex;gap:4px;align-items:center}
+</style>
+</head>
+<body>
+<div class="doc">
+<nav><a href="index.html">Índice</a><a href="resumo.html">Resumo</a><a href="notas.html">Notas</a><a href="relatorios.html">Relatórios</a><a href="enviar.html">Enviar</a><a href="configuracoes.html">Configurações</a><a href="sobre.html">Sobre</a><a href="carregando.html">Carregando</a><a href="relatorio-a4.html">Relatório A4</a><a href="opcoes.html">Opções para decidir</a></nav>
+<h1>ProXML v1.1.0 · Mockups do redesign (Plano 4, etapa 4.1)</h1>
+<p>Mockups estáticos em HTML/CSS, sem scripts e sem fontes externas (Segoe UI do Windows). As cores vêm de variáveis CSS com os mesmos nomes dos tokens de <code>docs/ui/tokens.md</code>. Dados fictícios.</p>
+<table style="border-collapse:collapse;background:#fff;font-size:10pt">
+<tr><td style="padding:6px 12px"><a href="resumo.html">Resumo</a></td><td style="padding:6px 12px"><a href="resumo.html#vazio">Vazio (primeiro uso)</a> · <a href="resumo.html#processando">Processando (X de N + Cancelar)</a> · <a href="resumo.html#concluido">Concluído (contadores + log)</a> · <a href="resumo.html#cancelado">Cancelado</a></td></tr>
+<tr><td style="padding:6px 12px"><a href="notas.html">Notas</a></td><td style="padding:6px 12px"><a href="notas.html#vazio">Vazio</a> · <a href="notas.html#dados">Com dados</a> · <a href="notas.html#busca-vazia">Busca sem resultado</a> · <a href="notas.html#selecionada">Nota selecionada (barra de ações ativa)</a></td></tr>
+<tr><td style="padding:6px 12px"><a href="relatorios.html">Relatórios</a></td><td style="padding:6px 12px"><a href="relatorios.html#sem-dados">Sem dados (botões desabilitados com dica)</a> · <a href="relatorios.html#com-dados">Com dados</a> · <a href="relatorios.html#sem-ibscbs">Com dados, sem IBS/CBS no filtro</a></td></tr>
+<tr><td style="padding:6px 12px"><a href="enviar.html">Enviar</a></td><td style="padding:6px 12px"><a href="enviar.html#sem-notas">Sem notas</a> · <a href="enviar.html#pronto">Pronto (anexo: N XMLs)</a> · <a href="enviar.html#email-invalido">E-mail de destino inválido</a> · <a href="enviar.html#enviando">Enviando</a> · <a href="enviar.html#enviado">Enviado</a> · <a href="enviar.html#erro">Erro</a></td></tr>
+<tr><td style="padding:6px 12px"><a href="configuracoes.html">Configurações</a></td><td style="padding:6px 12px"><a href="configuracoes.html#normal">Normal</a> · <a href="configuracoes.html#invalido">Campo inválido</a> · <a href="configuracoes.html#testando">Testando conexão</a> · <a href="configuracoes.html#ok">Conexão OK</a> · <a href="configuracoes.html#falhou">Conexão falhou</a> · <a href="configuracoes.html#salvo">Salvo</a></td></tr>
+<tr><td style="padding:6px 12px"><a href="sobre.html">Sobre</a></td><td style="padding:6px 12px"><a href="sobre.html#sobre">Sobre</a></td></tr>
+<tr><td style="padding:6px 12px"><a href="carregando.html">Carregando</a></td><td style="padding:6px 12px"><a href="carregando.html#danfe">Gerando DANFE</a> · <a href="carregando.html#relatorio">Gerando relatório</a></td></tr>
+<tr><td style="padding:6px 12px"><a href="relatorio-a4.html">Relatório A4</a></td><td style="padding:6px 12px">Relatório de Notas e Relatório IBS/CBS: 1ª página, intermediária e última com totais</td></tr>
+<tr><td style="padding:6px 12px"><a href="opcoes.html">Opções</a></td><td style="padding:6px 12px">D1 a D12, lado a lado, com a sugestão marcada</td></tr></table>
+<h2>Paleta</h2><div style="display:flex;flex-wrap:wrap;gap:8px">
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#171A21;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorMarinho</b><br>#171A21</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#C9CED6;border-bottom:1px solid #DADDE3"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorMarinhoTexto</b><br>#C9CED6</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#2067CA;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorPrimaria</b><br>#2067CA</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#1A56AB;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorPrimariaHover</b><br>#1A56AB</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#164A93;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorPrimariaPressionada</b><br>#164A93</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#E8F0FB;border-bottom:1px solid #DADDE3"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorPrimariaSuave</b><br>#E8F0FB</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#F2F3F5;border-bottom:1px solid #DADDE3"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorFundo</b><br>#F2F3F5</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#FFFFFF;border-bottom:1px solid #DADDE3"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorSuperficie</b><br>#FFFFFF</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#F7F8FA;border-bottom:1px solid #DADDE3"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorZebra</b><br>#F7F8FA</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#DADDE3;border-bottom:1px solid #DADDE3"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorBorda</b><br>#DADDE3</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#878E9B;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorBordaCampo</b><br>#878E9B</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#1F2430;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorTexto</b><br>#1F2430</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#5B6270;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorTextoSecundario</b><br>#5B6270</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#8C93A0;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorTextoDesabilitado</b><br>#8C93A0</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#EDF0F4;border-bottom:1px solid #DADDE3"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorFundoDesabilitado</b><br>#EDF0F4</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#18793A;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorSucesso</b><br>#18793A</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#E7F4EA;border-bottom:1px solid #DADDE3"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorSucessoSuave</b><br>#E7F4EA</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#8F5600;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorAviso</b><br>#8F5600</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#FFF4E0;border-bottom:1px solid #DADDE3"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorAvisoSuave</b><br>#FFF4E0</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#C62828;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorErro</b><br>#C62828</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#FDECEA;border-bottom:1px solid #DADDE3"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorErroSuave</b><br>#FDECEA</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#7FD99A;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorSucessoSobreMarinho</b><br>#7FD99A</div></div>
+<div style="width:160px;background:#fff;border:1px solid #C0C4CC"><div style="height:40px;background:#6D6D6D;"></div><div style="padding:4px 8px;font-size:9pt"><b style="font-weight:600">CorTextHintSistema</b><br>#6D6D6D</div></div>
+</div></div>
+</body>
+</html>
