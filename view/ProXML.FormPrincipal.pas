@@ -67,7 +67,8 @@ uses
   uCalculadoraXML,
   Vcl.ActnList,
   System.Actions,
-  ProXML.Botao;
+  ProXML.Botao,
+  ProXML.Tema;
 
 type
   //Relatório aberto depois de gravar as notas no banco (GravarNotasDB)
@@ -77,32 +78,57 @@ type
     PnlContainer: TPanel;
     PnlCabecalho: TPanel;
     PnlCorpo: TPanel;
-    PnlInfo: TPanel;
     PnlLocal: TPanel;
-    PnlLogo: TPanel;
     PnlInfoLocal: TPanel;
     {$IFDEF MSWINDOWS}
       FileOpenDialog1: TFileOpenDialog;
     {$ENDIF}
-    PanelVaorICMS: TPanel;
-    PanelValorBaseICMS: TPanel;
-    PanelValorTotal: TPanel;
-    PanelIMGValorTotal: TPanel;
-    PanelTextoValorTotal: TPanel;
-    Panel1: TPanel;
-    Panel2: TPanel;
-    Panel3: TPanel;
-    Panel4: TPanel;
-    Label3: TLabel;
+    //Cabeçalho (etapa 4.3): logo vetorial e acesso à tela Sobre
+    SkSvgLogo: TSkSvg;
+    PnlSobre: TPanel;
+    SkSvgSobre: TSkSvg;
+    LabelSobre: TLabel;
+    //Barra de pasta (etapa 4.3): campo, Selecionar…, seletor de modelo e Processar
+    PnlBarraPasta: TPanel;
+    PnlBarraPastaBorda: TPanel;
+    PnlCampoPasta: TPanel;
+    PnlCampoPastaFundo: TPanel;
+    SkSvgPasta: TSkSvg;
+    PnlSelecionar: TPanel;
+    PnlModelo: TPanel;
+    //Faixa de cards no topo da área de conteúdo (etapa 4.3, decisão D1)
+    PnlConteudo: TPanel;
+    PnlCards: TPanel;
+    PnlCardValorTotal: TPanel;
+    PnlCardValorTotalFundo: TPanel;
+    PnlCardValorTotalRotulo: TPanel;
+    SkSvgCardValorTotal: TSkSvg;
+    LabelTituloValorTotal: TLabel;
     LabelValorTotal: TLabel;
-    Label5: TLabel;
-    Label6: TLabel;
+    PnlCardBaseICMS: TPanel;
+    PnlCardBaseICMSFundo: TPanel;
+    PnlCardBaseICMSRotulo: TPanel;
+    SkSvgCardBaseICMS: TSkSvg;
+    LabelTituloBaseICMS: TLabel;
     LabelbaseICMS: TLabel;
+    PnlCardICMS: TPanel;
+    PnlCardICMSFundo: TPanel;
+    PnlCardICMSRotulo: TPanel;
+    SkSvgCardICMS: TSkSvg;
+    LabelTituloICMS: TLabel;
     LabelValorICMS: TLabel;
-    SkSvg2: TSkSvg;
-    SkSvg3: TSkSvg;
-    SkSvg4: TSkSvg;
-    Image1: TImage;
+    PnlCardIBS: TPanel;
+    PnlCardIBSFundo: TPanel;
+    PnlCardIBSRotulo: TPanel;
+    SkSvgCardIBS: TSkSvg;
+    LabelTituloIBS: TLabel;
+    LabelValorIBS: TLabel;
+    PnlCardCBS: TPanel;
+    PnlCardCBSFundo: TPanel;
+    PnlCardCBSRotulo: TPanel;
+    SkSvgCardCBS: TSkSvg;
+    LabelTituloCBS: TLabel;
+    LabelValorCBS: TLabel;
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
@@ -118,13 +144,6 @@ type
     FDMemTable1bcicms: TFloatField;
     FDMemTable1vtotal: TFloatField;
     Gauge1: TGauge;
-    Shape5: TShape;
-    Shape6: TShape;
-    Shape7: TShape;
-    Panel6: TPanel;
-    Shape8: TShape;
-    SkSvg1: TSkSvg;
-    Shape1: TShape;
     EditCaminho: TEdit;
     Panel7: TPanel;
     PanelMenus: TPanel;
@@ -181,23 +200,13 @@ type
     MemoMensagem: TMemo;
     Panel11: TPanel;
     ACBrNFeDANFEFR: TACBrNFeDANFEFR;
-    PanelValorIBS: TPanel;
-    ShapeValorIBS: TShape;
-    PanelIMGValorIBS: TPanel;
-    SkSvgValorIBS: TSkSvg;
-    PanelTextoValorIBS: TPanel;
-    LabelTituloIBS: TLabel;
-    LabelValorIBS: TLabel;
-    PanelValorCBS: TPanel;
-    ShapeValorCBS: TShape;
-    PanelIMGValorCBS: TPanel;
-    SkSvgValorCBS: TSkSvg;
-    PanelTextoValorCBS: TPanel;
-    LabelTituloCBS: TLabel;
-    LabelValorCBS: TLabel;
     LabelFiltroModelo: TLabel;
-    ComboFiltroModelo: TComboBox;
-    procedure SkSvg1Click(Sender: TObject);
+    //Faixa de aviso no Resumo (etapa 4.3): pasta salva que não existe mais (glossário 2.14)
+    PnlAvisoPasta: TPanel;
+    PnlAvisoPastaBarra: TPanel;
+    SkSvgAvisoPasta: TSkSvg;
+    LabelAvisoPasta: TLabel;
+    procedure SelecionarPastaClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure CategoryButtons1Categories0Items0Click(Sender: TObject);
@@ -214,7 +223,7 @@ type
     procedure SkSvg5Click(Sender: TObject);
     procedure btnEnviarEmailClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure ComboFiltroModeloChange(Sender: TObject);
+    procedure SeletorModeloChange(Sender: TObject);
     procedure CategoryButtons1RelatorioIBSCBSClick(Sender: TObject);
   private
     ConfigEmail : TConfig;
@@ -224,12 +233,13 @@ type
     FRolagemEnviar: TScrollBox;
     FRolagemConfig: TScrollBox;
     FMaximizarAoMostrar: Boolean;   //janela salva maximizada: maximiza no FormShow
+    FPPIAtual : Integer;
+    FPastaNaoEncontrada: string;   //pasta do aviso 2.14 (o texto da faixa encurta o caminho)       //escala atual da tela (o PixelsPerInch do 10.2 fica com o valor do .dfm)
     procedure SetTextoTranferencia(const Text: String);
     procedure AjustarAlturaLinhasGrade;
     procedure GerarRelatorio(const Relatorio: TTipoRelatorio);
     procedure FinalizaRelatorio(const Relatorio: TTipoRelatorio);
     procedure AbrirRelatorioIBSCBS;
-    function  FormatarValor(const Valor: Double): string;
     function  DescricaoFiltroModelo: string;
     procedure ConfigACBR;
     procedure GerarDanfe(const CaminhoArq: String);
@@ -262,12 +272,46 @@ type
     procedure AcaoCopiarChaveUpdate(Sender: TObject);
     procedure AcaoGerarDanfeExecute(Sender: TObject);
     procedure AcaoGerarDanfeUpdate(Sender: TObject);
+    //Plano 4, etapa 4.3: cabeçalho, barra de pasta e cards
+    function  Escalar(const Valor: Integer): Integer;
+    procedure FixarTamanhoMinimo;
+    procedure AplicarVisualCabecalho;
+    procedure CriarBarraPasta;
+    procedure PrepararCards;
+    procedure PnlCardsResize(Sender: TObject);
+    procedure AjustarFonteValoresCards;
+    procedure AtualizarVisualCards;
+    procedure PaginaShow(Sender: TObject);
+    procedure EditCaminhoChange(Sender: TObject);
+    procedure EditCaminhoEnter(Sender: TObject);
+    procedure EditCaminhoExit(Sender: TObject);
+    procedure AtualizarBordaCampoPasta(const ComFoco: Boolean);
+    procedure MostrarAvisoPastaNaoEncontrada(const Pasta: string);
+    procedure PnlAvisoPastaResize(Sender: TObject);
+    procedure AjustarLargurasBarraPasta;
+    procedure WMDropFiles(var Message: TWMDropFiles); message WM_DROPFILES;
+    procedure WMDpiChanged(var Message: TWMDpi); message WM_DPICHANGED;
+    procedure WMProXMLPPI(var Message: TMessage); message WM_PROXML_PPI;
+    function  PPIAtual: Integer;
+    procedure FonteNaEscala(Fonte: TFont; const Tamanho: Integer);
+    procedure AposMudarEscala;
+
+  protected
+    procedure CreateWnd; override;
+    procedure DestroyWnd; override;
+  public
+    //A VCL escala as Constraints junto com o DPI (ao carregar o .dfm e ao trocar de monitor);
+    //o mínimo da janela volta para 1024x640 pixels reais
+    procedure ScaleForPPI(NewPPI: Integer); override;
 
   public
-    //Botões criados em runtime (TProBotao) nos painéis de encaixe Panel7, Panel11 e Panel9
+    //Botões criados em runtime (TProBotao) nos painéis de encaixe Panel7, PnlSelecionar, Panel11 e Panel9
     btnProcessar    : TProBotao;
+    btnSelecionar   : TProBotao;
     btnEnviarEmail  : TProBotao;
     btnSalvarConfig : TProBotao;
+    //Seletor de modelo em botões segmentados (decisão D6), criado em runtime no PnlModelo
+    SeletorModelo   : TProSegmentado;
     //Atalhos de teclado (criados em runtime em CriarAtalhos)
     Acoes              : TActionList;
     actSelecionarPasta : TAction;   //Ctrl+O
@@ -276,6 +320,14 @@ type
     actCopiarChave     : TAction;   //Ctrl+C (com a grade em foco)
     actGerarDanfe      : TAction;   //Ctrl+D (na tela Notas)
     procedure AtualizarTotais;
+    //Há pasta escolhida? (P3: só olha se o campo está preenchido, sem comparar texto)
+    function  TemPasta: Boolean;
+    //Processar habilitado só com pasta (com a dica "Selecione uma pasta primeiro." no painel)
+    procedure AtualizarEstadoProcessar;
+    //Abre o seletor de pasta (clique no campo, em Selecionar… ou Ctrl+O)
+    procedure SelecionarPasta;
+    //Usa a pasta (ou a pasta do arquivo) solta na janela; False se o item não existe
+    function  UsarItemSolto(const Caminho: string): Boolean;
     //Modelo escolhido no seletor (FILTRO_MODELO_TODOS, FILTRO_MODELO_NFE ou FILTRO_MODELO_NFCE)
     function  ModeloSelecionado: Integer;
     //Aplica o modelo escolhido na grade, nos cards e nos relatórios
@@ -301,7 +353,7 @@ uses
   {$ENDIF}
   System.IOUtils,
   System.Math,
-  ProXML.Tema;
+  ProXML.Icones;
 
 {$R *.dfm}
 
@@ -334,11 +386,14 @@ begin
     //Recalcula os totais a partir das notas da grade (respeita o filtro ativo)
     FTotais := CalcularTotais(FDMemTable1);
 
-    LabelValorTotal.Caption := FormatarValor(FTotais.ValorTotal);
-    LabelbaseICMS.Caption   := FormatarValor(FTotais.BaseICMS);
-    LabelValorICMS.Caption  := FormatarValor(FTotais.ValorICMS);
-    LabelValorIBS.Caption   := FormatarValor(FTotais.IBS);
-    LabelValorCBS.Caption   := FormatarValor(FTotais.CBS);
+    LabelValorTotal.Caption := FormatarMoeda(FTotais.ValorTotal);
+    LabelbaseICMS.Caption   := FormatarMoeda(FTotais.BaseICMS);
+    LabelValorICMS.Caption  := FormatarMoeda(FTotais.ValorICMS);
+    LabelValorIBS.Caption   := FormatarMoeda(FTotais.IBS);
+    LabelValorCBS.Caption   := FormatarMoeda(FTotais.CBS);
+
+    //Sem notas no filtro: valores em cinza e peso normal; valor grande diminui para caber
+    AtualizarVisualCards;
 end;
 
 function TFormPrincipal.DescricaoFiltroModelo: string;
@@ -347,13 +402,7 @@ begin
     if ModeloSelecionado = FILTRO_MODELO_TODOS then
         Result := ''
     else
-        Result := ComboFiltroModelo.Text;
-end;
-
-function TFormPrincipal.FormatarValor(const Valor: Double): string;
-begin
-    //Formato dos valores nos cards e nos totais dos relatórios
-    Result := 'R$ ' + FloatToStrF(Valor, ffFixed, 15, 2);
+        Result := SeletorModelo.Itens[SeletorModelo.ItemIndex];
 end;
 
 procedure TFormPrincipal.AjustarAlturaLinhasGrade;
@@ -369,7 +418,7 @@ end;
 function TFormPrincipal.ModeloSelecionado: Integer;
 begin
     //Itens do seletor: 0 = Todos, 1 = NF-e 55, 2 = NFC-e 65
-    case ComboFiltroModelo.ItemIndex of
+    case SeletorModelo.ItemIndex of
         1: Result := FILTRO_MODELO_NFE;
         2: Result := FILTRO_MODELO_NFCE;
     else
@@ -409,7 +458,7 @@ begin
     AjustarAlturaLinhasGrade;
 end;
 
-procedure TFormPrincipal.ComboFiltroModeloChange(Sender: TObject);
+procedure TFormPrincipal.SeletorModeloChange(Sender: TObject);
 begin
     //Troca do modelo no seletor
     AplicarFiltroModelo;
@@ -513,11 +562,11 @@ begin
     //Os totais do rodapé vêm de FTotais (calculados na grade filtrada), não de SUM no banco.
     FormIBSCBS := TFormRelatorioIBSCBS.Create(Nil);
     try
-        FormIBSCBS.SetTotalBaseIBSCBS(FormatarValor(FTotais.BaseIBSCBS));
-        FormIBSCBS.SetTotalIBSUF(FormatarValor(FTotais.IBSUF));
-        FormIBSCBS.SetTotalIBSMun(FormatarValor(FTotais.IBSMun));
-        FormIBSCBS.SetTotalIBS(FormatarValor(FTotais.IBS));
-        FormIBSCBS.SetTotalCBS(FormatarValor(FTotais.CBS));
+        FormIBSCBS.SetTotalBaseIBSCBS(FormatarMoeda(FTotais.BaseIBSCBS));
+        FormIBSCBS.SetTotalIBSUF(FormatarMoeda(FTotais.IBSUF));
+        FormIBSCBS.SetTotalIBSMun(FormatarMoeda(FTotais.IBSMun));
+        FormIBSCBS.SetTotalIBS(FormatarMoeda(FTotais.IBS));
+        FormIBSCBS.SetTotalCBS(FormatarMoeda(FTotais.CBS));
         FormIBSCBS.SetQtRegistros(IntToStr(FTotais.QuantidadeIBSCBS));
         FormIBSCBS.SetDescricaoFiltro(DescricaoFiltroModelo);
 
@@ -602,8 +651,13 @@ begin
    //Tema (fonte base), botões e atalhos criados em runtime e rolagem nas telas
    //Enviar e Configurações quando a janela fica menor que o layout atual
    AplicarTema(Self);
+   FixarTamanhoMinimo;
    CriarBotoes;
    CriarAtalhos;
+   //Etapa 4.3: cabeçalho, barra de pasta (campo, Selecionar…, seletor de modelo) e cards
+   AplicarVisualCabecalho;
+   CriarBarraPasta;
+   PrepararCards;
    FRolagemEnviar := CriarRolagem(Panel10);
    FRolagemConfig := CriarRolagem(PanelCorpoConfig);
 
@@ -621,11 +675,14 @@ begin
    end;
 
    //Seletor de modelo começa em "Todos"
-   ComboFiltroModelo.ItemIndex := 0;
+   SeletorModelo.ItemIndex := 0;
    AplicarFiltroModelo;
 
    //Última pasta e janela da execução anterior
    RestaurarPreferencias;
+
+   //Sem pasta, Processar começa desabilitado
+   AtualizarEstadoProcessar;
 end;
 
 procedure TFormPrincipal.FormDestroy(Sender: TObject);
@@ -1047,7 +1104,13 @@ begin
     end;
 end;
 
-procedure TFormPrincipal.SkSvg1Click(Sender: TObject);
+procedure TFormPrincipal.SelecionarPastaClick(Sender: TObject);
+begin
+  //Clique no campo da pasta (ou no ícone dele) e no botão Selecionar…
+  SelecionarPasta;
+end;
+
+procedure TFormPrincipal.SelecionarPasta;
 begin
   //Selecionando a pasta de arquivos (cancelar não muda o campo)
   {$IFDEF MSWINDOWS}
@@ -1080,26 +1143,28 @@ begin
   CalculadoraXML:=  TCalculadoraXML.Create;
   try
 
-    if EditCaminho.Text <> 'Selecione uma pasta contendo XMLs de Nota Fiscal' then
+    //P3: "há pasta?" só olha se o campo está preenchido (a instrução fica no TextHint)
+    if TemPasta then
     begin
       //Nova pasta: o seletor de modelo volta para "Todos" (grade, cards e relatórios)
-      ComboFiltroModelo.ItemIndex := 0;
+      SeletorModelo.ItemIndex := 0;
       AplicarFiltroModelo;
 
-      CalculadoraXML.CaminhoDiretorio := EditCaminho.Text;
+      CalculadoraXML.CaminhoDiretorio := Trim(EditCaminho.Text);
       CalculadoraXML.ProcessarXMLs;
       AjustarAlturaLinhasGrade;
       DBGrid1.Refresh;
     end else
     begin
-         messagedlg('Por favor selecione um repositório !!', mtInformation	, [mbOk], 0);
+         //Só por segurança: sem pasta o botão fica desabilitado (glossário 2.13)
+         messagedlg('Selecione uma pasta com XMLs.', mtInformation	, [mbOk], 0);
     end;
-    
+
   finally
     CalculadoraXML.Free;
   end;
   PageControl1.ActivePageIndex := 0;
-  btnProcessar.Enabled := true;
+  AtualizarEstadoProcessar;
   Gauge1.Progress := 0;
   Memo1.SetFocus;
 end;
@@ -1143,8 +1208,8 @@ end;
 
 procedure TFormPrincipal.AcaoSelecionarPastaExecute(Sender: TObject);
 begin
-    //Ctrl+O: mesmo que clicar no ícone da pasta
-    SkSvg1Click(SkSvg1);
+    //Ctrl+O: mesmo que clicar no campo da pasta ou em Selecionar…
+    SelecionarPasta;
 end;
 
 procedure TFormPrincipal.AcaoProcessarExecute(Sender: TObject);
@@ -1311,9 +1376,12 @@ begin
         end;
     end;
 
-    //Última pasta, se ela ainda existir
+    //Última pasta, se ela ainda existir. Se não existe mais, o campo fica vazio e o Resumo
+    //mostra o aviso 2.14 numa faixa (sem caixa de diálogo ao abrir o app)
     if (Pref.UltimaPasta <> '') and SysUtils.DirectoryExists(Pref.UltimaPasta) then
-        EditCaminho.Text := Pref.UltimaPasta;
+        EditCaminho.Text := Pref.UltimaPasta
+    else if Trim(Pref.UltimaPasta) <> '' then
+        MostrarAvisoPastaNaoEncontrada(Pref.UltimaPasta);
 
     //Janela: tamanho e posição do estado normal, sempre dentro da área visível
     if Pref.TemJanela then
@@ -1380,6 +1448,523 @@ procedure TFormPrincipal.WMSize(var Message: TWMSize);
 begin
     inherited;
     RegistrarJanelaNormal;
+end;
+
+{ Plano 4, etapa 4.3: cabeçalho, barra de pasta (arrastar e soltar, seletor segmentado) e cards }
+
+function TFormPrincipal.PPIAtual: Integer;
+begin
+    //Escala atual da tela: a do último ScaleForPPI/WM_DPICHANGED; antes disso, a do .dfm
+    Result := FPPIAtual;
+    if Result < 30 then
+        Result := PixelsPerInch;
+end;
+
+procedure TFormPrincipal.WMProXMLPPI(var Message: TMessage);
+begin
+    //Consulta dos controles próprios (TProBotao, TProSegmentado) via ProXML.Tema.PPIDoControle
+    Message.Result := PPIAtual;
+end;
+
+function TFormPrincipal.Escalar(const Valor: Integer): Integer;
+begin
+    //Medidas do tema estão a 96 dpi
+    Result := MulDiv(Valor, PPIAtual, 96);
+end;
+
+procedure TFormPrincipal.FonteNaEscala(Fonte: TFont; const Tamanho: Integer);
+begin
+    //Tamanho em pontos na escala atual da tela (Font.Size usaria a escala do sistema)
+    Fonte.Height := -MulDiv(Tamanho, PPIAtual, 72);
+end;
+
+procedure TFormPrincipal.FixarTamanhoMinimo;
+begin
+    //Decisão de 20/10/2026: o mínimo é sempre 1024x640 pixels reais da tela, em qualquer escala
+    //do Windows. A VCL multiplica as Constraints pelo DPI ao carregar o .dfm e ao trocar de
+    //monitor (ChangeScale); aqui elas voltam para o valor do tema, sem escala
+    Constraints.MinWidth  := JanelaLarguraMinima;
+    Constraints.MinHeight := JanelaAlturaMinima;
+end;
+
+procedure TFormPrincipal.ScaleForPPI(NewPPI: Integer);
+begin
+    //Carga do .dfm (Loaded -> ScaleForCurrentDpi) e mudança de escala pedida pelo código
+    inherited;
+    if NewPPI >= 30 then
+        FPPIAtual := NewPPI;
+    AposMudarEscala;
+end;
+
+procedure TFormPrincipal.WMDpiChanged(var Message: TWMDpi);
+begin
+    //Janela levada para um monitor com outra escala: a VCL escala a tela sem passar pelo ScaleForPPI
+    inherited;
+    if Scaled and (Message.YDpi >= 30) then
+        FPPIAtual := Message.YDpi;
+    AposMudarEscala;
+end;
+
+procedure TFormPrincipal.AposMudarEscala;
+begin
+    FixarTamanhoMinimo;
+
+    //Medidas calculadas no código (larguras da barra de pasta e borda do campo) seguem a nova escala
+    if (not (csLoading in ComponentState)) and (SeletorModelo <> nil) then
+    begin
+        AjustarLargurasBarraPasta;
+        AtualizarBordaCampoPasta(EditCaminho.Focused);
+        AjustarFonteValoresCards;
+    end;
+end;
+
+procedure TFormPrincipal.CreateWnd;
+begin
+    inherited;
+    //Aceita pastas e arquivos arrastados do Explorer (WM_DROPFILES). Refeito sempre que a
+    //janela é recriada pela VCL
+    DragAcceptFiles(Handle, True);
+end;
+
+procedure TFormPrincipal.DestroyWnd;
+begin
+    DragAcceptFiles(Handle, False);
+    inherited;
+end;
+
+procedure TFormPrincipal.WMDropFiles(var Message: TWMDropFiles);
+var
+    Quantidade : Integer;
+    Tamanho    : Integer;
+    Caminho    : string;
+begin
+    //Itens soltos na janela: vale só o primeiro (pasta, ou a pasta do arquivo)
+    try
+        //Durante a espera do PDF do DANFE a tela processa mensagens: não troca a pasta no meio
+        if FGerandoDanfe then
+            Exit;
+
+        Quantidade := DragQueryFile(Message.Drop, $FFFFFFFF, nil, 0);
+        if Quantidade <= 0 then
+            Exit;
+
+        Tamanho := DragQueryFile(Message.Drop, 0, nil, 0);
+        SetLength(Caminho, Tamanho);
+        if Tamanho > 0 then
+            DragQueryFile(Message.Drop, 0, PChar(Caminho), Tamanho + 1);
+
+        UsarItemSolto(Caminho);
+    finally
+        DragFinish(Message.Drop);
+        Message.Result := 0;
+    end;
+end;
+
+function TFormPrincipal.UsarItemSolto(const Caminho: string): Boolean;
+var
+    Pasta: string;
+begin
+    //Pasta: usa ela mesma. Arquivo: usa a pasta onde ele está. Outra coisa: ignora
+    Result := False;
+    if SysUtils.DirectoryExists(Caminho) then
+        Pasta := Caminho
+    else if FileExists(Caminho) then
+        Pasta := ExtractFileDir(Caminho)
+    else
+        Exit;
+
+    EditCaminho.Text := Pasta;
+    GuardarUltimaPasta(Pasta);
+    Result := True;
+end;
+
+function TFormPrincipal.TemPasta: Boolean;
+begin
+    Result := Trim(EditCaminho.Text) <> '';
+end;
+
+procedure TFormPrincipal.AtualizarEstadoProcessar;
+begin
+    //Sem pasta, Processar fica desabilitado. A dica "Selecione uma pasta primeiro." fica no painel
+    //de encaixe (Panel7): a VCL não mostra o hint de um controle desabilitado, mas mostra o do pai
+    if btnProcessar <> nil then
+        btnProcessar.Enabled := TemPasta;
+end;
+
+procedure TFormPrincipal.EditCaminhoChange(Sender: TObject);
+begin
+    AtualizarEstadoProcessar;
+
+    //Dica do campo: o caminho completo (o campo pode cortar caminhos longos) + glossário 2.3
+    if TemPasta then
+        EditCaminho.Hint := Trim(EditCaminho.Text) + sLineBreak + 'Clique para escolher a pasta (Ctrl+O)'
+    else
+        EditCaminho.Hint := 'Clique para escolher a pasta (Ctrl+O)';
+
+    //Outra pasta escolhida: o aviso de pasta não encontrada deixa de valer
+    if TemPasta then
+        PnlAvisoPasta.Visible := False;
+end;
+
+procedure TFormPrincipal.MostrarAvisoPastaNaoEncontrada(const Pasta: string);
+var
+    Medida: TBitmap;
+begin
+    //Faixa de aviso (tokens.md 5.8): fundo CorAvisoSuave, barra de 4 px e ícone triangle-alert
+    //em CorAviso, texto 10 pt CorTexto. Texto do glossário 2.14, sem a linha em branco
+    PnlAvisoPasta.Color      := CorAvisoSuave;
+    PnlAvisoPastaBarra.Color := CorAviso;
+    SkSvgAvisoPasta.Svg.Source        := IconeAviso;
+    SkSvgAvisoPasta.Svg.OverrideColor := CorAlpha(CorAviso);
+    AplicarFonte(LabelAvisoPasta.Font, FonteTexto, TamanhoCorpo, CorTexto);
+    FPastaNaoEncontrada := Pasta;
+    PnlAvisoPasta.Hint      := Pasta;
+    PnlAvisoPasta.ShowHint  := True;
+    PnlAvisoPasta.OnResize  := PnlAvisoPastaResize;
+    PnlAvisoPastaResize(PnlAvisoPasta);
+
+    //Altura para as 3 linhas + padding da faixa em cima e embaixo
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelAvisoPasta.Font);
+        PnlAvisoPasta.Height := 3 * Medida.Canvas.TextHeight('Ag') + 2 * Escalar(PaddingFaixaVertical);
+    finally
+        Medida.Free;
+    end;
+    SkSvgAvisoPasta.Margins.Bottom := PnlAvisoPasta.Height - Escalar(PaddingFaixaVertical) - Escalar(TamanhoIconeMenu);
+
+    PnlAvisoPasta.Visible := True;
+end;
+
+procedure TFormPrincipal.PnlAvisoPastaResize(Sender: TObject);
+var
+    Medida: TBitmap;
+begin
+    //Caminho longo sem espaços não quebra linha: encurta no meio ("C:\...\pasta") para caber
+    //na largura da faixa; o caminho completo fica na dica
+    if FPastaNaoEncontrada = '' then
+        Exit;
+
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelAvisoPasta.Font);
+        LabelAvisoPasta.Caption := 'A pasta não foi encontrada:' + sLineBreak +
+                                   MinimizeName(FPastaNaoEncontrada, Medida.Canvas, LabelAvisoPasta.Width) +
+                                   sLineBreak + 'Selecione outra pasta.';
+    finally
+        Medida.Free;
+    end;
+end;
+
+procedure TFormPrincipal.EditCaminhoEnter(Sender: TObject);
+begin
+    AtualizarBordaCampoPasta(True);
+end;
+
+procedure TFormPrincipal.EditCaminhoExit(Sender: TObject);
+begin
+    AtualizarBordaCampoPasta(False);
+end;
+
+procedure TFormPrincipal.AtualizarBordaCampoPasta(const ComFoco: Boolean);
+var
+    Borda      : Integer;
+    Diferenca  : Integer;
+    Interno    : Integer;
+    AlturaTexto: Integer;
+    Medida     : TBitmap;
+begin
+    //Campo (tokens.md 5.3): borda de 1 px CorBordaCampo; com foco, 2 px CorPrimaria.
+    //A borda é o painel de fora (cor + Padding); ao engrossar, o espaço interno diminui o mesmo
+    //tanto para o ícone e o texto não mudarem de lugar
+    if ComFoco then
+    begin
+        Borda := Escalar(BordaCampoFoco);
+        PnlCampoPasta.Color := CorPrimaria;
+    end
+    else
+    begin
+        Borda := Escalar(BordaCampo);
+        PnlCampoPasta.Color := CorBordaCampo;
+    end;
+    Diferenca := Borda - Escalar(BordaCampo);
+    PnlCampoPasta.Padding.SetBounds(Borda, Borda, Borda, Borda);
+
+    //Ícone de 16 px e texto centralizados na altura interna do campo
+    Interno := Escalar(AlturaCampo) - 2 * Escalar(BordaCampo);
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(EditCaminho.Font);
+        AlturaTexto := Medida.Canvas.TextHeight('Ag');
+    finally
+        Medida.Free;
+    end;
+
+    SkSvgPasta.Margins.SetBounds(Escalar(PaddingCampo) - Diferenca,
+                                 Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca),
+                                 0,
+                                 Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca));
+    EditCaminho.Margins.SetBounds(Escalar(Espaco1),
+                                  Max(0, (Interno - AlturaTexto) div 2 - Diferenca),
+                                  Escalar(PaddingCampo) - Diferenca,
+                                  Max(0, Interno - AlturaTexto - (Interno - AlturaTexto) div 2 - Diferenca));
+end;
+
+procedure TFormPrincipal.AplicarVisualCabecalho;
+begin
+    //Cabeçalho marinho de 48 px (tokens.md 4.1): logo vetorial à esquerda (SVG embutido no .dfm,
+    //com as cores próprias do logo) e "Sobre" à direita
+    PnlCabecalho.Color := CorMarinho;
+    PnlSobre.Color     := CorMarinho;
+
+    SkSvgSobre.Svg.Source        := IconeInfo;
+    SkSvgSobre.Svg.OverrideColor := CorAlpha(CorMarinhoTexto);
+    AplicarFonte(LabelSobre.Font, FonteTexto, TamanhoLegenda, CorMarinhoTexto);
+    LabelSobre.Caption := 'Sobre';
+    PnlSobre.Hint      := 'Sobre o ProXML';
+    PnlSobre.ShowHint  := True;
+
+    //A tela Sobre chega na etapa 4.7: por enquanto o link aparece, mas não tem ação
+    PnlSobre.Enabled := False;
+end;
+
+procedure TFormPrincipal.CriarBarraPasta;
+begin
+    //Barra de pasta de 56 px (tokens.md 4.1): campo que estica, Selecionar…, Modelo e Processar
+    PnlBarraPasta.Color      := CorSuperficie;
+    PnlBarraPastaBorda.Color := CorBorda;
+    PnlSelecionar.Color      := CorSuperficie;
+    PnlModelo.Color          := CorSuperficie;
+    Panel7.Color             := CorSuperficie;
+
+    //Campo da pasta: clique no campo (ou no ícone) abre o seletor; a instrução fica só no TextHint
+    PnlCampoPasta.Color      := CorBordaCampo;
+    PnlCampoPastaFundo.Color := CorSuperficie;
+    EditCaminho.Color        := CorSuperficie;
+    AplicarFonte(EditCaminho.Font, FonteTexto, TamanhoCorpo, CorTexto);
+    EditCaminho.TextHint := 'Selecione ou arraste uma pasta com XMLs de Nota Fiscal';
+    EditCaminho.Hint     := 'Clique para escolher a pasta (Ctrl+O)';
+    EditCaminho.ShowHint := True;
+    EditCaminho.OnClick  := SelecionarPastaClick;
+    EditCaminho.OnChange := EditCaminhoChange;
+    EditCaminho.OnEnter  := EditCaminhoEnter;
+    EditCaminho.OnExit   := EditCaminhoExit;
+    PnlCampoPastaFundo.OnClick := SelecionarPastaClick;
+    SkSvgPasta.OnClick         := SelecionarPastaClick;
+    SkSvgPasta.Svg.Source        := IconePasta;
+    SkSvgPasta.Svg.OverrideColor := CorAlpha(CorTextoSecundario);
+
+    //Selecionar… (secundário) e Processar (primário, criado em CriarBotoes)
+    btnSelecionar := TProBotao.CriarEm(PnlSelecionar, 'Selecionar'#$2026, ebSecundario, SelecionarPastaClick);
+    btnSelecionar.IconeSvg := IconePastaAberta;
+    btnSelecionar.Hint     := 'Escolher a pasta dos XMLs (Ctrl+O)';
+    btnSelecionar.ShowHint := True;
+
+    btnProcessar.IconeSvg := IconeProcessar;
+    btnProcessar.Hint     := 'Ler os XMLs da pasta (F5)';
+    btnProcessar.ShowHint := True;
+    Panel7.Hint     := 'Selecione uma pasta primeiro.';
+    Panel7.ShowHint := True;
+
+    //Seletor de modelo em botões segmentados (D6): mesma ordem do seletor do Plano 1
+    AplicarFonte(LabelFiltroModelo.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelFiltroModelo.Caption := 'Modelo';
+    SeletorModelo := TProSegmentado.Create(Self);
+    SeletorModelo.Parent := PnlModelo;
+    SeletorModelo.Align  := alClient;
+    SeletorModelo.Itens.Add('Todos');
+    SeletorModelo.Itens.Add('NF-e 55');
+    SeletorModelo.Itens.Add('NFC-e 65');
+    SeletorModelo.Dicas.Add('Todos: NF-e (55) e NFC-e (65)');
+    SeletorModelo.Dicas.Add('Só NF-e (modelo 55)');
+    SeletorModelo.Dicas.Add('Só NFC-e (modelo 65)');
+    SeletorModelo.OnChange := SeletorModeloChange;
+
+    AjustarLargurasBarraPasta;
+    AtualizarBordaCampoPasta(False);
+end;
+
+procedure TFormPrincipal.AjustarLargurasBarraPasta;
+begin
+    //Os painéis de encaixe têm a largura do conteúdo; o campo da pasta fica com o resto.
+    //A VCL ordena os controles alRight pela borda direita (Left + Width): ao mudar a largura a
+    //ordem poderia trocar. Por isso a ordem (da direita para a esquerda: Processar, seletor,
+    //"Modelo", Selecionar…) é fixada pelo Left antes de realinhar
+    PnlBarraPasta.DisableAlign;
+    try
+        PnlSelecionar.Width := btnSelecionar.LarguraIdeal;
+        PnlModelo.Width     := SeletorModelo.LarguraIdeal;
+        Panel7.Width        := Escalar(LarguraBotaoDestaque) + 2 * btnProcessar.MargemFoco;
+
+        Panel7.Left            := 30000;
+        PnlModelo.Left         := 20000;
+        LabelFiltroModelo.Left := 10000;
+        PnlSelecionar.Left     := 0;
+    finally
+        PnlBarraPasta.EnableAlign;
+    end;
+
+    PnlSobre.Width := SkSvgSobre.Margins.Left + SkSvgSobre.Width + LabelSobre.Margins.Left +
+                      LabelSobre.Width + LabelSobre.Margins.Right;
+end;
+
+procedure TFormPrincipal.PrepararCards;
+var
+    Cartoes : array[0..4] of TPanel;
+    Fundos  : array[0..4] of TPanel;
+    Rotulos : array[0..4] of TPanel;
+    Icones  : array[0..4] of TSkSvg;
+    Titulos : array[0..4] of TLabel;
+    I       : Integer;
+begin
+    //Faixa de 5 cards no topo da área de conteúdo (D1; tokens.md 5.5): contêiner CorBorda com
+    //1 px de Padding (a borda) e fundo CorSuperficie; ícone CorPrimaria + rótulo 9 pt na linha 1
+    //e o valor 13 pt Semibold na linha 2
+    PnlConteudo.Color := CorFundo;
+    PnlCards.Color    := CorFundo;
+
+    Cartoes[0] := PnlCardValorTotal; Fundos[0] := PnlCardValorTotalFundo; Rotulos[0] := PnlCardValorTotalRotulo;
+    Cartoes[1] := PnlCardBaseICMS;   Fundos[1] := PnlCardBaseICMSFundo;   Rotulos[1] := PnlCardBaseICMSRotulo;
+    Cartoes[2] := PnlCardICMS;       Fundos[2] := PnlCardICMSFundo;       Rotulos[2] := PnlCardICMSRotulo;
+    Cartoes[3] := PnlCardIBS;        Fundos[3] := PnlCardIBSFundo;        Rotulos[3] := PnlCardIBSRotulo;
+    Cartoes[4] := PnlCardCBS;        Fundos[4] := PnlCardCBSFundo;        Rotulos[4] := PnlCardCBSRotulo;
+    Icones[0] := SkSvgCardValorTotal; Titulos[0] := LabelTituloValorTotal;
+    Icones[1] := SkSvgCardBaseICMS;   Titulos[1] := LabelTituloBaseICMS;
+    Icones[2] := SkSvgCardICMS;       Titulos[2] := LabelTituloICMS;
+    Icones[3] := SkSvgCardIBS;        Titulos[3] := LabelTituloIBS;
+    Icones[4] := SkSvgCardCBS;        Titulos[4] := LabelTituloCBS;
+
+    Icones[0].Svg.Source := IconeValorTotal;
+    Icones[1].Svg.Source := IconeBaseICMS;
+    Icones[2].Svg.Source := IconeICMS;
+    Icones[3].Svg.Source := IconeIBS;
+    Icones[4].Svg.Source := IconeCBS;
+
+    //Rótulos do glossário (4.1 a 4.5)
+    Titulos[0].Caption := 'Valor Total';
+    Titulos[1].Caption := 'Base ICMS';
+    Titulos[2].Caption := 'ICMS';
+    Titulos[3].Caption := 'IBS';
+    Titulos[4].Caption := 'CBS';
+
+    for I := Low(Cartoes) to High(Cartoes) do
+    begin
+        Cartoes[I].Color := CorBorda;
+        Fundos[I].Color  := CorSuperficie;
+        Rotulos[I].Color := CorSuperficie;
+        Icones[I].Svg.OverrideColor := CorAlpha(CorPrimaria);
+        AplicarFonte(Titulos[I].Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    end;
+
+    PnlCards.OnResize := PnlCardsResize;
+
+    //D2: cards visíveis em Resumo, Notas e Carregando; ocultos em Enviar e Configurações.
+    //O OnShow da aba dispara também quando a troca vem do código (ActivePageIndex)
+    TabSheet1.OnShow := PaginaShow;
+    TabSheet2.OnShow := PaginaShow;
+    Loading.OnShow   := PaginaShow;
+    Enviar.OnShow    := PaginaShow;
+    Config.OnShow    := PaginaShow;
+end;
+
+procedure TFormPrincipal.PaginaShow(Sender: TObject);
+begin
+    //Sender é a aba que acabou de aparecer (o ActivePage ainda pode ser a anterior)
+    PnlCards.Visible := (Sender <> Enviar) and (Sender <> Config);
+end;
+
+procedure TFormPrincipal.PnlCardsResize(Sender: TObject);
+var
+    Cartoes : array[0..4] of TPanel;
+    Espaco  : Integer;
+    Largura : Integer;
+    Sobra   : Integer;
+    X       : Integer;
+    W       : Integer;
+    I       : Integer;
+begin
+    //Os 5 cards têm a mesma largura e crescem com a janela; espaço de 8 px entre eles.
+    //Os pixels que sobram da divisão vão 1 a 1 para os primeiros cards
+    Cartoes[0] := PnlCardValorTotal;
+    Cartoes[1] := PnlCardBaseICMS;
+    Cartoes[2] := PnlCardICMS;
+    Cartoes[3] := PnlCardIBS;
+    Cartoes[4] := PnlCardCBS;
+
+    Espaco  := Escalar(Espaco1);
+    Largura := (PnlCards.ClientWidth - 4 * Espaco) div 5;
+    Sobra   := PnlCards.ClientWidth - 4 * Espaco - 5 * Largura;
+    X := 0;
+    for I := Low(Cartoes) to High(Cartoes) do
+    begin
+        W := Largura;
+        if I < Sobra then
+            Inc(W);
+        Cartoes[I].SetBounds(X, 0, W, PnlCards.ClientHeight);
+        Inc(X, W + Espaco);
+    end;
+
+    AjustarFonteValoresCards;
+end;
+
+procedure TFormPrincipal.AtualizarVisualCards;
+var
+    Valores : array[0..4] of TLabel;
+    I       : Integer;
+begin
+    //Com notas no filtro: valor 13 pt Semibold CorTexto. Sem notas: "R$ 0,00" 13 pt Regular
+    //CorTextoSecundario (tokens.md 5.5). Um total zero com notas (ex.: IBS) continua em destaque
+    Valores[0] := LabelValorTotal;
+    Valores[1] := LabelbaseICMS;
+    Valores[2] := LabelValorICMS;
+    Valores[3] := LabelValorIBS;
+    Valores[4] := LabelValorCBS;
+
+    for I := Low(Valores) to High(Valores) do
+    begin
+        if TemNotaNaGrade then
+            AplicarFonte(Valores[I].Font, FonteDestaque, TamanhoValorCard, CorTexto)
+        else
+            AplicarFonte(Valores[I].Font, FonteTexto, TamanhoValorCard, CorTextoSecundario);
+        FonteNaEscala(Valores[I].Font, TamanhoValorCard);
+    end;
+
+    AjustarFonteValoresCards;
+end;
+
+procedure TFormPrincipal.AjustarFonteValoresCards;
+var
+    Valores : array[0..4] of TLabel;
+    Medida  : TBitmap;
+    I       : Integer;
+    Tamanho : Integer;
+begin
+    //Valor maior que o card (ex.: R$ 10.000.000,00 em 1024 px): a fonte diminui 1 pt por vez,
+    //até TamanhoValorCardMinimo, para o número nunca ser cortado (tokens.md 5.5)
+    Valores[0] := LabelValorTotal;
+    Valores[1] := LabelbaseICMS;
+    Valores[2] := LabelValorICMS;
+    Valores[3] := LabelValorIBS;
+    Valores[4] := LabelValorCBS;
+
+    Medida := TBitmap.Create;
+    try
+        for I := Low(Valores) to High(Valores) do
+        begin
+            Tamanho := TamanhoValorCard;
+            FonteNaEscala(Valores[I].Font, Tamanho);
+            Medida.Canvas.Font.Assign(Valores[I].Font);
+            while (Medida.Canvas.TextWidth(Valores[I].Caption) > Valores[I].Width) and
+                  (Tamanho > TamanhoValorCardMinimo) do
+            begin
+                Dec(Tamanho);
+                FonteNaEscala(Valores[I].Font, Tamanho);
+                Medida.Canvas.Font.Assign(Valores[I].Font);
+            end;
+        end;
+    finally
+        Medida.Free;
+    end;
 end;
 
 end.

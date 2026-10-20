@@ -10,8 +10,11 @@ unit ProXML.Tema;
 interface
 
 uses
+  System.SysUtils,
   System.UITypes,
+  Winapi.Messages,
   Vcl.Graphics,
+  Vcl.Controls,
   Vcl.Forms;
 
 const
@@ -92,6 +95,30 @@ const
   EspessuraFoco           = 2;    //contorno de foco
   AfastamentoFoco         = 2;    //distância entre o botão e o contorno de foco
 
+  //Seletor segmentado (tokens.md, seção 5.2)
+  PaddingSegmento         = 12;   //padding horizontal de cada segmento
+
+  //Campo (tokens.md, seção 5.3)
+  PaddingCampo            = 8;    //padding horizontal dentro do campo
+  BordaCampo              = 1;    //borda normal
+  BordaCampoFoco          = 2;    //borda com foco
+
+  //Card de total (tokens.md, seção 5.5)
+  PaddingCardVertical     = 10;
+  PaddingCardHorizontal   = 12;
+  AlturaRotuloCard        = 16;   //linha 1: ícone + rótulo
+  AlturaValorCard         = 22;   //linha 2: valor
+  TamanhoValorCardMinimo  = 9;    //o valor diminui até aqui para nunca ser cortado
+
+  //Faixa de status (tokens.md, seção 5.8)
+  PaddingFaixaVertical    = 12;
+  PaddingFaixaHorizontal  = 16;
+  BarraFaixa              = 4;    //barra colorida à esquerda
+
+  //Cabeçalho (tokens.md, seção 4.1; logo vetorial 157x32 mostrado a 28 px de altura)
+  LarguraLogo             = 137;
+  AlturaLogo              = 28;
+
   //Ícones
   TamanhoIconePequeno     = 16;   //botões, campos, cards
   TamanhoIconeMenu        = 20;   //menu, faixas
@@ -106,16 +133,32 @@ procedure AplicarFonte(Fonte: TFont; const Nome: string; const Tamanho: Integer;
 //tamanho, cor e estilo de cada controle. Não mexe em cores nem em posições.
 procedure AplicarTema(Form: TForm);
 
+//Escala atual (DPI) da tela de um controle. No Delphi 10.2 o PixelsPerInch do formulário fica
+//com o valor do .dfm (96) mesmo depois de a VCL escalar a tela para o monitor (125%, 150%): a tela
+//principal guarda a escala atual e responde a WM_PROXML_PPI. Sem resposta, vale o PixelsPerInch
+const
+  WM_PROXML_PPI = WM_APP + 43;
+function PPIDoControle(Controle: TControl): Integer;
+
+//Medida do tema (96 dpi) convertida para a escala atual da tela do controle
+function EscalarPara(Controle: TControl; const Valor: Integer): Integer;
+
 //Converte um TColor (BGR, aceita cores do sistema) em TAlphaColor opaco (ARGB), usado pelo Skia
 function CorAlpha(const Cor: TColor): TAlphaColor;
+
+//Formato monetário único da interface (glossário 4.6, P7): "R$ 1.234.567,89".
+//Usa um TFormatSettings pt-BR próprio, nunca a configuração regional do Windows.
+//Vale para os cards, a grade (4.5) e os relatórios (4.8)
+function FormatarMoeda(const Valor: Double): string;
+
+//Configuração pt-BR usada por FormatarMoeda (vírgula decimal, ponto de milhar)
+function FormatoPtBR: TFormatSettings;
 
 implementation
 
 uses
-  System.SysUtils,
   System.Classes,
-  Winapi.Windows,
-  Vcl.Controls;
+  Winapi.Windows;
 
 type
   //Acesso à Font e à ParentFont (protegidas em TControl)
@@ -165,5 +208,48 @@ begin
               (TAlphaColor(GetGValue(RGBCor)) shl 8) or
               TAlphaColor(GetBValue(RGBCor));
 end;
+
+function PPIDoControle(Controle: TControl): Integer;
+var
+    Form: TCustomForm;
+begin
+    Result := 0;
+    Form   := nil;
+    if Controle <> nil then
+        Form := GetParentForm(Controle);
+    if Form <> nil then
+        Result := Form.Perform(WM_PROXML_PPI, 0, 0);
+    if Result < 30 then
+    begin
+        if (Form <> nil) and (Form is TForm) and (TForm(Form).PixelsPerInch > 0) then
+            Result := TForm(Form).PixelsPerInch
+        else
+            Result := Screen.PixelsPerInch;
+    end;
+end;
+
+function EscalarPara(Controle: TControl; const Valor: Integer): Integer;
+begin
+    Result := MulDiv(Valor, PPIDoControle(Controle), 96);
+end;
+
+var
+    FFormatoPtBR: TFormatSettings;
+
+function FormatoPtBR: TFormatSettings;
+begin
+    Result := FFormatoPtBR;
+end;
+
+function FormatarMoeda(const Valor: Double): string;
+begin
+    Result := FormatFloat('"R$ "#,##0.00', Valor, FFormatoPtBR);
+end;
+
+initialization
+    //pt-BR explícito: os separadores são fixados aqui e não dependem do Windows
+    FFormatoPtBR := TFormatSettings.Create('pt-BR');
+    FFormatoPtBR.DecimalSeparator  := ',';
+    FFormatoPtBR.ThousandSeparator := '.';
 
 end.

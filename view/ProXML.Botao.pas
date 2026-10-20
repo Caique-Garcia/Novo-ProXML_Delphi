@@ -74,6 +74,9 @@ type
       const AoClicar: TNotifyEvent): TProBotao;
     //Margem em volta da face reservada para o contorno de foco (pixels, já na escala da tela)
     function MargemFoco: Integer;
+    //Largura do painel de encaixe para mostrar ícone e texto inteiros (padding, largura mínima
+    //do tema e margem do foco incluídos)
+    function LarguraIdeal: Integer;
     property Estilo: TEstiloBotao read FEstilo write SetEstilo;
     //Conteúdo SVG do ícone (ex.: um arquivo de docs/ui/icones). Vazio = sem ícone.
     //O traço é pintado com a cor do texto do estado atual (OverrideColor do Skia)
@@ -83,6 +86,65 @@ type
     property Caption;
     property Font;
     property OnClick;
+  end;
+
+  { TProSegmentado: seletor de opções em botões segmentados (Plano 4, etapa 4.3; decisão D6;
+    visual em docs/ui/tokens.md, seção 5.2). Usado no seletor de modelo (Todos / NF-e 55 / NFC-e 65).
+
+    - Um só controle com N segmentos colados (borda sobreposta em 1 px), cantos arredondados só
+      nas pontas. O segmento escolhido fica em CorPrimariaSuave com borda CorPrimaria e texto Semibold.
+    - Teclado: o seletor é uma única parada do Tab (como um grupo de opções do Windows);
+      Seta para a esquerda/cima e para a direita/baixo, Home e End trocam a opção na hora.
+    - Mouse: clique num segmento escolhe a opção. Cada segmento tem a própria dica (Dicas).
+    - OnChange só dispara quando o usuário troca a opção (mouse ou teclado). Mudar ItemIndex
+      pelo código não dispara o evento, como no TComboBox.
+    - Mesma margem do contorno de foco do TProBotao: os dois ficam alinhados na mesma barra. }
+  TProSegmentado = class(TCustomControl)
+  private
+    FItens           : TStrings;
+    FDicas           : TStrings;
+    FItemIndex       : Integer;
+    FSobre           : Integer;   //segmento sob o mouse (-1 = nenhum)
+    FFocoPeloMouse   : Boolean;
+    FMostrarFoco     : Boolean;
+    FOnChange        : TNotifyEvent;
+    procedure SetItemIndex(const Value: Integer);
+    procedure ItensAlterados(Sender: TObject);
+    function  Escalar(const Valor: Integer): Integer;
+    function  LarguraSegmento(const Indice: Integer): Integer;
+    procedure Escolher(const Indice: Integer);
+    procedure DesenharFundoDoPai;
+    procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
+    procedure CMEnabledChanged(var Message: TMessage); message CM_ENABLEDCHANGED;
+    procedure CMFontChanged(var Message: TMessage); message CM_FONTCHANGED;
+    procedure CMHintShow(var Message: TCMHintShow); message CM_HINTSHOW;
+    procedure WMGetDlgCode(var Message: TWMGetDlgCode); message WM_GETDLGCODE;
+    procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
+  protected
+    procedure Paint; override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
+    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
+    procedure DoEnter; override;
+    procedure DoExit; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    //Margem em volta dos segmentos reservada para o contorno de foco (igual à do TProBotao)
+    function MargemFoco: Integer;
+    //Retângulo do segmento (coordenadas do controle). Vazio se o índice não existe
+    function RetanguloSegmento(const Indice: Integer): TRect;
+    //Segmento no ponto (coordenadas do controle) ou -1
+    function SegmentoEm(const X, Y: Integer): Integer;
+    //Largura necessária para mostrar todos os segmentos (com a margem do foco)
+    function LarguraIdeal: Integer;
+    //Textos dos segmentos (um por linha) e dicas de cada um (mesma ordem)
+    property Itens: TStrings read FItens;
+    property Dicas: TStrings read FDicas;
+    property ItemIndex: Integer read FItemIndex write SetItemIndex;
+    property MostrandoFoco: Boolean read FMostrarFoco;
+    property Font;
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
 implementation
@@ -132,21 +194,39 @@ begin
 end;
 
 function TProBotao.Escalar(const Valor: Integer): Integer;
-var
-    Form: TCustomForm;
-    PPI: Integer;
 begin
-    //Medidas do tema estão a 96 dpi
-    PPI  := Screen.PixelsPerInch;
-    Form := GetParentForm(Self);
-    if (Form <> nil) and (Form is TForm) and (TForm(Form).PixelsPerInch > 0) then
-        PPI := TForm(Form).PixelsPerInch;
-    Result := MulDiv(Valor, PPI, 96);
+    //Medidas do tema estão a 96 dpi; a escala atual vem da tela (ver PPIDoControle)
+    Result := EscalarPara(Self, Valor);
 end;
 
 function TProBotao.MargemFoco: Integer;
 begin
     Result := Escalar(AfastamentoFoco + EspessuraFoco);
+end;
+
+function TProBotao.LarguraIdeal: Integer;
+var
+    Medida : TBitmap;
+    Largura: Integer;
+begin
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(Font);
+        Largura := Medida.Canvas.TextWidth(StripHotkey(Caption));
+    finally
+        Medida.Free;
+    end;
+
+    if FIconeSvg <> '' then
+    begin
+        Inc(Largura, Escalar(TamanhoIconePequeno));
+        if Caption <> '' then
+            Inc(Largura, Escalar(Espaco1));
+    end;
+    Inc(Largura, 2 * Escalar(PaddingBotao));
+    if Largura < Escalar(LarguraMinimaBotao) then
+        Largura := Escalar(LarguraMinimaBotao);
+    Result := Largura + 2 * MargemFoco;
 end;
 
 function TProBotao.Pressionado: Boolean;
@@ -489,6 +569,396 @@ begin
 end;
 
 procedure TProBotao.WMEraseBkgnd(var Message: TWMEraseBkgnd);
+begin
+    //O Paint desenha tudo (inclusive o fundo do pai): evita piscar
+    Message.Result := 1;
+end;
+
+{ TProSegmentado }
+
+constructor TProSegmentado.Create(AOwner: TComponent);
+begin
+    inherited Create(AOwner);
+    ControlStyle := ControlStyle + [csOpaque] - [csDoubleClicks, csSetCaption];
+    FItens := TStringList.Create;
+    TStringList(FItens).OnChange := ItensAlterados;
+    FDicas := TStringList.Create;
+    FItemIndex := -1;
+    FSobre := -1;
+    TabStop := True;
+    Cursor := crHandPoint;
+    DoubleBuffered := True;
+    ShowHint := True;
+    ParentFont := False;
+    AplicarFonte(Font, FonteTexto, TamanhoBotao, CorTexto);
+    Height := AlturaBotao + 2 * (AfastamentoFoco + EspessuraFoco);
+end;
+
+destructor TProSegmentado.Destroy;
+begin
+    FItens.Free;
+    FDicas.Free;
+    inherited;
+end;
+
+function TProSegmentado.Escalar(const Valor: Integer): Integer;
+begin
+    //Medidas do tema estão a 96 dpi (mesma regra do TProBotao)
+    Result := EscalarPara(Self, Valor);
+end;
+
+function TProSegmentado.MargemFoco: Integer;
+begin
+    Result := Escalar(AfastamentoFoco + EspessuraFoco);
+end;
+
+function TProSegmentado.LarguraSegmento(const Indice: Integer): Integer;
+var
+    Medida: TBitmap;
+begin
+    //Largura medida sempre com a fonte Semibold: o segmento não muda de tamanho ao ser escolhido
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(Font);
+        Medida.Canvas.Font.Name := FonteDestaque;
+        Result := Medida.Canvas.TextWidth(FItens[Indice]) + 2 * Escalar(PaddingSegmento);
+    finally
+        Medida.Free;
+    end;
+end;
+
+function TProSegmentado.LarguraIdeal: Integer;
+var
+    I: Integer;
+begin
+    //Segmentos colados: cada borda interna é compartilhada (1 px a menos por segmento)
+    Result := 2 * MargemFoco;
+    for I := 0 to FItens.Count - 1 do
+        Inc(Result, LarguraSegmento(I) - 1);
+    if FItens.Count > 0 then
+        Inc(Result);
+end;
+
+function TProSegmentado.RetanguloSegmento(const Indice: Integer): TRect;
+var
+    I: Integer;
+    X: Integer;
+begin
+    Result := Rect(0, 0, 0, 0);
+    if (Indice < 0) or (Indice >= FItens.Count) then
+        Exit;
+
+    X := MargemFoco;
+    for I := 0 to Indice - 1 do
+        Inc(X, LarguraSegmento(I) - 1);
+    Result := Rect(X, MargemFoco, X + LarguraSegmento(Indice), ClientHeight - MargemFoco);
+end;
+
+function TProSegmentado.SegmentoEm(const X, Y: Integer): Integer;
+var
+    I: Integer;
+begin
+    Result := -1;
+    for I := 0 to FItens.Count - 1 do
+        if PtInRect(RetanguloSegmento(I), Point(X, Y)) then
+            Result := I;   //na borda compartilhada vale o segmento da direita
+end;
+
+procedure TProSegmentado.SetItemIndex(const Value: Integer);
+begin
+    //Mudança pelo código: não dispara OnChange
+    if (Value >= -1) and (Value < FItens.Count) and (Value <> FItemIndex) then
+    begin
+        FItemIndex := Value;
+        Invalidate;
+    end;
+end;
+
+procedure TProSegmentado.ItensAlterados(Sender: TObject);
+begin
+    if FItemIndex >= FItens.Count then
+        FItemIndex := FItens.Count - 1;
+    Invalidate;
+end;
+
+procedure TProSegmentado.Escolher(const Indice: Integer);
+begin
+    //Troca feita pelo usuário: aplica e avisa
+    if (Indice < 0) or (Indice >= FItens.Count) or (Indice = FItemIndex) then
+        Exit;
+
+    FItemIndex := Indice;
+    Invalidate;
+    if Assigned(FOnChange) then
+        FOnChange(Self);
+end;
+
+procedure TProSegmentado.DesenharFundoDoPai;
+begin
+    //Cantos arredondados e margem do contorno de foco mostram o fundo do painel pai
+    if StyleServices.Enabled and StyleServices.DrawParentBackground(Handle, Canvas.Handle, nil, False) then
+        Exit;
+
+    if Parent <> nil then
+        Canvas.Brush.Color := TControleAcesso(Parent).Color
+    else
+        Canvas.Brush.Color := CorSuperficie;
+    Canvas.Brush.Style := bsSolid;
+    Canvas.FillRect(ClientRect);
+end;
+
+procedure TProSegmentado.Paint;
+var
+    Raio     : Integer;
+    Ordem    : Integer;
+    I        : Integer;
+    J        : Integer;
+    R        : TRect;
+    Contorno : TRect;
+    Fundo    : TColor;
+    Borda    : TColor;
+    Texto    : TColor;
+    Estado   : Integer;
+    Escolhido: Boolean;
+    TextoSeg : string;
+begin
+    DesenharFundoDoPai;
+    if FItens.Count = 0 then
+        Exit;
+
+    Raio := Escalar(RaioBotao);
+
+    //O segmento escolhido é desenhado por último: a borda CorPrimaria fica por cima das vizinhas
+    for Ordem := 0 to FItens.Count do
+    begin
+        if Ordem < FItens.Count then
+        begin
+            I := Ordem;
+            if I = FItemIndex then
+                Continue;
+        end
+        else
+        begin
+            I := FItemIndex;
+            if I < 0 then
+                Break;
+        end;
+
+        R := RetanguloSegmento(I);
+        Escolhido := (I = FItemIndex);
+
+        //Tabela 5.2 do tokens.md: fundo / borda / texto
+        if not Enabled then
+        begin
+            Fundo := CorFundoDesabilitado;
+            Borda := CorBorda;
+            Texto := CorTextoDesabilitado;
+        end
+        else if Escolhido then
+        begin
+            Fundo := CorPrimariaSuave;
+            Borda := CorPrimaria;
+            Texto := CorTexto;
+        end
+        else
+        begin
+            if I = FSobre then
+                Fundo := CorFundo
+            else
+                Fundo := CorSuperficie;
+            Borda := CorBordaCampo;
+            Texto := CorTexto;
+        end;
+
+        Canvas.Pen.Style   := psSolid;
+        Canvas.Pen.Width   := 1;
+        Canvas.Pen.Color   := Borda;
+        Canvas.Brush.Style := bsSolid;
+        Canvas.Brush.Color := Fundo;
+
+        //Cantos arredondados só nas pontas: desenha o retângulo arredondado estendido para dentro,
+        //recortado no segmento, e completa a borda interna com uma linha
+        Estado := SaveDC(Canvas.Handle);
+        try
+            IntersectClipRect(Canvas.Handle, R.Left, R.Top, R.Right, R.Bottom);
+            if FItens.Count = 1 then
+                Canvas.RoundRect(R.Left, R.Top, R.Right, R.Bottom, 2 * Raio, 2 * Raio)
+            else if I = 0 then
+            begin
+                Canvas.RoundRect(R.Left, R.Top, R.Right + 2 * Raio, R.Bottom, 2 * Raio, 2 * Raio);
+                Canvas.MoveTo(R.Right - 1, R.Top);
+                Canvas.LineTo(R.Right - 1, R.Bottom);
+            end
+            else if I = FItens.Count - 1 then
+            begin
+                Canvas.RoundRect(R.Left - 2 * Raio, R.Top, R.Right, R.Bottom, 2 * Raio, 2 * Raio);
+                Canvas.MoveTo(R.Left, R.Top);
+                Canvas.LineTo(R.Left, R.Bottom);
+            end
+            else
+                Canvas.Rectangle(R.Left, R.Top, R.Right, R.Bottom);
+        finally
+            RestoreDC(Canvas.Handle, Estado);
+        end;
+
+        //Texto centralizado: Semibold no escolhido
+        Canvas.Font.Assign(Font);
+        if Escolhido then
+            Canvas.Font.Name := FonteDestaque;
+        Canvas.Font.Color  := Texto;
+        Canvas.Brush.Style := bsClear;
+        TextoSeg := FItens[I];
+        DrawText(Canvas.Handle, PChar(TextoSeg), Length(TextoSeg), R,
+                 DT_CENTER or DT_VCENTER or DT_SINGLELINE or DT_NOPREFIX);
+
+        //Contorno de foco no segmento escolhido (só quando o foco veio do teclado)
+        if Escolhido and Focused and FMostrarFoco and Enabled then
+        begin
+            Canvas.Brush.Style := bsClear;
+            Canvas.Pen.Color   := CorPrimaria;
+            for J := 1 to Escalar(EspessuraFoco) do
+            begin
+                Contorno := R;
+                InflateRect(Contorno, Escalar(AfastamentoFoco) + J, Escalar(AfastamentoFoco) + J);
+                Canvas.RoundRect(Contorno.Left, Contorno.Top, Contorno.Right, Contorno.Bottom,
+                                 2 * (Raio + Escalar(AfastamentoFoco) + J), 2 * (Raio + Escalar(AfastamentoFoco) + J));
+            end;
+        end;
+    end;
+end;
+
+procedure TProSegmentado.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+    if Enabled and (Button = mbLeft) then
+    begin
+        if CanFocus and not Focused then
+        begin
+            FFocoPeloMouse := True;
+            try
+                SetFocus;
+            finally
+                FFocoPeloMouse := False;
+            end;
+        end;
+        Escolher(SegmentoEm(X, Y));
+    end;
+    inherited;
+end;
+
+procedure TProSegmentado.MouseMove(Shift: TShiftState; X, Y: Integer);
+var
+    Novo: Integer;
+begin
+    Novo := SegmentoEm(X, Y);
+    if Novo <> FSobre then
+    begin
+        FSobre := Novo;
+        Invalidate;
+    end;
+    inherited;
+end;
+
+procedure TProSegmentado.KeyDown(var Key: Word; Shift: TShiftState);
+begin
+    if Enabled and (FItens.Count > 0) then
+    begin
+        //Tecla com o seletor em foco: mostra o contorno (uso por teclado)
+        if not FMostrarFoco then
+        begin
+            FMostrarFoco := True;
+            Invalidate;
+        end;
+
+        case Key of
+            VK_LEFT, VK_UP:
+            begin
+                Key := 0;
+                if FItemIndex > 0 then
+                    Escolher(FItemIndex - 1)
+                else if FItemIndex < 0 then
+                    Escolher(0);
+            end;
+
+            VK_RIGHT, VK_DOWN:
+            begin
+                Key := 0;
+                if FItemIndex < FItens.Count - 1 then
+                    Escolher(FItemIndex + 1);
+            end;
+
+            VK_HOME:
+            begin
+                Key := 0;
+                Escolher(0);
+            end;
+
+            VK_END:
+            begin
+                Key := 0;
+                Escolher(FItens.Count - 1);
+            end;
+        end;
+    end;
+    inherited;
+end;
+
+procedure TProSegmentado.DoEnter;
+begin
+    FMostrarFoco := not FFocoPeloMouse;
+    Invalidate;
+    inherited;
+end;
+
+procedure TProSegmentado.DoExit;
+begin
+    FMostrarFoco := False;
+    Invalidate;
+    inherited;
+end;
+
+procedure TProSegmentado.CMMouseLeave(var Message: TMessage);
+begin
+    inherited;
+    FSobre := -1;
+    Invalidate;
+end;
+
+procedure TProSegmentado.CMEnabledChanged(var Message: TMessage);
+begin
+    inherited;
+    Invalidate;
+end;
+
+procedure TProSegmentado.CMFontChanged(var Message: TMessage);
+begin
+    inherited;
+    Invalidate;
+end;
+
+procedure TProSegmentado.CMHintShow(var Message: TCMHintShow);
+var
+    Indice: Integer;
+begin
+    //Uma dica por segmento (glossário 2.9); ao passar para outro segmento a dica é trocada
+    Indice := SegmentoEm(Message.HintInfo^.CursorPos.X, Message.HintInfo^.CursorPos.Y);
+    if (Indice >= 0) and (Indice < FDicas.Count) and (FDicas[Indice] <> '') then
+    begin
+        Message.HintInfo^.HintStr    := FDicas[Indice];
+        Message.HintInfo^.CursorRect := RetanguloSegmento(Indice);
+        Message.Result := 0;
+    end
+    else
+        Message.Result := 1;
+end;
+
+procedure TProSegmentado.WMGetDlgCode(var Message: TWMGetDlgCode);
+begin
+    //As setas trocam a opção (sem isso o formulário as usa para mover o foco)
+    inherited;
+    Message.Result := Message.Result or DLGC_WANTARROWS;
+end;
+
+procedure TProSegmentado.WMEraseBkgnd(var Message: TWMEraseBkgnd);
 begin
     //O Paint desenha tudo (inclusive o fundo do pai): evita piscar
     Message.Result := 1;
