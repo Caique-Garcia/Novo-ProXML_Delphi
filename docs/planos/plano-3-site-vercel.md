@@ -9,6 +9,7 @@ Site público que apresenta o ProXML, ensina a usar o app, leva ao download e ap
 | Tecnologia | HTML/CSS estático, sem build |
 | Código | Pasta `site/` neste repositório |
 | Deploy | Integração GitHub da Vercel (Root Directory = `site`); cada push na `main` publica |
+| Endereço | Subdomínio grátis da Vercel (ex.: `proxml.vercel.app`), sem domínio próprio |
 | Imagens | Prints fornecidos pelo usuário |
 | SEO | Site com várias páginas, cada uma focada numa busca, e SEO técnico completo (ver 3.1) |
 | Monetização | **Sem anúncios.** Só o link de doação do Apoia.se: <https://apoia.se/proxmlferramenta> |
@@ -52,7 +53,6 @@ Arquivos de apoio: `site/styles.css`, `site/img/`, `site/favicon.ico` (+ `favico
 - `site/sitemap.xml` com as URLs finais (sem `.html`) e `lastmod`.
 - `site/vercel.json`:
   - `cleanUrls: true` (URLs sem `.html`) e `trailingSlash: false`.
-  - Redirecionamento permanente de `www` para o domínio principal (se houver domínio próprio).
   - Cache longo para `img/`, `styles.css` e favicons.
 - CSS em um único arquivo, sem frameworks e sem fontes externas pesadas (usar fontes do sistema ou uma fonte só, com `font-display: swap`).
 
@@ -102,13 +102,12 @@ Cuidados:
 ### 3.4 Publicação — usuário + `release-manager`
 - O `release-manager` faz o commit/push da pasta `site/` (após aprovação).
 - **Usuário:** na Vercel, *Add New → Project → Import* do repositório e Root Directory `site` (Framework: Other). Esse passo é manual, feito no painel.
-- **Usuário (se houver domínio próprio):** em *Settings → Domains* da Vercel, adicionar o domínio e configurar o DNS no registrador.
-- **Usuário:** no [Google Search Console](https://search.google.com/search-console), adicionar a propriedade do site, verificar a posse e enviar o `sitemap.xml`. Repetir no [Bing Webmaster Tools](https://www.bing.com/webmasters) (dá para importar direto do Search Console).
+- **Usuário:** no [Google Search Console](https://search.google.com/search-console), adicionar a propriedade do tipo **Prefixo do URL** (o tipo "Domínio" exige acesso ao DNS, que não existe no subdomínio da Vercel), verificar a posse pela meta tag ou pelo arquivo HTML que o Google fornece (o `web-landing` coloca em `site/`) e enviar o `sitemap.xml`. Repetir no [Bing Webmaster Tools](https://www.bing.com/webmasters) (dá para importar direto do Search Console).
 - O `release-manager` adiciona a URL do site ao README, à descrição e aos tópicos do repositório e às notas das próximas Releases. Esses links apontando para o site são o sinal de SEO que mais pesa no começo.
 
 ## Pendências (decidir com o usuário)
 - **P1.** Pasta onde você vai colocar os prints.
-- **P2.** Nome do projeto na Vercel / subdomínio (ex.: `proxml.vercel.app`, se estiver livre) ou domínio próprio? Sem anúncios, o subdomínio da Vercel funciona. Um domínio próprio (ex.: `proxml.com.br`, ~R$ 40/ano no Registro.br) é recomendado para SEO e confiança. As URLs do `canonical`, do `sitemap.xml` e do Open Graph dependem dessa escolha.
 
 ## Pendências resolvidas
+- **P2.** Endereço do site: **subdomínio da Vercel** (decidido em 20/10/2026), sem domínio próprio. O nome exato (ex.: `proxml.vercel.app`, se estiver livre) sai na criação do projeto na Vercel (3.4). Até lá, as URLs do `canonical`, do `sitemap.xml` e do Open Graph usam `https://proxml.vercel.app` e são corrigidas se o nome mudar.
 - **P3.** Plataforma de doação: **Apoia.se** (decidido em 20/10/2026), link <https://apoia.se/proxmlferramenta>. Entra no rodapé de todas as páginas, na seção "Apoie o projeto" da página inicial, no README e na tela Sobre do app.
