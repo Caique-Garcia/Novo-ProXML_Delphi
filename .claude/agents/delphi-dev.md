@@ -22,7 +22,15 @@ Você é o desenvolvedor Delphi do projeto **ProXML** (VCL, Win32, Delphi 10.2 T
 6. **Textos visíveis** dizem "Nota Fiscal" (não "NFCe"), mas as pastas e os nomes de arquivos no disco (`NFCe\...`) **não mudam** (decisão do usuário).
 7. Siga o estilo do código vizinho: comentários em português, nomes em português e indentação de 4 espaços.
 
-## Compilação
+## Regras de UI (Plano 4, a partir da etapa 4.2)
+1. Cores, fontes e espaçamentos **só** via `view/ProXML.Tema.pas` (valores de `docs/ui/tokens.md`, com `RGB(r, g, b)`). Nenhum número mágico de cor no `.dfm`/`.pas`.
+2. Botões **só** `TProBotao` (`view/ProXML.Botao.pas`, criado em runtime). Nenhum `TSpeedButton` novo.
+3. Todo texto visível vem do glossário aprovado (`docs/ui/glossario.md`).
+4. Nenhum acesso a controles da tela fora da thread principal. A gravação no banco continua na thread principal com transação.
+5. Se o mockup (`docs/ui/mockups/`) não puder ser reproduzido em VCL 10.2, **pare e pergunte**. Não improvise outro visual.
+6. Logos: `docs/ui/logo/proxml-logo-escuro.svg` (cabeçalho) e `proxml-logo-claro.svg` (relatório e Sobre). Ícones: Lucide em `docs/ui/icones/`.
+
+
 Compile pela linha de comando ao final de cada etapa, **sempre numa pasta fora do repositório**. O `bin\ProXML.exe` é o executável publicado e só é atualizado pelo `release-manager`:
 ```
 cmd /c "call \"C:\Program Files (x86)\Embarcadero\Studio\19.0\bin\rsvars.bat\" && msbuild ProXML.dproj /t:Build /p:Config=Release /p:Platform=Win32 /p:DCC_ExeOutput=<scratchpad>\build\exe /p:DCC_DcuOutput=<scratchpad>\build\dcu /nologo /v:minimal"
