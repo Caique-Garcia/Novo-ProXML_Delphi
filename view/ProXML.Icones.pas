@@ -33,7 +33,7 @@ const
     '><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 1' +
     '9z"/></svg>';
 
-  //info.svg: Sobre (cabeçalho)
+  //info.svg: Sobre (cabeçalho) e dicas visíveis da tela Relatórios
   IconeInfo =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
     'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
@@ -62,7 +62,7 @@ const
     '><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5"' +
     ' cy="17.5" r="2.5"/></svg>';
 
-  //map.svg: card IBS (estadual + municipal)
+  //map.svg: card IBS (estadual + municipal) e Relatório IBS/CBS (tela Relatórios)
   IconeIBS =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
     'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
@@ -78,6 +78,48 @@ const
     '><path d="M10 18v-7"/><path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 ' +
     '7h-17a.5.5 0 0 1-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/' +
     '><path d="M6 18v-7"/></svg>';
+
+  //layout-dashboard.svg: menu Resumo
+  IconeResumo =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx=' +
+    '"1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="1' +
+    '6" rx="1"/></svg>';
+
+  //file-text.svg: menu Notas; na tela Relatórios, Relatório de Notas e indicador do filtro
+  IconeNotas =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.' +
+    '4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M10 9H8"/><pa' +
+    'th d="M16 13H8"/><path d="M16 17H8"/></svg>';
+
+  //printer.svg: menu Relatórios e botões "Gerar relatório"
+  IconeRelatorios =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><pa' +
+    'th d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" r' +
+    'x="1"/></svg>';
+
+  //send.svg: menu Enviar
+  IconeEnviar =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5' +
+    ' 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></' +
+    'svg>';
+
+  //settings.svg: menu Configurações
+  IconeConfiguracoes =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1' +
+    ' 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915' +
+    ' 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0' +
+    ' 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="' +
+    '12" r="3"/></svg>';
 
   //triangle-alert.svg: faixa de aviso
   IconeAviso =

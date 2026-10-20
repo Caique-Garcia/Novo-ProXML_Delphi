@@ -42,7 +42,6 @@ uses
   Vcl.DBGrids,
   FireDAC.Stan.StorageBin,
   Vcl.Samples.Gauges,
-  Vcl.CategoryButtons,
   Vcl.Menus,
   DM,
   ProXML.FormRelatorios,
@@ -68,11 +67,19 @@ uses
   Vcl.ActnList,
   System.Actions,
   ProXML.Botao,
-  ProXML.Tema;
+  ProXML.Tema,
+  ProXML.FrameLoad;
 
 type
   //Relatório aberto depois de gravar as notas no banco (GravarNotasDB)
   TTipoRelatorio = (trNotas, trIBSCBS);
+
+  //Telas da área de conteúdo (Plano 4, etapa 4.4). Cada tela é uma aba do PageControl1 e toda
+  //troca de tela passa por TFormPrincipal.MostrarTela, que também sincroniza o item ativo do menu
+  TTela = (tlResumo, tlNotas, tlRelatorios, tlEnviar, tlConfiguracoes, tlCarregando);
+  //Telas com item no menu lateral. Carregando não tem item (o item da tela de origem continua
+  //destacado) e uma tela nova sem item (ex.: Sobre, etapa 4.7) deixa o menu sem item ativo
+  TTelaMenu = tlResumo..tlConfiguracoes;
 
   TFormPrincipal = class(TForm)
     PnlContainer: TPanel;
@@ -146,9 +153,10 @@ type
     Gauge1: TGauge;
     EditCaminho: TEdit;
     Panel7: TPanel;
+    //Menu lateral (etapa 4.4): itens TProItemMenu criados em runtime no PnlMenuItens
     PanelMenus: TPanel;
-    CategoryButtons1: TCategoryButtons;
-    Panel8: TPanel;
+    PnlMenuItens: TPanel;
+    PnlMenuBorda: TPanel;
     PopupMenu: TPopupMenu;
     GerarPDF1: TMenuItem;
     Loading: TTabSheet;
@@ -206,25 +214,56 @@ type
     PnlAvisoPastaBarra: TPanel;
     SkSvgAvisoPasta: TSkSvg;
     LabelAvisoPasta: TLabel;
+    //Tela Carregando (etapa 4.4; tokens.md 5.14): animação do ProXML.FrameLoad, operação e legenda
+    PnlCarregando: TPanel;
+    PnlCarregandoFundo: TPanel;
+    PnlAnimacao: TPanel;
+    LabelCarregandoTitulo: TLabel;
+    LabelCarregandoLegenda: TLabel;
+    //Tela Relatórios (etapa 4.4; mockup relatorios.html e glossário 8.1 a 8.11)
+    Relatorios: TTabSheet;
+    PnlRelatorios: TPanel;
+    PnlRelatoriosTitulo: TPanel;
+    LabelRelatoriosTitulo: TLabel;
+    PnlRelatoriosFiltro: TPanel;
+    PnlRelatoriosFiltroFundo: TPanel;
+    SkSvgRelatoriosFiltro: TSkSvg;
+    LabelRelatoriosFiltro: TLabel;
+    PnlOpcoes: TPanel;
+    PnlOpcaoNotas: TPanel;
+    PnlOpcaoNotasFundo: TPanel;
+    PnlOpcaoNotasTitulo: TPanel;
+    SkSvgOpcaoNotas: TSkSvg;
+    LabelOpcaoNotasTitulo: TLabel;
+    LabelOpcaoNotasDescricao: TLabel;
+    PnlOpcaoNotasRodape: TPanel;
+    PnlGerarNotas: TPanel;
+    SkSvgDicaNotas: TSkSvg;
+    LabelDicaNotas: TLabel;
+    PnlOpcaoIBSCBS: TPanel;
+    PnlOpcaoIBSCBSFundo: TPanel;
+    PnlOpcaoIBSCBSTitulo: TPanel;
+    SkSvgOpcaoIBSCBS: TSkSvg;
+    LabelOpcaoIBSCBSTitulo: TLabel;
+    LabelOpcaoIBSCBSDescricao: TLabel;
+    PnlOpcaoIBSCBSRodape: TPanel;
+    PnlGerarIBSCBS: TPanel;
+    SkSvgDicaIBSCBS: TSkSvg;
+    LabelDicaIBSCBS: TLabel;
+    LabelRelatoriosRodape: TLabel;
     procedure SelecionarPastaClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure CategoryButtons1Categories0Items0Click(Sender: TObject);
-    procedure CategoryButtons1Categories0Items1Click(Sender: TObject);
     procedure GerarPDF1Click(Sender: TObject);
-    procedure CategoryButtons1Categories0Items2Click(Sender: TObject);
     procedure GravarNotasDB(const Relatorio: TTipoRelatorio);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure CategoryButtons1Categories0Items3Click(Sender: TObject);
     procedure GerarDANFe1Click(Sender: TObject);
-    procedure CategoryButtons1Categories0Items4Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnSalvarConfigClick(Sender: TObject);
     procedure SkSvg5Click(Sender: TObject);
     procedure btnEnviarEmailClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure SeletorModeloChange(Sender: TObject);
-    procedure CategoryButtons1RelatorioIBSCBSClick(Sender: TObject);
   private
     ConfigEmail : TConfig;
     FTotais : TTotaisNotas;
@@ -235,6 +274,12 @@ type
     FMaximizarAoMostrar: Boolean;   //janela salva maximizada: maximiza no FormShow
     FPPIAtual : Integer;
     FPastaNaoEncontrada: string;   //pasta do aviso 2.14 (o texto da faixa encurta o caminho)       //escala atual da tela (o PixelsPerInch do 10.2 fica com o valor do .dfm)
+    //Etapa 4.4: tela Carregando e moldura do PageControl
+    FCarregando         : Boolean;        //tela Carregando aberta (menu bloqueado)
+    FFocoAntesCarregando: TWinControl;    //controle que tinha o foco ao abrir a tela Carregando
+    FFrameCarregando    : TFrameLoad;     //animação Lottie (ProXML.FrameLoad), criada em runtime
+    FJanelaPaginas      : TWndMethod;     //WindowProc original do PageControl1
+    FAjustandoRelatorios: Boolean;        //evita reentrada no layout da tela Relatórios
     procedure SetTextoTranferencia(const Text: String);
     procedure AjustarAlturaLinhasGrade;
     procedure GerarRelatorio(const Relatorio: TTipoRelatorio);
@@ -242,7 +287,7 @@ type
     procedure AbrirRelatorioIBSCBS;
     function  DescricaoFiltroModelo: string;
     procedure ConfigACBR;
-    procedure GerarDanfe(const CaminhoArq: String);
+    procedure GerarDanfe(const CaminhoArq, Numero: String);
     function  ConfigurarLayoutDanfe(out Mensagem: string): Boolean;
     function  AguardarArquivoPDF(const Caminhos: array of string; out CaminhoGerado: string): Boolean;
     procedure ComprimirArquivos();
@@ -295,6 +340,30 @@ type
     function  PPIAtual: Integer;
     procedure FonteNaEscala(Fonte: TFont; const Tamanho: Integer);
     procedure AposMudarEscala;
+    //Plano 4, etapa 4.4: menu, navegação, tela Relatórios e tela Carregando
+    procedure CriarMenu;
+    procedure ItemMenuClick(Sender: TObject);
+    function  AbaDaTela(const Tela: TTela): TTabSheet;
+    function  TelaDaAba(const Aba: TTabSheet): TTela;
+    procedure SincronizarMenu(const Tela: TTela);
+    procedure HabilitarMenu(const Habilitar: Boolean);
+    function  TelaSemMoldura(const Tela: TTela): Boolean;
+    procedure JanelaPaginas(var Message: TMessage);
+    procedure PrepararTelaRelatorios;
+    procedure PrepararOpcaoRelatorio(Borda, Fundo, Titulo: TPanel; Icone: TSkSvg; Rotulo,
+      Descricao: TLabel; Rodape, Encaixe: TPanel; IconeDica: TSkSvg; Dica: TLabel; Botao: TProBotao);
+    procedure AjustarLayoutRelatorios;
+    procedure PnlOpcoesResize(Sender: TObject);
+    procedure AjustarIndicadorFiltro;
+    procedure MostrarDica(IconeDica: TSkSvg; Dica: TLabel; const Texto: string);
+    function  AlturaTextoQuebrado(Rotulo: TLabel; const Largura: Integer): Integer;
+    procedure GerarRelatorioNotasClick(Sender: TObject);
+    procedure GerarRelatorioIBSCBSClick(Sender: TObject);
+    procedure PrepararTelaCarregando;
+    procedure AjustarLayoutCarregando;
+    procedure PnlCarregandoFundoResize(Sender: TObject);
+    procedure IniciarCarregando(const Titulo, Legenda: string);
+    procedure EncerrarCarregando(const Destino: TTela);
 
   protected
     procedure CreateWnd; override;
@@ -319,6 +388,19 @@ type
     actBuscar          : TAction;   //Ctrl+F
     actCopiarChave     : TAction;   //Ctrl+C (com a grade em foco)
     actGerarDanfe      : TAction;   //Ctrl+D (na tela Notas)
+    //Menu lateral (etapa 4.4): um item por tela com item no menu, criados em CriarMenu
+    ItensMenu          : array[TTelaMenu] of TProItemMenu;
+    //Botões "Gerar relatório" da tela Relatórios (criados em PrepararTelaRelatorios)
+    btnGerarRelNotas   : TProBotao;
+    btnGerarRelIBSCBS  : TProBotao;
+    //Troca de tela (única rotina): mostra a aba da tela e sincroniza o item ativo do menu
+    procedure MostrarTela(const Tela: TTela);
+    //Tela exibida agora (pela aba ativa do PageControl1)
+    function  TelaAtual: TTela;
+    //Tela Carregando aberta (menu bloqueado)
+    property  Carregando: Boolean read FCarregando;
+    //Textos, botões e dicas da tela Relatórios conforme as notas do filtro de modelo atual
+    procedure AtualizarTelaRelatorios;
     procedure AtualizarTotais;
     //Há pasta escolhida? (P3: só olha se o campo está preenchido, sem comparar texto)
     function  TemPasta: Boolean;
@@ -353,6 +435,7 @@ uses
   {$ENDIF}
   System.IOUtils,
   System.Math,
+  Winapi.CommCtrl,
   ProXML.Icones;
 
 {$R *.dfm}
@@ -394,6 +477,9 @@ begin
 
     //Sem notas no filtro: valores em cinza e peso normal; valor grande diminui para caber
     AtualizarVisualCards;
+
+    //A tela Relatórios mostra o filtro e as contagens: acompanha o filtro de modelo e o Processar
+    AtualizarTelaRelatorios;
 end;
 
 function TFormPrincipal.DescricaoFiltroModelo: string;
@@ -476,22 +562,10 @@ begin
     ConfigEmail.TSL         := CheckBoxTSl.Checked;
     try
         DMConfig.UpdateConfig(ConfigEmail);
+        //Etapa 4.4 (N5): salvar não troca de tela. A mensagem muda na 4.7 (glossário)
         messagedlg('Configuração salva com sucesso !!', mtInformation	, [mbOk], 0);
-        PageControl1.ActivePageIndex := 0;
     except
     end;
-end;
-
-procedure TFormPrincipal.CategoryButtons1Categories0Items0Click(
-  Sender: TObject);
-begin
-   PageControl1.ActivePageIndex := 0;
-end;
-
-procedure TFormPrincipal.CategoryButtons1Categories0Items1Click(
-  Sender: TObject);
-begin
-   PageControl1.ActivePageIndex := 1;
 end;
 
 function TFormPrincipal.CreateProcessSimple(cmd: string): boolean;
@@ -546,8 +620,7 @@ begin
         FormRelatorio.SetQtRegistros(IntToStr(FDMemTable1.RecordCount));
         FormRelatorio.SetDescricaoFiltro(DescricaoFiltroModelo);
         FormRelatorio.GerarRelatorio;
-        //Relatório fechado: volta para a aba Notas
-        PageControl1.ActivePageIndex := 1;
+        //Visualização fechada: GravarNotasDB fecha a tela Carregando e volta para Relatórios
    finally
         FreeAndNil(FormRelatorio);
    end
@@ -572,13 +645,13 @@ begin
 
         if not FormIBSCBS.GerarRelatorio then
         begin
-            //Nenhuma nota do filtro atual tem IBS/CBS: não abre a visualização
-            PageControl1.ActivePageIndex := 1;
-            messagedlg('Nenhuma nota com IBS/CBS', mtInformation, [mbOk], 0);
+            //Nenhuma nota do filtro atual tem IBS/CBS: não abre a visualização (glossário 8.10).
+            //Com o botão desabilitado nesse caso, a caixa só aparece se o relatório for pedido mesmo assim
+            EncerrarCarregando(tlRelatorios);
+            messagedlg('Nenhuma nota do modelo selecionado tem IBS/CBS.', mtInformation, [mbOk], 0);
         end;
 
-        //Relatório fechado: volta para a aba Notas
-        PageControl1.ActivePageIndex := 1;
+        //Visualização fechada: GravarNotasDB fecha a tela Carregando e volta para Relatórios
     finally
         FreeAndNil(FormIBSCBS);
     end;
@@ -586,49 +659,23 @@ end;
 
 procedure TFormPrincipal.GerarRelatorio(const Relatorio: TTipoRelatorio);
 begin
-    //Confere se a grade (filtrada) tem notas, grava no banco e abre o relatório escolhido
-    if DataSource1.DataSet.RecordCount <= 0 then
+    //Confere se a grade (filtrada) tem notas, grava no banco e abre o relatório escolhido.
+    //Na tela Relatórios os botões ficam desabilitados nesses casos (dicas 8.8 e 8.10): as caixas
+    //abaixo só aparecem se o relatório for pedido mesmo assim (glossário 8.9 e 8.10)
+    if not TemNotaNaGrade then
     begin
-       messagedlg('Sem dados para gerar relatório !!', mtInformation	, [mbOk], 0);
+       messagedlg('Nenhuma nota para o relatório. Processe uma pasta primeiro.', mtInformation	, [mbOk], 0);
        Exit;
-    end
-    else
-        GravarNotasDB(Relatorio);
-end;
+    end;
 
-procedure TFormPrincipal.CategoryButtons1Categories0Items2Click(
-  Sender: TObject);
-begin
-    //Geração de relatóeio
-    GerarRelatorio(trNotas);
-end;
+    if (Relatorio = trIBSCBS) and (FTotais.QuantidadeIBSCBS = 0) then
+    begin
+       //Sem nota com IBS/CBS no filtro: não grava nada no banco
+       messagedlg('Nenhuma nota do modelo selecionado tem IBS/CBS.', mtInformation, [mbOk], 0);
+       Exit;
+    end;
 
-procedure TFormPrincipal.CategoryButtons1RelatorioIBSCBSClick(
-  Sender: TObject);
-begin
-    //Relatório IBS/CBS (item do menu lateral logo abaixo de "Relatório")
-    GerarRelatorio(trIBSCBS);
-end;
-
-procedure TFormPrincipal.CategoryButtons1Categories0Items3Click(
-  Sender: TObject);
-begin
-    //PageControl1.ActivePageIndex := 2;
-    //SkAnimatedImage1.Animation.Start;
-    //Só abre a aba e carrega a configuração do email: os XMLs são separados e
-    //compactados no clique em "Enviar Email" (btnEnviarEmailClick)
-    LerConfigEmail();
-    PageControl1.ActivePageIndex := 3;
-end;
-
-procedure TFormPrincipal.CategoryButtons1Categories0Items4Click(
-  Sender: TObject);
-begin
-  //Configurações
-  try
-    PageControl1.ActivePageIndex := 4;
-  except
-  end;
+    GravarNotasDB(Relatorio);
 end;
 
 procedure TFormPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -654,6 +701,10 @@ begin
    FixarTamanhoMinimo;
    CriarBotoes;
    CriarAtalhos;
+   //Etapa 4.4: menu lateral (só navega), tela Relatórios e tela Carregando
+   CriarMenu;
+   PrepararTelaRelatorios;
+   PrepararTelaCarregando;
    //Etapa 4.3: cabeçalho, barra de pasta (campo, Selecionar…, seletor de modelo) e cards
    AplicarVisualCabecalho;
    CriarBarraPasta;
@@ -688,6 +739,9 @@ end;
 procedure TFormPrincipal.FormDestroy(Sender: TObject);
 begin
   //ConfigEmail.Free;
+  //Devolve o WindowProc original do PageControl1 (trocado em PrepararTelaRelatorios)
+  if Assigned(FJanelaPaginas) then
+    PageControl1.WindowProc := FJanelaPaginas;
 end;
 
 procedure TFormPrincipal.ComprimirArquivos();
@@ -792,10 +846,8 @@ begin
    except
    end;
 
-   try
-    PageControl1.ActivePageIndex := 0;
-   except
-   end;
+   //Abre no Resumo, com o item do menu sincronizado
+   MostrarTela(tlResumo);
 
    try
     ConfigACBR();
@@ -906,7 +958,7 @@ begin
     end;
 end;
 
-procedure TFormPrincipal.GerarDanfe(const CaminhoArq: String);
+procedure TFormPrincipal.GerarDanfe(const CaminhoArq, Numero: String);
 var
     Chave         : string;
     Mensagem      : string;
@@ -921,10 +973,13 @@ begin
 
     FGerandoDanfe := True;
     GerarDANFe1.Enabled := False;
+    //Tela Carregando com a animação durante a geração e a espera do PDF (glossário 7.8 e 7.9).
+    //Em qualquer caminho (sucesso, erro ou exceção) o finally volta para Notas e reabilita o menu;
+    //nos erros a tela volta antes da mensagem, para a caixa aparecer sobre a tela Notas
+    IniciarCarregando('Gerando o DANFE da nota ' + Numero + #$2026,
+                      'O PDF abre sozinho quando ficar pronto (até ' + IntToStr(TEMPO_LIMITE_PDF_MS div 1000) +
+                      ' segundos).');
     try
-        PageControl1.ActivePageIndex := 2;
-        //SkAnimatedImage1.Animation.Start;
-
         //Carrega o XML (sem validar a assinatura)
         ACBrNFe.NotasFiscais.Clear;
         try
@@ -935,7 +990,7 @@ begin
             on E: Exception do
             begin
                 DMConfig.CreateLog(E.ClassName, E.Message);
-                PageControl1.ActivePageIndex := 1;
+                EncerrarCarregando(tlNotas);
                 messagedlg('Não foi possível carregar o XML da nota:' + sLineBreak + CaminhoArq + sLineBreak +
                            sLineBreak + E.Message, mtError, [mbOk], 0);
                 Exit;
@@ -945,7 +1000,7 @@ begin
         //Escolhe o layout pelo modelo e pelo tpImp da nota
         if not ConfigurarLayoutDanfe(Mensagem) then
         begin
-            PageControl1.ActivePageIndex := 1;
+            EncerrarCarregando(tlNotas);
             messagedlg(Mensagem, mtWarning, [mbOk], 0);
             Exit;
         end;
@@ -975,7 +1030,7 @@ begin
             on E: Exception do
             begin
                 DMConfig.CreateLog(E.ClassName, E.Message);
-                PageControl1.ActivePageIndex := 1;
+                EncerrarCarregando(tlNotas);
                 messagedlg('Erro ao gerar o DANFE:' + sLineBreak + sLineBreak + E.Message, mtError, [mbOk], 0);
                 Exit;
             end;
@@ -987,7 +1042,7 @@ begin
                 Exit;
 
             DMConfig.CreateLog('GerarDanfe', 'PDF do DANFE não gerado: ' + CaminhoArq);
-            PageControl1.ActivePageIndex := 1;
+            EncerrarCarregando(tlNotas);
             messagedlg('O PDF do DANFE não foi gerado em ' + IntToStr(TEMPO_LIMITE_PDF_MS div 1000) +
                        ' segundos.' + sLineBreak + sLineBreak + 'Pasta esperada: ' + ACBrNFe.DANFE.PathPDF,
                        mtError, [mbOk], 0);
@@ -995,8 +1050,8 @@ begin
         end;
 
         ShellExecute(0, 'open', PChar(CaminhoGerado), nil, nil, SW_SHOWNORMAL);
-        PageControl1.ActivePageIndex := 1;
     finally
+        EncerrarCarregando(tlNotas);
         GerarDANFe1.Enabled := True;
         FGerandoDanfe := False;
     end;
@@ -1007,7 +1062,8 @@ begin
   if DBGrid1.DataSource.DataSet.IsEmpty then
     Exit;
 
-  GerarDanfe(DBGrid1.DataSource.DataSet.FieldByName('xml').AsString);
+  GerarDanfe(DBGrid1.DataSource.DataSet.FieldByName('xml').AsString,
+             DBGrid1.DataSource.DataSet.FieldByName('numero').AsString);
 end;
 
 procedure TFormPrincipal.GerarPDF1Click(Sender: TObject);
@@ -1016,48 +1072,67 @@ begin
 end;
 
 procedure TFormPrincipal.GravarNotasDB(const Relatorio: TTipoRelatorio);
+var
+  Titulo : string;
+  Legenda: string;
 begin
   //Grava as notas no banco de dados SQLite e abre o relatório escolhido (notas ou IBS/CBS).
   //A gravação roda na thread principal, numa transação: a conexão DMConfig.Conexao também
   //é usada pela tela e o FireDAC não permite usar a mesma conexão em duas threads ao mesmo tempo.
+  //Só roda no clique em "Gerar relatório": abrir a tela Relatórios não grava nada (N1).
 
   if not FDMemTable1.Active then
     FDMemTable1.Open;
 
-  //Mostra a tela de carregamento antes de começar a gravar
-  PageControl1.ActivePageIndex := 2;
-  PageControl1.Update;
-  Screen.Cursor := crHourGlass;
+  //Tela Carregando antes de começar a gravar (glossário 8.15 e 8.16). Fluxo: Carregando ->
+  //visualização do QuickReport -> volta para Relatórios, com sucesso ou erro (o finally garante
+  //a volta e o menu reabilitado; nos erros a tela volta antes da mensagem)
+  if Relatorio = trIBSCBS then
+    Titulo := 'Gerando o Relatório IBS/CBS' + #$2026
+  else
+    Titulo := 'Gerando o Relatório de Notas' + #$2026;
+  if FDMemTable1.RecordCount = 1 then
+    Legenda := 'Gravando 1 nota e montando a visualização.'
+  else
+    Legenda := 'Gravando ' + IntToStr(FDMemTable1.RecordCount) + ' notas e montando a visualização.';
+
+  IniciarCarregando(Titulo, Legenda);
   try
+    Screen.Cursor := crHourGlass;
     try
-      DMConfig.GravarNotas(FDMemTable1);
+      try
+        DMConfig.GravarNotas(FDMemTable1);
+      except
+        on E: Exception do
+        begin
+          //GravarNotas já desfez a transação: o banco continua como estava (glossário 8.12)
+          Screen.Cursor := crDefault;
+          EncerrarCarregando(tlRelatorios);
+          messagedlg('Não foi possível gravar as notas no banco de dados. O relatório não foi gerado.' +
+                     sLineBreak + sLineBreak + 'Motivo: ' + E.Message, mtError, [mbOk], 0);
+          Exit;
+        end;
+      end;
+    finally
+      Screen.Cursor := crDefault;
+    end;
+
+    //Gravação concluída: abre o relatório.
+    //Se a geração ou a prévia falhar (ex.: 'Sem registros no banco de dados!'),
+    //volta para Relatórios e mostra o erro (glossário 8.13)
+    try
+      FinalizaRelatorio(Relatorio);
     except
       on E: Exception do
       begin
-        //GravarNotas já desfez a transação: o banco continua como estava
-        Screen.Cursor := crDefault;
-        PageControl1.ActivePageIndex := 1;
-        messagedlg('Erro ao gravar as notas no banco de dados. O relatório não foi gerado.' + sLineBreak +
-                   E.Message, mtError, [mbOk], 0);
-        Exit;
+        EncerrarCarregando(tlRelatorios);
+        messagedlg('Não foi possível gerar o relatório.' + sLineBreak + sLineBreak + 'Motivo: ' + E.Message,
+                   mtError, [mbOk], 0);
+        DMConfig.CreateLog(E.ClassName, E.Message);
       end;
     end;
   finally
-    Screen.Cursor := crDefault;
-  end;
-
-  //Gravação concluída: abre o relatório.
-  //Se a geração ou a prévia falhar (ex.: 'Sem registros no banco de dados!'),
-  //sai da aba Loading, volta para a aba Notas e mostra o erro
-  try
-    FinalizaRelatorio(Relatorio);
-  except
-    on E: Exception do
-    begin
-      PageControl1.ActivePageIndex := 1;
-      messagedlg('Erro ao gerar o relatório:' + sLineBreak + sLineBreak + E.Message, mtError, [mbOk], 0);
-      DMConfig.CreateLog(E.ClassName, E.Message);
-    end;
+    EncerrarCarregando(tlRelatorios);
   end;
 end;
 
@@ -1136,8 +1211,8 @@ var
   CalculadoraXML : TCalculadoraXML;
 begin
   btnProcessar.Enabled := false;
-  //PageControl1.ActivePageIndex := 0;
-  CategoryButtons1Categories0Items0Click(Self);
+  //Processar mostra o Resumo (log da leitura), com o item do menu sincronizado
+  MostrarTela(tlResumo);
 
   Memo1.Lines.Clear;
   CalculadoraXML:=  TCalculadoraXML.Create;
@@ -1163,7 +1238,7 @@ begin
   finally
     CalculadoraXML.Free;
   end;
-  PageControl1.ActivePageIndex := 0;
+  MostrarTela(tlResumo);
   AtualizarEstadoProcessar;
   Gauge1.Progress := 0;
   Memo1.SetFocus;
@@ -1225,8 +1300,9 @@ end;
 
 procedure TFormPrincipal.AcaoBuscarExecute(Sender: TObject);
 begin
-    //Ctrl+F: a busca chega na etapa 4.5; por enquanto leva o foco para a grade de notas
-    PageControl1.ActivePageIndex := 1;
+    //Ctrl+F: a busca chega na etapa 4.5; por enquanto leva para a tela Notas (com o menu
+    //sincronizado) e o foco para a grade de notas
+    MostrarTela(tlNotas);
     if DBGrid1.CanFocus then
         DBGrid1.SetFocus;
 end;
@@ -1252,7 +1328,7 @@ end;
 procedure TFormPrincipal.AcaoGerarDanfeUpdate(Sender: TObject);
 begin
     //Só na tela Notas, com nota na grade e sem outro DANFE em andamento
-    actGerarDanfe.Enabled := (PageControl1.ActivePageIndex = 1) and TemNotaNaGrade and (not FGerandoDanfe);
+    actGerarDanfe.Enabled := (TelaAtual = tlNotas) and TemNotaNaGrade and (not FGerandoDanfe);
 end;
 
 function TFormPrincipal.CriarRolagem(Painel: TPanel): TScrollBox;
@@ -1515,6 +1591,10 @@ begin
         AjustarLargurasBarraPasta;
         AtualizarBordaCampoPasta(EditCaminho.Focused);
         AjustarFonteValoresCards;
+        //Etapa 4.4: tela Relatórios e tela Carregando
+        AjustarIndicadorFiltro;
+        AjustarLayoutRelatorios;
+        AjustarLayoutCarregando;
     end;
 end;
 
@@ -1858,19 +1938,27 @@ begin
 
     PnlCards.OnResize := PnlCardsResize;
 
-    //D2: cards visíveis em Resumo, Notas e Carregando; ocultos em Enviar e Configurações.
+    //D2: cards visíveis em Resumo, Notas, Relatórios e Carregando; ocultos em Enviar e Configurações.
     //O OnShow da aba dispara também quando a troca vem do código (ActivePageIndex)
-    TabSheet1.OnShow := PaginaShow;
-    TabSheet2.OnShow := PaginaShow;
-    Loading.OnShow   := PaginaShow;
-    Enviar.OnShow    := PaginaShow;
-    Config.OnShow    := PaginaShow;
+    TabSheet1.OnShow  := PaginaShow;
+    TabSheet2.OnShow  := PaginaShow;
+    Relatorios.OnShow := PaginaShow;
+    Loading.OnShow    := PaginaShow;
+    Enviar.OnShow     := PaginaShow;
+    Config.OnShow     := PaginaShow;
 end;
 
 procedure TFormPrincipal.PaginaShow(Sender: TObject);
+var
+    Tela: TTela;
 begin
     //Sender é a aba que acabou de aparecer (o ActivePage ainda pode ser a anterior)
-    PnlCards.Visible := (Sender <> Enviar) and (Sender <> Config);
+    Tela := TelaDaAba(Sender as TTabSheet);
+    PnlCards.Visible := not (Tela in [tlEnviar, tlConfiguracoes]);
+
+    //Garantia extra: o item ativo do menu acompanha a aba mesmo se ela for trocada direto no
+    //PageControl (a troca normal passa por MostrarTela)
+    SincronizarMenu(Tela);
 end;
 
 procedure TFormPrincipal.PnlCardsResize(Sender: TObject);
@@ -1965,6 +2053,618 @@ begin
     finally
         Medida.Free;
     end;
+end;
+
+{ Plano 4, etapa 4.4: menu lateral, navegação, tela Relatórios e tela Carregando }
+
+procedure TFormPrincipal.CriarMenu;
+const
+    //Glossário 3.2 a 3.7 (sem o cabeçalho "Opções" e sem o espaço de 'Notas ')
+    TEXTOS: array[TTelaMenu] of string = ('Resumo', 'Notas', 'Relatórios', 'Enviar', 'Configurações');
+    ICONES: array[TTelaMenu] of string = (IconeResumo, IconeNotas, IconeRelatorios, IconeEnviar,
+                                          IconeConfiguracoes);
+    NOMES : array[TTelaMenu] of string = ('ItemMenuResumo', 'ItemMenuNotas', 'ItemMenuRelatorios',
+                                          'ItemMenuEnviar', 'ItemMenuConfiguracoes');
+var
+    Tela: TTelaMenu;
+begin
+    //Menu lateral de 200 px (tokens.md 4.1 e 5.6): fundo CorSuperficie, divisória CorBorda à direita
+    //e 5 itens de 40 px, o primeiro 8 px abaixo do topo. O menu só navega: abrir uma tela não grava,
+    //não compacta e não envia nada (N1)
+    PanelMenus.Color   := CorSuperficie;
+    PnlMenuItens.Color := CorSuperficie;
+    PnlMenuBorda.Color := CorBorda;
+    PnlMenuBorda.Width := Escalar(BordaMenu);
+    PnlMenuItens.Padding.Top := Escalar(TopoMenu);
+
+    for Tela := Low(TTelaMenu) to High(TTelaMenu) do
+    begin
+        ItensMenu[Tela] := TProItemMenu.CriarNoMenu(PnlMenuItens, TEXTOS[Tela], ICONES[Tela], ItemMenuClick);
+        ItensMenu[Tela].Name := NOMES[Tela];
+        ItensMenu[Tela].Tag  := Ord(Tela);
+    end;
+    TProItemMenu.AjustarParadaTab(PnlMenuItens);
+
+    //Ordem do Tab: barra de pasta -> menu (uma parada) -> conteúdo da tela. O PageControl1 não
+    //recebe foco pelo Tab: as abas ficam escondidas e o foco nele não aparece na tela
+    PageControl1.TabStop := False;
+end;
+
+procedure TFormPrincipal.ItemMenuClick(Sender: TObject);
+var
+    Tela: TTela;
+begin
+    //Clique, Enter ou Espaço num item do menu: só abre a tela
+    Tela := TTela((Sender as TComponent).Tag);
+
+    //Enviar: carrega a configuração do e-mail; os XMLs só são separados e compactados no
+    //clique em "Enviar" da própria tela (btnEnviarEmailClick)
+    if Tela = tlEnviar then
+        LerConfigEmail;
+
+    MostrarTela(Tela);
+end;
+
+function TFormPrincipal.AbaDaTela(const Tela: TTela): TTabSheet;
+begin
+    case Tela of
+        tlResumo        : Result := TabSheet1;
+        tlNotas         : Result := TabSheet2;
+        tlRelatorios    : Result := Relatorios;
+        tlEnviar        : Result := Enviar;
+        tlConfiguracoes : Result := Config;
+    else
+        Result := Loading;
+    end;
+end;
+
+function TFormPrincipal.TelaDaAba(const Aba: TTabSheet): TTela;
+begin
+    if Aba = TabSheet2 then
+        Result := tlNotas
+    else if Aba = Relatorios then
+        Result := tlRelatorios
+    else if Aba = Enviar then
+        Result := tlEnviar
+    else if Aba = Config then
+        Result := tlConfiguracoes
+    else if Aba = Loading then
+        Result := tlCarregando
+    else
+        Result := tlResumo;
+end;
+
+function TFormPrincipal.TelaAtual: TTela;
+begin
+    Result := TelaDaAba(PageControl1.ActivePage);
+end;
+
+procedure TFormPrincipal.MostrarTela(const Tela: TTela);
+var
+    Aba: TTabSheet;
+begin
+    //Única rotina de troca de tela: mostra a aba da tela e sincroniza o item ativo do menu.
+    //Nenhum outro ponto do código troca a aba do PageControl1
+    Aba := AbaDaTela(Tela);
+    if PageControl1.ActivePage <> Aba then
+        PageControl1.ActivePage := Aba;
+
+    //Relatórios e Carregando ocupam o PageControl inteiro (sem a moldura): realinha as abas
+    PageControl1.Realign;
+
+    //D2: os cards só somem em Enviar e Configurações
+    PnlCards.Visible := not (Tela in [tlEnviar, tlConfiguracoes]);
+    SincronizarMenu(Tela);
+
+    if Tela = tlRelatorios then
+        AtualizarTelaRelatorios;
+end;
+
+procedure TFormPrincipal.SincronizarMenu(const Tela: TTela);
+var
+    Item: TTelaMenu;
+begin
+    //Carregando não tem item no menu: o item da tela de origem continua destacado (mockup carregando.html)
+    if Tela = tlCarregando then
+        Exit;
+
+    //Item ativo = tela exibida. Uma tela sem item (ex.: Sobre, etapa 4.7) deixa todos inativos
+    for Item := Low(TTelaMenu) to High(TTelaMenu) do
+        if ItensMenu[Item] <> nil then
+            ItensMenu[Item].Ativo := (Ord(Item) = Ord(Tela));
+
+    TProItemMenu.AjustarParadaTab(PnlMenuItens);
+end;
+
+procedure TFormPrincipal.HabilitarMenu(const Habilitar: Boolean);
+var
+    Item: TTelaMenu;
+begin
+    //Tokens 5.13: durante a tela Carregando os itens do menu ficam desabilitados
+    for Item := Low(TTelaMenu) to High(TTelaMenu) do
+        if ItensMenu[Item] <> nil then
+            ItensMenu[Item].Enabled := Habilitar;
+end;
+
+function TFormPrincipal.TelaSemMoldura(const Tela: TTela): Boolean;
+begin
+    //Telas no visual novo, com os próprios quadros sobre CorFundo (mockups relatorios.html e
+    //carregando.html): ocupam a área inteira do PageControl1, sem a moldura do controle.
+    //As outras telas mantêm a moldura até as etapas delas (4.5 e 4.7)
+    Result := Tela in [tlRelatorios, tlCarregando];
+end;
+
+procedure TFormPrincipal.JanelaPaginas(var Message: TMessage);
+begin
+    FJanelaPaginas(Message);
+
+    //TCM_ADJUSTRECT (wParam = 0): área das abas dentro do controle. Nas telas sem moldura a aba
+    //cobre o controle inteiro (a VCL soma 2 px no topo depois da mensagem: por isso o -2)
+    if (Message.Msg = TCM_ADJUSTRECT) and (Message.WParam = 0) and (PageControl1.ActivePage <> nil) and
+       TelaSemMoldura(TelaDaAba(PageControl1.ActivePage)) then
+        PRect(Message.LParam)^ := Rect(0, -2, PageControl1.ClientWidth, PageControl1.ClientHeight);
+end;
+
+function TFormPrincipal.AlturaTextoQuebrado(Rotulo: TLabel; const Largura: Integer): Integer;
+var
+    Medida : TBitmap;
+    Area   : TRect;
+    Texto  : string;
+begin
+    //Altura do texto do rótulo quebrado em linhas na largura informada
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(Rotulo.Font);
+        Texto := Rotulo.Caption;
+        if Texto = '' then
+            Texto := 'Ag';
+        Area := Rect(0, 0, Max(1, Largura), 0);
+        DrawText(Medida.Canvas.Handle, PChar(Texto), Length(Texto), Area,
+                 DT_CALCRECT or DT_WORDBREAK or DT_NOPREFIX);
+        Result := Area.Bottom - Area.Top;
+    finally
+        Medida.Free;
+    end;
+end;
+
+procedure TFormPrincipal.PrepararTelaRelatorios;
+var
+    Medida: TBitmap;
+begin
+    //Tela Relatórios (mockup relatorios.html; glossário 8.1 a 8.11): título e indicador do filtro,
+    //um quadro para cada relatório com "Gerar relatório" e o rodapé 8.11. Abrir a tela não grava nada
+    FJanelaPaginas := PageControl1.WindowProc;
+    PageControl1.WindowProc := JanelaPaginas;
+
+    PnlRelatorios.Color := CorFundo;
+    PnlOpcoes.Color     := CorFundo;
+    PnlOpcoes.OnResize  := PnlOpcoesResize;
+
+    //Título 14 pt Semibold (8.1) numa linha de 32 px, 16 px acima dos quadros
+    PnlRelatoriosTitulo.Color := CorFundo;
+    PnlRelatoriosTitulo.AlignWithMargins := True;
+    PnlRelatoriosTitulo.Margins.SetBounds(0, 0, 0, Escalar(Espaco2));
+    PnlRelatoriosTitulo.Height := Escalar(AlturaTituloTela);
+    AplicarFonte(LabelRelatoriosTitulo.Font, FonteDestaque, TamanhoTituloTela, CorTexto);
+    LabelRelatoriosTitulo.Layout  := tlCenter;
+    LabelRelatoriosTitulo.Caption := 'Relatórios';
+
+    //Indicador do filtro à direita do título (8.2): borda CorBorda, fundo CorFundo, ícone file-text
+    //de 14 px e texto 9 pt CorTexto
+    PnlRelatoriosFiltro.Color := CorBorda;
+    PnlRelatoriosFiltro.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
+    PnlRelatoriosFiltro.AlignWithMargins := True;
+    PnlRelatoriosFiltroFundo.Color := CorFundo;
+    PnlRelatoriosFiltroFundo.Padding.SetBounds(Escalar(PaddingChipHorizontal), Escalar(PaddingChipVertical),
+                                               Escalar(PaddingChipHorizontal), Escalar(PaddingChipVertical));
+    SkSvgRelatoriosFiltro.Svg.Source        := IconeNotas;
+    SkSvgRelatoriosFiltro.Svg.OverrideColor := CorAlpha(CorTexto);
+    SkSvgRelatoriosFiltro.Width             := Escalar(TamanhoIconeDica);
+    SkSvgRelatoriosFiltro.AlignWithMargins  := True;
+    AplicarFonte(LabelRelatoriosFiltro.Font, FonteTexto, TamanhoLegenda, CorTexto);
+    LabelRelatoriosFiltro.AlignWithMargins := True;
+    LabelRelatoriosFiltro.Margins.SetBounds(Escalar(EspacoIconeChip), 0, 0, 0);
+    LabelRelatoriosFiltro.Layout := tlCenter;
+
+    //Quadros dos dois relatórios (8.3 a 8.7). "Gerar relatório" é TProBotao primário com printer
+    btnGerarRelNotas  := TProBotao.CriarEm(PnlGerarNotas,  'Gerar relatório', ebPrimario, GerarRelatorioNotasClick);
+    btnGerarRelIBSCBS := TProBotao.CriarEm(PnlGerarIBSCBS, 'Gerar relatório', ebPrimario, GerarRelatorioIBSCBSClick);
+    PrepararOpcaoRelatorio(PnlOpcaoNotas, PnlOpcaoNotasFundo, PnlOpcaoNotasTitulo, SkSvgOpcaoNotas,
+                           LabelOpcaoNotasTitulo, LabelOpcaoNotasDescricao, PnlOpcaoNotasRodape, PnlGerarNotas,
+                           SkSvgDicaNotas, LabelDicaNotas, btnGerarRelNotas);
+    PrepararOpcaoRelatorio(PnlOpcaoIBSCBS, PnlOpcaoIBSCBSFundo, PnlOpcaoIBSCBSTitulo, SkSvgOpcaoIBSCBS,
+                           LabelOpcaoIBSCBSTitulo, LabelOpcaoIBSCBSDescricao, PnlOpcaoIBSCBSRodape, PnlGerarIBSCBS,
+                           SkSvgDicaIBSCBS, LabelDicaIBSCBS, btnGerarRelIBSCBS);
+    SkSvgOpcaoNotas.Svg.Source  := IconeNotas;
+    SkSvgOpcaoIBSCBS.Svg.Source := IconeIBS;
+    LabelOpcaoNotasTitulo.Caption    := 'Relatório de Notas';
+    LabelOpcaoNotasDescricao.Caption := 'Nº, modelo, data, chave, valor da nota, base de cálculo do ICMS e ICMS ' +
+                                        'de cada nota, com os totais no fim.';
+    LabelOpcaoIBSCBSTitulo.Caption   := 'Relatório IBS/CBS';
+
+    //Linha do título do quadro: a maior entre o ícone de 20 px e o texto de 12 pt
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelOpcaoNotasTitulo.Font);
+        PnlOpcaoNotasTitulo.Height := Max(Escalar(TamanhoIconeMenu), Medida.Canvas.TextHeight('Ag'));
+        PnlOpcaoIBSCBSTitulo.Height := PnlOpcaoNotasTitulo.Height;
+    finally
+        Medida.Free;
+    end;
+    SkSvgOpcaoNotas.Margins.SetBounds(0, (PnlOpcaoNotasTitulo.Height - Escalar(TamanhoIconeMenu)) div 2, 0,
+        PnlOpcaoNotasTitulo.Height - Escalar(TamanhoIconeMenu) - (PnlOpcaoNotasTitulo.Height - Escalar(TamanhoIconeMenu)) div 2);
+    SkSvgOpcaoIBSCBS.Margins.Assign(SkSvgOpcaoNotas.Margins);
+
+    //Rodapé da tela (8.11): legenda 9 pt CorTextoSecundario, 16 px abaixo dos quadros
+    AplicarFonte(LabelRelatoriosRodape.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelRelatoriosRodape.AlignWithMargins := True;
+    LabelRelatoriosRodape.Margins.SetBounds(0, Escalar(Espaco2), 0, 0);
+    LabelRelatoriosRodape.WordWrap := True;
+    LabelRelatoriosRodape.Caption  := 'Os relatórios usam as notas do modelo selecionado na barra de cima. ' +
+                                      'A busca da tela Notas não é aplicada.';
+end;
+
+procedure TFormPrincipal.PrepararOpcaoRelatorio(Borda, Fundo, Titulo: TPanel; Icone: TSkSvg; Rotulo,
+  Descricao: TLabel; Rodape, Encaixe: TPanel; IconeDica: TSkSvg; Dica: TLabel; Botao: TProBotao);
+var
+    Margem: Integer;
+begin
+    //Quadro de um relatório (mockup .opc): borda CorBorda de 1 px, fundo CorSuperficie e padding 16;
+    //título 12 pt Semibold com ícone de 20 px CorPrimaria, descrição 10 pt CorTextoSecundario e, embaixo,
+    //"Gerar relatório" com a dica visível ao lado (ícone info 14 px + texto 9 pt CorTextoSecundario).
+    //O painel de encaixe do botão tem a margem do contorno de foco em volta da face: o padding esquerdo
+    //e o de baixo do quadro descontam essa margem para a face ficar alinhada ao texto
+    Margem := Botao.MargemFoco;
+    Borda.Color := CorBorda;
+    Borda.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
+    Fundo.Color := CorSuperficie;
+    Fundo.Padding.SetBounds(Escalar(PaddingOpcao) - Margem, Escalar(PaddingOpcao), Escalar(PaddingOpcao),
+                            Escalar(PaddingOpcao) - Margem);
+
+    Titulo.Color := CorSuperficie;
+    Titulo.AlignWithMargins := True;
+    Titulo.Margins.SetBounds(Margem, 0, 0, Escalar(Espaco1));
+    Icone.Width := Escalar(TamanhoIconeMenu);
+    Icone.AlignWithMargins := True;
+    Icone.Svg.OverrideColor := CorAlpha(CorPrimaria);
+    AplicarFonte(Rotulo.Font, FonteDestaque, TamanhoSubtitulo, CorTexto);
+    Rotulo.AlignWithMargins := True;
+    Rotulo.Margins.SetBounds(Escalar(Espaco1), 0, 0, 0);
+    Rotulo.Layout := tlCenter;
+
+    AplicarFonte(Descricao.Font, FonteTexto, TamanhoCorpo, CorTextoSecundario);
+    Descricao.AlignWithMargins := True;
+    Descricao.Margins.SetBounds(Margem, 0, 0, Escalar(Espaco1) - Margem);
+    Descricao.AutoSize := False;
+    Descricao.WordWrap := True;
+
+    Rodape.Color  := CorSuperficie;
+    Encaixe.Color := CorSuperficie;
+    Encaixe.AlignWithMargins := True;
+    Botao.IconeSvg := IconeRelatorios;
+    Botao.Hint     := 'Gravar as notas e abrir a visualização do relatório';
+    Botao.ShowHint := True;
+    Encaixe.Width  := Botao.LarguraIdeal;
+
+    IconeDica.Svg.Source        := IconeInfo;
+    IconeDica.Svg.OverrideColor := CorAlpha(CorTextoSecundario);
+    IconeDica.Width             := Escalar(TamanhoIconeDica);
+    IconeDica.AlignWithMargins  := True;
+    AplicarFonte(Dica.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    Dica.AlignWithMargins := True;
+    Dica.Margins.SetBounds(Escalar(EspacoMeio), 0, 0, 0);
+    Dica.Layout   := tlCenter;
+    Dica.WordWrap := True;
+
+    //Ordem da esquerda para a direita: botão, ícone da dica, texto da dica
+    Encaixe.Left   := 0;
+    IconeDica.Left := Encaixe.Left + Encaixe.Width + 1;
+end;
+
+procedure TFormPrincipal.MostrarDica(IconeDica: TSkSvg; Dica: TLabel; const Texto: string);
+begin
+    //Dica visível ao lado do botão desabilitado (tokens.md 5.12: o hint de um controle desabilitado
+    //não aparece na VCL). Texto vazio: sem dica
+    Dica.Caption      := Texto;
+    Dica.Visible      := Texto <> '';
+    IconeDica.Visible := Texto <> '';
+    //alLeft: o ícone volta sempre depois do botão
+    if IconeDica.Visible then
+        IconeDica.Left := IconeDica.Parent.ClientWidth;
+end;
+
+procedure TFormPrincipal.AtualizarTelaRelatorios;
+var
+    Carregadas: Integer;
+    Total     : Integer;
+    ComIBSCBS : Integer;
+    Descricao : string;
+
+    function QuantidadeNotas(const N: Integer): string;
+    begin
+        if N = 1 then
+            Result := '1 nota'
+        else
+            Result := IntToStr(N) + ' notas';
+    end;
+
+begin
+    //Glossário 8.2 a 8.10, sempre com as notas do filtro de modelo atual (a busca da tela Notas não
+    //entra: decisão D5). Só atualiza a tela: nada é gravado ao abrir ou atualizar a tela Relatórios
+    if (SeletorModelo = nil) or (btnGerarRelNotas = nil) or (btnGerarRelIBSCBS = nil) then
+        Exit;
+
+    Carregadas := 0;
+    Total      := 0;
+    if FDMemTable1.Active then
+    begin
+        Carregadas := FDMemTable1.Table.Rows.Count;   //todas as notas lidas, sem o filtro de modelo
+        Total      := FDMemTable1.RecordCount;        //notas do filtro de modelo atual
+    end;
+    ComIBSCBS := FTotais.QuantidadeIBSCBS;
+
+    //Indicador do filtro (8.2)
+    if Carregadas = 0 then
+        LabelRelatoriosFiltro.Caption := 'Nenhuma nota carregada'
+    else
+        LabelRelatoriosFiltro.Caption := 'Modelo: ' + SeletorModelo.Itens[SeletorModelo.ItemIndex] + ' ' + #$00B7 +
+                                         ' ' + QuantidadeNotas(Total);
+
+    //Relatório IBS/CBS (8.6): a contagem só aparece com notas no filtro (mockup, estado sem dados)
+    Descricao := 'Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS das notas que têm o grupo IBS/CBS.';
+    if Total = 1 then
+        Descricao := Descricao + ' ' + IntToStr(ComIBSCBS) + ' de 1 nota tem IBS/CBS.'
+    else if Total > 1 then
+        Descricao := Descricao + ' ' + IntToStr(ComIBSCBS) + ' de ' + IntToStr(Total) + ' notas têm IBS/CBS.';
+    LabelOpcaoIBSCBSDescricao.Caption := Descricao;
+
+    //Botões e dicas visíveis: sem notas carregadas, os dois desabilitados (8.8); com notas carregadas
+    //mas nenhuma no filtro de modelo, os dois desabilitados (8.8a); com notas e nenhuma com
+    //IBS/CBS no filtro, só o IBS/CBS (8.10)
+    btnGerarRelNotas.Enabled  := Total > 0;
+    btnGerarRelIBSCBS.Enabled := (Total > 0) and (ComIBSCBS > 0);
+    if (Total = 0) and (Carregadas > 0) then
+    begin
+        MostrarDica(SkSvgDicaNotas,  LabelDicaNotas,  'Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima.');
+        MostrarDica(SkSvgDicaIBSCBS, LabelDicaIBSCBS, 'Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima.');
+    end
+    else if Total = 0 then
+    begin
+        MostrarDica(SkSvgDicaNotas,  LabelDicaNotas,  'Processe uma pasta para gerar relatórios.');
+        MostrarDica(SkSvgDicaIBSCBS, LabelDicaIBSCBS, 'Processe uma pasta para gerar relatórios.');
+    end
+    else
+    begin
+        MostrarDica(SkSvgDicaNotas, LabelDicaNotas, '');
+        if ComIBSCBS = 0 then
+            MostrarDica(SkSvgDicaIBSCBS, LabelDicaIBSCBS, 'Nenhuma nota do modelo selecionado tem IBS/CBS.')
+        else
+            MostrarDica(SkSvgDicaIBSCBS, LabelDicaIBSCBS, '');
+    end;
+
+    AjustarIndicadorFiltro;
+    AjustarLayoutRelatorios;
+end;
+
+procedure TFormPrincipal.AjustarIndicadorFiltro;
+var
+    Medida      : TBitmap;
+    LarguraTexto: Integer;
+    AlturaTexto : Integer;
+    Altura      : Integer;
+    Interno     : Integer;
+    Folga       : Integer;
+begin
+    //Indicador do filtro (mockup .chip): largura do texto + ícone + paddings, centralizado na linha do título
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelRelatoriosFiltro.Font);
+        LarguraTexto := Medida.Canvas.TextWidth(LabelRelatoriosFiltro.Caption);
+        AlturaTexto  := Medida.Canvas.TextHeight('Ag');
+    finally
+        Medida.Free;
+    end;
+
+    Interno := Max(Escalar(TamanhoIconeDica), AlturaTexto);
+    Altura  := Interno + 2 * Escalar(PaddingChipVertical) + 2 * Escalar(BordaQuadro);
+    Folga   := Max(0, PnlRelatoriosTitulo.Height - Altura);
+    PnlRelatoriosFiltro.Margins.SetBounds(0, Folga div 2, 0, Folga - Folga div 2);
+    PnlRelatoriosFiltro.Width := 2 * Escalar(BordaQuadro) + 2 * Escalar(PaddingChipHorizontal) +
+                                 Escalar(TamanhoIconeDica) + Escalar(EspacoIconeChip) + LarguraTexto;
+    SkSvgRelatoriosFiltro.Margins.SetBounds(0, (Interno - Escalar(TamanhoIconeDica)) div 2, 0,
+                                            Interno - Escalar(TamanhoIconeDica) - (Interno - Escalar(TamanhoIconeDica)) div 2);
+end;
+
+procedure TFormPrincipal.AjustarLayoutRelatorios;
+var
+    Margem          : Integer;
+    Espaco          : Integer;
+    Largura         : Integer;
+    LarguraTexto    : Integer;
+    LarguraDica     : Integer;
+    AlturaDescricao : Integer;
+    AlturaBotaoEncx : Integer;
+    AlturaRodape    : Integer;
+    Altura          : Integer;
+
+    procedure AjustarRodape(Rodape, Encaixe: TPanel; IconeDica: TSkSvg);
+    var
+        Folga: Integer;
+    begin
+        Rodape.Height := AlturaRodape;
+        Folga := AlturaRodape - AlturaBotaoEncx;
+        Encaixe.Margins.SetBounds(0, Folga div 2, 0, Folga - Folga div 2);
+        Folga := AlturaRodape - Escalar(TamanhoIconeDica);
+        IconeDica.Margins.SetBounds(Escalar(EspacoDica) - Margem, Folga div 2, 0, Folga - Folga div 2);
+    end;
+
+begin
+    //Dois quadros lado a lado com a mesma largura e a mesma altura (espaço de 16 px entre eles).
+    //A altura vem da maior descrição e da dica, que pode quebrar em duas linhas em 1024 px
+    if (btnGerarRelNotas = nil) or FAjustandoRelatorios then
+        Exit;
+
+    FAjustandoRelatorios := True;
+    try
+        Margem  := btnGerarRelNotas.MargemFoco;
+        Espaco  := Escalar(Espaco2);
+        Largura := (PnlOpcoes.ClientWidth - Espaco) div 2;
+        if Largura <= 0 then
+            Exit;
+
+        //Largura do texto dentro do quadro: borda e padding dos dois lados
+        LarguraTexto := Largura - 2 * Escalar(BordaQuadro) - 2 * Escalar(PaddingOpcao);
+        AlturaDescricao := Max(AlturaTextoQuebrado(LabelOpcaoNotasDescricao, LarguraTexto),
+                               AlturaTextoQuebrado(LabelOpcaoIBSCBSDescricao, LarguraTexto));
+        LabelOpcaoNotasDescricao.Height  := AlturaDescricao;
+        LabelOpcaoIBSCBSDescricao.Height := AlturaDescricao;
+
+        //Rodapé: face do botão (32 px) com a margem do foco; a dica pode precisar de mais altura
+        AlturaBotaoEncx := Escalar(AlturaBotao) + 2 * Margem;
+        AlturaRodape    := AlturaBotaoEncx;
+        LarguraDica := LarguraTexto + Margem - PnlGerarNotas.Width - (Escalar(EspacoDica) - Margem) -
+                       Escalar(TamanhoIconeDica) - Escalar(EspacoMeio);
+        if LabelDicaNotas.Visible then
+            AlturaRodape := Max(AlturaRodape, AlturaTextoQuebrado(LabelDicaNotas, LarguraDica));
+        LarguraDica := LarguraTexto + Margem - PnlGerarIBSCBS.Width - (Escalar(EspacoDica) - Margem) -
+                       Escalar(TamanhoIconeDica) - Escalar(EspacoMeio);
+        if LabelDicaIBSCBS.Visible then
+            AlturaRodape := Max(AlturaRodape, AlturaTextoQuebrado(LabelDicaIBSCBS, LarguraDica));
+        AjustarRodape(PnlOpcaoNotasRodape, PnlGerarNotas, SkSvgDicaNotas);
+        AjustarRodape(PnlOpcaoIBSCBSRodape, PnlGerarIBSCBS, SkSvgDicaIBSCBS);
+
+        Altura := 2 * Escalar(BordaQuadro) + PnlOpcaoNotasFundo.Padding.Top +
+                  PnlOpcaoNotasTitulo.Height + PnlOpcaoNotasTitulo.Margins.Bottom +
+                  AlturaDescricao + LabelOpcaoNotasDescricao.Margins.Bottom +
+                  AlturaRodape + PnlOpcaoNotasFundo.Padding.Bottom;
+
+        PnlOpcoes.Height := Altura;
+        PnlOpcaoNotas.SetBounds(0, 0, Largura, Altura);
+        PnlOpcaoIBSCBS.SetBounds(Largura + Espaco, 0, PnlOpcoes.ClientWidth - Largura - Espaco, Altura);
+    finally
+        FAjustandoRelatorios := False;
+    end;
+end;
+
+procedure TFormPrincipal.PnlOpcoesResize(Sender: TObject);
+begin
+    AjustarLayoutRelatorios;
+end;
+
+procedure TFormPrincipal.GerarRelatorioNotasClick(Sender: TObject);
+begin
+    //"Gerar relatório" do Relatório de Notas: grava as notas do filtro e abre a visualização
+    GerarRelatorio(trNotas);
+end;
+
+procedure TFormPrincipal.GerarRelatorioIBSCBSClick(Sender: TObject);
+begin
+    //"Gerar relatório" do Relatório IBS/CBS
+    GerarRelatorio(trIBSCBS);
+end;
+
+procedure TFormPrincipal.PrepararTelaCarregando;
+begin
+    //Tela Carregando (tokens.md 5.14; mockup carregando.html): quadro CorSuperficie com borda CorBorda,
+    //animação Lottie do ProXML.FrameLoad (160x134) centralizada, a operação em 12 pt Semibold e a
+    //legenda em 10 pt CorTextoSecundario
+    PnlCarregando.Color := CorBorda;
+    PnlCarregando.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
+    PnlCarregandoFundo.Color    := CorSuperficie;
+    PnlCarregandoFundo.OnResize := PnlCarregandoFundoResize;
+    PnlAnimacao.Color := CorSuperficie;
+    PnlAnimacao.SetBounds(0, 0, Escalar(LarguraAnimacao), Escalar(AlturaAnimacao));
+    AplicarFonte(LabelCarregandoTitulo.Font, FonteDestaque, TamanhoSubtitulo, CorTexto);
+    AplicarFonte(LabelCarregandoLegenda.Font, FonteTexto, TamanhoCorpo, CorTextoSecundario);
+    LabelCarregandoTitulo.Caption  := '';
+    LabelCarregandoLegenda.Caption := '';
+
+    //Frame com a animação (TSkAnimatedImage), criado aqui e ocupando o painel da animação
+    FFrameCarregando := TFrameLoad.Create(Self);
+    FFrameCarregando.Parent := PnlAnimacao;
+    FFrameCarregando.Align  := alClient;
+    FFrameCarregando.Panel1.ParentBackground := False;
+    FFrameCarregando.Panel1.Color := CorSuperficie;
+    FFrameCarregando.SkAnimatedImage1.Anchors := [akLeft, akTop];
+    FFrameCarregando.SkAnimatedImage1.Align   := alClient;
+    FFrameCarregando.SkAnimatedImage1.Animation.Loop := True;
+end;
+
+procedure TFormPrincipal.AjustarLayoutCarregando;
+var
+    Medida        : TBitmap;
+    Espaco        : Integer;
+    AlturaTitulo  : Integer;
+    AlturaLegenda : Integer;
+    Topo          : Integer;
+    Largura       : Integer;
+begin
+    //Animação, operação e legenda empilhadas (12 px entre elas) no centro do quadro
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelCarregandoTitulo.Font);
+        AlturaTitulo := Medida.Canvas.TextHeight('Ag');
+        Medida.Canvas.Font.Assign(LabelCarregandoLegenda.Font);
+        AlturaLegenda := Medida.Canvas.TextHeight('Ag');
+    finally
+        Medida.Free;
+    end;
+
+    Espaco  := Escalar(EspacoCarregando);
+    Largura := PnlCarregandoFundo.ClientWidth;
+    Topo    := Max(0, (PnlCarregandoFundo.ClientHeight -
+                       (PnlAnimacao.Height + Espaco + AlturaTitulo + Espaco + AlturaLegenda)) div 2);
+    PnlAnimacao.SetBounds((Largura - PnlAnimacao.Width) div 2, Topo, PnlAnimacao.Width, PnlAnimacao.Height);
+    LabelCarregandoTitulo.SetBounds(0, Topo + PnlAnimacao.Height + Espaco, Largura, AlturaTitulo);
+    LabelCarregandoLegenda.SetBounds(0, LabelCarregandoTitulo.Top + AlturaTitulo + Espaco, Largura, AlturaLegenda);
+end;
+
+procedure TFormPrincipal.PnlCarregandoFundoResize(Sender: TObject);
+begin
+    AjustarLayoutCarregando;
+end;
+
+procedure TFormPrincipal.IniciarCarregando(const Titulo, Legenda: string);
+begin
+    //Abre a tela Carregando. Enquanto ela estiver aberta só os itens do menu ficam bloqueados
+    //(decisão da 4.4; o bloqueio da barra de pasta, do Processar e do filtro, H4, fica para a 4.6).
+    //Quem abre a tela chama EncerrarCarregando num finally: o menu volta em qualquer caminho
+    FFocoAntesCarregando := ActiveControl;
+    LabelCarregandoTitulo.Caption  := Titulo;
+    LabelCarregandoLegenda.Caption := Legenda;
+    FCarregando := True;
+    HabilitarMenu(False);
+    MostrarTela(tlCarregando);
+    AjustarLayoutCarregando;
+    if FFrameCarregando <> nil then
+        FFrameCarregando.SkAnimatedImage1.Animation.Start;
+
+    //A gravação no banco e a montagem do relatório rodam na thread principal sem processar
+    //mensagens: a tela é pintada agora, antes do trabalho pesado. Na espera do PDF do DANFE as
+    //mensagens são processadas e a animação continua rodando
+    if PnlCorpo.HandleAllocated then
+        RedrawWindow(PnlCorpo.Handle, nil, 0, RDW_INVALIDATE or RDW_ERASE or RDW_ALLCHILDREN or RDW_UPDATENOW);
+end;
+
+procedure TFormPrincipal.EncerrarCarregando(const Destino: TTela);
+begin
+    //Fecha a tela Carregando e volta para a tela de origem (só na primeira chamada)
+    if not FCarregando then
+        Exit;
+
+    FCarregando := False;
+    try
+        if FFrameCarregando <> nil then
+            FFrameCarregando.SkAnimatedImage1.Animation.Stop;
+        MostrarTela(Destino);
+    finally
+        HabilitarMenu(True);
+    end;
+
+    //O foco volta para onde estava (grade de notas, botão "Gerar relatório"), se ainda puder
+    if (FFocoAntesCarregando <> nil) and FFocoAntesCarregando.CanFocus then
+        FFocoAntesCarregando.SetFocus;
+    FFocoAntesCarregando := nil;
 end;
 
 end.

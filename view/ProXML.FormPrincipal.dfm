@@ -57,40 +57,39 @@ object FormPrincipal: TFormPrincipal
         Margins.Right = 0
         Margins.Bottom = 10
         Align = alLeft
-        Svg.Source =
+        Svg.Source = 
           '<svg xmlns="http://www.w3.org/2000/svg" width="157" height="32" ' +
-          'viewBox="0 0 157 32">'#13#10 +
-          '  <title>ProXML (para fundo escuro)</title>'#13#10 +
-          '  <!-- Logo ProXML vetorial (redesenhado a partir de src/img/Log' +
-          'o/Logo1.png). Sem fontes, filtros nem scripts. -->'#13#10 +
-          '  <g><circle cx="13" cy="3" r="1.25" fill="#363B50"/><circle cx=' +
-          '"18.5" cy="3" r="1.25" fill="#363B50"/><circle cx="8.25" cy="7.7' +
-          '5" r="1.55" fill="#363B50"/><circle cx="13" cy="7.75" r="1.8" fi' +
-          'll="#4A5A7D"/><circle cx="18.5" cy="7.75" r="1.8" fill="#4A5A7D"' +
-          '/><circle cx="23.25" cy="7.75" r="1.55" fill="#363B50"/><circle ' +
-          'cx="3.5" cy="12.75" r="1.25" fill="#363B50"/><circle cx="8.25" c' +
-          'y="12.75" r="1.8" fill="#4A5A7D"/><circle cx="13" cy="12.75" r="' +
-          '2.1" fill="#46637F"/><circle cx="18.5" cy="12.75" r="2.1" fill="' +
-          '#46637F"/><circle cx="23.25" cy="12.75" r="1.8" fill="#4A5A7D"/>' +
-          '<circle cx="28" cy="12.75" r="1.25" fill="#363B50"/><circle cx="' +
-          '3.5" cy="18.25" r="1.25" fill="#363B50"/><circle cx="8.25" cy="1' +
-          '8.25" r="1.8" fill="#4A5A7D"/><circle cx="13" cy="18.25" r="2.1"' +
-          ' fill="#46637F"/><circle cx="18.5" cy="18.25" r="2.1" fill="#466' +
-          '37F"/><circle cx="23.25" cy="18.25" r="1.8" fill="#4A5A7D"/><cir' +
-          'cle cx="28" cy="18.25" r="1.25" fill="#363B50"/><circle cx="8.25' +
-          '" cy="23.25" r="1.55" fill="#363B50"/><circle cx="13" cy="23.25"' +
-          ' r="1.8" fill="#4A5A7D"/><circle cx="18.5" cy="23.25" r="1.8" fi' +
-          'll="#4A5A7D"/><circle cx="23.25" cy="23.25" r="1.55" fill="#363B' +
-          '50"/><circle cx="13" cy="28" r="1.25" fill="#363B50"/><circle cx' +
-          '="18.5" cy="28" r="1.25" fill="#363B50"/></g>'#13#10 +
-          '  <path d="M35 25V8.2A2.2 2.2 0 0 1 37.2 6H46A4 4 0 0 1 50 10V14' +
-          'A4 4 0 0 1 46 18H35M55 25V11.8M55 15.6C55.4 13.3 57.4 12.3 60 12' +
-          '.3H62.4M91 5.6L106.2 25M106.4 5.6L91 25M112 25V11.2A5.75 5.75 0 ' +
-          '0 1 123.5 11.2V25M123.5 11.2A5.75 5.75 0 0 1 135 11.2V25M140 5.6' +
-          'V22A3 3 0 0 0 143 25H153.2" fill="none" stroke="#FFFFFF" stroke-' +
-          'width="2.5" stroke-linecap="round" stroke-linejoin="round"/>'#13#10 +
-          '  <ellipse cx="72" cy="18.6" rx="6.7" ry="6.4" fill="none" strok' +
-          'e="#FFFFFF" stroke-width="2.5"/>'#13#10'</svg>'
+          'viewBox="0 0 157 32">'#13#10'  <title>ProXML (para fundo escuro)</titl' +
+          'e>'#13#10'  <!-- Logo ProXML vetorial (redesenhado a partir de src/img' +
+          '/Logo/Logo1.png). Sem fontes, filtros nem scripts. -->'#13#10'  <g><ci' +
+          'rcle cx="13" cy="3" r="1.25" fill="#363B50"/><circle cx="18.5" c' +
+          'y="3" r="1.25" fill="#363B50"/><circle cx="8.25" cy="7.75" r="1.' +
+          '55" fill="#363B50"/><circle cx="13" cy="7.75" r="1.8" fill="#4A5' +
+          'A7D"/><circle cx="18.5" cy="7.75" r="1.8" fill="#4A5A7D"/><circl' +
+          'e cx="23.25" cy="7.75" r="1.55" fill="#363B50"/><circle cx="3.5"' +
+          ' cy="12.75" r="1.25" fill="#363B50"/><circle cx="8.25" cy="12.75' +
+          '" r="1.8" fill="#4A5A7D"/><circle cx="13" cy="12.75" r="2.1" fil' +
+          'l="#46637F"/><circle cx="18.5" cy="12.75" r="2.1" fill="#46637F"' +
+          '/><circle cx="23.25" cy="12.75" r="1.8" fill="#4A5A7D"/><circle ' +
+          'cx="28" cy="12.75" r="1.25" fill="#363B50"/><circle cx="3.5" cy=' +
+          '"18.25" r="1.25" fill="#363B50"/><circle cx="8.25" cy="18.25" r=' +
+          '"1.8" fill="#4A5A7D"/><circle cx="13" cy="18.25" r="2.1" fill="#' +
+          '46637F"/><circle cx="18.5" cy="18.25" r="2.1" fill="#46637F"/><c' +
+          'ircle cx="23.25" cy="18.25" r="1.8" fill="#4A5A7D"/><circle cx="' +
+          '28" cy="18.25" r="1.25" fill="#363B50"/><circle cx="8.25" cy="23' +
+          '.25" r="1.55" fill="#363B50"/><circle cx="13" cy="23.25" r="1.8"' +
+          ' fill="#4A5A7D"/><circle cx="18.5" cy="23.25" r="1.8" fill="#4A5' +
+          'A7D"/><circle cx="23.25" cy="23.25" r="1.55" fill="#363B50"/><ci' +
+          'rcle cx="13" cy="28" r="1.25" fill="#363B50"/><circle cx="18.5" ' +
+          'cy="28" r="1.25" fill="#363B50"/></g>'#13#10'  <path d="M35 25V8.2A2.2' +
+          ' 2.2 0 0 1 37.2 6H46A4 4 0 0 1 50 10V14A4 4 0 0 1 46 18H35M55 25' +
+          'V11.8M55 15.6C55.4 13.3 57.4 12.3 60 12.3H62.4M91 5.6L106.2 25M1' +
+          '06.4 5.6L91 25M112 25V11.2A5.75 5.75 0 0 1 123.5 11.2V25M123.5 1' +
+          '1.2A5.75 5.75 0 0 1 135 11.2V25M140 5.6V22A3 3 0 0 0 143 25H153.' +
+          '2" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-lineca' +
+          'p="round" stroke-linejoin="round"/>'#13#10'  <ellipse cx="72" cy="18.6' +
+          '" rx="6.7" ry="6.4" fill="none" stroke="#FFFFFF" stroke-width="2' +
+          '.5"/>'#13#10'</svg>'
       end
       object PnlSobre: TPanel
         AlignWithMargins = True
@@ -132,6 +131,7 @@ object FormPrincipal: TFormPrincipal
           Align = alLeft
           Caption = 'Sobre'
           Layout = tlCenter
+          ExplicitHeight = 13
         end
       end
     end
@@ -145,6 +145,21 @@ object FormPrincipal: TFormPrincipal
       ParentBackground = False
       ShowCaption = False
       TabOrder = 1
+      object LabelFiltroModelo: TLabel
+        AlignWithMargins = True
+        Left = 716
+        Top = 8
+        Width = 40
+        Height = 40
+        Margins.Left = 8
+        Margins.Top = 8
+        Margins.Right = 4
+        Margins.Bottom = 7
+        Align = alRight
+        Caption = 'Modelo'
+        Layout = tlCenter
+        ExplicitHeight = 13
+      end
       object PnlBarraPastaBorda: TPanel
         Left = 0
         Top = 55
@@ -154,7 +169,7 @@ object FormPrincipal: TFormPrincipal
         BevelOuter = bvNone
         ParentBackground = False
         ShowCaption = False
-        TabOrder = 5
+        TabOrder = 2
       end
       object Panel7: TPanel
         AlignWithMargins = True
@@ -187,20 +202,6 @@ object FormPrincipal: TFormPrincipal
         ParentBackground = False
         ShowCaption = False
         TabOrder = 3
-      end
-      object LabelFiltroModelo: TLabel
-        AlignWithMargins = True
-        Left = 716
-        Top = 8
-        Width = 40
-        Height = 40
-        Margins.Left = 8
-        Margins.Top = 8
-        Margins.Right = 4
-        Margins.Bottom = 7
-        Align = alRight
-        Caption = 'Modelo'
-        Layout = tlCenter
       end
       object PnlSelecionar: TPanel
         AlignWithMargins = True
@@ -328,7 +329,7 @@ object FormPrincipal: TFormPrincipal
             Padding.Bottom = 16
             ParentBackground = False
             ShowCaption = False
-            TabOrder = 0
+            TabOrder = 1
             object PnlCards: TPanel
               AlignWithMargins = True
               Left = 16
@@ -371,6 +372,16 @@ object FormPrincipal: TFormPrincipal
                   ParentBackground = False
                   ShowCaption = False
                   TabOrder = 0
+                  object LabelValorTotal: TLabel
+                    Left = 12
+                    Top = 30
+                    Width = 149
+                    Height = 22
+                    Align = alBottom
+                    AutoSize = False
+                    Caption = 'R$ 0,00'
+                    Layout = tlCenter
+                  end
                   object PnlCardValorTotalRotulo: TPanel
                     Left = 12
                     Top = 10
@@ -405,16 +416,6 @@ object FormPrincipal: TFormPrincipal
                       Layout = tlCenter
                     end
                   end
-                  object LabelValorTotal: TLabel
-                    Left = 12
-                    Top = 30
-                    Width = 149
-                    Height = 22
-                    Align = alBottom
-                    AutoSize = False
-                    Caption = 'R$ 0,00'
-                    Layout = tlCenter
-                  end
                 end
               end
               object PnlCardBaseICMS: TPanel
@@ -444,6 +445,16 @@ object FormPrincipal: TFormPrincipal
                   ParentBackground = False
                   ShowCaption = False
                   TabOrder = 0
+                  object LabelbaseICMS: TLabel
+                    Left = 12
+                    Top = 30
+                    Width = 149
+                    Height = 22
+                    Align = alBottom
+                    AutoSize = False
+                    Caption = 'R$ 0,00'
+                    Layout = tlCenter
+                  end
                   object PnlCardBaseICMSRotulo: TPanel
                     Left = 12
                     Top = 10
@@ -478,16 +489,6 @@ object FormPrincipal: TFormPrincipal
                       Layout = tlCenter
                     end
                   end
-                  object LabelbaseICMS: TLabel
-                    Left = 12
-                    Top = 30
-                    Width = 149
-                    Height = 22
-                    Align = alBottom
-                    AutoSize = False
-                    Caption = 'R$ 0,00'
-                    Layout = tlCenter
-                  end
                 end
               end
               object PnlCardICMS: TPanel
@@ -517,6 +518,16 @@ object FormPrincipal: TFormPrincipal
                   ParentBackground = False
                   ShowCaption = False
                   TabOrder = 0
+                  object LabelValorICMS: TLabel
+                    Left = 12
+                    Top = 30
+                    Width = 149
+                    Height = 22
+                    Align = alBottom
+                    AutoSize = False
+                    Caption = 'R$ 0,00'
+                    Layout = tlCenter
+                  end
                   object PnlCardICMSRotulo: TPanel
                     Left = 12
                     Top = 10
@@ -551,16 +562,6 @@ object FormPrincipal: TFormPrincipal
                       Layout = tlCenter
                     end
                   end
-                  object LabelValorICMS: TLabel
-                    Left = 12
-                    Top = 30
-                    Width = 149
-                    Height = 22
-                    Align = alBottom
-                    AutoSize = False
-                    Caption = 'R$ 0,00'
-                    Layout = tlCenter
-                  end
                 end
               end
               object PnlCardIBS: TPanel
@@ -590,6 +591,16 @@ object FormPrincipal: TFormPrincipal
                   ParentBackground = False
                   ShowCaption = False
                   TabOrder = 0
+                  object LabelValorIBS: TLabel
+                    Left = 12
+                    Top = 30
+                    Width = 149
+                    Height = 22
+                    Align = alBottom
+                    AutoSize = False
+                    Caption = 'R$ 0,00'
+                    Layout = tlCenter
+                  end
                   object PnlCardIBSRotulo: TPanel
                     Left = 12
                     Top = 10
@@ -624,16 +635,6 @@ object FormPrincipal: TFormPrincipal
                       Layout = tlCenter
                     end
                   end
-                  object LabelValorIBS: TLabel
-                    Left = 12
-                    Top = 30
-                    Width = 149
-                    Height = 22
-                    Align = alBottom
-                    AutoSize = False
-                    Caption = 'R$ 0,00'
-                    Layout = tlCenter
-                  end
                 end
               end
               object PnlCardCBS: TPanel
@@ -663,6 +664,16 @@ object FormPrincipal: TFormPrincipal
                   ParentBackground = False
                   ShowCaption = False
                   TabOrder = 0
+                  object LabelValorCBS: TLabel
+                    Left = 12
+                    Top = 30
+                    Width = 149
+                    Height = 22
+                    Align = alBottom
+                    AutoSize = False
+                    Caption = 'R$ 0,00'
+                    Layout = tlCenter
+                  end
                   object PnlCardCBSRotulo: TPanel
                     Left = 12
                     Top = 10
@@ -697,16 +708,6 @@ object FormPrincipal: TFormPrincipal
                       Layout = tlCenter
                     end
                   end
-                  object LabelValorCBS: TLabel
-                    Left = 12
-                    Top = 30
-                    Width = 149
-                    Height = 22
-                    Align = alBottom
-                    AutoSize = False
-                    Caption = 'R$ 0,00'
-                    Layout = tlCenter
-                  end
                 end
               end
             end
@@ -715,74 +716,16 @@ object FormPrincipal: TFormPrincipal
               Top = 96
               Width = 904
               Height = 483
-              ActivePage = Config
+              ActivePage = TabSheet1
               Align = alClient
               TabOrder = 1
               object TabSheet1: TTabSheet
                 Caption = 'TabSheet1'
                 TabVisible = False
-                ExplicitLeft = 0
-                ExplicitTop = 0
-                ExplicitWidth = 0
-                ExplicitHeight = 0
-                object PnlAvisoPasta: TPanel
-                  AlignWithMargins = True
-                  Left = 0
-                  Top = 0
-                  Width = 616
-                  Height = 76
-                  Margins.Left = 0
-                  Margins.Top = 0
-                  Margins.Right = 0
-                  Margins.Bottom = 8
-                  Align = alTop
-                  BevelOuter = bvNone
-                  ParentBackground = False
-                  ShowCaption = False
-                  TabOrder = 1
-                  Visible = False
-                  object PnlAvisoPastaBarra: TPanel
-                    Left = 0
-                    Top = 0
-                    Width = 4
-                    Height = 76
-                    Align = alLeft
-                    BevelOuter = bvNone
-                    ParentBackground = False
-                    ShowCaption = False
-                    TabOrder = 0
-                  end
-                  object SkSvgAvisoPasta: TSkSvg
-                    AlignWithMargins = True
-                    Left = 16
-                    Top = 12
-                    Width = 20
-                    Height = 52
-                    Margins.Left = 12
-                    Margins.Top = 12
-                    Margins.Right = 0
-                    Margins.Bottom = 44
-                    Align = alLeft
-                  end
-                  object LabelAvisoPasta: TLabel
-                    AlignWithMargins = True
-                    Left = 48
-                    Top = 12
-                    Width = 552
-                    Height = 52
-                    Margins.Left = 12
-                    Margins.Top = 12
-                    Margins.Right = 16
-                    Margins.Bottom = 12
-                    Align = alClient
-                    AutoSize = False
-                    ShowAccelChar = False
-                  end
-                end
                 object Gauge1: TGauge
                   Left = 0
-                  Top = 387
-                  Width = 616
+                  Top = 441
+                  Width = 896
                   Height = 32
                   Align = alBottom
                   BorderStyle = bsNone
@@ -796,11 +739,67 @@ object FormPrincipal: TFormPrincipal
                   ExplicitTop = 344
                   ExplicitWidth = 746
                 end
-                object Memo1: TMemo
+                object PnlAvisoPasta: TPanel
+                  AlignWithMargins = True
                   Left = 0
                   Top = 0
-                  Width = 616
-                  Height = 387
+                  Width = 896
+                  Height = 76
+                  Margins.Left = 0
+                  Margins.Top = 0
+                  Margins.Right = 0
+                  Margins.Bottom = 8
+                  Align = alTop
+                  BevelOuter = bvNone
+                  ParentBackground = False
+                  ShowCaption = False
+                  TabOrder = 1
+                  Visible = False
+                  object SkSvgAvisoPasta: TSkSvg
+                    AlignWithMargins = True
+                    Left = 16
+                    Top = 12
+                    Width = 20
+                    Height = 20
+                    Margins.Left = 12
+                    Margins.Top = 12
+                    Margins.Right = 0
+                    Margins.Bottom = 44
+                    Align = alLeft
+                    ExplicitHeight = 52
+                  end
+                  object LabelAvisoPasta: TLabel
+                    AlignWithMargins = True
+                    Left = 48
+                    Top = 12
+                    Width = 832
+                    Height = 52
+                    Margins.Left = 12
+                    Margins.Top = 12
+                    Margins.Right = 16
+                    Margins.Bottom = 12
+                    Align = alClient
+                    AutoSize = False
+                    ShowAccelChar = False
+                    ExplicitWidth = 552
+                  end
+                  object PnlAvisoPastaBarra: TPanel
+                    Left = 0
+                    Top = 0
+                    Width = 4
+                    Height = 76
+                    Align = alLeft
+                    BevelOuter = bvNone
+                    ParentBackground = False
+                    ShowCaption = False
+                    TabOrder = 0
+                  end
+                end
+                object Memo1: TMemo
+                  Left = 0
+                  Top = 84
+                  Width = 896
+                  Height = 357
                   Align = alClient
                   BevelInner = bvNone
                   BevelOuter = bvNone
@@ -927,6 +926,60 @@ object FormPrincipal: TFormPrincipal
                 ExplicitTop = 0
                 ExplicitWidth = 0
                 ExplicitHeight = 0
+                object PnlCarregando: TPanel
+                  Left = 0
+                  Top = 0
+                  Width = 904
+                  Height = 483
+                  Align = alClient
+                  BevelOuter = bvNone
+                  Padding.Left = 1
+                  Padding.Top = 1
+                  Padding.Right = 1
+                  Padding.Bottom = 1
+                  ParentBackground = False
+                  ShowCaption = False
+                  TabOrder = 0
+                  object PnlCarregandoFundo: TPanel
+                    Left = 1
+                    Top = 1
+                    Width = 902
+                    Height = 481
+                    Align = alClient
+                    BevelOuter = bvNone
+                    ParentBackground = False
+                    ShowCaption = False
+                    TabOrder = 0
+                    object LabelCarregandoTitulo: TLabel
+                      Left = 0
+                      Top = 256
+                      Width = 902
+                      Height = 21
+                      Alignment = taCenter
+                      AutoSize = False
+                      ShowAccelChar = False
+                    end
+                    object LabelCarregandoLegenda: TLabel
+                      Left = 0
+                      Top = 289
+                      Width = 902
+                      Height = 17
+                      Alignment = taCenter
+                      AutoSize = False
+                      ShowAccelChar = False
+                    end
+                    object PnlAnimacao: TPanel
+                      Left = 371
+                      Top = 110
+                      Width = 160
+                      Height = 134
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                    end
+                  end
+                end
               end
               object Enviar: TTabSheet
                 Caption = 'Enviar'
@@ -1042,6 +1095,10 @@ object FormPrincipal: TFormPrincipal
                 Caption = 'Config'
                 ImageIndex = 4
                 TabVisible = False
+                ExplicitLeft = 0
+                ExplicitTop = 0
+                ExplicitWidth = 0
+                ExplicitHeight = 0
                 object PanelCorpoConfig: TPanel
                   Left = 0
                   Top = 0
@@ -1061,7 +1118,7 @@ object FormPrincipal: TFormPrincipal
                     AlignWithMargins = True
                     Left = 10
                     Top = 3
-                    Width = 603
+                    Width = 122
                     Height = 25
                     Margins.Left = 10
                     Align = alTop
@@ -1072,13 +1129,12 @@ object FormPrincipal: TFormPrincipal
                     Font.Name = 'Segoe UI'
                     Font.Style = []
                     ParentFont = False
-                    ExplicitWidth = 122
                   end
                   object Label2: TLabel
                     AlignWithMargins = True
                     Left = 10
                     Top = 34
-                    Width = 603
+                    Width = 164
                     Height = 17
                     Margins.Left = 10
                     Align = alTop
@@ -1089,7 +1145,6 @@ object FormPrincipal: TFormPrincipal
                     Font.Name = 'Segoe UI'
                     Font.Style = []
                     ParentFont = False
-                    ExplicitWidth = 164
                   end
                   object Shape2: TShape
                     Left = 24
@@ -1281,92 +1336,451 @@ object FormPrincipal: TFormPrincipal
                   end
                 end
               end
+              object Relatorios: TTabSheet
+                Caption = 'Relatorios'
+                ImageIndex = 5
+                TabVisible = False
+                ExplicitLeft = 0
+                ExplicitTop = 0
+                ExplicitWidth = 0
+                ExplicitHeight = 0
+                object PnlRelatorios: TPanel
+                  Left = 0
+                  Top = 0
+                  Width = 904
+                  Height = 483
+                  Align = alClient
+                  BevelOuter = bvNone
+                  ParentBackground = False
+                  ShowCaption = False
+                  TabOrder = 0
+                  object LabelRelatoriosRodape: TLabel
+                    AlignWithMargins = True
+                    Left = 0
+                    Top = 234
+                    Width = 4
+                    Height = 17
+                    Margins.Left = 0
+                    Margins.Top = 16
+                    Margins.Right = 0
+                    Margins.Bottom = 0
+                    Align = alTop
+                    ShowAccelChar = False
+                    WordWrap = True
+                  end
+                  object PnlRelatoriosTitulo: TPanel
+                    AlignWithMargins = True
+                    Left = 0
+                    Top = 0
+                    Width = 904
+                    Height = 32
+                    Margins.Left = 0
+                    Margins.Top = 0
+                    Margins.Right = 0
+                    Margins.Bottom = 16
+                    Align = alTop
+                    BevelOuter = bvNone
+                    ParentBackground = False
+                    ShowCaption = False
+                    TabOrder = 0
+                    object LabelRelatoriosTitulo: TLabel
+                      Left = 0
+                      Top = 0
+                      Width = 59
+                      Height = 17
+                      Align = alLeft
+                      Caption = 'Relat'#243'rios'
+                      ShowAccelChar = False
+                      Layout = tlCenter
+                    end
+                    object PnlRelatoriosFiltro: TPanel
+                      AlignWithMargins = True
+                      Left = 734
+                      Top = 5
+                      Width = 170
+                      Height = 22
+                      Margins.Left = 0
+                      Margins.Top = 5
+                      Margins.Right = 0
+                      Margins.Bottom = 5
+                      Align = alRight
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                      object PnlRelatoriosFiltroFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 168
+                        Height = 20
+                        Align = alClient
+                        BevelOuter = bvNone
+                        Padding.Left = 8
+                        Padding.Top = 2
+                        Padding.Right = 8
+                        Padding.Bottom = 2
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object LabelRelatoriosFiltro: TLabel
+                          AlignWithMargins = True
+                          Left = 28
+                          Top = 2
+                          Width = 4
+                          Height = 17
+                          Margins.Left = 6
+                          Margins.Top = 0
+                          Margins.Right = 0
+                          Margins.Bottom = 0
+                          Align = alClient
+                          ShowAccelChar = False
+                          Layout = tlCenter
+                        end
+                        object SkSvgRelatoriosFiltro: TSkSvg
+                          AlignWithMargins = True
+                          Left = 8
+                          Top = 3
+                          Width = 14
+                          Height = 14
+                          Margins.Left = 0
+                          Margins.Top = 1
+                          Margins.Right = 0
+                          Margins.Bottom = 1
+                          Align = alLeft
+                        end
+                      end
+                    end
+                  end
+                  object PnlOpcoes: TPanel
+                    Left = 0
+                    Top = 48
+                    Width = 904
+                    Height = 170
+                    Align = alTop
+                    BevelOuter = bvNone
+                    ParentBackground = False
+                    ShowCaption = False
+                    TabOrder = 1
+                    object PnlOpcaoNotas: TPanel
+                      Left = 0
+                      Top = 0
+                      Width = 444
+                      Height = 170
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                      object PnlOpcaoNotasFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 442
+                        Height = 168
+                        Align = alClient
+                        BevelOuter = bvNone
+                        Padding.Left = 12
+                        Padding.Top = 16
+                        Padding.Right = 16
+                        Padding.Bottom = 12
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object LabelOpcaoNotasDescricao: TLabel
+                          AlignWithMargins = True
+                          Left = 16
+                          Top = 53
+                          Width = 410
+                          Height = 40
+                          Margins.Left = 4
+                          Margins.Top = 0
+                          Margins.Right = 0
+                          Margins.Bottom = 4
+                          Align = alTop
+                          AutoSize = False
+                          ShowAccelChar = False
+                          WordWrap = True
+                        end
+                        object PnlOpcaoNotasTitulo: TPanel
+                          AlignWithMargins = True
+                          Left = 16
+                          Top = 16
+                          Width = 410
+                          Height = 29
+                          Margins.Left = 4
+                          Margins.Top = 0
+                          Margins.Right = 0
+                          Margins.Bottom = 8
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 0
+                          object LabelOpcaoNotasTitulo: TLabel
+                            AlignWithMargins = True
+                            Left = 28
+                            Top = 0
+                            Width = 4
+                            Height = 17
+                            Margins.Left = 8
+                            Margins.Top = 0
+                            Margins.Right = 0
+                            Margins.Bottom = 0
+                            Align = alClient
+                            ShowAccelChar = False
+                            Layout = tlCenter
+                          end
+                          object SkSvgOpcaoNotas: TSkSvg
+                            AlignWithMargins = True
+                            Left = 0
+                            Top = 4
+                            Width = 20
+                            Height = 20
+                            Margins.Left = 0
+                            Margins.Top = 4
+                            Margins.Right = 0
+                            Margins.Bottom = 5
+                            Align = alLeft
+                          end
+                        end
+                        object PnlOpcaoNotasRodape: TPanel
+                          Left = 12
+                          Top = 114
+                          Width = 414
+                          Height = 40
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 1
+                          object LabelDicaNotas: TLabel
+                            AlignWithMargins = True
+                            Left = 191
+                            Top = 0
+                            Width = 4
+                            Height = 17
+                            Margins.Left = 4
+                            Margins.Top = 0
+                            Margins.Right = 0
+                            Margins.Bottom = 0
+                            Align = alClient
+                            ShowAccelChar = False
+                            Layout = tlCenter
+                            WordWrap = True
+                          end
+                          object SkSvgDicaNotas: TSkSvg
+                            AlignWithMargins = True
+                            Left = 167
+                            Top = 13
+                            Width = 14
+                            Height = 14
+                            Margins.Left = 8
+                            Margins.Top = 13
+                            Margins.Right = 0
+                            Margins.Bottom = 13
+                            Align = alLeft
+                          end
+                          object PnlGerarNotas: TPanel
+                            AlignWithMargins = True
+                            Left = 0
+                            Top = 0
+                            Width = 159
+                            Height = 40
+                            Margins.Left = 0
+                            Margins.Top = 0
+                            Margins.Right = 0
+                            Margins.Bottom = 0
+                            Align = alLeft
+                            BevelOuter = bvNone
+                            ParentBackground = False
+                            ShowCaption = False
+                            TabOrder = 0
+                          end
+                        end
+                      end
+                    end
+                    object PnlOpcaoIBSCBS: TPanel
+                      Left = 452
+                      Top = 0
+                      Width = 444
+                      Height = 170
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 1
+                      object PnlOpcaoIBSCBSFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 442
+                        Height = 168
+                        Align = alClient
+                        BevelOuter = bvNone
+                        Padding.Left = 12
+                        Padding.Top = 16
+                        Padding.Right = 16
+                        Padding.Bottom = 12
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object LabelOpcaoIBSCBSDescricao: TLabel
+                          AlignWithMargins = True
+                          Left = 16
+                          Top = 53
+                          Width = 410
+                          Height = 40
+                          Margins.Left = 4
+                          Margins.Top = 0
+                          Margins.Right = 0
+                          Margins.Bottom = 4
+                          Align = alTop
+                          AutoSize = False
+                          ShowAccelChar = False
+                          WordWrap = True
+                        end
+                        object PnlOpcaoIBSCBSTitulo: TPanel
+                          AlignWithMargins = True
+                          Left = 16
+                          Top = 16
+                          Width = 410
+                          Height = 29
+                          Margins.Left = 4
+                          Margins.Top = 0
+                          Margins.Right = 0
+                          Margins.Bottom = 8
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 0
+                          object LabelOpcaoIBSCBSTitulo: TLabel
+                            AlignWithMargins = True
+                            Left = 28
+                            Top = 0
+                            Width = 4
+                            Height = 17
+                            Margins.Left = 8
+                            Margins.Top = 0
+                            Margins.Right = 0
+                            Margins.Bottom = 0
+                            Align = alClient
+                            ShowAccelChar = False
+                            Layout = tlCenter
+                          end
+                          object SkSvgOpcaoIBSCBS: TSkSvg
+                            AlignWithMargins = True
+                            Left = 0
+                            Top = 4
+                            Width = 20
+                            Height = 20
+                            Margins.Left = 0
+                            Margins.Top = 4
+                            Margins.Right = 0
+                            Margins.Bottom = 5
+                            Align = alLeft
+                          end
+                        end
+                        object PnlOpcaoIBSCBSRodape: TPanel
+                          Left = 12
+                          Top = 114
+                          Width = 414
+                          Height = 40
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 1
+                          object LabelDicaIBSCBS: TLabel
+                            AlignWithMargins = True
+                            Left = 191
+                            Top = 0
+                            Width = 4
+                            Height = 17
+                            Margins.Left = 4
+                            Margins.Top = 0
+                            Margins.Right = 0
+                            Margins.Bottom = 0
+                            Align = alClient
+                            ShowAccelChar = False
+                            Layout = tlCenter
+                            WordWrap = True
+                          end
+                          object SkSvgDicaIBSCBS: TSkSvg
+                            AlignWithMargins = True
+                            Left = 167
+                            Top = 13
+                            Width = 14
+                            Height = 14
+                            Margins.Left = 8
+                            Margins.Top = 13
+                            Margins.Right = 0
+                            Margins.Bottom = 13
+                            Align = alLeft
+                          end
+                          object PnlGerarIBSCBS: TPanel
+                            AlignWithMargins = True
+                            Left = 0
+                            Top = 0
+                            Width = 159
+                            Height = 40
+                            Margins.Left = 0
+                            Margins.Top = 0
+                            Margins.Right = 0
+                            Margins.Bottom = 0
+                            Align = alLeft
+                            BevelOuter = bvNone
+                            ParentBackground = False
+                            ShowCaption = False
+                            TabOrder = 0
+                          end
+                        end
+                      end
+                    end
+                  end
+                end
+              end
             end
           end
           object PanelMenus: TPanel
-            AlignWithMargins = True
             Left = 0
-            Top = 15
+            Top = 0
             Width = 200
-            Height = 565
-            Margins.Left = 0
-            Margins.Top = 15
-            Margins.Right = 0
-            Margins.Bottom = 15
+            Height = 595
             Align = alLeft
             BevelOuter = bvNone
+            ParentBackground = False
             ShowCaption = False
-            TabOrder = 1
-            object CategoryButtons1: TCategoryButtons
-              Left = 0
-              Top = 28
-              Width = 200
-              Height = 410
-              Cursor = crHandPoint
-              BevelInner = bvNone
+            TabOrder = 0
+            object PnlMenuBorda: TPanel
+              Left = 199
+              Top = 0
+              Width = 1
+              Height = 595
+              Align = alRight
               BevelOuter = bvNone
-              BorderStyle = bsNone
-              ButtonFlow = cbfVertical
-              ButtonHeight = 40
-              ButtonOptions = [boFullSize, boShowCaptions]
-              Categories = <
-                item
-                  Color = clWhite
-                  Collapsed = False
-                  Items = <
-                    item
-                      Caption = 'Resumo'
-                      OnClick = CategoryButtons1Categories0Items0Click
-                    end
-                    item
-                      Caption = 'Notas '
-                      OnClick = CategoryButtons1Categories0Items1Click
-                    end
-                    item
-                      Caption = 'Relat'#243'rio'
-                      OnClick = CategoryButtons1Categories0Items2Click
-                    end
-                    item
-                      Caption = 'Relat'#243'rio IBS/CBS'
-                      OnClick = CategoryButtons1RelatorioIBSCBSClick
-                    end
-                    item
-                      Caption = 'Enviar'
-                      OnClick = CategoryButtons1Categories0Items3Click
-                    end
-                    item
-                      Caption = 'Configura'#231#245'es'
-                      OnClick = CategoryButtons1Categories0Items4Click
-                    end>
-                  TextColor = 2169367
-                end>
-              Color = clWhite
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clGray
-              Font.Height = -13
-              Font.Name = 'Segoe UI'
-              Font.Style = []
-              RegularButtonColor = clWhite
-              SelectedButtonColor = clWhite
-              TabOrder = 0
+              ParentBackground = False
+              ShowCaption = False
+              TabOrder = 1
             end
-            object Panel8: TPanel
+            object PnlMenuItens: TPanel
               Left = 0
               Top = 0
-              Width = 200
-              Height = 47
-              Align = alTop
+              Width = 199
+              Height = 595
+              Align = alClient
               BevelOuter = bvNone
-              Caption = 'Op'#231#245'es'
-              Color = clWhite
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clGray
-              Font.Height = -13
-              Font.Name = 'Segoe UI'
-              Font.Style = []
               ParentBackground = False
-              ParentFont = False
-              TabOrder = 1
+              ShowCaption = False
+              TabOrder = 0
             end
           end
         end
@@ -1466,7 +1880,7 @@ object FormPrincipal: TFormPrincipal
     Left = 1040
     Top = 377
     Content = {
-      414442530F00781D29050000FF00010001FF02FF03040016000000460044004D
+      414442530F004A1E29050000FF00010001FF02FF03040016000000460044004D
       0065006D005400610062006C006500310005000A0000005400610062006C0065
       00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
       006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
