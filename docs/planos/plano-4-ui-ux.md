@@ -204,6 +204,8 @@ Legenda de severidade: 🔴 **Alta** (atrapalha o uso ou passa informação erra
 | **Texto 5.25 do glossário** | "o arquivo não é uma Nota Fiscal com protocolo de autorização (falta a tag nfeProc)" (vale também para eventos, CT-e etc.) |
 | **Avisos de homologação e de entrada** | O **Resumo** mostra uma linha de aviso quando a pasta tiver notas de homologação (`tpAmb=2`) e/ou de entrada (`tpNF=0`) somadas aos totais (texto a definir pelo `ux-designer` no glossário, com aprovação do usuário) |
 | **Notas canceladas** | **Fora do escopo** do Plano 4. Hoje a nota cancelada continua somada (o cancelamento é um evento separado e o `nfeProc` mantém cStat 100). Registrado como ideia para um plano futuro |
+| **Textos do aviso (20/10/2026)** | Aprovados os itens 5.29–5.31 do glossário (faixa de aviso no Resumo) e as linhas de log por nota 5.32/5.33 (homologação e NF-e de entrada) |
+| **D7 revista (20/10/2026)** | O cabeçalho do relatório A4 usa o **logo vetorial claro** (`proxml-logo-claro.svg`) no lugar do texto "ProXML" |
 | **Textos** | O `ux-designer` propõe um **glossário de mensagens** (antes → depois) e o usuário aprova junto com os mockups |
 
 ---

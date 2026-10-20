@@ -103,6 +103,11 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 5.26 | `LerNotaXML` (nNF) | I/L | Tag nNF vazia no XML | tag nNF vazia | |
 | 5.27 | exceção não prevista (novo) | I/L | — | {mensagem da exceção} | Texto original do Delphi/MSXML |
 | 5.28 | fechar durante a leitura (novo) | M | — | A leitura dos XMLs ainda está em andamento.<br>Deseja cancelar e fechar o ProXML? | Botões Sim / Não |
+| 5.29 | aviso no Resumo: só homologação (novo) | F | — | **Os totais incluem {h} notas de homologação** (ambiente de testes, sem valor fiscal). Confira se a pasta é a certa. | **Aprovado pelo usuário em 20/10/2026.** Faixa de aviso (`CorAvisoSuave` + `CorAviso`) entre os contadores e o log. Singular: "**Os totais incluem 1 nota de homologação** (…)" |
+| 5.30 | aviso no Resumo: só entrada (novo) | F | — | **Os totais incluem {e} NF-e de entrada**, somadas às de saída. Confira se a pasta é a certa. | **Aprovado pelo usuário em 20/10/2026.** Entrada = NF-e 55 com tpNF 0. Singular: "**Os totais incluem 1 NF-e de entrada**, somada às de saída." |
+| 5.31 | aviso no Resumo: os dois (novo) | F | — | **Os totais incluem {h} notas de homologação** (ambiente de testes, sem valor fiscal) **e {e} NF-e de entrada.** Confira se a pasta é a certa. | **Aprovado pelo usuário em 20/10/2026.** Exemplo no mockup `resumo.html`, estado "Concluído" |
+| 5.32 | log: nota de homologação (novo) | L | — | Nota Fiscal {n}: homologação (tpAmb 2), somada aos totais. | **Aprovado pelo usuário em 20/10/2026.** Uma linha por nota, ícone de aviso; não muda os contadores |
+| 5.33 | log: NF-e de entrada (novo) | L | — | Nota Fiscal {n}: NF-e de entrada (tpNF 0), somada aos totais. | **Aprovado pelo usuário em 20/10/2026.** Idem |
 
 ## 6. Notas (grade, ações, busca, CSV)
 
