@@ -9,7 +9,8 @@ uses
   DM in 'datamodule\DM.pas' {DMConfig: TDataModule},
   ProXML.Classes in 'classes\ProXML.Classes.pas',
   ProXML.Tema in 'view\ProXML.Tema.pas',
-  ProXML.Botao in 'view\ProXML.Botao.pas';
+  ProXML.Botao in 'view\ProXML.Botao.pas',
+  ProXML.Icones in 'view\ProXML.Icones.pas';
 
 {$R *.res}
 

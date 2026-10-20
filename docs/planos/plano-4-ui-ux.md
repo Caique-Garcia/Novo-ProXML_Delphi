@@ -1,6 +1,6 @@
 # Plano 4 — Redesign de UI/UX (v1.1.0, junto com o Plano 1)
 
-> **Status:** 📝 Próximo a executar: logo depois do Plano 1 e **antes** dos Planos 2 e 3
+> **Status:** ▶️ Em execução: 4.1, 4.2 e 4.3 concluídas (commits locais); próxima etapa **4.4**
 > **Análise feita em:** 19/10/2026, sobre o commit `5ae82ac` (antes da etapa 1.2 do Plano 1)
 > **Atualizado em:** 19/10/2026, sobre o commit `b593076` (Plano 1 concluído e aprovado pelo QA; v1.1.0 preparada, **não publicada**). Ver a seção [2.10](#210-o-que-o-plano-1-já-mudou)
 > **Escopo:** tela principal (todas as abas), relatório de notas e relatório IBS/CBS (QuickReport), layouts do DANFE (`.fr3`) e textos da interface
@@ -207,6 +207,10 @@ Legenda de severidade: 🔴 **Alta** (atrapalha o uso ou passa informação erra
 | **Textos do aviso (20/10/2026)** | Aprovados os itens 5.29–5.31 do glossário (faixa de aviso no Resumo) e as linhas de log por nota 5.32/5.33 (homologação e NF-e de entrada) |
 | **D7 revista (20/10/2026)** | O cabeçalho do relatório A4 usa o **logo vetorial claro** (`proxml-logo-claro.svg`) no lugar do texto "ProXML" |
 | **Decisões da 4.2 (20/10/2026)** | Rolagem provisória em Enviar e Configurações em janela pequena, **mantida até a 4.7**. Janela maximizada abre no monitor salvo; se ele não existir, centralizada e maximizada no principal. "Copiar chave" **tolerante** à área de transferência ocupada (tentar de novo e avisar), na **4.5**, com texto novo no glossário para aprovação |
+| **Mínimo da janela com DPI (20/10/2026)** | O mínimo é sempre **1024×640 pixels reais da tela**, em qualquer escala do Windows (a VCL não pode escalá-lo); o layout se adapta. Implementado na 4.3 e conferido na 4.10 |
+| **Processar travado após erro (20/10/2026)** | Defeito antigo (o `Enabled := True` fora de `finally`): corrigir na **4.6**, junto com o processamento em segundo plano |
+| **Decisões da 4.3 (20/10/2026)** | Pasta salva que não existe mais: mensagem 2.14 do glossário **ao abrir o app** (não modal), campo vazio. Caminho longo: **aceito como está** (cortado no fim, caminho completo na dica). Aperto da barra/cards em 125%/150% na janela mínima: **tratar na 4.10** com prints reais. Link "Sobre" visível e sem ação até a 4.7. Menu lateral com 200 px (visual do menu na 4.4) |
+| **QA (20/10/2026)** | O `qa-reviewer` revisa só nos pontos de controle maiores (4.10, cobrindo da 4.3 em diante). Nas etapas, vale a bateria do `delphi-dev` + teste do usuário na IDE |
 | **Textos** | O `ux-designer` propõe um **glossário de mensagens** (antes → depois) e o usuário aprova junto com os mockups |
 
 ---
@@ -304,7 +308,7 @@ flowchart LR
     E412["4.12 Release v1.1.0<br/>(Planos 1 + 4)<br/>📦 release-manager"]
 ```
 
-Ao fim de **cada** etapa do `delphi-dev`, o `qa-reviewer` revisa o diff e compila. A etapa seguinte só começa com o QA aprovado e o usuário de acordo.
+~~Ao fim de **cada** etapa do `delphi-dev`, o `qa-reviewer` revisa o diff e compila.~~ **Atualizado em 20/10/2026 (decisão do usuário):** o `qa-reviewer` só entra nos **pontos de controle maiores**: a revisão completa da **4.10**, que cobre todas as etapas desde a 4.3, cujo QA foi interrompido. Em cada etapa, o `delphi-dev` roda a própria bateria de regressão (dois separadores, banco antigo e novo) e o usuário testa na IDE antes do commit. A etapa seguinte só começa com o usuário de acordo.
 
 ### 5.2 Resumo das etapas
 
