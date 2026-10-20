@@ -103,6 +103,9 @@ const
   BordaCampo              = 1;    //borda normal
   BordaCampoFoco          = 2;    //borda com foco
 
+  //Quadros (cards, quadros das telas, indicador do filtro): contorno de 1 px CorBorda
+  BordaQuadro             = 1;
+
   //Card de total (tokens.md, seção 5.5)
   PaddingCardVertical     = 10;
   PaddingCardHorizontal   = 12;
@@ -119,9 +122,29 @@ const
   LarguraLogo             = 137;
   AlturaLogo              = 28;
 
+  //Menu lateral (tokens.md, seções 4.1 e 5.6; mockups: classe .mi)
+  TopoMenu                = 8;    //primeiro item 8 px abaixo do topo do menu
+  BarraItemMenu           = 4;    //barra à esquerda do item (transparente; ativo: CorPrimaria)
+  PaddingItemMenu         = 16;   //da barra até o ícone
+  EspacoIconeMenu         = 12;   //ícone -> texto do item
+  BordaMenu               = 1;    //divisória à direita do menu (CorBorda)
+
+  //Tela Relatórios (mockup relatorios.html: .opc, .rod, .dica e .chip)
+  PaddingOpcao            = 16;   //padding do quadro de cada relatório
+  EspacoDica              = 12;   //botão -> dica visível ao lado
+  PaddingChipHorizontal   = 8;    //indicador do filtro ("Modelo: Todos · 19 notas")
+  PaddingChipVertical     = 2;
+  EspacoIconeChip         = 6;    //ícone -> texto do indicador
+
+  //Tela Carregando (tokens.md, seção 5.14; mockup carregando.html)
+  LarguraAnimacao         = 160;
+  AlturaAnimacao          = 134;
+  EspacoCarregando        = 12;   //animação -> texto -> legenda
+
   //Ícones
   TamanhoIconePequeno     = 16;   //botões, campos, cards
-  TamanhoIconeMenu        = 20;   //menu, faixas
+  TamanhoIconeDica        = 14;   //dicas visíveis e indicador do filtro
+  TamanhoIconeMenu        = 20;   //menu, faixas, título das opções de relatório
   TamanhoIconeContador    = 24;   //contadores do Resumo
   TamanhoIconeVazio       = 48;   //estados vazios
 

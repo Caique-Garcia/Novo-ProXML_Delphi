@@ -171,6 +171,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 8.6 | opção 2 (novo) | F | — | Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS das notas que têm o grupo IBS/CBS. {x} de {n} notas têm IBS/CBS. | |
 | 8.7 | botões (novo) | B/H | — | Gerar relatório · *hint:* Gravar as notas e abrir a visualização do relatório | |
 | 8.8 | sem notas (novo) | F | — | Processe uma pasta para gerar relatórios. | Dica visível ao lado dos botões desabilitados |
+| 8.8a | sem notas no modelo (novo) | F | — | Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima. | Há notas carregadas, mas nenhuma no filtro de modelo. Aprovado em 20/10/2026 (4.4) |
 | 8.9 | `GerarRelatorio` | M | Sem dados para gerar relatório !! | *(substituída pela 8.8)* | Botões desabilitados; se ainda for preciso: "Nenhuma nota para o relatório. Processe uma pasta primeiro." |
 | 8.10 | `AbrirRelatorioIBSCBS` | M | Nenhuma nota com IBS/CBS | Nenhuma nota do modelo selecionado tem IBS/CBS. | Vira dica visível com o botão IBS/CBS desabilitado; a caixa só se o botão for acionado mesmo assim |
 | 8.11 | rodapé da tela (novo) | F | — | Os relatórios usam as notas do modelo selecionado na barra de cima. A busca da tela Notas não é aplicada. | Depende da decisão D5 |

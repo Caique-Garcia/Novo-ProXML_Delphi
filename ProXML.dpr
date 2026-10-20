@@ -10,7 +10,8 @@ uses
   ProXML.Classes in 'classes\ProXML.Classes.pas',
   ProXML.Tema in 'view\ProXML.Tema.pas',
   ProXML.Botao in 'view\ProXML.Botao.pas',
-  ProXML.Icones in 'view\ProXML.Icones.pas';
+  ProXML.Icones in 'view\ProXML.Icones.pas',
+  ProXML.FrameLoad in 'view\ProXML.FrameLoad.pas' {FrameLoad: TFrame};
 
 {$R *.res}
 

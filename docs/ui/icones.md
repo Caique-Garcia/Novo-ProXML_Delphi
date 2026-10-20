@@ -22,11 +22,11 @@
 | Onde | Ícone | Arquivo | Tamanho |
 |------|-------|---------|---------|
 | Menu · Resumo | layout-dashboard | `layout-dashboard.svg` | 20 |
-| Menu · Notas | file-text | `file-text.svg` | 20 |
+| Menu · Notas / indicador do filtro e título do Relatório de Notas (tela Relatórios) | file-text | `file-text.svg` | 20 / 16 |
 | Menu · Relatórios / botão Gerar relatório | printer | `printer.svg` | 20 / 16 |
 | Menu · Enviar / botão Enviar | send | `send.svg` | 20 / 16 |
 | Menu · Configurações | settings | `settings.svg` | 20 |
-| Cabeçalho · Sobre / faixa informativa / dicas | info | `info.svg` | 16 / 20 / 14 |
+| Cabeçalho · Sobre / faixa informativa / dicas (inclusive as da tela Relatórios) | info | `info.svg` | 16 / 20 / 14 |
 | Campo da pasta | folder | `folder.svg` | 16 |
 | Botão Selecionar… / Selecionar pasta… | folder-open | `folder-open.svg` | 16 |
 | Estado vazio do Resumo (arrastar pasta) | folder-input | `folder-input.svg` | 48 |

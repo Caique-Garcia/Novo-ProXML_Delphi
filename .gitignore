@@ -75,3 +75,5 @@ modules/
 
 # XMLs reais de teste (dados fiscais - nunca versionar)
 /exemple/
+bin/db/notas.db
+bin/db/notas.db

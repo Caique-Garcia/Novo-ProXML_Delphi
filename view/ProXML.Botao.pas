@@ -147,6 +147,39 @@ type
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
+  { TProItemMenu: item do menu lateral (Plano 4, etapa 4.4; visual em docs/ui/tokens.md, seção 5.6).
+
+    - Modo "menu" do TProBotao: mesmo clique, Enter/Espaço, hover, foco pelo teclado e ícone SVG,
+      com outra pintura: sem cantos nem margem de foco, ícone de 20 px e texto alinhados à esquerda.
+    - Normal: CorSuperficie, texto 10 pt CorTexto, ícone CorTextoSecundario, barra esquerda de 4 px
+      transparente. Hover: fundo CorFundo. Ativo: fundo CorPrimariaSuave, barra CorPrimaria, texto
+      Semibold e ícone CorPrimaria. Foco (teclado): contorno de 2 px CorPrimaria por dentro do item.
+      Desabilitado: texto e ícone CorTextoDesabilitado; o item ativo continua com o visual de ativo
+      (mockup carregando.html: durante a espera o item da tela de origem segue destacado).
+    - Teclado: o menu é uma única parada do Tab (o item com foco; sem foco, o item ativo).
+      Seta para cima/baixo, Home e End movem o foco entre os itens; Enter ou Espaço abrem a tela.
+    - Ativo é só o destaque: quem troca a tela e escolhe o item ativo é o formulário. }
+  TProItemMenu = class(TProBotao)
+  private
+    FAtivo: Boolean;
+    procedure SetAtivo(const Value: Boolean);
+    function  ItensDoMenu: TArray<TProItemMenu>;
+    procedure MoverFoco(const Passo: Integer);
+    procedure WMGetDlgCode(var Message: TWMGetDlgCode); message WM_GETDLGCODE;
+  protected
+    procedure Paint; override;
+    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
+    procedure DoEnter; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    //Cria o item embaixo dos itens que já existem no painel do menu (alTop, altura do tema)
+    class function CriarNoMenu(Menu: TWinControl; const Texto, Icone: string;
+      const AoClicar: TNotifyEvent): TProItemMenu;
+    //Deixa um só item do menu como parada do Tab: o que tem foco; sem foco, o ativo; sem ativo, o primeiro
+    class procedure AjustarParadaTab(Menu: TWinControl);
+    property Ativo: Boolean read FAtivo write SetAtivo;
+  end;
+
 implementation
 
 uses
@@ -962,6 +995,295 @@ procedure TProSegmentado.WMEraseBkgnd(var Message: TWMEraseBkgnd);
 begin
     //O Paint desenha tudo (inclusive o fundo do pai): evita piscar
     Message.Result := 1;
+end;
+
+{ TProItemMenu }
+
+constructor TProItemMenu.Create(AOwner: TComponent);
+begin
+    inherited Create(AOwner);
+    //Texto 10 pt Regular (o item ativo passa a Semibold na pintura)
+    AplicarFonte(Font, FonteTexto, TamanhoCorpo, CorTexto);
+    Height := AlturaItemMenu;
+end;
+
+class function TProItemMenu.CriarNoMenu(Menu: TWinControl; const Texto, Icone: string;
+  const AoClicar: TNotifyEvent): TProItemMenu;
+var
+    I     : Integer;
+    Fundo : Integer;
+begin
+    //Itens alTop na ordem de criação: o novo começa abaixo do último que já está no painel
+    Fundo := 0;
+    for I := 0 to Menu.ControlCount - 1 do
+        if (Menu.Controls[I].Align = alTop) and (Menu.Controls[I].Top + Menu.Controls[I].Height > Fundo) then
+            Fundo := Menu.Controls[I].Top + Menu.Controls[I].Height;
+
+    Result := TProItemMenu.Create(Menu.Owner);
+    Result.Caption  := Texto;
+    Result.IconeSvg := Icone;
+    Result.OnClick  := AoClicar;
+    Result.SetBounds(0, Fundo, Menu.ClientWidth, EscalarPara(Menu, AlturaItemMenu));
+    Result.Align    := alTop;
+    Result.Parent   := Menu;
+end;
+
+function TProItemMenu.ItensDoMenu: TArray<TProItemMenu>;
+var
+    I     : Integer;
+    J     : Integer;
+    Qtd   : Integer;
+    Troca : TProItemMenu;
+begin
+    //Itens irmãos (mesmo painel), de cima para baixo
+    SetLength(Result, 0);
+    if Parent = nil then
+        Exit;
+
+    Qtd := 0;
+    SetLength(Result, Parent.ControlCount);
+    for I := 0 to Parent.ControlCount - 1 do
+        if Parent.Controls[I] is TProItemMenu then
+        begin
+            Result[Qtd] := TProItemMenu(Parent.Controls[I]);
+            Inc(Qtd);
+        end;
+    SetLength(Result, Qtd);
+
+    for I := 1 to Qtd - 1 do
+    begin
+        J := I;
+        while (J > 0) and (Result[J - 1].Top > Result[J].Top) do
+        begin
+            Troca := Result[J - 1];
+            Result[J - 1] := Result[J];
+            Result[J] := Troca;
+            Dec(J);
+        end;
+    end;
+end;
+
+class procedure TProItemMenu.AjustarParadaTab(Menu: TWinControl);
+var
+    I         : Integer;
+    Item      : TProItemMenu;
+    Primeiro  : TProItemMenu;
+    ItemAtivo : TProItemMenu;
+    Escolhido : TProItemMenu;
+begin
+    Primeiro  := nil;
+    ItemAtivo := nil;
+    Escolhido := nil;
+    for I := 0 to Menu.ControlCount - 1 do
+    begin
+        if not (Menu.Controls[I] is TProItemMenu) then
+            Continue;
+        Item := TProItemMenu(Menu.Controls[I]);
+        if (Primeiro = nil) or (Item.Top < Primeiro.Top) then
+            Primeiro := Item;
+        if Item.FAtivo then
+            ItemAtivo := Item;
+        if Item.Focused then
+            Escolhido := Item;
+    end;
+
+    if Escolhido = nil then
+        Escolhido := ItemAtivo;
+    if Escolhido = nil then
+        Escolhido := Primeiro;
+
+    for I := 0 to Menu.ControlCount - 1 do
+        if Menu.Controls[I] is TProItemMenu then
+            TProItemMenu(Menu.Controls[I]).TabStop := (Menu.Controls[I] = Escolhido);
+end;
+
+procedure TProItemMenu.SetAtivo(const Value: Boolean);
+begin
+    if FAtivo <> Value then
+    begin
+        FAtivo := Value;
+        Invalidate;
+    end;
+end;
+
+procedure TProItemMenu.MoverFoco(const Passo: Integer);
+var
+    Itens : TArray<TProItemMenu>;
+    Atual : Integer;
+    I     : Integer;
+begin
+    //Passo -1/+1: item de cima/de baixo (para no primeiro e no último, sem dar a volta).
+    //Passo -2/+2: primeiro/último item (Home/End). Itens desabilitados são pulados
+    Itens := ItensDoMenu;
+    if Length(Itens) = 0 then
+        Exit;
+
+    Atual := 0;
+    for I := 0 to High(Itens) do
+        if Itens[I] = Self then
+            Atual := I;
+
+    case Passo of
+        -2: begin
+                for I := 0 to High(Itens) do
+                    if Itens[I].CanFocus then
+                    begin
+                        Itens[I].SetFocus;
+                        Exit;
+                    end;
+            end;
+        2:  begin
+                for I := High(Itens) downto 0 do
+                    if Itens[I].CanFocus then
+                    begin
+                        Itens[I].SetFocus;
+                        Exit;
+                    end;
+            end;
+    else
+        I := Atual + Passo;
+        while (I >= 0) and (I <= High(Itens)) do
+        begin
+            if Itens[I].CanFocus then
+            begin
+                Itens[I].SetFocus;
+                Exit;
+            end;
+            Inc(I, Passo);
+        end;
+    end;
+end;
+
+procedure TProItemMenu.KeyDown(var Key: Word; Shift: TShiftState);
+begin
+    if Enabled and (Shift * [ssCtrl, ssAlt, ssShift] = []) then
+    begin
+        case Key of
+            VK_UP:
+            begin
+                Key := 0;
+                MoverFoco(-1);
+                Exit;
+            end;
+
+            VK_DOWN:
+            begin
+                Key := 0;
+                MoverFoco(1);
+                Exit;
+            end;
+
+            VK_HOME:
+            begin
+                Key := 0;
+                MoverFoco(-2);
+                Exit;
+            end;
+
+            VK_END:
+            begin
+                Key := 0;
+                MoverFoco(2);
+                Exit;
+            end;
+        end;
+    end;
+    //Enter, Espaço e o contorno de foco: mesmo comportamento do TProBotao
+    inherited;
+end;
+
+procedure TProItemMenu.DoEnter;
+begin
+    inherited;
+    //O item com foco passa a ser a parada do Tab do menu (Shift+Tab volta para ele)
+    if Parent <> nil then
+        AjustarParadaTab(Parent);
+end;
+
+procedure TProItemMenu.WMGetDlgCode(var Message: TWMGetDlgCode);
+begin
+    //As setas movem o foco entre os itens (sem isso o formulário as usa para trocar de controle)
+    inherited;
+    Message.Result := Message.Result or DLGC_WANTARROWS;
+end;
+
+procedure TProItemMenu.Paint;
+var
+    Fundo     : TColor;
+    CorTitulo : TColor;
+    CorIcone  : TColor;
+    Barra     : Integer;
+    Icone     : Integer;
+    X         : Integer;
+    I         : Integer;
+    Area      : TRect;
+    Texto     : string;
+begin
+    //Tabela 5.6 do tokens.md
+    if FAtivo then
+        Fundo := CorPrimariaSuave
+    else if FMouseSobre and Enabled then
+        Fundo := CorFundo
+    else
+        Fundo := CorSuperficie;
+
+    if FAtivo then
+    begin
+        CorTitulo := CorTexto;
+        CorIcone  := CorPrimaria;
+    end
+    else if not Enabled then
+    begin
+        CorTitulo := CorTextoDesabilitado;
+        CorIcone  := CorTextoDesabilitado;
+    end
+    else
+    begin
+        CorTitulo := CorTexto;
+        CorIcone  := CorTextoSecundario;
+    end;
+
+    Canvas.Brush.Style := bsSolid;
+    Canvas.Brush.Color := Fundo;
+    Canvas.FillRect(ClientRect);
+
+    //Barra esquerda: só aparece no item ativo (nos outros é transparente, da cor do fundo)
+    Barra := Escalar(BarraItemMenu);
+    if FAtivo then
+    begin
+        Canvas.Brush.Color := CorPrimaria;
+        Canvas.FillRect(Rect(0, 0, Barra, ClientHeight));
+    end;
+
+    //Ícone de 20 px e texto, centralizados na altura
+    X := Barra + Escalar(PaddingItemMenu);
+    if FIconeSvg <> '' then
+    begin
+        Icone := Escalar(TamanhoIconeMenu);
+        DesenharIcone(Rect(X, (ClientHeight - Icone) div 2, X + Icone, (ClientHeight - Icone) div 2 + Icone), CorIcone);
+        Inc(X, Icone + Escalar(EspacoIconeMenu));
+    end;
+
+    Canvas.Font.Assign(Font);
+    if FAtivo then
+        Canvas.Font.Name := FonteDestaque;
+    Canvas.Font.Color  := CorTitulo;
+    Canvas.Brush.Style := bsClear;
+    Texto := Caption;
+    Area  := Rect(X, 0, ClientWidth - Escalar(PaddingItemMenu), ClientHeight);
+    DrawText(Canvas.Handle, PChar(Texto), Length(Texto), Area,
+             DT_LEFT or DT_VCENTER or DT_SINGLELINE or DT_END_ELLIPSIS or DT_NOPREFIX);
+
+    //Foco pelo teclado: contorno de 2 px CorPrimaria por dentro do item
+    if Focused and FMostrarFoco and Enabled then
+    begin
+        Canvas.Brush.Style := bsClear;
+        Canvas.Pen.Style   := psSolid;
+        Canvas.Pen.Width   := 1;
+        Canvas.Pen.Color   := CorPrimaria;
+        for I := 0 to Escalar(EspessuraFoco) - 1 do
+            Canvas.Rectangle(I, I, ClientWidth - I, ClientHeight - I);
+    end;
 end;
 
 end.
