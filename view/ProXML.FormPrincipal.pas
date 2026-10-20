@@ -16,7 +16,6 @@ uses
   Vcl.StdCtrls,
   Skia,
   Skia.Vcl,
-  Vcl.Buttons,
   Vcl.Imaging.pngimage,
   FireDAC.Stan.Intf,
   FireDAC.Stan.Option,
@@ -65,7 +64,10 @@ uses
   ACBrMail,
   Midas,
   MidasLib,
-  uCalculadoraXML;
+  uCalculadoraXML,
+  Vcl.ActnList,
+  System.Actions,
+  ProXML.Botao;
 
 type
   //Relatório aberto depois de gravar as notas no banco (GravarNotasDB)
@@ -125,7 +127,6 @@ type
     Shape1: TShape;
     EditCaminho: TEdit;
     Panel7: TPanel;
-    SpeedButton1: TSpeedButton;
     PanelMenus: TPanel;
     CategoryButtons1: TCategoryButtons;
     Panel8: TPanel;
@@ -167,7 +168,6 @@ type
     EditPass: TEdit;
     MemoMsg: TMemo;
     Panel9: TPanel;
-    btnSalvarConfig: TSpeedButton;
     SkSvg5: TSkSvg;
     ACBrMail1: TACBrMail;
     Panel10: TPanel;
@@ -180,7 +180,6 @@ type
     EditEmailEnviar: TEdit;
     MemoMensagem: TMemo;
     Panel11: TPanel;
-    btnEnviarEmail: TSpeedButton;
     ACBrNFeDANFEFR: TACBrNFeDANFEFR;
     PanelValorIBS: TPanel;
     ShapeValorIBS: TShape;
@@ -221,6 +220,10 @@ type
     ConfigEmail : TConfig;
     FTotais : TTotaisNotas;
     FGerandoDanfe : Boolean;   //evita gerar dois DANFEs ao mesmo tempo (a espera do PDF processa mensagens)
+    FJanelaNormal : TRect;     //posição e tamanho da janela no estado normal (salvos mesmo se maximizada)
+    FRolagemEnviar: TScrollBox;
+    FRolagemConfig: TScrollBox;
+    FMaximizarAoMostrar: Boolean;   //janela salva maximizada: maximiza no FormShow
     procedure SetTextoTranferencia(const Text: String);
     procedure AjustarAlturaLinhasGrade;
     procedure GerarRelatorio(const Relatorio: TTipoRelatorio);
@@ -237,8 +240,41 @@ type
     procedure EnviaArquivo(const Email, Assunto: string);
     procedure ApplicationException(Sender: TObject; E: Exception);
     function  CreateProcessSimple(cmd: string): boolean;
+    //Plano 4, etapa 4.2: botões, atalhos, rolagem e preferências da janela
+    procedure CriarBotoes;
+    procedure CriarAtalhos;
+    function  CriarRolagem(Painel: TPanel): TScrollBox;
+    procedure RolagemResize(Sender: TObject);
+    function  TemNotaNaGrade: Boolean;
+    procedure RestaurarPreferencias;
+    procedure SalvarPreferencias;
+    procedure GuardarUltimaPasta(const Pasta: string);
+    procedure RegistrarFalhaPreferencias(E: Exception);
+    function  AjustarAreaVisivel(const Janela: TRect): TRect;
+    procedure RegistrarJanelaNormal;
+    procedure WMMove(var Message: TWMMove); message WM_MOVE;
+    procedure WMSize(var Message: TWMSize); message WM_SIZE;
+    procedure AcaoSelecionarPastaExecute(Sender: TObject);
+    procedure AcaoProcessarExecute(Sender: TObject);
+    procedure AcaoProcessarUpdate(Sender: TObject);
+    procedure AcaoBuscarExecute(Sender: TObject);
+    procedure AcaoCopiarChaveExecute(Sender: TObject);
+    procedure AcaoCopiarChaveUpdate(Sender: TObject);
+    procedure AcaoGerarDanfeExecute(Sender: TObject);
+    procedure AcaoGerarDanfeUpdate(Sender: TObject);
 
   public
+    //Botões criados em runtime (TProBotao) nos painéis de encaixe Panel7, Panel11 e Panel9
+    btnProcessar    : TProBotao;
+    btnEnviarEmail  : TProBotao;
+    btnSalvarConfig : TProBotao;
+    //Atalhos de teclado (criados em runtime em CriarAtalhos)
+    Acoes              : TActionList;
+    actSelecionarPasta : TAction;   //Ctrl+O
+    actProcessar       : TAction;   //F5
+    actBuscar          : TAction;   //Ctrl+F
+    actCopiarChave     : TAction;   //Ctrl+C (com a grade em foco)
+    actGerarDanfe      : TAction;   //Ctrl+D (na tela Notas)
     procedure AtualizarTotais;
     //Modelo escolhido no seletor (FILTRO_MODELO_TODOS, FILTRO_MODELO_NFE ou FILTRO_MODELO_NFCE)
     function  ModeloSelecionado: Integer;
@@ -263,7 +299,9 @@ uses
   {$IFDEF MSWINDOWS}
     Vcl.FileCtrl,
   {$ENDIF}
-  System.IOUtils;
+  System.IOUtils,
+  System.Math,
+  ProXML.Tema;
 
 {$R *.dfm}
 
@@ -546,6 +584,8 @@ end;
 
 procedure TFormPrincipal.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  //Guarda a pasta e a janela para a próxima execução
+  SalvarPreferencias;
 
   try
     action := cafree;
@@ -558,6 +598,14 @@ procedure TFormPrincipal.FormCreate(Sender: TObject);
 begin
    //Create do Form
    //Application.OnException := DMConfig.GravaLog;
+
+   //Tema (fonte base), botões e atalhos criados em runtime e rolagem nas telas
+   //Enviar e Configurações quando a janela fica menor que o layout atual
+   AplicarTema(Self);
+   CriarBotoes;
+   CriarAtalhos;
+   FRolagemEnviar := CriarRolagem(Panel10);
+   FRolagemConfig := CriarRolagem(PanelCorpoConfig);
 
    try          
     ConfigEmail := DMConfig.GetConfig;
@@ -575,6 +623,9 @@ begin
    //Seletor de modelo começa em "Todos"
    ComboFiltroModelo.ItemIndex := 0;
    AplicarFiltroModelo;
+
+   //Última pasta e janela da execução anterior
+   RestaurarPreferencias;
 end;
 
 procedure TFormPrincipal.FormDestroy(Sender: TObject);
@@ -692,6 +743,15 @@ begin
    try
     ConfigACBR();
    except
+   end;
+
+   //Janela salva maximizada: maximiza só agora, com a janela já criada no tamanho normal.
+   //Maximizando no FormCreate, a VCL cria a janela com o tamanho do .dfm (ClientWidth/ClientHeight)
+   //e o tamanho normal salvo se perde ao restaurar.
+   if FMaximizarAoMostrar then
+   begin
+       FMaximizarAoMostrar := False;
+       WindowState := wsMaximized;
    end;
 end;
 
@@ -989,10 +1049,13 @@ end;
 
 procedure TFormPrincipal.SkSvg1Click(Sender: TObject);
 begin
-  //Selecionando a pasta de arquivos
+  //Selecionando a pasta de arquivos (cancelar não muda o campo)
   {$IFDEF MSWINDOWS}
-    FileOpenDialog1.Execute;   
-    EditCaminho.Text := FileOpenDialog1.FileName;
+    if FileOpenDialog1.Execute then
+    begin
+        EditCaminho.Text := FileOpenDialog1.FileName;
+        GuardarUltimaPasta(EditCaminho.Text);
+    end;
   {$ENDIF}
 end;
 
@@ -1009,7 +1072,7 @@ procedure TFormPrincipal.SpeedButton1Click(Sender: TObject);
 var
   CalculadoraXML : TCalculadoraXML;
 begin
-  SpeedButton1.Enabled := false;
+  btnProcessar.Enabled := false;
   //PageControl1.ActivePageIndex := 0;
   CategoryButtons1Categories0Items0Click(Self);
 
@@ -1036,9 +1099,287 @@ begin
     CalculadoraXML.Free;
   end;
   PageControl1.ActivePageIndex := 0;
-  SpeedButton1.Enabled := true;
+  btnProcessar.Enabled := true;
   Gauge1.Progress := 0;
   Memo1.SetFocus;
+end;
+
+{ Plano 4, etapa 4.2: botões TProBotao, atalhos de teclado, rolagem e preferências da janela }
+
+procedure TFormPrincipal.CriarBotoes;
+begin
+    //Os painéis Panel7, Panel11 e Panel9 do .dfm são só o ponto de encaixe.
+    //Mesmos OnClick e textos de antes (os textos do glossário entram na etapa 4.7)
+    btnProcessar    := TProBotao.CriarEm(Panel7,  'Processar', ebPrimario, SpeedButton1Click);
+    btnEnviarEmail  := TProBotao.CriarEm(Panel11, 'Enviar',    ebPrimario, btnEnviarEmailClick);
+    btnSalvarConfig := TProBotao.CriarEm(Panel9,  'Salvar',    ebPrimario, btnSalvarConfigClick);
+end;
+
+procedure TFormPrincipal.CriarAtalhos;
+
+    function NovaAcao(const Atalho: TShortCut; const Executar, Atualizar: TNotifyEvent): TAction;
+    begin
+        Result := TAction.Create(Acoes);
+        Result.ActionList := Acoes;
+        Result.ShortCut   := Atalho;
+        Result.OnExecute  := Executar;
+        Result.OnUpdate   := Atualizar;
+    end;
+
+begin
+    //Atalhos ligados às rotinas que já existem. As ações não têm texto: não aparecem na tela
+    Acoes := TActionList.Create(Self);
+    actSelecionarPasta := NovaAcao(Vcl.Menus.ShortCut(Ord('O'), [ssCtrl]), AcaoSelecionarPastaExecute, nil);
+    actProcessar       := NovaAcao(Vcl.Menus.ShortCut(VK_F5, []), AcaoProcessarExecute, AcaoProcessarUpdate);
+    actBuscar          := NovaAcao(Vcl.Menus.ShortCut(Ord('F'), [ssCtrl]), AcaoBuscarExecute, nil);
+    actCopiarChave     := NovaAcao(Vcl.Menus.ShortCut(Ord('C'), [ssCtrl]), AcaoCopiarChaveExecute, AcaoCopiarChaveUpdate);
+    actGerarDanfe      := NovaAcao(Vcl.Menus.ShortCut(Ord('D'), [ssCtrl]), AcaoGerarDanfeExecute, AcaoGerarDanfeUpdate);
+end;
+
+function TFormPrincipal.TemNotaNaGrade: Boolean;
+begin
+    Result := FDMemTable1.Active and (not FDMemTable1.IsEmpty);
+end;
+
+procedure TFormPrincipal.AcaoSelecionarPastaExecute(Sender: TObject);
+begin
+    //Ctrl+O: mesmo que clicar no ícone da pasta
+    SkSvg1Click(SkSvg1);
+end;
+
+procedure TFormPrincipal.AcaoProcessarExecute(Sender: TObject);
+begin
+    //F5: mesmo que clicar em Processar
+    btnProcessar.Click;
+end;
+
+procedure TFormPrincipal.AcaoProcessarUpdate(Sender: TObject);
+begin
+    actProcessar.Enabled := btnProcessar.Enabled;
+end;
+
+procedure TFormPrincipal.AcaoBuscarExecute(Sender: TObject);
+begin
+    //Ctrl+F: a busca chega na etapa 4.5; por enquanto leva o foco para a grade de notas
+    PageControl1.ActivePageIndex := 1;
+    if DBGrid1.CanFocus then
+        DBGrid1.SetFocus;
+end;
+
+procedure TFormPrincipal.AcaoCopiarChaveExecute(Sender: TObject);
+begin
+    //Ctrl+C: mesmo que "Copiar Chave" do menu da grade
+    GerarPDF1Click(GerarPDF1);
+end;
+
+procedure TFormPrincipal.AcaoCopiarChaveUpdate(Sender: TObject);
+begin
+    //Só com a grade em foco: nos campos de texto o Ctrl+C continua copiando o texto
+    actCopiarChave.Enabled := (ActiveControl = DBGrid1) and TemNotaNaGrade;
+end;
+
+procedure TFormPrincipal.AcaoGerarDanfeExecute(Sender: TObject);
+begin
+    //Ctrl+D: mesmo que "Gerar DANFe" do menu da grade
+    GerarDANFe1Click(GerarDANFe1);
+end;
+
+procedure TFormPrincipal.AcaoGerarDanfeUpdate(Sender: TObject);
+begin
+    //Só na tela Notas, com nota na grade e sem outro DANFE em andamento
+    actGerarDanfe.Enabled := (PageControl1.ActivePageIndex = 1) and TemNotaNaGrade and (not FGerandoDanfe);
+end;
+
+function TFormPrincipal.CriarRolagem(Painel: TPanel): TScrollBox;
+var
+    I        : Integer;
+    Largura  : Integer;
+    Altura   : Integer;
+    Controle : TControl;
+begin
+    //Com a janela menor que o tamanho antigo (1136x699) as telas Enviar e Configurações não
+    //cabem. O painel passa para dentro de uma caixa com rolagem e nunca fica menor que o
+    //necessário para os seus controles: abaixo disso aparecem as barras de rolagem.
+    //Provisório até o novo layout dessas telas (etapa 4.7).
+    Largura := 0;
+    Altura  := 0;
+    for I := 0 to Painel.ControlCount - 1 do
+    begin
+        Controle := Painel.Controls[I];
+        if Controle.Align = alNone then
+        begin
+            Largura := Max(Largura, Controle.Left + Controle.Width);
+            Altura  := Max(Altura, Controle.Top + Controle.Height);
+        end;
+    end;
+
+    Result := TScrollBox.Create(Self);
+    Result.Parent           := Painel.Parent;
+    Result.Align            := alClient;
+    Result.BorderStyle      := bsNone;
+    Result.ParentBackground := True;
+    Result.HorzScrollBar.Tracking := True;
+    Result.VertScrollBar.Tracking := True;
+
+    Painel.Constraints.MinWidth  := Largura + Espaco1;
+    Painel.Constraints.MinHeight := Altura + Espaco1;
+    Painel.Align  := alNone;
+    Painel.Parent := Result;
+    Painel.SetBounds(0, 0, Max(Painel.Width, Painel.Constraints.MinWidth), Max(Painel.Height, Painel.Constraints.MinHeight));
+    Result.OnResize := RolagemResize;
+end;
+
+procedure TFormPrincipal.RolagemResize(Sender: TObject);
+var
+    Caixa  : TScrollBox;
+    Painel : TControl;
+begin
+    //O painel ocupa a caixa inteira, mas não encolhe abaixo do mínimo (aí entra a rolagem)
+    Caixa := Sender as TScrollBox;
+    if Caixa.ControlCount = 0 then
+        Exit;
+
+    Painel := Caixa.Controls[0];
+    Painel.SetBounds(Painel.Left, Painel.Top,
+                     Max(Caixa.ClientWidth, Painel.Constraints.MinWidth),
+                     Max(Caixa.ClientHeight, Painel.Constraints.MinHeight));
+end;
+
+procedure TFormPrincipal.RegistrarFalhaPreferencias(E: Exception);
+begin
+    //As preferências não são essenciais: a falha vai para o LOG e a tela segue normalmente.
+    //Se nem o LOG puder ser gravado (banco indisponível), resta a saída de depuração
+    try
+        DMConfig.CreateLog(E.ClassName, 'Preferências da tela: ' + E.Message);
+    except
+        on ELog: Exception do
+            OutputDebugString(PChar('ProXML: ' + ELog.Message));
+    end;
+end;
+
+procedure TFormPrincipal.GuardarUltimaPasta(const Pasta: string);
+begin
+    try
+        DMConfig.GravarUltimaPasta(Pasta);
+    except
+        on E: Exception do
+            RegistrarFalhaPreferencias(E);
+    end;
+end;
+
+function TFormPrincipal.AjustarAreaVisivel(const Janela: TRect): TRect;
+var
+    Monitor : TMonitor;
+    Area    : TRect;
+    Largura : Integer;
+    Altura  : Integer;
+begin
+    //Monitor onde a janela estava. Se ele não existe mais (a janela não toca nenhum monitor),
+    //a janela é centralizada no monitor principal
+    Monitor := Screen.MonitorFromRect(Janela, mdNull);
+    if Monitor = nil then
+    begin
+        Area    := Screen.PrimaryMonitor.WorkareaRect;
+        Largura := Min(Janela.Width, Area.Width);
+        Altura  := Min(Janela.Height, Area.Height);
+        Result  := Bounds(Area.Left + (Area.Width - Largura) div 2,
+                          Area.Top + (Area.Height - Altura) div 2, Largura, Altura);
+        Exit;
+    end;
+
+    //O monitor existe: a janela inteira fica dentro da área de trabalho dele
+    Area    := Monitor.WorkareaRect;
+    Largura := Min(Janela.Width, Area.Width);
+    Altura  := Min(Janela.Height, Area.Height);
+    Result  := Bounds(EnsureRange(Janela.Left, Area.Left, Area.Right - Largura),
+                      EnsureRange(Janela.Top, Area.Top, Area.Bottom - Altura), Largura, Altura);
+end;
+
+procedure TFormPrincipal.RestaurarPreferencias;
+var
+    Pref   : TPreferencias;
+    Janela : TRect;
+begin
+    try
+        Pref := DMConfig.GetPreferencias;
+    except
+        on E: Exception do
+        begin
+            //Sem preferências a tela abre como antes (centralizada e sem pasta)
+            RegistrarFalhaPreferencias(E);
+            Exit;
+        end;
+    end;
+
+    //Última pasta, se ela ainda existir
+    if (Pref.UltimaPasta <> '') and SysUtils.DirectoryExists(Pref.UltimaPasta) then
+        EditCaminho.Text := Pref.UltimaPasta;
+
+    //Janela: tamanho e posição do estado normal, sempre dentro da área visível
+    if Pref.TemJanela then
+    begin
+        Janela := AjustarAreaVisivel(Bounds(Pref.JanelaEsquerda, Pref.JanelaTopo,
+                                            Pref.JanelaLargura, Pref.JanelaAltura));
+        Position      := poDesigned;
+        BoundsRect    := Janela;
+        FJanelaNormal := BoundsRect;
+
+        //Maximizada no monitor da posição normal (no principal, se aquele não existe mais).
+        //A maximização fica para o FormShow (ver lá o motivo)
+        FMaximizarAoMostrar := Pref.JanelaMaximizada;
+    end;
+end;
+
+procedure TFormPrincipal.SalvarPreferencias;
+var
+    Maximizada : Boolean;
+    Posicao    : TWindowPlacement;
+begin
+    if not HandleAllocated then
+        Exit;
+
+    //Maximizada agora, ou minimizada a partir do estado maximizado
+    Maximizada := IsZoomed(Handle);
+    if IsIconic(Handle) then
+    begin
+        FillChar(Posicao, SizeOf(Posicao), 0);
+        Posicao.length := SizeOf(Posicao);
+        if GetWindowPlacement(Handle, @Posicao) then
+            Maximizada := (Posicao.flags and WPF_RESTORETOMAXIMIZED) <> 0;
+    end;
+
+    if FJanelaNormal.IsEmpty then
+        FJanelaNormal := BoundsRect;
+
+    try
+        DMConfig.GravarJanela(FJanelaNormal.Left, FJanelaNormal.Top, FJanelaNormal.Width,
+                              FJanelaNormal.Height, Maximizada);
+
+        if SysUtils.DirectoryExists(EditCaminho.Text) then
+            DMConfig.GravarUltimaPasta(EditCaminho.Text);
+    except
+        on E: Exception do
+            RegistrarFalhaPreferencias(E);
+    end;
+end;
+
+procedure TFormPrincipal.RegistrarJanelaNormal;
+begin
+    //Guarda posição e tamanho só no estado normal (maximizada ou minimizada não conta)
+    if HandleAllocated and (not IsIconic(Handle)) and (not IsZoomed(Handle)) then
+        FJanelaNormal := BoundsRect;
+end;
+
+procedure TFormPrincipal.WMMove(var Message: TWMMove);
+begin
+    inherited;
+    RegistrarJanelaNormal;
+end;
+
+procedure TFormPrincipal.WMSize(var Message: TWMSize);
+begin
+    inherited;
+    RegistrarJanelaNormal;
 end;
 
 end.

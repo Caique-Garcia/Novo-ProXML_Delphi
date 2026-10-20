@@ -34,6 +34,17 @@ const
   FILTRO_MODELO_NFCE  = 65;
 
 type
+  //Preferências da tela guardadas na tabela config (última pasta e janela)
+  TPreferencias = record
+    UltimaPasta      : String;
+    TemJanela        : Boolean;   //False: a janela nunca foi salva (abre centralizada)
+    JanelaEsquerda   : Integer;
+    JanelaTopo       : Integer;
+    JanelaLargura    : Integer;
+    JanelaAltura     : Integer;
+    JanelaMaximizada : Boolean;
+  end;
+
   TDMConfig = class(TDataModule)
     Conexao: TFDConnection;
     Query: TFDQuery;
@@ -62,7 +73,10 @@ type
   private
     FFiltroModelo: Integer;
     procedure GravarConfig(const Config: TConfig);
+    procedure AdicionarColunasFaltantes(const Tabela: String; const Colunas, Definicoes: array of String);
     procedure MigrarTabelaNF;
+    procedure MigrarTabelaConfig;
+    function  ConfigVazia: Boolean;
     procedure SetFiltroModelo(const Value: Integer);
   public
     procedure CreateLog(const Classe, Msg: String);
@@ -74,6 +88,10 @@ type
     function GetConfig: TConfig;
     procedure UpdateConfig(const Config: TConfig);
     procedure GravaLog(Sender: TObject; E: Exception);
+    //Preferências da tela (colunas ULTIMA_PASTA e JANELA_* da tabela config)
+    function  GetPreferencias: TPreferencias;
+    procedure GravarUltimaPasta(const Pasta: String);
+    procedure GravarJanela(const Esquerda, Topo, Largura, Altura: Integer; const Maximizada: Boolean);
     //Filtro de modelo usado por QryNotas e QryNotasIBSCBS: 0 = Todos, 55 = NF-e, 65 = NFC-e
     //Vale na próxima abertura das queries
     property FiltroModelo: Integer read FFiltroModelo write SetFiltroModelo;
@@ -121,8 +139,17 @@ begin
                                 'PORTA            TEXT (36), '  +
                                 'SSL              TEXT (36), '  +
                                 'TSL              TEXT (36), '  +
-                                'MSG              TEXT (200) '  +
+                                'MSG              TEXT (200), '  +
+                                'ULTIMA_PASTA     TEXT, '  +
+                                'JANELA_ESQUERDA  INTEGER, '  +
+                                'JANELA_TOPO      INTEGER, '  +
+                                'JANELA_LARGURA   INTEGER, '  +
+                                'JANELA_ALTURA    INTEGER, '  +
+                                'JANELA_MAXIMIZADA INTEGER DEFAULT 0 '  +
                                 ' ); ');
+
+   //Bancos criados até a versão 1.1 sem as preferências da tela
+   MigrarTabelaConfig;
 
   Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS LOG ( ' +
                                 'CLASSE           TEXT (200), '  +
@@ -131,24 +158,20 @@ begin
                                 ' ); ');
 end;
 
-procedure TDMConfig.MigrarTabelaNF;
-const
-  //Colunas novas da tabela nf (versão 1.1) e suas definições
-  ColunasNovas: array[0..6] of String = ('MODELO', 'TEM_IBSCBS', 'VBCIBSCBS', 'VIBSUF', 'VIBSMUN', 'VIBS', 'VCBS');
-  DefColunas: array[0..6] of String = ('INTEGER', 'INTEGER DEFAULT 0', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)');
+procedure TDMConfig.AdicionarColunasFaltantes(const Tabela: String; const Colunas, Definicoes: array of String);
 var
   QryAux: TFDQuery;
   ColunasExistentes: TStringList;
   I: Integer;
 begin
-  //Migração idempotente: só adiciona as colunas que ainda não existem
+  //Migração idempotente: só adiciona as colunas que ainda não existem na tabela
   ColunasExistentes := TStringList.Create;
   QryAux := TFDQuery.Create(Nil);
   try
     ColunasExistentes.CaseSensitive := False;
 
     QryAux.Connection := Conexao;
-    QryAux.Open('PRAGMA table_info(nf)');
+    QryAux.Open('PRAGMA table_info(' + Tabela + ')');
     while not QryAux.Eof do
     begin
       ColunasExistentes.Add(QryAux.FieldByName('name').AsString);
@@ -156,15 +179,34 @@ begin
     end;
     QryAux.Close;
 
-    for I := Low(ColunasNovas) to High(ColunasNovas) do
+    for I := Low(Colunas) to High(Colunas) do
     begin
-      if ColunasExistentes.IndexOf(ColunasNovas[I]) < 0 then
-        Conexao.ExecSQL('ALTER TABLE nf ADD COLUMN ' + ColunasNovas[I] + ' ' + DefColunas[I]);
+      if ColunasExistentes.IndexOf(Colunas[I]) < 0 then
+        Conexao.ExecSQL('ALTER TABLE ' + Tabela + ' ADD COLUMN ' + Colunas[I] + ' ' + Definicoes[I]);
     end;
   finally
     FreeAndNil(QryAux);
     FreeAndNil(ColunasExistentes);
   end;
+end;
+
+procedure TDMConfig.MigrarTabelaNF;
+const
+  //Colunas novas da tabela nf (versão 1.1) e suas definições
+  ColunasNovas: array[0..6] of String = ('MODELO', 'TEM_IBSCBS', 'VBCIBSCBS', 'VIBSUF', 'VIBSMUN', 'VIBS', 'VCBS');
+  DefColunas: array[0..6] of String = ('INTEGER', 'INTEGER DEFAULT 0', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)');
+begin
+  AdicionarColunasFaltantes('nf', ColunasNovas, DefColunas);
+end;
+
+procedure TDMConfig.MigrarTabelaConfig;
+const
+  //Preferências da tela (Plano 4): última pasta e tamanho/posição/estado da janela
+  ColunasNovas: array[0..5] of String = ('ULTIMA_PASTA', 'JANELA_ESQUERDA', 'JANELA_TOPO', 'JANELA_LARGURA',
+                                         'JANELA_ALTURA', 'JANELA_MAXIMIZADA');
+  DefColunas: array[0..5] of String = ('TEXT', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER', 'INTEGER DEFAULT 0');
+begin
+  AdicionarColunasFaltantes('config', ColunasNovas, DefColunas);
 end;
 
 procedure TDMConfig.ConexaoBeforeConnect(Sender: TObject);
@@ -316,7 +358,7 @@ begin
     Query.Active := False;
     Query.SQL.Clear;
 
-    Query.SQL.Add('insert into LOG ');
+    Query.SQL.Add('insert into LOG ( CLASSE, MSG, DT ) ');
     Query.SQL.Add('values( :CLASSE, :MSG, :DT )');
     Query.Params.ParamByName('CLASSE').AsString         := Trim(Classe);
     Query.Params.ParamByName('MSG').AsString            := Trim(Msg);
@@ -350,7 +392,7 @@ begin
     if Config.TSL then TSL := '1';
     if Config.SSL then SSL := '1';
 
-    Query.SQL.Add('insert into config ');
+    Query.SQL.Add('insert into config ( SMTP, EMAIL, SENHA, PORTA, SSL, TSL, MSG ) ');
     Query.SQL.Add('values( :SMTP, :EMAIL, :SENHA, :PORTA, :SSL, :TSL, :MSG )');
     Query.Params.ParamByName('SMTP').AsString    := Trim(Config.SMTP);
     Query.Params.ParamByName('EMAIL').AsString   := Trim(Config.Email);
@@ -452,6 +494,82 @@ begin
 
     end;
 
+end;
+
+function TDMConfig.ConfigVazia: Boolean;
+begin
+    //A tabela config tem uma linha só (e-mail + preferências); pode ainda não existir
+    Result := Conexao.ExecSQLScalar('SELECT COUNT(*) FROM config') = 0;
+end;
+
+function TDMConfig.GetPreferencias: TPreferencias;
+var
+    QryAux: TFDQuery;
+begin
+    Result.UltimaPasta      := '';
+    Result.TemJanela        := False;
+    Result.JanelaEsquerda   := 0;
+    Result.JanelaTopo       := 0;
+    Result.JanelaLargura    := 0;
+    Result.JanelaAltura     := 0;
+    Result.JanelaMaximizada := False;
+
+    QryAux := TFDQuery.Create(Nil);
+    try
+        QryAux.Connection := Conexao;
+        QryAux.Open('SELECT ULTIMA_PASTA, JANELA_ESQUERDA, JANELA_TOPO, JANELA_LARGURA, JANELA_ALTURA, ' +
+                    'JANELA_MAXIMIZADA FROM config');
+        if not QryAux.IsEmpty then
+        begin
+            Result.UltimaPasta := QryAux.FieldByName('ULTIMA_PASTA').AsString;
+
+            //Janela só conta como salva com as quatro medidas preenchidas
+            Result.TemJanela := (not QryAux.FieldByName('JANELA_ESQUERDA').IsNull) and
+                                (not QryAux.FieldByName('JANELA_TOPO').IsNull) and
+                                (not QryAux.FieldByName('JANELA_LARGURA').IsNull) and
+                                (not QryAux.FieldByName('JANELA_ALTURA').IsNull) and
+                                (QryAux.FieldByName('JANELA_LARGURA').AsInteger > 0) and
+                                (QryAux.FieldByName('JANELA_ALTURA').AsInteger > 0);
+            if Result.TemJanela then
+            begin
+                Result.JanelaEsquerda   := QryAux.FieldByName('JANELA_ESQUERDA').AsInteger;
+                Result.JanelaTopo       := QryAux.FieldByName('JANELA_TOPO').AsInteger;
+                Result.JanelaLargura    := QryAux.FieldByName('JANELA_LARGURA').AsInteger;
+                Result.JanelaAltura     := QryAux.FieldByName('JANELA_ALTURA').AsInteger;
+                Result.JanelaMaximizada := QryAux.FieldByName('JANELA_MAXIMIZADA').AsInteger = 1;
+            end;
+        end;
+    finally
+        FreeAndNil(QryAux);
+    end;
+end;
+
+procedure TDMConfig.GravarUltimaPasta(const Pasta: String);
+begin
+    //Grava na linha da config (cria a linha se o e-mail ainda não foi configurado)
+    if ConfigVazia then
+        Conexao.ExecSQL('INSERT INTO config ( ULTIMA_PASTA ) VALUES ( :ULTIMA_PASTA )', [Pasta])
+    else
+        Conexao.ExecSQL('UPDATE config SET ULTIMA_PASTA = :ULTIMA_PASTA', [Pasta]);
+end;
+
+procedure TDMConfig.GravarJanela(const Esquerda, Topo, Largura, Altura: Integer; const Maximizada: Boolean);
+var
+    Estado: Integer;
+begin
+    //Posição e tamanho da janela no estado normal (restaurada) e se estava maximizada
+    Estado := 0;
+    if Maximizada then
+        Estado := 1;
+
+    if ConfigVazia then
+        Conexao.ExecSQL('INSERT INTO config ( JANELA_ESQUERDA, JANELA_TOPO, JANELA_LARGURA, JANELA_ALTURA, ' +
+                        'JANELA_MAXIMIZADA ) VALUES ( :ESQUERDA, :TOPO, :LARGURA, :ALTURA, :MAXIMIZADA )',
+                        [Esquerda, Topo, Largura, Altura, Estado])
+    else
+        Conexao.ExecSQL('UPDATE config SET JANELA_ESQUERDA = :ESQUERDA, JANELA_TOPO = :TOPO, ' +
+                        'JANELA_LARGURA = :LARGURA, JANELA_ALTURA = :ALTURA, JANELA_MAXIMIZADA = :MAXIMIZADA',
+                        [Esquerda, Topo, Largura, Altura, Estado]);
 end;
 
 end.

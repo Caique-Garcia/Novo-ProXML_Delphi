@@ -206,6 +206,7 @@ Legenda de severidade: 🔴 **Alta** (atrapalha o uso ou passa informação erra
 | **Notas canceladas** | **Fora do escopo** do Plano 4. Hoje a nota cancelada continua somada (o cancelamento é um evento separado e o `nfeProc` mantém cStat 100). Registrado como ideia para um plano futuro |
 | **Textos do aviso (20/10/2026)** | Aprovados os itens 5.29–5.31 do glossário (faixa de aviso no Resumo) e as linhas de log por nota 5.32/5.33 (homologação e NF-e de entrada) |
 | **D7 revista (20/10/2026)** | O cabeçalho do relatório A4 usa o **logo vetorial claro** (`proxml-logo-claro.svg`) no lugar do texto "ProXML" |
+| **Decisões da 4.2 (20/10/2026)** | Rolagem provisória em Enviar e Configurações em janela pequena, **mantida até a 4.7**. Janela maximizada abre no monitor salvo; se ele não existir, centralizada e maximizada no principal. "Copiar chave" **tolerante** à área de transferência ocupada (tentar de novo e avisar), na **4.5**, com texto novo no glossário para aprovação |
 | **Textos** | O `ux-designer` propõe um **glossário de mensagens** (antes → depois) e o usuário aprova junto com os mockups |
 
 ---
@@ -413,6 +414,7 @@ Ao fim de **cada** etapa do `delphi-dev`, o `qa-reviewer` revisa o diff e compil
 - **Visual:** `DisplayFormat` monetário, linhas zebradas, seleção em `CorPrimariaSuave`, títulos em Semibold, altura de linha definida **uma vez** no `FormShow`/`FormCreate` (sai de `OnDrawColumnCell`).
 - **Estado vazio** com mensagem e atalho para selecionar a pasta.
 - Renomear `GerarPDF1` → `mnuCopiarChave` (e ajustar o `.pas`).
+- "Copiar chave" tolerante à área de transferência ocupada por outro programa (novas tentativas e aviso), com o texto aprovado no glossário.
 
 **Aceite:**
 - [ ] Busca + filtro + ordenação funcionam juntos e a contagem exibida corresponde às linhas visíveis.
