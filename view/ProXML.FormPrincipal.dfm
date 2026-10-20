@@ -1,16 +1,16 @@
 object FormPrincipal: TFormPrincipal
   Left = 0
   Top = 0
-  BorderIcons = [biSystemMenu, biMinimize]
-  BorderStyle = bsSingle
   Caption = 'Pro XML'
   ClientHeight = 699
   ClientWidth = 1136
   Color = clBtnFace
+  Constraints.MinHeight = 640
+  Constraints.MinWidth = 1024
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Height = -13
+  Font.Name = 'Segoe UI'
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
@@ -19,7 +19,7 @@ object FormPrincipal: TFormPrincipal
   OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 17
   object PnlContainer: TPanel
     Left = 0
     Top = 0
@@ -1076,35 +1076,13 @@ object FormPrincipal: TFormPrincipal
                   TabOrder = 1
                 end
                 object Panel11: TPanel
-                  Left = 438
-                  Top = 97
-                  Width = 110
-                  Height = 40
+                  Left = 434
+                  Top = 93
+                  Width = 118
+                  Height = 48
                   BevelOuter = bvNone
-                  Color = 13264672
-                  ParentBackground = False
                   ShowCaption = False
                   TabOrder = 2
-                  object btnEnviarEmail: TSpeedButton
-                    Left = 0
-                    Top = 0
-                    Width = 110
-                    Height = 40
-                    Cursor = crHandPoint
-                    Align = alClient
-                    Caption = 'Enviar'
-                    Flat = True
-                    Font.Charset = DEFAULT_CHARSET
-                    Font.Color = clWhite
-                    Font.Height = -13
-                    Font.Name = 'Segoe UI'
-                    Font.Style = []
-                    ParentFont = False
-                    OnClick = btnEnviarEmailClick
-                    ExplicitTop = -4
-                    ExplicitWidth = 167
-                    ExplicitHeight = 36
-                  end
                 end
               end
             end
@@ -1341,34 +1319,13 @@ object FormPrincipal: TFormPrincipal
                   TabOrder = 4
                 end
                 object Panel9: TPanel
-                  Left = 427
-                  Top = 376
-                  Width = 134
-                  Height = 36
+                  Left = 423
+                  Top = 372
+                  Width = 142
+                  Height = 44
                   BevelOuter = bvNone
-                  Color = 13264672
-                  ParentBackground = False
                   ShowCaption = False
                   TabOrder = 7
-                  object btnSalvarConfig: TSpeedButton
-                    Left = 0
-                    Top = 0
-                    Width = 134
-                    Height = 36
-                    Cursor = crHandPoint
-                    Align = alClient
-                    Caption = 'Salvar'
-                    Flat = True
-                    Font.Charset = DEFAULT_CHARSET
-                    Font.Color = clWhite
-                    Font.Height = -13
-                    Font.Name = 'Segoe UI'
-                    Font.Style = []
-                    ParentFont = False
-                    OnClick = btnSalvarConfigClick
-                    ExplicitTop = -4
-                    ExplicitWidth = 167
-                  end
                 end
               end
             end
@@ -1492,6 +1449,7 @@ object FormPrincipal: TFormPrincipal
             Width = 33
             Height = 20
             Cursor = crHandPoint
+            Anchors = [akTop, akRight]
             OnClick = SkSvg1Click
             Svg.OverrideColor = xFA171A21
             Svg.Source = 
@@ -1506,6 +1464,7 @@ object FormPrincipal: TFormPrincipal
             Top = 56
             Width = 635
             Height = 1
+            Anchors = [akLeft, akTop, akRight]
             Pen.Color = 15460841
           end
           object LabelFiltroModelo: TLabel
@@ -1514,6 +1473,7 @@ object FormPrincipal: TFormPrincipal
             Width = 46
             Height = 17
             Alignment = taRightJustify
+            Anchors = [akTop, akRight]
             AutoSize = False
             Caption = 'Modelo'
             Font.Charset = DEFAULT_CHARSET
@@ -1528,6 +1488,7 @@ object FormPrincipal: TFormPrincipal
             Top = 30
             Width = 593
             Height = 20
+            Anchors = [akLeft, akTop, akRight]
             BevelInner = bvNone
             BevelOuter = bvNone
             BorderStyle = bsNone
@@ -1550,6 +1511,7 @@ object FormPrincipal: TFormPrincipal
             Width = 167
             Height = 25
             Cursor = crHandPoint
+            Anchors = [akTop, akRight]
             Style = csDropDownList
             Font.Charset = DEFAULT_CHARSET
             Font.Color = 2169367
@@ -1567,36 +1529,14 @@ object FormPrincipal: TFormPrincipal
               'NFC-e 65')
           end
           object Panel7: TPanel
-            Left = 682
-            Top = 24
-            Width = 167
-            Height = 36
+            Left = 678
+            Top = 20
+            Width = 175
+            Height = 44
+            Anchors = [akTop, akRight]
             BevelOuter = bvNone
-            Color = 13264672
-            ParentBackground = False
             ShowCaption = False
             TabOrder = 1
-            object SpeedButton1: TSpeedButton
-              Left = 0
-              Top = 0
-              Width = 167
-              Height = 36
-              Cursor = crHandPoint
-              Align = alClient
-              Caption = 'Processar'
-              Flat = True
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clWhite
-              Font.Height = -13
-              Font.Name = 'Segoe UI'
-              Font.Style = []
-              ParentFont = False
-              OnClick = SpeedButton1Click
-              ExplicitLeft = 8
-              ExplicitTop = 2
-              ExplicitWidth = 97
-              ExplicitHeight = 30
-            end
           end
         end
       end
