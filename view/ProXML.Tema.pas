@@ -167,6 +167,29 @@ const
   DistanciaAvisoBorda     = 16;   //acima da borda inferior da grade
   DuracaoAvisoMs          = 2000; //some sozinho depois disto
 
+  //Resumo (tokens.md, seções 5.8 a 5.10; mockup resumo.html), etapa 4.6
+  EspacoBlocos            = 16;   //entre os blocos do Resumo (contadores, faixa, log)
+  PaddingFaixaCompacta    = 8;    //padding vertical da faixa de aviso entre os contadores e o log
+  PaddingProgressoVertical   = 32;  //quadro "Lendo os XMLs…"
+  PaddingProgressoHorizontal = 48;
+  EspacoProgresso         = 12;   //título -> barra -> contagem -> Cancelar
+  EspacoAcoesProgresso    = 8;    //espaço extra acima da linha do Cancelar
+  AlturaBarraProgresso    = 8;    //trilho CorBorda + preenchimento CorPrimaria (tokens.md 5.10)
+  AlturaLinhaProgresso    = 32;   //linha "{x} de {n} arquivos" + nome do arquivo
+  EspacoContadores        = 8;    //entre os 4 contadores
+  BordaSuperiorContador   = 4;    //borda superior na cor do status (tokens.md 5.9)
+  PaddingContadorVertical    = 8;
+  PaddingContadorHorizontal  = 12;
+  EspacoIconeContador     = 12;   //ícone -> número
+  PaddingTituloLogVertical   = 8; //linha "Detalhes da leitura · Processado em …"
+  PaddingTituloLogHorizontal = 12;
+  PaddingLog              = 4;    //respiro acima e abaixo da lista do log
+  AlturaLinhaLog          = 24;   //linha da lista do log (owner-draw, decisão da 4.6)
+  PaddingLinhaLog         = 12;   //padding horizontal da linha do log
+  EspacoIconeLog          = 8;    //ícone -> texto na linha do log
+  EspacoAtalhosVazio      = 4;    //botão -> legenda dos atalhos no estado vazio do Resumo
+  EspacoIconeFaixa        = 12;   //ícone -> texto nas faixas de status (mockup .banner)
+
   //Ícones
   TamanhoIconePequeno     = 16;   //botões, campos, cards
   TamanhoIconeDica        = 14;   //dicas visíveis e indicador do filtro

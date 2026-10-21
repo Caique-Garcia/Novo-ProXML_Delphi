@@ -41,7 +41,6 @@ uses
   Vcl.Grids,
   Vcl.DBGrids,
   FireDAC.Stan.StorageBin,
-  Vcl.Samples.Gauges,
   Vcl.Menus,
   DM,
   ProXML.FormRelatorios,
@@ -80,6 +79,24 @@ type
   //Telas com item no menu lateral. Carregando não tem item (o item da tela de origem continua
   //destacado) e uma tela nova sem item (ex.: Sobre, etapa 4.7) deixa o menu sem item ativo
   TTelaMenu = tlResumo..tlConfiguracoes;
+
+  //Motivos de bloqueio da tela (tokens.md 5.13; etapa 4.6): leitura dos XMLs, envio do e-mail e tela
+  //Carregando (DANFE e relatórios, H4). Com qualquer motivo ativo ficam desabilitados o menu, a barra de
+  //pasta (campo, Selecionar…, modelo e Processar), o "Sobre" do cabeçalho e os atalhos
+  TMotivoBloqueio = (blLeitura, blEnvio, blCarregando);
+  TBloqueios = set of TMotivoBloqueio;
+
+  //Resumo sem leitura em andamento: nenhuma pasta processada ainda ou o resultado da última leitura
+  TEstadoResumo = (esrVazio, esrConcluido);
+
+  //Trecho de texto das faixas de status do Resumo (tokens.md 5.8: primeira frase em Semibold)
+  TEstiloTrecho = (etrNormal, etrDestaque, etrLegenda);
+  TTrechoTexto = record
+    Texto     : string;
+    Estilo    : TEstiloTrecho;
+    NovaLinha : Boolean;   //o trecho começa numa linha nova
+  end;
+  TTrechosTexto = array of TTrechoTexto;
 
   //Pintura do título de uma coluna da grade de notas (feita pela tela, com as cores do tema)
   TDesenharTituloGrade = procedure(Sender: TObject; const Area: TRect; Coluna: TColumn) of object;
@@ -178,7 +195,66 @@ type
     PageControl1: TPageControl;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
-    Memo1: TMemo;
+    //Resumo (etapa 4.6; mockup resumo.html e glossário 5.1 a 5.36): faixa de status, estado vazio,
+    //leitura em andamento (progresso + Cancelar) e resultado (contadores, aviso e log com ícones)
+    PnlResumo: TPanel;
+    PnlFaixaResumo: TPanel;
+    PnlFaixaResumoBarra: TPanel;
+    SkSvgFaixaResumo: TSkSvg;
+    PbxFaixaResumo: TPaintBox;
+    PnlResumoVazio: TPanel;
+    PnlResumoVazioFundo: TPanel;
+    SkSvgResumoVazio: TSkSvg;
+    LabelResumoVazioTitulo: TLabel;
+    LabelResumoVazioTexto: TLabel;
+    PnlResumoVazioBotao: TPanel;
+    LabelResumoVazioAtalhos: TLabel;
+    PnlProgresso: TPanel;
+    PnlProgressoFundo: TPanel;
+    LabelProgressoTitulo: TLabel;
+    PnlProgressoTrilho: TPanel;
+    PnlProgressoBarra: TPanel;
+    LabelProgressoContagem: TLabel;
+    LabelProgressoArquivo: TLabel;
+    PnlCancelar: TPanel;
+    LabelProgressoDica: TLabel;
+    PnlConcluido: TPanel;
+    PnlContadores: TPanel;
+    PnlContadorAutorizadas: TPanel;
+    PnlContadorAutorizadasTopo: TPanel;
+    PnlContadorAutorizadasFundo: TPanel;
+    SkSvgContadorAutorizadas: TSkSvg;
+    LabelNumeroAutorizadas: TLabel;
+    LabelRotuloAutorizadas: TLabel;
+    PnlContadorIgnoradas: TPanel;
+    PnlContadorIgnoradasTopo: TPanel;
+    PnlContadorIgnoradasFundo: TPanel;
+    SkSvgContadorIgnoradas: TSkSvg;
+    LabelNumeroIgnoradas: TLabel;
+    LabelRotuloIgnoradas: TLabel;
+    PnlContadorComErro: TPanel;
+    PnlContadorComErroTopo: TPanel;
+    PnlContadorComErroFundo: TPanel;
+    SkSvgContadorComErro: TSkSvg;
+    LabelNumeroComErro: TLabel;
+    LabelRotuloComErro: TLabel;
+    PnlContadorTempo: TPanel;
+    PnlContadorTempoTopo: TPanel;
+    PnlContadorTempoFundo: TPanel;
+    SkSvgContadorTempo: TSkSvg;
+    LabelNumeroTempo: TLabel;
+    LabelRotuloTempo: TLabel;
+    PnlAvisoResumo: TPanel;
+    PnlAvisoResumoBarra: TPanel;
+    SkSvgAvisoResumo: TSkSvg;
+    PbxAvisoResumo: TPaintBox;
+    PnlLog: TPanel;
+    PnlLogFundo: TPanel;
+    PnlLogTitulo: TPanel;
+    LabelLogTitulo: TLabel;
+    LabelLogData: TLabel;
+    PnlLogDivisoria: TPanel;
+    ListBoxLog: TListBox;
     //Tela Notas (etapa 4.5; mockup notas.html e glossário 6.1 a 6.32): linha de título com contador,
     //ações e busca; grade com estado vazio e aviso flutuante "Chave copiada" por cima
     PnlNotas: TPanel;
@@ -212,7 +288,6 @@ type
     FDMemTable1vlicms: TFloatField;
     FDMemTable1bcicms: TFloatField;
     FDMemTable1vtotal: TFloatField;
-    Gauge1: TGauge;
     EditCaminho: TEdit;
     Panel7: TPanel;
     //Menu lateral (etapa 4.4): itens TProItemMenu criados em runtime no PnlMenuItens
@@ -319,6 +394,7 @@ type
     procedure mnuCopiarChaveClick(Sender: TObject);
     procedure GravarNotasDB(const Relatorio: TTipoRelatorio);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure GerarDANFe1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnSalvarConfigClick(Sender: TObject);
@@ -350,6 +426,24 @@ type
     FOrdemDecrescente   : Boolean;
     FAjustandoColunas   : Boolean;        //evita reentrada no ajuste das colunas da grade
     FAjustandoTituloNotas: Boolean;       //evita reentrada no layout da linha de título da tela Notas
+    //Etapa 4.6: leitura e envio em segundo plano, bloqueio e Resumo
+    FBloqueios          : TBloqueios;     //motivos de bloqueio ativos (vazio = tela livre)
+    FLeitura            : TThreadLeituraXML;  //thread da última leitura (liberada na próxima ou no fim do app)
+    FLendo              : Boolean;        //leitura em andamento (do Processar até o fim da thread)
+    FCancelamentoPedido : Boolean;        //Cancelar ou Esc durante a leitura (PD-3: descarta o que foi lido)
+    FFechando           : Boolean;        //a janela vai fechar (pergunta 5.28 respondida com Sim)
+    FProgressoLidos     : Integer;        //último progresso recebido da thread
+    FProgressoTotal     : Integer;
+    FProgressoArquivo   : string;
+    FEstadoResumo       : TEstadoResumo;  //o que o Resumo mostra quando não há leitura em andamento
+    FTrechosFaixaResumo : TTrechosTexto;  //texto da faixa de status (cancelado, nenhum XML)
+    FTrechosAvisoResumo : TTrechosTexto;  //texto da faixa de aviso (homologação e entrada)
+    FAjustandoResumo    : Boolean;        //evita reentrada no layout do Resumo
+    FVazioAposCancelar  : Boolean;        //estado vazio depois de cancelar no primeiro uso (texto 5.37, sem botão)
+    FIconesLog          : array[TTipoLinhaLog] of TBitmap;   //ícones do log já desenhados na escala atual
+    FEnvio              : TThread;        //thread do último envio de e-mail
+    FEnviando           : Boolean;        //envio do e-mail em andamento
+    FLarguraEnviar      : Integer;        //largura do encaixe do botão Enviar antes do "Enviando…"
     function  CopiarTextoTolerante(const Texto: string): Boolean;
     procedure AjustarAlturaLinhasGrade;
     procedure PrepararTelaNotas;
@@ -401,11 +495,8 @@ type
     procedure GerarDanfe(const CaminhoArq, Numero: String);
     function  ConfigurarLayoutDanfe(out Mensagem: string): Boolean;
     function  AguardarArquivoPDF(const Caminhos: array of string; out CaminhoGerado: string): Boolean;
-    procedure ComprimirArquivos();
     procedure LerConfigEmail();
-    procedure EnviaArquivo(const Email, Assunto: string);
     procedure ApplicationException(Sender: TObject; E: Exception);
-    function  CreateProcessSimple(cmd: string): boolean;
     //Plano 4, etapa 4.2: botões, atalhos, rolagem e preferências da janela
     procedure CriarBotoes;
     procedure CriarAtalhos;
@@ -474,6 +565,62 @@ type
     procedure PnlCarregandoFundoResize(Sender: TObject);
     procedure IniciarCarregando(const Titulo, Legenda: string);
     procedure EncerrarCarregando(const Destino: TTela);
+    //Plano 4, etapa 4.6: leitura e envio em segundo plano, bloqueio da tela e Resumo
+    procedure DefinirBloqueio(const Motivo: TMotivoBloqueio; const Ativo: Boolean);
+    procedure AplicarBloqueio;
+    procedure AcaoSelecionarPastaUpdate(Sender: TObject);
+    procedure AcaoBuscarUpdate(Sender: TObject);
+    procedure AcaoCancelarLeituraExecute(Sender: TObject);
+    procedure AcaoCancelarLeituraUpdate(Sender: TObject);
+    procedure PrepararResumo;
+    procedure PrepararContador(Borda, Topo, Fundo: TPanel; Icone: TSkSvg; Numero, Rotulo: TLabel;
+      const CorStatus, CorNumero: TColor; const IconeSvg, TextoRotulo: string);
+    procedure PrepararFaixa(Faixa, Barra: TPanel; Icone: TSkSvg; const CorDoFundo, CorDaBarra: TColor;
+      const IconeSvg: string);
+    procedure AjustarFaixa(Faixa, Barra: TPanel; Icone: TSkSvg; Texto: TPaintBox; const Trechos: TTrechosTexto;
+      const PaddingVertical: Integer);
+    procedure AjustarLayoutResumo;
+    procedure AjustarLayoutResumoVazio;
+    procedure AjustarLayoutProgresso;
+    procedure AjustarContadores;
+    procedure AjustarTituloLog;
+    procedure PnlResumoVazioFundoResize(Sender: TObject);
+    procedure PnlProgressoFundoResize(Sender: TObject);
+    procedure PnlContadoresResize(Sender: TObject);
+    procedure PnlFaixaResumoResize(Sender: TObject);
+    procedure PnlAvisoResumoResize(Sender: TObject);
+    procedure PbxFaixaResumoPaint(Sender: TObject);
+    procedure PbxAvisoResumoPaint(Sender: TObject);
+    procedure FonteDoTrecho(Fonte: TFont; const Estilo: TEstiloTrecho);
+    function  DesenharTrechos(Tela: TCanvas; const Trechos: TTrechosTexto; const Area: TRect;
+      const Desenhar: Boolean): Integer;
+    function  MedirTrechos(const Trechos: TTrechosTexto; const Largura: Integer): Integer;
+    procedure MostrarFaixaResumo(const Trechos: TTrechosTexto);
+    procedure OcultarFaixaResumo;
+    procedure MostrarEstadoResumo;
+    procedure IniciarLeitura(const Pasta: string);
+    procedure LiberarThreadLeitura;
+    procedure CancelarLeitura;
+    procedure CancelarLeituraClick(Sender: TObject);
+    procedure ResumoSelecionarPastaClick(Sender: TObject);
+    procedure LeituraProgresso(const Lidos, Total: Integer; const Arquivo: string);
+    procedure AtualizarProgresso;
+    procedure LeituraTerminada(Sender: TObject);
+    procedure EncerrarLeituraParaFechar;
+    procedure CarregarNotasLidas(Resultado: TResultadoLeitura);
+    procedure MostrarResultadoLeitura(Resultado: TResultadoLeitura);
+    procedure MostrarAvisoResumo(const Homologacao, Entrada: Integer);
+    procedure MostrarCancelamento(const Lidos, Total: Integer);
+    function  TextoArquivosLidos(const Quantidade: Integer): string;
+    function  EncurtarNoMeio(Fonte: TFont; const Texto: string; const Largura: Integer): string;
+    function  IconeLog(const Tipo: TTipoLinhaLog): TBitmap;
+    procedure LiberarIconesLog;
+    procedure ListBoxLogDrawItem(Control: TWinControl; Index: Integer; Rect: TRect; State: TOwnerDrawState);
+    procedure ListBoxLogMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure IniciarEnvio;
+    procedure LiberarThreadEnvio;
+    procedure EnvioTerminado(Sender: TObject);
+    procedure RestaurarBotaoEnviar;
 
   protected
     procedure CreateWnd; override;
@@ -498,6 +645,7 @@ type
     actBuscar          : TAction;   //Ctrl+F
     actCopiarChave     : TAction;   //Ctrl+C (com a grade em foco)
     actGerarDanfe      : TAction;   //Ctrl+D (na tela Notas)
+    actCancelarLeitura : TAction;   //Esc (durante a leitura dos XMLs)
     //Menu lateral (etapa 4.4): um item por tela com item no menu, criados em CriarMenu
     ItensMenu          : array[TTelaMenu] of TProItemMenu;
     //Botões "Gerar relatório" da tela Relatórios (criados em PrepararTelaRelatorios)
@@ -508,6 +656,14 @@ type
     btnGerarDanfe      : TProBotao;
     btnExportarCSV     : TProBotao;
     btnNotasVazio      : TProBotao;
+    //Resumo (etapa 4.6): Cancelar da leitura e "Selecionar pasta…" do estado vazio (PrepararResumo)
+    btnCancelar        : TProBotao;
+    btnResumoVazio     : TProBotao;
+    //Leitura dos XMLs em andamento (thread) e envio do e-mail em andamento
+    property  Lendo: Boolean read FLendo;
+    property  Enviando: Boolean read FEnviando;
+    //Algum motivo de bloqueio ativo (leitura, envio ou tela Carregando)
+    function  Bloqueado: Boolean;
     //Notas do filtro de modelo (sem a busca): cards, relatórios, Enviar (PD-1 e D5)
     function  NotasDoModelo: TFDMemTable;
     function  TemNotaNoModelo: Boolean;
@@ -566,6 +722,7 @@ uses
   System.Math,
   System.Types,
   Winapi.CommCtrl,
+  Winapi.ActiveX,
   ProXML.Icones;
 
 {$R *.dfm}
@@ -582,6 +739,178 @@ const
   //Seta no fim do título da coluna ordenada (tokens.md 5.7; glossário 6.10): triângulo para cima (U+25B2) crescente, para baixo (U+25BC) decrescente
   SETA_CRESCENTE   = #$25B2;
   SETA_DECRESCENTE = #$25BC;
+
+  //A tela Sobre chega na etapa 4.7: até lá o link do cabeçalho aparece, mas fica sem ação
+  SOBRE_DISPONIVEL = False;
+
+type
+  //Resultado do envio do e-mail, mostrado na thread principal
+  TResultadoEnvio = (reEnviado, reSemAnexo, reErro);
+
+  { Compactação (WinRAR) e envio do e-mail numa thread própria (Plano 4, etapa 4.6).
+    TThread própria em vez de ACBrMail.UseThread: a compactação também precisa sair da thread principal
+    e o resultado (enviado, sem anexo ou erro) volta num ponto só, o OnTerminate, já na thread principal.
+    Os dados da tela (XMLs do filtro, destino, assunto e mensagem) são copiados na thread principal antes
+    do Start: aqui nada toca em controles, no DataSet nem no banco. }
+  TThreadEnvioEmail = class(TThread)
+  private
+    FACBrNFe    : TACBrNFe;
+    FPastaApp   : string;
+    FPara       : string;
+    FAssunto    : string;
+    FMensagem   : TStringList;
+    FOrigens    : TStringList;   //XMLs das notas (caminho completo)
+    FNomes      : TStringList;   //nome de cada XML dentro do anexo (<chave>-nfe.xml)
+    FResultado  : TResultadoEnvio;
+    FErro       : string;
+    FClasseErro : string;
+    procedure Compactar;
+  protected
+    procedure Execute; override;
+  public
+    //Criada suspensa: quem cria acrescenta os XMLs, liga o OnTerminate e chama Start
+    constructor Create(ACBrNFe: TACBrNFe; const PastaApp, Para, Assunto: string; Mensagem: TStrings);
+    destructor Destroy; override;
+    procedure AdicionarXML(const Origem, Nome: string);
+    property Resultado: TResultadoEnvio read FResultado;
+    property Erro: string read FErro;
+    property ClasseErro: string read FClasseErro;
+  end;
+
+function ExecutarOculto(const Comando: string): Boolean;
+var
+  SUInfo: TStartupInfo;
+  ProcInfo: TProcessInformation;
+begin
+  //Executa o comando sem janela e espera terminar (WinRAR). Não acessa a tela
+  FillChar(SUInfo, SizeOf(SUInfo), #0);
+  SUInfo.cb      := SizeOf(SUInfo);
+  SUInfo.dwFlags := STARTF_USESHOWWINDOW;
+  SUInfo.wShowWindow := SW_HIDE;
+
+  Result := CreateProcess(nil,
+                          PChar(Comando),
+                          nil,
+                          nil,
+                          false,
+                          CREATE_NEW_CONSOLE or
+                          NORMAL_PRIORITY_CLASS,
+                          nil,
+                          nil,
+                          SUInfo,
+                          ProcInfo);
+
+  if (Result) then
+  begin
+    WaitForSingleObject(ProcInfo.hProcess, INFINITE);
+
+    CloseHandle(ProcInfo.hProcess);
+    CloseHandle(ProcInfo.hThread);
+  end;
+end;
+
+{ TThreadEnvioEmail }
+
+constructor TThreadEnvioEmail.Create(ACBrNFe: TACBrNFe; const PastaApp, Para, Assunto: string; Mensagem: TStrings);
+begin
+    inherited Create(True);
+    FreeOnTerminate := False;
+    FACBrNFe  := ACBrNFe;
+    FPastaApp := PastaApp;
+    FPara     := Para;
+    FAssunto  := Assunto;
+    FMensagem := TStringList.Create;
+    FMensagem.Assign(Mensagem);
+    FOrigens  := TStringList.Create;
+    FNomes    := TStringList.Create;
+    FResultado := reErro;
+end;
+
+destructor TThreadEnvioEmail.Destroy;
+begin
+    inherited;
+    FNomes.Free;
+    FOrigens.Free;
+    FMensagem.Free;
+end;
+
+procedure TThreadEnvioEmail.AdicionarXML(const Origem, Nome: string);
+begin
+    FOrigens.Add(Origem);
+    FNomes.Add(Nome);
+end;
+
+procedure TThreadEnvioEmail.Compactar;
+var
+    Pasta : string;
+    Anexo : string;
+    I     : Integer;
+begin
+    //Mesma compactação de antes da 4.6 (pasta NFCe\ProXML e WinRAR), agora fora da thread principal
+    Pasta := FPastaApp + 'NFCe\ProXML';
+    if TDirectory.Exists(Pasta) then
+        TDirectory.Delete(Pasta, True);   //apaga a pasta e todo o seu conteúdo
+
+    if not SysUtils.DirectoryExists(Pasta) then
+        SysUtils.ForceDirectories(FPastaApp + '\NFCe\ProXML');
+
+    for I := 0 to FOrigens.Count - 1 do
+        CopyFile(PChar(FOrigens[I]), PChar(Pasta + '\' + FNomes[I]), False);
+
+    Anexo := FPastaApp + 'NFCe\NFCe_ProXML.rar';
+    if FileExists(Anexo) then
+        SysUtils.DeleteFile(Anexo);
+
+    ExecutarOculto('cmd.exe /c' + FPastaApp + 'WinRAR.exe a -ep ' + Anexo + ' ' +
+                   FPastaApp + 'NFCe\ProXML\*-nfe.xml');
+end;
+
+procedure TThreadEnvioEmail.Execute;
+var
+    Anexos       : TStringList;
+    Anexo        : string;
+    ResultadoCOM : HResult;
+begin
+    NameThreadForDebugging('ProXML.EnvioEmail');
+
+    //Liberada sem ter sido iniciada (a VCL a inicia já terminada): não compacta nem envia
+    if Terminated then
+        Exit;
+
+    ResultadoCOM := CoInitialize(nil);
+    try
+        try
+            Compactar;
+
+            //WinRAR ausente ou com falha: sem anexo, como antes da 4.6
+            Anexo := FPastaApp + 'NFCe\NFCe_ProXML.rar';
+            if not FileExists(Anexo) then
+            begin
+                FResultado := reSemAnexo;
+                Exit;
+            end;
+
+            Anexos := TStringList.Create;
+            try
+                Anexos.Add(Anexo);
+                FACBrNFe.EnviarEmail(FPara, FAssunto, FMensagem, nil, Anexos, nil, '', nil);
+            finally
+                Anexos.Free;
+            end;
+            FResultado := reEnviado;
+        except
+            on E: Exception do
+            begin
+                FResultado  := reErro;
+                FErro       := E.Message;
+                FClasseErro := E.ClassName;
+            end;
+        end;
+    finally
+        if Succeeded(ResultadoCOM) then
+            CoUninitialize;
+    end;
+end;
 
 { TDBGrid (grade de notas, etapa 4.5) }
 
@@ -676,17 +1005,20 @@ end;
 
 procedure TFormPrincipal.btnEnviarEmailClick(Sender: TObject);
 begin
-    //Enviar Email com arquivos compactados.
+    //Enviar e-mail com os XMLs compactados. Etapa 4.6: a compactação e o envio rodam numa thread
+    //(TThreadEnvioEmail) e a tela continua respondendo, com o botão em "Enviando…".
     //Os XMLs são separados e compactados agora, com o filtro de modelo atual (a busca da tela
     //Notas não vale para o Enviar: decisão D5)
+    if FEnviando or Bloqueado then
+        Exit;
+
     if not TemNotaNoModelo then
     begin
         messagedlg('Sem arquivos para enviar!', mtInformation	, [mbOk], 0);
         Exit;
     end;
 
-    ComprimirArquivos();
-    EnviaArquivo(Trim(EditEmailEnviar.Text), 'Projeto Pro XML - XMLs de Nota Fiscal');
+    IniciarEnvio;
 end;
 
 procedure TFormPrincipal.AtualizarTotais;
@@ -794,38 +1126,6 @@ begin
         messagedlg('Configuração salva com sucesso !!', mtInformation	, [mbOk], 0);
     except
     end;
-end;
-
-function TFormPrincipal.CreateProcessSimple(cmd: string): boolean;
-var
-  SUInfo: TStartupInfo;
-  ProcInfo: TProcessInformation;
-begin
-  FillChar(SUInfo, SizeOf(SUInfo), #0);
-  SUInfo.cb      := SizeOf(SUInfo);
-  SUInfo.dwFlags := STARTF_USESHOWWINDOW;
-  SUInfo.wShowWindow := SW_HIDE;
-
-  Result := CreateProcess(nil,
-                          PChar(cmd),
-                          nil,
-                          nil,
-                          false,
-                          CREATE_NEW_CONSOLE or
-                          NORMAL_PRIORITY_CLASS,
-                          nil,
-                          nil,
-                          SUInfo,
-                          ProcInfo);
-
-  if (Result) then
-  begin
-    WaitForSingleObject(ProcInfo.hProcess, INFINITE);
-
-    CloseHandle(ProcInfo.hProcess);
-    CloseHandle(ProcInfo.hThread);
-  end;
-
 end;
 
 procedure TFormPrincipal.FinalizaRelatorio(const Relatorio: TTipoRelatorio);
@@ -939,6 +1239,8 @@ begin
    PrepararCards;
    //Etapa 4.5: tela Notas (linha de título, busca, ordenação, grade, estado vazio, aviso)
    PrepararTelaNotas;
+   //Etapa 4.6: Resumo (estado vazio, leitura em andamento, contadores, avisos e log)
+   PrepararResumo;
    FRolagemEnviar := CriarRolagem(Panel10);
    FRolagemConfig := CriarRolagem(PanelCorpoConfig);
 
@@ -969,60 +1271,19 @@ end;
 procedure TFormPrincipal.FormDestroy(Sender: TObject);
 begin
   //ConfigEmail.Free;
+  //Threads que ainda existam. Normalmente já terminaram: o FormCloseQuery espera a leitura e não deixa
+  //fechar durante o envio. O fim delas não mexe mais na tela
+  FFechando := True;
+  if FLeitura <> nil then
+    FLeitura.OnTerminate := nil;
+  if FEnvio <> nil then
+    FEnvio.OnTerminate := nil;
+  LiberarThreadLeitura;
+  LiberarThreadEnvio;
+  LiberarIconesLog;
   //Devolve o WindowProc original do PageControl1 (trocado em PrepararTelaRelatorios)
   if Assigned(FJanelaPaginas) then
     PageControl1.WindowProc := FJanelaPaginas;
-end;
-
-procedure TFormPrincipal.ComprimirArquivos();
-var
-  varPath: string;
-  varDestino: string;
-  Marcador: TBookmark;
-  Notas: TFDMemTable;
-begin
-    //Comprime os arquivos XML
-    varPath := ExtractFilePath(ParamStr(0));
-
-    if TDirectory.Exists(varPath + 'NFCe\ProXML') then
-    begin
-      // Deleta a pasta e todo o seu conteúdo
-      TDirectory.Delete(varPath + 'NFCe\ProXML', True);  // O segundo parâmetro True indica exclusão recursiva
-    end;
-
-    if not SysUtils.DirectoryExists(varPath + 'NFCe\ProXML') then SysUtils.ForceDirectories(varPath + '\NFCe\ProXML');
-
-    //Copia as notas do filtro de modelo (a busca da tela Notas não vale para o Enviar: D5), sem
-    //mexer na grade. A chave tem 44 dígitos (D4): o arquivo sai como <chave>-nfe.xml (H3)
-    Notas := NotasDoModelo;
-    Notas.DisableControls;
-    try
-        Marcador := Notas.GetBookmark;
-        try
-            Notas.First;
-            while not Notas.Eof do
-            begin
-                varDestino := varPath + 'NFCe\ProXML\'+Notas.FieldByName('chave').AsString+'-nfe.xml';
-
-                CopyFile(PChar(Notas.FieldByName('xml').AsString), PChar(varDestino), False);
-                Notas.Next;
-            end;
-        finally
-            if (Marcador <> nil) and Notas.BookmarkValid(Marcador) then
-                Notas.GotoBookmark(Marcador);
-            Notas.FreeBookmark(Marcador);
-        end;
-    finally
-        Notas.EnableControls;
-    end;
-
-    if FileExists(varPath + 'NFCe\NFCe_ProXML.rar') then
-        DeleteFile(varPath + 'NFCe\NFCe_ProXML.rar');
-
-    createProcessSimple('cmd.exe /c' + varPath + 'WinRAR.exe a -ep '
-                + varPath + 'NFCe\NFCe_ProXML.rar '
-                + varPath + 'NFCe\ProXML\*-nfe.xml' );
-
 end;
 
 procedure TFormPrincipal.ConfigACBR();
@@ -1422,34 +1683,10 @@ begin
     ACBrMail1.SetSSL      := ConfigEmail.SSL; // SSL - Conexao Segura
     ACBrMail1.SetTLS      := ConfigEmail.TSL; // Auto TLS
     ACBrMail1.ReadingConfirmation := False; // Pede confirmacao de leitura do email
-    ACBrMail1.UseThread := False;           // Aguarda Envio do Email(nao usa thread)
+    ACBrMail1.UseThread := False;           // O envio já roda numa thread própria (TThreadEnvioEmail, etapa 4.6)
     ACBrMail1.FromName  := 'Projeto Pro XML';
 
     MemoMensagem.Text := ConfigEmail.Mensagem;
-end;
-
-procedure TFormPrincipal.EnviaArquivo(const Email, Assunto: string);
-var
-    ListaArquivos : TStringList;
-    varPath: String;
-begin
-    //Envia arquivos
-    varPath := ExtractFilePath(ParamStr(0));
-    ListaArquivos := TStringList.Create;
-    try
-        if FileExists(varPath + 'NFCe\NFCe_ProXML.rar') then
-            ListaArquivos.Add(varPath + 'NFCe\NFCe_ProXML.rar');
-
-        if ListaArquivos.Count > 0 then
-        begin
-            ACBrNFe.EnviarEmail(Email, Assunto, MemoMensagem.Lines, nil, ListaArquivos, nil, '', nil);
-            messagedlg('Email enviado com sucesso!!', mtInformation	, [mbOk], 0);
-        end
-        else
-            messagedlg('Sem arquivos para enviar!', mtInformation	, [mbOk], 0);
-    finally
-        ListaArquivos.Free;
-    end;
 end;
 
 procedure TFormPrincipal.SelecionarPastaClick(Sender: TObject);
@@ -1460,6 +1697,10 @@ end;
 
 procedure TFormPrincipal.SelecionarPasta;
 begin
+  //Durante a leitura, o envio ou a tela Carregando a pasta não muda (tokens.md 5.13)
+  if Bloqueado then
+    Exit;
+
   //Selecionando a pasta de arquivos (cancelar não muda o campo)
   {$IFDEF MSWINDOWS}
     if FileOpenDialog1.Execute then
@@ -1480,47 +1721,21 @@ begin
 end;
 
 procedure TFormPrincipal.SpeedButton1Click(Sender: TObject);
-var
-  CalculadoraXML : TCalculadoraXML;
 begin
-  btnProcessar.Enabled := false;
-  //Processar mostra o Resumo (log da leitura), com o item do menu sincronizado
-  MostrarTela(tlResumo);
+  //Processar (etapa 4.6): a leitura roda numa thread (IniciarLeitura). O Resumo mostra o progresso
+  //com Cancelar e, no fim, o resultado; o Processar volta habilitado em qualquer caminho (LeituraTerminada)
+  if FLendo or Bloqueado then
+    Exit;
 
-  Memo1.Lines.Clear;
-  CalculadoraXML:=  TCalculadoraXML.Create;
-  try
-
-    //P3: "há pasta?" só olha se o campo está preenchido (a instrução fica no TextHint)
-    if TemPasta then
-    begin
-      //Nova pasta: o seletor de modelo volta para "Todos" (grade, cards e relatórios) e a busca da
-      //tela Notas é limpa (as notas novas aparecem todas)
-      SeletorModelo.ItemIndex := 0;
-      LimparBusca;
-      AplicarFiltroModelo;
-
-      CalculadoraXML.CaminhoDiretorio := Trim(EditCaminho.Text);
-      CalculadoraXML.ProcessarXMLs;
-      //Pasta nova: nenhuma nota escolhida, lista no começo
-      FNotaSelecionada := False;
-      if FDMemTable1.Active then
-        FDMemTable1.First;
-      AtualizarTelaNotas;
-      DBGrid1.Refresh;
-    end else
-    begin
-         //Só por segurança: sem pasta o botão fica desabilitado (glossário 2.13)
-         messagedlg('Selecione uma pasta com XMLs.', mtInformation	, [mbOk], 0);
-    end;
-
-  finally
-    CalculadoraXML.Free;
+  //P3: "há pasta?" só olha se o campo está preenchido (a instrução fica no TextHint)
+  if not TemPasta then
+  begin
+    //Só por segurança: sem pasta o botão fica desabilitado (glossário 2.13)
+    messagedlg('Selecione uma pasta com XMLs.', mtInformation	, [mbOk], 0);
+    Exit;
   end;
-  MostrarTela(tlResumo);
-  AtualizarEstadoProcessar;
-  Gauge1.Progress := 0;
-  Memo1.SetFocus;
+
+  IniciarLeitura(Trim(EditCaminho.Text));
 end;
 
 { Plano 4, etapa 4.2: botões TProBotao, atalhos de teclado, rolagem e preferências da janela }
@@ -1548,11 +1763,13 @@ procedure TFormPrincipal.CriarAtalhos;
 begin
     //Atalhos ligados às rotinas que já existem. As ações não têm texto: não aparecem na tela
     Acoes := TActionList.Create(Self);
-    actSelecionarPasta := NovaAcao(Vcl.Menus.ShortCut(Ord('O'), [ssCtrl]), AcaoSelecionarPastaExecute, nil);
+    actSelecionarPasta := NovaAcao(Vcl.Menus.ShortCut(Ord('O'), [ssCtrl]), AcaoSelecionarPastaExecute, AcaoSelecionarPastaUpdate);
     actProcessar       := NovaAcao(Vcl.Menus.ShortCut(VK_F5, []), AcaoProcessarExecute, AcaoProcessarUpdate);
-    actBuscar          := NovaAcao(Vcl.Menus.ShortCut(Ord('F'), [ssCtrl]), AcaoBuscarExecute, nil);
+    actBuscar          := NovaAcao(Vcl.Menus.ShortCut(Ord('F'), [ssCtrl]), AcaoBuscarExecute, AcaoBuscarUpdate);
     actCopiarChave     := NovaAcao(Vcl.Menus.ShortCut(Ord('C'), [ssCtrl]), AcaoCopiarChaveExecute, AcaoCopiarChaveUpdate);
     actGerarDanfe      := NovaAcao(Vcl.Menus.ShortCut(Ord('D'), [ssCtrl]), AcaoGerarDanfeExecute, AcaoGerarDanfeUpdate);
+    //Etapa 4.6: Esc cancela a leitura dos XMLs (só fica ativo durante a leitura)
+    actCancelarLeitura := NovaAcao(Vcl.Menus.ShortCut(VK_ESCAPE, []), AcaoCancelarLeituraExecute, AcaoCancelarLeituraUpdate);
 end;
 
 function TFormPrincipal.NotasDoModelo: TFDMemTable;
@@ -1631,7 +1848,7 @@ end;
 procedure TFormPrincipal.AcaoCopiarChaveUpdate(Sender: TObject);
 begin
     //Só com a grade em foco e uma nota escolhida: nos campos de texto o Ctrl+C continua copiando o texto
-    actCopiarChave.Enabled := (ActiveControl = DBGrid1) and NotaSelecionada;
+    actCopiarChave.Enabled := (ActiveControl = DBGrid1) and NotaSelecionada and (not Bloqueado);
 end;
 
 procedure TFormPrincipal.AcaoGerarDanfeExecute(Sender: TObject);
@@ -1643,7 +1860,7 @@ end;
 procedure TFormPrincipal.AcaoGerarDanfeUpdate(Sender: TObject);
 begin
     //Só na tela Notas, com uma nota escolhida e sem outro DANFE em andamento
-    actGerarDanfe.Enabled := (TelaAtual = tlNotas) and NotaSelecionada and (not FGerandoDanfe);
+    actGerarDanfe.Enabled := (TelaAtual = tlNotas) and NotaSelecionada and (not FGerandoDanfe) and (not Bloqueado);
 end;
 
 function TFormPrincipal.CriarRolagem(Painel: TPanel): TScrollBox;
@@ -1917,6 +2134,10 @@ begin
         AjustarIndicadorFiltro;
         AjustarLayoutRelatorios;
         AjustarLayoutCarregando;
+        //Etapa 4.6: Resumo (ícones do log refeitos no tamanho novo)
+        LiberarIconesLog;
+        ListBoxLog.ItemHeight := Escalar(AlturaLinhaLog);
+        AjustarLayoutResumo;
     end;
 end;
 
@@ -1942,8 +2163,9 @@ var
 begin
     //Itens soltos na janela: vale só o primeiro (pasta, ou a pasta do arquivo)
     try
-        //Durante a espera do PDF do DANFE a tela processa mensagens: não troca a pasta no meio
-        if FGerandoDanfe then
+        //Durante a leitura, o envio ou a tela Carregando (a espera do PDF do DANFE processa mensagens)
+        //a pasta não muda (tokens.md 5.13)
+        if FGerandoDanfe or Bloqueado then
             Exit;
 
         Quantidade := DragQueryFile(Message.Drop, $FFFFFFFF, nil, 0);
@@ -1990,7 +2212,13 @@ begin
     //Sem pasta, Processar fica desabilitado. A dica "Selecione uma pasta primeiro." fica no painel
     //de encaixe (Panel7): a VCL não mostra o hint de um controle desabilitado, mas mostra o do pai
     if btnProcessar <> nil then
-        btnProcessar.Enabled := TemPasta;
+        btnProcessar.Enabled := TemPasta and (FBloqueios = []);
+
+    //Etapa 4.6: bloqueado pela leitura, pelo envio ou pela tela Carregando, a dica de pasta não vale
+    if FBloqueios = [] then
+        Panel7.Hint := 'Selecione uma pasta primeiro.'
+    else
+        Panel7.Hint := '';
 end;
 
 procedure TFormPrincipal.EditCaminhoChange(Sender: TObject);
@@ -2071,7 +2299,25 @@ end;
 procedure TFormPrincipal.AtualizarBordaCampoPasta(const ComFoco: Boolean);
 begin
     //Campo da pasta (tokens.md 5.3; a rotina é a mesma do campo Buscar da tela Notas)
-    AtualizarBordaCampo(PnlCampoPasta, SkSvgPasta, EditCaminho, 0, ComFoco);
+    AtualizarBordaCampo(PnlCampoPasta, SkSvgPasta, EditCaminho, 0, ComFoco and PnlCampoPasta.Enabled);
+
+    //Bloqueado (leitura, envio ou tela Carregando; tokens.md 5.3 e 5.13): borda de 1 px CorBorda, fundo
+    //CorFundoDesabilitado, texto e ícone CorTextoDesabilitado
+    if PnlCampoPasta.Enabled then
+    begin
+        PnlCampoPastaFundo.Color := CorSuperficie;
+        EditCaminho.Color        := CorSuperficie;
+        EditCaminho.Font.Color   := CorTexto;
+        SkSvgPasta.Svg.OverrideColor := CorAlpha(CorTextoSecundario);
+    end
+    else
+    begin
+        PnlCampoPasta.Color      := CorBorda;
+        PnlCampoPastaFundo.Color := CorFundoDesabilitado;
+        EditCaminho.Color        := CorFundoDesabilitado;
+        EditCaminho.Font.Color   := CorTextoDesabilitado;
+        SkSvgPasta.Svg.OverrideColor := CorAlpha(CorTextoDesabilitado);
+    end;
 end;
 
 procedure TFormPrincipal.AtualizarBordaCampo(Borda: TPanel; Icone: TSkSvg; Edit: TEdit; const Margem: Integer;
@@ -2511,7 +2757,7 @@ procedure TFormPrincipal.HabilitarMenu(const Habilitar: Boolean);
 var
     Item: TTelaMenu;
 begin
-    //Tokens 5.13: durante a tela Carregando os itens do menu ficam desabilitados
+    //Tokens 5.13: itens do menu desabilitados durante a leitura, o envio e a tela Carregando (AplicarBloqueio)
     for Item := Low(TTelaMenu) to High(TTelaMenu) do
         if ItensMenu[Item] <> nil then
             ItensMenu[Item].Enabled := Habilitar;
@@ -2519,10 +2765,10 @@ end;
 
 function TFormPrincipal.TelaSemMoldura(const Tela: TTela): Boolean;
 begin
-    //Telas no visual novo, com os próprios quadros sobre CorFundo (mockups notas.html, relatorios.html
-    //e carregando.html): ocupam a área inteira do PageControl1, sem a moldura do controle.
+    //Telas no visual novo, com os próprios quadros sobre CorFundo (mockups resumo.html, notas.html,
+    //relatorios.html e carregando.html): ocupam a área inteira do PageControl1, sem a moldura do controle.
     //As outras telas mantêm a moldura até a etapa delas (4.7)
-    Result := Tela in [tlNotas, tlRelatorios, tlCarregando];
+    Result := Tela in [tlResumo, tlNotas, tlRelatorios, tlCarregando];
 end;
 
 procedure TFormPrincipal.JanelaPaginas(var Message: TMessage);
@@ -2752,8 +2998,8 @@ begin
     //Botões e dicas visíveis: sem notas carregadas, os dois desabilitados (8.8); com notas carregadas
     //mas nenhuma no filtro de modelo, os dois desabilitados (8.8a); com notas e nenhuma com
     //IBS/CBS no filtro, só o IBS/CBS (8.10)
-    btnGerarRelNotas.Enabled  := Total > 0;
-    btnGerarRelIBSCBS.Enabled := (Total > 0) and (ComIBSCBS > 0);
+    btnGerarRelNotas.Enabled  := (Total > 0) and (not Bloqueado);
+    btnGerarRelIBSCBS.Enabled := (Total > 0) and (ComIBSCBS > 0) and (not Bloqueado);
     if (Total = 0) and (Carregadas > 0) then
     begin
         MostrarDica(SkSvgDicaNotas,  LabelDicaNotas,  'Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima.');
@@ -2957,14 +3203,14 @@ end;
 
 procedure TFormPrincipal.IniciarCarregando(const Titulo, Legenda: string);
 begin
-    //Abre a tela Carregando. Enquanto ela estiver aberta só os itens do menu ficam bloqueados
-    //(decisão da 4.4; o bloqueio da barra de pasta, do Processar e do filtro, H4, fica para a 4.6).
-    //Quem abre a tela chama EncerrarCarregando num finally: o menu volta em qualquer caminho
+    //Abre a tela Carregando. Enquanto ela estiver aberta ficam bloqueados o menu, a barra de pasta
+    //(campo, Selecionar…, modelo e Processar), os relatórios e os atalhos (H4, etapa 4.6; tokens.md 5.13).
+    //Quem abre a tela chama EncerrarCarregando num finally: tudo volta em qualquer caminho
     FFocoAntesCarregando := ActiveControl;
     LabelCarregandoTitulo.Caption  := Titulo;
     LabelCarregandoLegenda.Caption := Legenda;
     FCarregando := True;
-    HabilitarMenu(False);
+    DefinirBloqueio(blCarregando, True);
     MostrarTela(tlCarregando);
     AjustarLayoutCarregando;
     if FFrameCarregando <> nil then
@@ -2989,7 +3235,7 @@ begin
             FFrameCarregando.SkAnimatedImage1.Animation.Stop;
         MostrarTela(Destino);
     finally
-        HabilitarMenu(True);
+        DefinirBloqueio(blCarregando, False);
     end;
 
     //O foco volta para onde estava (grade de notas, botão "Gerar relatório"), se ainda puder
@@ -3376,7 +3622,7 @@ begin
     //Copiar chave e Gerar DANFE só com uma nota escolhida; Exportar CSV só com linhas visíveis
     Selecionada := NotaSelecionada;
     btnCopiarChave.Enabled := Selecionada;
-    btnGerarDanfe.Enabled  := Selecionada and (not FGerandoDanfe);
+    btnGerarDanfe.Enabled  := Selecionada and (not FGerandoDanfe) and (not Bloqueado);
     btnExportarCSV.Enabled := Visiveis > 0;
     if Selecionada then
     begin
@@ -3704,7 +3950,7 @@ procedure TFormPrincipal.PopupMenuPopup(Sender: TObject);
 begin
     //Menu da grade: os itens seguem os botões da linha de título
     mnuCopiarChave.Enabled := NotaSelecionada;
-    GerarDANFe1.Enabled    := NotaSelecionada and (not FGerandoDanfe);
+    GerarDANFe1.Enabled    := NotaSelecionada and (not FGerandoDanfe) and (not Bloqueado);
 end;
 
 procedure TFormPrincipal.CopiarChaveClick(Sender: TObject);
@@ -3972,6 +4218,1374 @@ begin
         messagedlg('Arquivo CSV salvo:' + sLineBreak + Dialogo.FileName, mtInformation, [mbOk], 0);
     finally
         Dialogo.Free;
+    end;
+end;
+
+{ Plano 4, etapa 4.6: leitura e envio em segundo plano, bloqueio da tela e Resumo }
+
+procedure AdicionarTrecho(var Trechos: TTrechosTexto; const Texto: string; const Estilo: TEstiloTrecho;
+  const NovaLinha: Boolean = False);
+begin
+    //Acrescenta um trecho ao texto de uma faixa de status
+    SetLength(Trechos, Length(Trechos) + 1);
+    Trechos[High(Trechos)].Texto     := Texto;
+    Trechos[High(Trechos)].Estilo    := Estilo;
+    Trechos[High(Trechos)].NovaLinha := NovaLinha;
+end;
+
+function TFormPrincipal.Bloqueado: Boolean;
+begin
+    Result := FBloqueios <> [];
+end;
+
+procedure TFormPrincipal.DefinirBloqueio(const Motivo: TMotivoBloqueio; const Ativo: Boolean);
+begin
+    //Cada operação liga o próprio motivo ao começar e desliga num finally ao terminar: a tela só volta
+    //quando nenhum motivo está ativo
+    if Ativo then
+        Include(FBloqueios, Motivo)
+    else
+        Exclude(FBloqueios, Motivo);
+    AplicarBloqueio;
+end;
+
+procedure TFormPrincipal.AplicarBloqueio;
+var
+    Livre: Boolean;
+begin
+    //Tokens.md 5.13: menu, barra de pasta (campo, Selecionar…, modelo e Processar) e o "Sobre" do
+    //cabeçalho. Os atalhos (Ctrl+O, F5, Ctrl+F, Ctrl+C e Ctrl+D) conferem o bloqueio no OnUpdate das
+    //ações e o arrastar pasta, no WM_DROPFILES. Durante a leitura só o Cancelar continua ativo
+    Livre := FBloqueios = [];
+    HabilitarMenu(Livre);
+    PnlCampoPasta.Enabled := Livre;
+    AtualizarBordaCampoPasta(Livre and EditCaminho.Focused);
+    if btnSelecionar <> nil then
+        btnSelecionar.Enabled := Livre;
+    if SeletorModelo <> nil then
+        SeletorModelo.Enabled := Livre;
+    PnlSobre.Enabled := Livre and SOBRE_DISPONIVEL;
+    //"Sobre" bloqueado em CorTextoDesabilitado (decisão da 4.6); livre, volta para CorMarinhoTexto
+    if Livre then
+    begin
+        LabelSobre.Font.Color := CorMarinhoTexto;
+        SkSvgSobre.Svg.OverrideColor := CorAlpha(CorMarinhoTexto);
+    end
+    else
+    begin
+        LabelSobre.Font.Color := CorTextoDesabilitado;
+        SkSvgSobre.Svg.OverrideColor := CorAlpha(CorTextoDesabilitado);
+    end;
+    AtualizarEstadoProcessar;
+
+    //Botões que abrem trabalho nas telas Relatórios e Notas (H4)
+    AtualizarTelaRelatorios;
+    AtualizarTelaNotas;
+end;
+
+procedure TFormPrincipal.AcaoSelecionarPastaUpdate(Sender: TObject);
+begin
+    actSelecionarPasta.Enabled := not Bloqueado;
+end;
+
+procedure TFormPrincipal.AcaoBuscarUpdate(Sender: TObject);
+begin
+    //Ctrl+F troca de tela: bloqueado junto com o menu
+    actBuscar.Enabled := not Bloqueado;
+end;
+
+procedure TFormPrincipal.AcaoCancelarLeituraExecute(Sender: TObject);
+begin
+    //Esc durante a leitura: mesmo que clicar em Cancelar (glossário 5.8 e 5.9)
+    CancelarLeitura;
+end;
+
+procedure TFormPrincipal.AcaoCancelarLeituraUpdate(Sender: TObject);
+begin
+    actCancelarLeitura.Enabled := FLendo and (not FCancelamentoPedido);
+end;
+
+procedure TFormPrincipal.PrepararFaixa(Faixa, Barra: TPanel; Icone: TSkSvg; const CorDoFundo, CorDaBarra: TColor;
+  const IconeSvg: string);
+begin
+    //Faixa de status (tokens.md 5.8): fundo suave, barra de 4 px e ícone de 20 px na cor do tipo
+    Faixa.Color := CorDoFundo;
+    Barra.Color := CorDaBarra;
+    Barra.Width := Escalar(BarraFaixa);
+    Icone.Svg.Source        := IconeSvg;
+    Icone.Svg.OverrideColor := CorAlpha(CorDaBarra);
+    Icone.Width := Escalar(TamanhoIconeMenu);
+end;
+
+procedure TFormPrincipal.PrepararContador(Borda, Topo, Fundo: TPanel; Icone: TSkSvg; Numero, Rotulo: TLabel;
+  const CorStatus, CorNumero: TColor; const IconeSvg, TextoRotulo: string);
+begin
+    //Contador (tokens.md 5.9): borda de 1 px CorBorda com a borda superior de 4 px na cor do status,
+    //fundo CorSuperficie, ícone de 24 px e número 16 pt Semibold na cor do status, rótulo 9 pt
+    //CorTextoSecundario. As posições internas ficam em AjustarContadores
+    Borda.Color := CorBorda;
+    Borda.Padding.SetBounds(Escalar(BordaQuadro), 0, Escalar(BordaQuadro), Escalar(BordaQuadro));
+    Topo.Color  := CorStatus;
+    Topo.Height := Escalar(BordaSuperiorContador);
+    Fundo.Color := CorSuperficie;
+    Icone.Svg.Source        := IconeSvg;
+    Icone.Svg.OverrideColor := CorAlpha(CorNumero);
+    AplicarFonte(Numero.Font, FonteDestaque, TamanhoContador, CorNumero);
+    AplicarFonte(Rotulo.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    Numero.Caption := '0';
+    Rotulo.Caption := TextoRotulo;
+end;
+
+procedure TFormPrincipal.PrepararResumo;
+begin
+    //Resumo sem moldura, sobre CorFundo (mockup resumo.html): faixa de status, estado vazio, leitura
+    //em andamento e resultado da leitura. Os blocos ficam 16 px um do outro
+    PnlResumo.Color := CorFundo;
+
+    //Faixa de status no topo (tokens.md 5.8): processamento cancelado (5.10 e 5.11) e nenhum XML (2.15)
+    PrepararFaixa(PnlFaixaResumo, PnlFaixaResumoBarra, SkSvgFaixaResumo, CorAvisoSuave, CorAviso, IconeAviso);
+    PnlFaixaResumo.AlignWithMargins := True;
+    PnlFaixaResumo.Margins.SetBounds(0, 0, 0, Escalar(EspacoBlocos));
+    PnlFaixaResumo.OnResize := PnlFaixaResumoResize;
+    PbxFaixaResumo.OnPaint  := PbxFaixaResumoPaint;
+    PnlFaixaResumo.Visible  := False;
+
+    //Estado vazio (glossário 5.1 a 5.4): quadro com borda, ícone folder-input de 48 px, título 12 pt
+    //Semibold, texto 10 pt, "Selecionar pasta…" e a legenda dos atalhos
+    PnlResumoVazio.Color := CorBorda;
+    PnlResumoVazio.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
+    PnlResumoVazioFundo.Color    := CorSuperficie;
+    PnlResumoVazioFundo.OnResize := PnlResumoVazioFundoResize;
+    SkSvgResumoVazio.Svg.Source        := IconePastaEntrada;
+    SkSvgResumoVazio.Svg.OverrideColor := CorAlpha(CorTextoSecundario);
+    AplicarFonte(LabelResumoVazioTitulo.Font, FonteDestaque, TamanhoSubtitulo, CorTexto);
+    AplicarFonte(LabelResumoVazioTexto.Font, FonteTexto, TamanhoCorpo, CorTextoSecundario);
+    AplicarFonte(LabelResumoVazioAtalhos.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelResumoVazioTitulo.Caption  := 'Nenhuma pasta processada';
+    LabelResumoVazioTexto.Caption   := 'Selecione uma pasta com XMLs de NF-e (55) ou NFC-e (65), ou arraste a ' +
+                                       'pasta para esta janela, e clique em Processar.';
+    LabelResumoVazioAtalhos.Caption := 'Atalhos: Ctrl+O seleciona a pasta ' + #$00B7 + ' F5 processa';
+    PnlResumoVazioBotao.Color := CorSuperficie;
+    btnResumoVazio := TProBotao.CriarEm(PnlResumoVazioBotao, 'Selecionar pasta' + #$2026, ebSecundario,
+                                        ResumoSelecionarPastaClick);
+    btnResumoVazio.IconeSvg := IconePastaAberta;
+
+    //Leitura em andamento (glossário 5.5 a 5.9; tokens.md 5.10): título, barra própria (trilho CorBorda
+    //de 8 px + preenchimento CorPrimaria), "{x} de {n} arquivos" com o nome do arquivo atual em legenda
+    //(cortado no meio) e Cancelar com a legenda do Esc
+    PnlProgresso.Color := CorBorda;
+    PnlProgresso.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
+    PnlProgressoFundo.Color    := CorSuperficie;
+    PnlProgressoFundo.OnResize := PnlProgressoFundoResize;
+    AplicarFonte(LabelProgressoTitulo.Font, FonteDestaque, TamanhoSubtitulo, CorTexto);
+    LabelProgressoTitulo.Caption := 'Lendo os XMLs' + #$2026;
+    PnlProgressoTrilho.Color := CorBorda;
+    PnlProgressoBarra.Color  := CorPrimaria;
+    PnlProgressoBarra.Width  := 0;
+    AplicarFonte(LabelProgressoContagem.Font, FonteTexto, TamanhoCorpo, CorTexto);
+    AplicarFonte(LabelProgressoArquivo.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    AplicarFonte(LabelProgressoDica.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelProgressoContagem.Caption := '';
+    LabelProgressoArquivo.Caption  := '';
+    LabelProgressoDica.Caption     := 'Esc também cancela. As notas só aparecem quando a leitura termina.';
+    PnlCancelar.Color := CorSuperficie;
+    btnCancelar := TProBotao.CriarEm(PnlCancelar, 'Cancelar', ebSecundario, CancelarLeituraClick);
+    btnCancelar.IconeSvg := IconeLimpar;
+    btnCancelar.Hint     := 'Parar a leitura (Esc)';
+    btnCancelar.ShowHint := True;
+
+    //Resultado (glossário 5.12 a 5.15; tokens.md 5.9): 4 contadores, faixa de aviso e log
+    PnlConcluido.Color  := CorFundo;
+    PnlContadores.Color := CorFundo;
+    PnlContadores.AlignWithMargins := True;
+    PnlContadores.Margins.SetBounds(0, 0, 0, Escalar(EspacoBlocos));
+    PnlContadores.OnResize := PnlContadoresResize;
+    PrepararContador(PnlContadorAutorizadas, PnlContadorAutorizadasTopo, PnlContadorAutorizadasFundo,
+                     SkSvgContadorAutorizadas, LabelNumeroAutorizadas, LabelRotuloAutorizadas,
+                     CorSucesso, CorSucesso, IconeSucesso, 'Autorizadas');
+    PrepararContador(PnlContadorIgnoradas, PnlContadorIgnoradasTopo, PnlContadorIgnoradasFundo,
+                     SkSvgContadorIgnoradas, LabelNumeroIgnoradas, LabelRotuloIgnoradas,
+                     CorAviso, CorAviso, IconeAviso, 'Ignoradas');
+    PrepararContador(PnlContadorComErro, PnlContadorComErroTopo, PnlContadorComErroFundo,
+                     SkSvgContadorComErro, LabelNumeroComErro, LabelRotuloComErro,
+                     CorErro, CorErro, IconeErro, 'Com erro');
+    //O 4º contador é neutro (borda superior CorBorda): tempo total em 12 pt, como no mockup, e a
+    //quantidade de arquivos lidos no rótulo (5.13)
+    PrepararContador(PnlContadorTempo, PnlContadorTempoTopo, PnlContadorTempoFundo,
+                     SkSvgContadorTempo, LabelNumeroTempo, LabelRotuloTempo,
+                     CorBorda, CorTexto, IconeTempo, '');
+    AplicarFonte(LabelNumeroTempo.Font, FonteDestaque, TamanhoSubtitulo, CorTexto);
+
+    //Faixa de aviso de homologação e entrada (glossário 5.29 a 5.31), com padding vertical de 8 px (mockup)
+    PrepararFaixa(PnlAvisoResumo, PnlAvisoResumoBarra, SkSvgAvisoResumo, CorAvisoSuave, CorAviso, IconeAviso);
+    PnlAvisoResumo.AlignWithMargins := True;
+    PnlAvisoResumo.Margins.SetBounds(0, 0, 0, Escalar(EspacoBlocos));
+    PnlAvisoResumo.OnResize := PnlAvisoResumoResize;
+    PbxAvisoResumo.OnPaint  := PbxAvisoResumoPaint;
+    PnlAvisoResumo.Visible  := False;
+
+    //Log "Detalhes da leitura" (5.14 e 5.15): quadro com borda, linha de título com divisória e a lista
+    //owner-draw com um ícone colorido por tipo de linha (decisão da 4.6), linhas de 24 px
+    PnlLog.Color := CorBorda;
+    PnlLog.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
+    PnlLogFundo.Color := CorSuperficie;
+    PnlLogFundo.Padding.SetBounds(0, 0, 0, Escalar(PaddingLog));
+    PnlLogTitulo.Color    := CorSuperficie;
+    PnlLogDivisoria.Color := CorBorda;
+    AplicarFonte(LabelLogTitulo.Font, FonteDestaque, TamanhoRotuloCampo, CorTexto);
+    AplicarFonte(LabelLogData.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelLogTitulo.Caption := 'Detalhes da leitura';
+    LabelLogData.Caption   := '';
+    ListBoxLog.Color := CorSuperficie;
+    AplicarFonte(ListBoxLog.Font, FonteTexto, TamanhoLegenda, CorTexto);
+    ListBoxLog.Style       := lbOwnerDrawFixed;
+    ListBoxLog.ItemHeight  := Escalar(AlturaLinhaLog);
+    ListBoxLog.OnDrawItem  := ListBoxLogDrawItem;
+    ListBoxLog.OnMouseMove := ListBoxLogMouseMove;
+    ListBoxLog.ShowHint    := True;
+    ListBoxLog.AlignWithMargins := True;
+
+    //Primeiro uso: nenhuma pasta processada
+    FEstadoResumo := esrVazio;
+    MostrarEstadoResumo;
+end;
+
+procedure TFormPrincipal.AjustarLayoutResumo;
+begin
+    //Medidas calculadas do Resumo (criação, troca de escala e mudança de estado)
+    if (btnCancelar = nil) or FAjustandoResumo then
+        Exit;
+
+    FAjustandoResumo := True;
+    try
+        PnlFaixaResumo.Margins.Bottom := Escalar(EspacoBlocos);
+        PnlContadores.Margins.Bottom  := Escalar(EspacoBlocos);
+        PnlAvisoResumo.Margins.Bottom := Escalar(EspacoBlocos);
+        PnlLogDivisoria.Height := Escalar(DivisoriaGrade);
+        ListBoxLog.Margins.SetBounds(0, Escalar(PaddingLog), 0, 0);
+        if PnlFaixaResumo.Visible then
+            AjustarFaixa(PnlFaixaResumo, PnlFaixaResumoBarra, SkSvgFaixaResumo, PbxFaixaResumo,
+                         FTrechosFaixaResumo, PaddingFaixaVertical);
+        if PnlAvisoResumo.Visible then
+            AjustarFaixa(PnlAvisoResumo, PnlAvisoResumoBarra, SkSvgAvisoResumo, PbxAvisoResumo,
+                         FTrechosAvisoResumo, PaddingFaixaCompacta);
+        AjustarLayoutResumoVazio;
+        AjustarLayoutProgresso;
+        AjustarContadores;
+        AjustarTituloLog;
+    finally
+        FAjustandoResumo := False;
+    end;
+end;
+
+procedure TFormPrincipal.AjustarLayoutResumoVazio;
+var
+    Largura       : Integer;
+    LarguraTitulo : Integer;
+    AlturaTitulo  : Integer;
+    AlturaTexto   : Integer;
+    AlturaAtalhos : Integer;
+    AlturaEncaixe : Integer;
+    Icone         : Integer;
+    Espaco        : Integer;
+    Margem        : Integer;
+    Total         : Integer;
+    Topo          : Integer;
+    W             : Integer;
+begin
+    //Estado vazio (mockup .vazio): ícone 48 px, título, texto (até 420 px), botão e legenda dos atalhos,
+    //8 px entre eles (o botão tem mais 8 px em cima e a legenda mais 4 px), tudo no centro do quadro
+    if btnResumoVazio = nil then
+        Exit;
+
+    //Cancelado no primeiro uso (mockup, estado cancelado): 5.37 no lugar da 5.2, sem botão e sem atalhos
+    if FVazioAposCancelar then
+        LabelResumoVazioTexto.Caption := 'As notas e os totais continuam como estavam antes de Processar.'
+    else
+        LabelResumoVazioTexto.Caption := 'Selecione uma pasta com XMLs de NF-e (55) ou NFC-e (65), ou arraste a ' +
+                                         'pasta para esta janela, e clique em Processar.';
+    PnlResumoVazioBotao.Visible     := not FVazioAposCancelar;
+    LabelResumoVazioAtalhos.Visible := not FVazioAposCancelar;
+
+    W       := PnlResumoVazioFundo.ClientWidth;
+    Espaco  := Escalar(EspacoVazio);
+    Icone   := Escalar(TamanhoIconeVazio);
+    Margem  := btnResumoVazio.MargemFoco;
+    LarguraTitulo := Max(1, W - 2 * Escalar(Espaco2));
+    Largura := Min(Escalar(LarguraTextoVazio), LarguraTitulo);
+    AlturaTitulo  := AlturaTextoQuebrado(LabelResumoVazioTitulo, LarguraTitulo);
+    AlturaTexto   := AlturaTextoQuebrado(LabelResumoVazioTexto, Largura);
+    AlturaAtalhos := AlturaTextoQuebrado(LabelResumoVazioAtalhos, LarguraTitulo);
+    AlturaEncaixe := Escalar(AlturaBotao) + 2 * Margem;
+    PnlResumoVazioBotao.Width  := btnResumoVazio.LarguraIdeal;
+    PnlResumoVazioBotao.Height := AlturaEncaixe;
+
+    Total := Icone + Espaco + AlturaTitulo + Espaco + AlturaTexto;
+    if not FVazioAposCancelar then
+        Inc(Total, 2 * Espaco + Escalar(AlturaBotao) + Espaco + Escalar(EspacoAtalhosVazio) + AlturaAtalhos);
+    Topo  := Max(0, (PnlResumoVazioFundo.ClientHeight - Total) div 2);
+    SkSvgResumoVazio.SetBounds((W - Icone) div 2, Topo, Icone, Icone);
+    Inc(Topo, Icone + Espaco);
+    LabelResumoVazioTitulo.SetBounds((W - LarguraTitulo) div 2, Topo, LarguraTitulo, AlturaTitulo);
+    Inc(Topo, AlturaTitulo + Espaco);
+    LabelResumoVazioTexto.SetBounds((W - Largura) div 2, Topo, Largura, AlturaTexto);
+    Inc(Topo, AlturaTexto + 2 * Espaco);
+    PnlResumoVazioBotao.SetBounds((W - PnlResumoVazioBotao.Width) div 2, Topo - Margem, PnlResumoVazioBotao.Width,
+                                  AlturaEncaixe);
+    Inc(Topo, Escalar(AlturaBotao) + Espaco + Escalar(EspacoAtalhosVazio));
+    LabelResumoVazioAtalhos.SetBounds((W - LarguraTitulo) div 2, Topo, LarguraTitulo, AlturaAtalhos);
+end;
+
+procedure TFormPrincipal.AjustarLayoutProgresso;
+var
+    Medida          : TBitmap;
+    Esquerda        : Integer;
+    Largura         : Integer;
+    Espaco          : Integer;
+    Margem          : Integer;
+    AlturaTitulo    : Integer;
+    AlturaLinha     : Integer;
+    AlturaEncaixe   : Integer;
+    LarguraContagem : Integer;
+    Total           : Integer;
+    Topo            : Integer;
+    Preenchido      : Integer;
+begin
+    //Quadro "Lendo os XMLs…" (mockup, estado processando): padding 32 x 48, blocos com 12 px entre eles
+    //(a linha do Cancelar tem mais 8 px em cima), tudo centralizado na altura do quadro
+    if btnCancelar = nil then
+        Exit;
+
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelProgressoTitulo.Font);
+        AlturaTitulo := Medida.Canvas.TextHeight('Ag');
+        Medida.Canvas.Font.Assign(LabelProgressoContagem.Font);
+        LarguraContagem := Medida.Canvas.TextWidth(LabelProgressoContagem.Caption);
+    finally
+        Medida.Free;
+    end;
+
+    Esquerda      := Escalar(PaddingProgressoHorizontal);
+    Largura       := Max(1, PnlProgressoFundo.ClientWidth - 2 * Esquerda);
+    Espaco        := Escalar(EspacoProgresso);
+    Margem        := btnCancelar.MargemFoco;
+    AlturaLinha   := Escalar(AlturaLinhaProgresso);
+    AlturaEncaixe := Escalar(AlturaBotao) + 2 * Margem;
+
+    Total := AlturaTitulo + Espaco + Escalar(AlturaBarraProgresso) + Espaco + AlturaLinha + Espaco +
+             Escalar(EspacoAcoesProgresso) + Escalar(AlturaBotao);
+    Topo  := Max(Escalar(PaddingProgressoVertical), (PnlProgressoFundo.ClientHeight - Total) div 2);
+
+    LabelProgressoTitulo.SetBounds(Esquerda, Topo, Largura, AlturaTitulo);
+    Inc(Topo, AlturaTitulo + Espaco);
+
+    //Barra (tokens.md 5.10): o preenchimento acompanha "{x} de {n}" (N = quantidade de arquivos)
+    PnlProgressoTrilho.SetBounds(Esquerda, Topo, Largura, Escalar(AlturaBarraProgresso));
+    Preenchido := 0;
+    if FProgressoTotal > 0 then
+        Preenchido := MulDiv(Largura, Min(FProgressoLidos, FProgressoTotal), FProgressoTotal);
+    PnlProgressoBarra.Width := Preenchido;
+    Inc(Topo, Escalar(AlturaBarraProgresso) + Espaco);
+
+    //"{x} de {n} arquivos" à esquerda e o nome do arquivo em legenda à direita, cortado no meio com "…"
+    LabelProgressoContagem.SetBounds(Esquerda, Topo, Min(Largura, LarguraContagem), AlturaLinha);
+    LabelProgressoArquivo.SetBounds(Esquerda + LarguraContagem + Escalar(Espaco2), Topo,
+                                    Max(0, Largura - LarguraContagem - Escalar(Espaco2)), AlturaLinha);
+    LabelProgressoArquivo.Caption := EncurtarNoMeio(LabelProgressoArquivo.Font, FProgressoArquivo,
+                                                    LabelProgressoArquivo.Width);
+    LabelProgressoArquivo.Hint     := FProgressoArquivo;
+    LabelProgressoArquivo.ShowHint := FProgressoArquivo <> '';
+    Inc(Topo, AlturaLinha + Espaco + Escalar(EspacoAcoesProgresso));
+
+    //Cancelar (a face alinhada ao texto; o painel de encaixe tem a margem do contorno de foco) e a legenda
+    PnlCancelar.SetBounds(Esquerda - Margem, Topo - Margem, btnCancelar.LarguraIdeal, AlturaEncaixe);
+    LabelProgressoDica.SetBounds(PnlCancelar.Left + PnlCancelar.Width - Margem + Escalar(Espaco1), Topo,
+                                 Max(0, Esquerda + Largura - (PnlCancelar.Left + PnlCancelar.Width - Margem +
+                                        Escalar(Espaco1))), Escalar(AlturaBotao));
+end;
+
+procedure TFormPrincipal.AjustarContadores;
+var
+    Contadores : array[0..3] of TPanel;
+    Fundos     : array[0..3] of TPanel;
+    Icones     : array[0..3] of TSkSvg;
+    Numeros    : array[0..3] of TLabel;
+    Rotulos    : array[0..3] of TLabel;
+    Medida     : TBitmap;
+    AlturaNum  : array[0..3] of Integer;
+    AlturaRot  : Integer;
+    Conteudo   : Integer;
+    Altura     : Integer;
+    AlturaFundo: Integer;
+    Espaco     : Integer;
+    Largura    : Integer;
+    Sobra      : Integer;
+    Icone      : Integer;
+    Esquerda   : Integer;
+    Topo       : Integer;
+    X, W, I    : Integer;
+begin
+    //4 contadores com a mesma largura e 8 px entre eles (mockup .cnts); padding 8 x 12, ícone de 24 px
+    //e, 12 px à direita, o número com o rótulo embaixo, centralizados na altura
+    if btnCancelar = nil then
+        Exit;
+
+    Contadores[0] := PnlContadorAutorizadas; Fundos[0] := PnlContadorAutorizadasFundo;
+    Contadores[1] := PnlContadorIgnoradas;   Fundos[1] := PnlContadorIgnoradasFundo;
+    Contadores[2] := PnlContadorComErro;     Fundos[2] := PnlContadorComErroFundo;
+    Contadores[3] := PnlContadorTempo;       Fundos[3] := PnlContadorTempoFundo;
+    Icones[0] := SkSvgContadorAutorizadas; Numeros[0] := LabelNumeroAutorizadas; Rotulos[0] := LabelRotuloAutorizadas;
+    Icones[1] := SkSvgContadorIgnoradas;   Numeros[1] := LabelNumeroIgnoradas;   Rotulos[1] := LabelRotuloIgnoradas;
+    Icones[2] := SkSvgContadorComErro;     Numeros[2] := LabelNumeroComErro;     Rotulos[2] := LabelRotuloComErro;
+    Icones[3] := SkSvgContadorTempo;       Numeros[3] := LabelNumeroTempo;       Rotulos[3] := LabelRotuloTempo;
+
+    Medida := TBitmap.Create;
+    try
+        for I := Low(Numeros) to High(Numeros) do
+        begin
+            Medida.Canvas.Font.Assign(Numeros[I].Font);
+            AlturaNum[I] := Medida.Canvas.TextHeight('0');
+        end;
+        Medida.Canvas.Font.Assign(LabelRotuloAutorizadas.Font);
+        AlturaRot := Medida.Canvas.TextHeight('Ag');
+    finally
+        Medida.Free;
+    end;
+
+    Icone    := Escalar(TamanhoIconeContador);
+    Conteudo := Max(Icone, AlturaNum[0] + AlturaRot);
+    AlturaFundo := Conteudo + 2 * Escalar(PaddingContadorVertical);
+    Altura   := Escalar(BordaSuperiorContador) + AlturaFundo + Escalar(BordaQuadro);
+    if PnlContadores.Height <> Altura then
+        PnlContadores.Height := Altura;
+
+    Espaco  := Escalar(EspacoContadores);
+    Largura := (PnlContadores.ClientWidth - 3 * Espaco) div 4;
+    Sobra   := PnlContadores.ClientWidth - 3 * Espaco - 4 * Largura;
+    X := 0;
+    for I := Low(Contadores) to High(Contadores) do
+    begin
+        W := Largura;
+        if I < Sobra then
+            Inc(W);
+        Contadores[I].SetBounds(X, 0, W, Altura);
+        Contadores[I].Padding.SetBounds(Escalar(BordaQuadro), 0, Escalar(BordaQuadro), Escalar(BordaQuadro));
+        Inc(X, W + Espaco);
+
+        Esquerda := Escalar(PaddingContadorHorizontal);
+        Icones[I].SetBounds(Esquerda, (AlturaFundo - Icone) div 2, Icone, Icone);
+        Inc(Esquerda, Icone + Escalar(EspacoIconeContador));
+        Topo := (AlturaFundo - (AlturaNum[I] + AlturaRot)) div 2;
+        Numeros[I].SetBounds(Esquerda, Topo, Max(0, W - 2 * Escalar(BordaQuadro) - Esquerda -
+                             Escalar(PaddingContadorHorizontal)), AlturaNum[I]);
+        Rotulos[I].SetBounds(Esquerda, Topo + AlturaNum[I], Numeros[I].Width, AlturaRot);
+    end;
+end;
+
+procedure TFormPrincipal.AjustarTituloLog;
+var
+    Medida : TBitmap;
+    Altura : Integer;
+begin
+    //Linha de título do log (mockup): padding 8 x 12, "Detalhes da leitura" à esquerda e "Processado em…"
+    //à direita, divisória de 1 px CorBorda embaixo
+    if btnCancelar = nil then
+        Exit;
+
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelLogTitulo.Font);
+        Altura := Medida.Canvas.TextHeight('Ag');
+    finally
+        Medida.Free;
+    end;
+    PnlLogTitulo.Height := Altura + 2 * Escalar(PaddingTituloLogVertical);
+    LabelLogTitulo.Margins.SetBounds(Escalar(PaddingTituloLogHorizontal), 0, 0, 0);
+    LabelLogData.Margins.SetBounds(0, 0, Escalar(PaddingTituloLogHorizontal), 0);
+end;
+
+procedure TFormPrincipal.AjustarFaixa(Faixa, Barra: TPanel; Icone: TSkSvg; Texto: TPaintBox;
+  const Trechos: TTrechosTexto; const PaddingVertical: Integer);
+var
+    Padding : Integer;
+    Tamanho : Integer;
+    Largura : Integer;
+    Altura  : Integer;
+begin
+    //Barra de 4 px, ícone 16 px depois dela, texto 12 px depois do ícone e 16 px antes da borda direita.
+    //A altura acompanha o texto quebrado na largura da faixa, com o padding vertical em cima e embaixo
+    Padding := Escalar(PaddingVertical);
+    Tamanho := Escalar(TamanhoIconeMenu);
+    Barra.Width := Escalar(BarraFaixa);
+    Icone.Width := Tamanho;
+    Texto.Margins.SetBounds(Escalar(EspacoIconeFaixa), Padding, Escalar(PaddingFaixaHorizontal), Padding);
+    Largura := Faixa.ClientWidth - Barra.Width - Escalar(PaddingFaixaHorizontal) - Tamanho -
+               Texto.Margins.Left - Texto.Margins.Right;
+    Altura  := Max(Tamanho, MedirTrechos(Trechos, Largura));
+    Icone.Margins.SetBounds(Escalar(PaddingFaixaHorizontal), Padding, 0, Altura - Tamanho + Padding);
+    if Faixa.Height <> Altura + 2 * Padding then
+        Faixa.Height := Altura + 2 * Padding;
+    Texto.Invalidate;
+end;
+
+procedure TFormPrincipal.PnlResumoVazioFundoResize(Sender: TObject);
+begin
+    AjustarLayoutResumoVazio;
+end;
+
+procedure TFormPrincipal.PnlProgressoFundoResize(Sender: TObject);
+begin
+    AjustarLayoutProgresso;
+end;
+
+procedure TFormPrincipal.PnlContadoresResize(Sender: TObject);
+begin
+    AjustarContadores;
+end;
+
+procedure TFormPrincipal.PnlFaixaResumoResize(Sender: TObject);
+begin
+    if PnlFaixaResumo.Visible then
+        AjustarFaixa(PnlFaixaResumo, PnlFaixaResumoBarra, SkSvgFaixaResumo, PbxFaixaResumo, FTrechosFaixaResumo,
+                     PaddingFaixaVertical);
+end;
+
+procedure TFormPrincipal.PnlAvisoResumoResize(Sender: TObject);
+begin
+    if PnlAvisoResumo.Visible then
+        AjustarFaixa(PnlAvisoResumo, PnlAvisoResumoBarra, SkSvgAvisoResumo, PbxAvisoResumo, FTrechosAvisoResumo,
+                     PaddingFaixaCompacta);
+end;
+
+procedure TFormPrincipal.FonteDoTrecho(Fonte: TFont; const Estilo: TEstiloTrecho);
+begin
+    //Faixa de status (tokens.md 5.8): texto 10 pt CorTexto, primeira frase em Semibold; a legenda da
+    //segunda linha (ex.: 5.11) em 9 pt CorTextoSecundario
+    case Estilo of
+        etrDestaque:
+        begin
+            AplicarFonte(Fonte, FonteDestaque, TamanhoCorpo, CorTexto);
+            FonteNaEscala(Fonte, TamanhoCorpo);
+        end;
+        etrLegenda:
+        begin
+            AplicarFonte(Fonte, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+            FonteNaEscala(Fonte, TamanhoLegenda);
+        end;
+    else
+        AplicarFonte(Fonte, FonteTexto, TamanhoCorpo, CorTexto);
+        FonteNaEscala(Fonte, TamanhoCorpo);
+    end;
+end;
+
+function TFormPrincipal.DesenharTrechos(Tela: TCanvas; const Trechos: TTrechosTexto; const Area: TRect;
+  const Desenhar: Boolean): Integer;
+var
+    X, Y           : Integer;
+    AlturaLinha    : Integer;
+    LarguraEspaco  : Integer;
+    Largura        : Integer;
+    Inicio, P, I   : Integer;
+    EspacoPendente : Boolean;
+    Texto          : string;
+    Palavra        : string;
+begin
+    //Texto com trechos em estilos diferentes, quebrado por palavras na largura da área (a VCL não tem
+    //rótulo com Semibold só na primeira frase). Desenhar = False só mede: devolve a altura usada
+    X := Area.Left;
+    Y := Area.Top;
+    AlturaLinha    := 0;
+    EspacoPendente := False;
+    Tela.Brush.Style := bsClear;
+    for I := 0 to High(Trechos) do
+    begin
+        FonteDoTrecho(Tela.Font, Trechos[I].Estilo);
+        if Trechos[I].NovaLinha and ((X > Area.Left) or (AlturaLinha > 0)) then
+        begin
+            Inc(Y, AlturaLinha);
+            X := Area.Left;
+            AlturaLinha    := 0;
+            EspacoPendente := False;
+        end;
+        LarguraEspaco := Tela.TextWidth(' ');
+
+        Texto := Trechos[I].Texto;
+        P := 1;
+        while P <= Length(Texto) do
+        begin
+            if Texto[P] = ' ' then
+            begin
+                EspacoPendente := True;
+                Inc(P);
+                Continue;
+            end;
+
+            Inicio := P;
+            while (P <= Length(Texto)) and (Texto[P] <> ' ') do
+                Inc(P);
+            Palavra := Copy(Texto, Inicio, P - Inicio);
+            Largura := Tela.TextWidth(Palavra);
+
+            //Palavra que não cabe vai para a linha de baixo (palavras coladas a outro trecho seguem juntas)
+            if EspacoPendente and (X > Area.Left) then
+            begin
+                if X + LarguraEspaco + Largura > Area.Right then
+                begin
+                    Inc(Y, AlturaLinha);
+                    X := Area.Left;
+                    AlturaLinha := 0;
+                end
+                else
+                    Inc(X, LarguraEspaco);
+            end;
+            EspacoPendente := False;
+
+            AlturaLinha := Max(AlturaLinha, Tela.TextHeight('Ag'));
+            if Desenhar then
+                Tela.TextOut(X, Y, Palavra);
+            Inc(X, Largura);
+        end;
+    end;
+    Tela.Brush.Style := bsSolid;
+    Result := Y + AlturaLinha - Area.Top;
+end;
+
+function TFormPrincipal.MedirTrechos(const Trechos: TTrechosTexto; const Largura: Integer): Integer;
+var
+    Medida: TBitmap;
+begin
+    Medida := TBitmap.Create;
+    try
+        Result := DesenharTrechos(Medida.Canvas, Trechos, Rect(0, 0, Max(1, Largura), 0), False);
+    finally
+        Medida.Free;
+    end;
+end;
+
+procedure TFormPrincipal.PbxFaixaResumoPaint(Sender: TObject);
+begin
+    DesenharTrechos(PbxFaixaResumo.Canvas, FTrechosFaixaResumo, PbxFaixaResumo.ClientRect, True);
+end;
+
+procedure TFormPrincipal.PbxAvisoResumoPaint(Sender: TObject);
+begin
+    DesenharTrechos(PbxAvisoResumo.Canvas, FTrechosAvisoResumo, PbxAvisoResumo.ClientRect, True);
+end;
+
+procedure TFormPrincipal.MostrarFaixaResumo(const Trechos: TTrechosTexto);
+begin
+    //Faixa de aviso no topo do Resumo, logo abaixo do aviso de pasta não encontrada (2.14), se houver
+    FTrechosFaixaResumo := Trechos;
+    PnlFaixaResumo.Top := PnlAvisoPasta.Top + PnlAvisoPasta.Height + 1;
+    PnlFaixaResumo.Visible := True;
+    AjustarFaixa(PnlFaixaResumo, PnlFaixaResumoBarra, SkSvgFaixaResumo, PbxFaixaResumo, FTrechosFaixaResumo,
+                 PaddingFaixaVertical);
+    PbxFaixaResumo.Invalidate;
+end;
+
+procedure TFormPrincipal.OcultarFaixaResumo;
+begin
+    PnlFaixaResumo.Visible := False;
+    FTrechosFaixaResumo := nil;
+end;
+
+procedure TFormPrincipal.MostrarEstadoResumo;
+begin
+    //Um só bloco por vez: leitura em andamento, resultado da última leitura ou estado vazio
+    PnlProgresso.Visible   := FLendo;
+    PnlConcluido.Visible   := (not FLendo) and (FEstadoResumo = esrConcluido);
+    PnlResumoVazio.Visible := (not FLendo) and (FEstadoResumo = esrVazio);
+    AjustarLayoutResumo;
+end;
+
+procedure TFormPrincipal.MostrarAvisoResumo(const Homologacao, Entrada: Integer);
+var
+    Trechos     : TTrechosTexto;
+    NotasHomolog: string;
+begin
+    //Faixa de aviso entre os contadores e o log (glossário 5.29 a 5.31, aprovados em 20/10/2026)
+    Trechos := nil;
+    if Homologacao = 1 then
+        NotasHomolog := '1 nota de homologação'
+    else
+        NotasHomolog := IntToStr(Homologacao) + ' notas de homologação';
+
+    if (Homologacao > 0) and (Entrada > 0) then
+    begin
+        //5.31
+        AdicionarTrecho(Trechos, 'Os totais incluem ' + NotasHomolog, etrDestaque);
+        AdicionarTrecho(Trechos, ' (ambiente de testes, sem valor fiscal) ', etrNormal);
+        AdicionarTrecho(Trechos, 'e ' + IntToStr(Entrada) + ' NF-e de entrada.', etrDestaque);
+        AdicionarTrecho(Trechos, ' Confira se a pasta é a certa.', etrNormal);
+    end
+    else if Homologacao > 0 then
+    begin
+        //5.29
+        AdicionarTrecho(Trechos, 'Os totais incluem ' + NotasHomolog, etrDestaque);
+        AdicionarTrecho(Trechos, ' (ambiente de testes, sem valor fiscal). Confira se a pasta é a certa.', etrNormal);
+    end
+    else if Entrada > 0 then
+    begin
+        //5.30 (singular: "somada às de saída")
+        AdicionarTrecho(Trechos, 'Os totais incluem ' + IntToStr(Entrada) + ' NF-e de entrada', etrDestaque);
+        if Entrada = 1 then
+            AdicionarTrecho(Trechos, ', somada às de saída. Confira se a pasta é a certa.', etrNormal)
+        else
+            AdicionarTrecho(Trechos, ', somadas às de saída. Confira se a pasta é a certa.', etrNormal);
+    end;
+
+    FTrechosAvisoResumo := Trechos;
+    PnlAvisoResumo.Visible := Length(Trechos) > 0;
+    if PnlAvisoResumo.Visible then
+    begin
+        //Entre os contadores e o log
+        PnlAvisoResumo.Top := PnlContadores.Top + PnlContadores.Height + 1;
+        AjustarFaixa(PnlAvisoResumo, PnlAvisoResumoBarra, SkSvgAvisoResumo, PbxAvisoResumo, FTrechosAvisoResumo,
+                     PaddingFaixaCompacta);
+        PbxAvisoResumo.Invalidate;
+    end;
+end;
+
+procedure TFormPrincipal.MostrarCancelamento(const Lidos, Total: Integer);
+var
+    Trechos: TTrechosTexto;
+begin
+    //Glossário 5.10 e 5.11 (PD-3): nada mudou na grade, nos cards, em Relatórios nem em Enviar.
+    //Sem pasta processada antes, o estado vazio abaixo da faixa mostra a 5.37, sem botão
+    if FEstadoResumo = esrVazio then
+        FVazioAposCancelar := True;
+    Trechos := nil;
+    AdicionarTrecho(Trechos, 'Processamento cancelado.', etrDestaque);
+    AdicionarTrecho(Trechos, ' Nenhuma nota foi alterada.', etrNormal);
+    AdicionarTrecho(Trechos, IntToStr(Lidos) + ' de ' + IntToStr(Total) + ' arquivos tinham sido lidos. ' +
+                             'Clique em Processar para começar de novo.', etrLegenda, True);
+    MostrarFaixaResumo(Trechos);
+end;
+
+function TFormPrincipal.TextoArquivosLidos(const Quantidade: Integer): string;
+begin
+    //Rótulo do 4º contador (glossário 5.13), com singular e plural
+    if Quantidade = 1 then
+        Result := '1 arquivo lido'
+    else
+        Result := IntToStr(Quantidade) + ' arquivos lidos';
+end;
+
+function TFormPrincipal.EncurtarNoMeio(Fonte: TFont; const Texto: string; const Largura: Integer): string;
+var
+    Medida    : TBitmap;
+    Esquerda  : Integer;
+    Direita   : Integer;
+    Tentativa : string;
+begin
+    //Nome longo: tira caracteres do meio e põe "…" no lugar, mantendo o começo e o fim (extensão)
+    Result := Texto;
+    if (Texto = '') or (Largura <= 0) then
+        Exit;
+
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(Fonte);
+        if Medida.Canvas.TextWidth(Texto) <= Largura then
+            Exit;
+
+        Esquerda := Length(Texto) div 2;
+        Direita  := Length(Texto) - Esquerda;
+        while (Esquerda > 0) or (Direita > 0) do
+        begin
+            if Esquerda >= Direita then
+                Dec(Esquerda)
+            else
+                Dec(Direita);
+            Tentativa := Copy(Texto, 1, Esquerda) + #$2026 + Copy(Texto, Length(Texto) - Direita + 1, Direita);
+            if Medida.Canvas.TextWidth(Tentativa) <= Largura then
+                Exit(Tentativa);
+        end;
+        Result := #$2026;
+    finally
+        Medida.Free;
+    end;
+end;
+
+function TFormPrincipal.IconeLog(const Tipo: TTipoLinhaLog): TBitmap;
+var
+    Pincel  : TSkSvgBrush;
+    Tamanho : Integer;
+    Cor     : TColor;
+    Svg     : string;
+begin
+    //Ícone de 16 px de cada tipo de linha do log, desenhado uma vez na escala atual (Skia) e reaproveitado
+    //em todas as linhas: sucesso circle-check CorSucesso, aviso triangle-alert CorAviso, erro circle-x CorErro
+    if FIconesLog[Tipo] = nil then
+    begin
+        case Tipo of
+            llSucesso:
+            begin
+                Svg := IconeSucesso;
+                Cor := CorSucesso;
+            end;
+            llAviso:
+            begin
+                Svg := IconeAviso;
+                Cor := CorAviso;
+            end;
+        else
+            Svg := IconeErro;
+            Cor := CorErro;
+        end;
+
+        Tamanho := Escalar(TamanhoIconePequeno);
+        Pincel  := TSkSvgBrush.Create;
+        try
+            Pincel.Source        := Svg;
+            Pincel.OverrideColor := CorAlpha(Cor);
+            FIconesLog[Tipo] := TBitmap.Create;
+            FIconesLog[Tipo].SetSize(Tamanho, Tamanho);
+            FIconesLog[Tipo].SkiaDraw(
+                procedure (const ACanvas: ISkCanvas)
+                begin
+                    Pincel.Render(ACanvas, RectF(0, 0, Tamanho, Tamanho), 1);
+                end);
+        finally
+            Pincel.Free;
+        end;
+    end;
+    Result := FIconesLog[Tipo];
+end;
+
+procedure TFormPrincipal.LiberarIconesLog;
+var
+    Tipo: TTipoLinhaLog;
+begin
+    //Troca de escala (os ícones são refeitos no tamanho novo) e fim do app
+    for Tipo := Low(TTipoLinhaLog) to High(TTipoLinhaLog) do
+        FreeAndNil(FIconesLog[Tipo]);
+end;
+
+procedure TFormPrincipal.ListBoxLogDrawItem(Control: TWinControl; Index: Integer; Rect: TRect;
+  State: TOwnerDrawState);
+var
+    Tela    : TCanvas;
+    Tipo    : TTipoLinhaLog;
+    Icone   : TBitmap;
+    Area    : TRect;
+    Texto   : string;
+    Padding : Integer;
+begin
+    //Linha do log (mockup .log): padding 3 x 12, ícone de 16 px colorido pelo tipo, 8 px, texto 9 pt
+    //CorTexto numa linha só (a linha inteira aparece na dica). Linha escolhida pelo teclado em CorPrimariaSuave
+    Tela := ListBoxLog.Canvas;
+    Tela.Brush.Style := bsSolid;
+    if (odSelected in State) and ListBoxLog.Focused then
+        Tela.Brush.Color := CorPrimariaSuave
+    else
+        Tela.Brush.Color := CorSuperficie;
+    Tela.FillRect(Rect);
+    if (Index < 0) or (Index >= ListBoxLog.Items.Count) then
+        Exit;
+
+    Tipo    := TTipoLinhaLog(NativeInt(ListBoxLog.Items.Objects[Index]));
+    Padding := Escalar(PaddingLinhaLog);
+    Icone   := IconeLog(Tipo);
+    Tela.Draw(Rect.Left + Padding, Rect.Top + (Rect.Height - Icone.Height) div 2, Icone);
+
+    Texto := ListBoxLog.Items[Index];
+    Area  := System.Types.Rect(Rect.Left + Padding + Icone.Width + Escalar(EspacoIconeLog), Rect.Top,
+                          Rect.Right - Padding, Rect.Bottom);
+    Tela.Font.Assign(ListBoxLog.Font);
+    Tela.Font.Color  := CorTexto;
+    Tela.Brush.Style := bsClear;
+    DrawText(Tela.Handle, PChar(Texto), Length(Texto), Area,
+             DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX or DT_END_ELLIPSIS or DT_LEFT);
+    Tela.Brush.Style := bsSolid;
+end;
+
+procedure TFormPrincipal.ListBoxLogMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+var
+    Indice : Integer;
+    Texto  : string;
+begin
+    //Dica com a linha inteira do log sob o mouse (a lista corta a linha longa com "…")
+    Indice := ListBoxLog.ItemAtPos(Point(X, Y), True);
+    Texto  := '';
+    if Indice >= 0 then
+        Texto := ListBoxLog.Items[Indice];
+    if ListBoxLog.Hint <> Texto then
+    begin
+        ListBoxLog.Hint := Texto;
+        Application.CancelHint;
+    end;
+end;
+
+procedure TFormPrincipal.ResumoSelecionarPastaClick(Sender: TObject);
+begin
+    //"Selecionar pasta…" do estado vazio do Resumo (5.3): mesmo seletor do Ctrl+O
+    SelecionarPasta;
+end;
+
+procedure TFormPrincipal.IniciarLeitura(const Pasta: string);
+begin
+    //Processar (P1): a leitura roda numa thread e a tela continua respondendo. O Resumo mostra o
+    //progresso; grade, cards, Relatórios e Enviar ficam como estavam até a leitura terminar (PD-3)
+    LiberarThreadLeitura;
+    FCancelamentoPedido := False;
+    FVazioAposCancelar  := False;
+    FProgressoLidos     := 0;
+    FProgressoTotal     := 0;
+    FProgressoArquivo   := '';
+    LabelProgressoContagem.Caption := '';
+
+    MostrarTela(tlResumo);
+    OcultarFaixaResumo;
+    FLendo := True;
+    MostrarEstadoResumo;
+    if btnCancelar.CanFocus then
+        btnCancelar.SetFocus;
+    DefinirBloqueio(blLeitura, True);
+    try
+        FLeitura := TThreadLeituraXML.Create(Pasta, LeituraProgresso);
+        FLeitura.OnTerminate := LeituraTerminada;
+        FLeitura.Start;
+    except
+        //A thread não pôde ser criada: a tela volta como estava, inclusive o Processar
+        FreeAndNil(FLeitura);
+        FLendo := False;
+        MostrarEstadoResumo;
+        DefinirBloqueio(blLeitura, False);
+        raise;
+    end;
+end;
+
+procedure TFormPrincipal.LiberarThreadLeitura;
+begin
+    //A thread da leitura anterior já terminou (o fim dela devolveu a tela); falta liberar o objeto.
+    //No fim do app ela é cancelada antes (Terminate) e esperada aqui
+    if FLeitura <> nil then
+    begin
+        FLeitura.Terminate;
+        FLeitura.WaitFor;
+        FreeAndNil(FLeitura);
+    end;
+end;
+
+procedure TFormPrincipal.CancelarLeitura;
+begin
+    //Cancelamento cooperativo: a thread para antes do próximo arquivo (Terminated) e o fim dela mostra
+    //a faixa 5.10/5.11. Tudo o que foi lido é descartado (PD-3)
+    if (not FLendo) or (FLeitura = nil) then
+        Exit;
+
+    FCancelamentoPedido := True;
+    FLeitura.Terminate;
+end;
+
+procedure TFormPrincipal.CancelarLeituraClick(Sender: TObject);
+begin
+    CancelarLeitura;
+end;
+
+procedure TFormPrincipal.LeituraProgresso(const Lidos, Total: Integer; const Arquivo: string);
+begin
+    //Aviso da thread de leitura, já na thread principal (TThread.Queue; no máximo um a cada 50 ms)
+    if (not FLendo) or FFechando then
+        Exit;
+
+    FProgressoLidos   := Lidos;
+    FProgressoTotal   := Total;
+    FProgressoArquivo := Arquivo;
+    AtualizarProgresso;
+end;
+
+procedure TFormPrincipal.AtualizarProgresso;
+begin
+    //Glossário 5.6: "{x} de {n} arquivos" (vazio até a thread contar os arquivos da pasta)
+    if FProgressoTotal > 0 then
+        LabelProgressoContagem.Caption := IntToStr(FProgressoLidos) + ' de ' + IntToStr(FProgressoTotal) + ' arquivos'
+    else
+        LabelProgressoContagem.Caption := '';
+    AjustarLayoutProgresso;
+end;
+
+procedure TFormPrincipal.LeituraTerminada(Sender: TObject);
+var
+    Resultado  : TResultadoLeitura;
+    Erro       : string;
+    ClasseErro : string;
+    Concluida  : Boolean;
+    Trechos    : TTrechosTexto;
+begin
+    //OnTerminate da thread de leitura: roda na thread principal. Nenhuma exceção pode sair daqui (o
+    //Synchronize a levaria de volta para a thread): o erro é mostrado aqui mesmo
+    try
+        Resultado  := nil;
+        Erro       := '';
+        ClasseErro := '';
+        Concluida  := False;
+        try
+            try
+                if FLeitura <> nil then
+                begin
+                    Resultado  := FLeitura.ExtrairResultado;
+                    Erro       := FLeitura.Erro;
+                    ClasseErro := FLeitura.ClasseErro;
+                end;
+
+                //A janela vai fechar (pergunta 5.28 respondida com Sim): nada muda na tela
+                if FFechando or (Resultado = nil) then
+                    Exit;
+
+                //Erro fora da leitura de um arquivo (ex.: pasta apagada): tudo fica como estava
+                if Erro = '' then
+                begin
+                    if FCancelamentoPedido or Resultado.Cancelado then
+                        //PD-3: as notas lidas são descartadas; grade, cards, Relatórios e Enviar ficam como estavam
+                        MostrarCancelamento(Resultado.ArquivosLidos, Resultado.TotalArquivos)
+                    else if Resultado.TotalArquivos = 0 then
+                    begin
+                        //Pasta sem XML: como antes da 4.6, a grade fica vazia (cards e relatórios refletem só
+                        //a pasta atual) e o Resumo mostra a faixa 2.15 sobre o estado vazio
+                        CarregarNotasLidas(Resultado);
+                        FEstadoResumo := esrVazio;
+                        Trechos := nil;
+                        AdicionarTrecho(Trechos, 'Nenhum XML encontrado na pasta selecionada.', etrDestaque);
+                        MostrarFaixaResumo(Trechos);
+                    end
+                    else
+                    begin
+                        //Leitura concluída: as notas novas vão para a grade e o Resumo mostra o resultado
+                        CarregarNotasLidas(Resultado);
+                        MostrarResultadoLeitura(Resultado);
+                        Concluida := True;
+                    end;
+                end;
+            finally
+                Resultado.Free;
+            end;
+        finally
+            //Em qualquer caminho (inclusive erro) a leitura acaba e a tela volta: menu, barra de pasta,
+            //atalhos e o Processar (antes ele ficava travado depois de um erro)
+            FLendo := False;
+            if not FFechando then
+                MostrarEstadoResumo;
+            DefinirBloqueio(blLeitura, False);
+        end;
+
+        if FFechando then
+            Exit;
+
+        if Erro <> '' then
+        begin
+            try
+                DMConfig.CreateLog(ClasseErro, 'Processar: ' + Erro);
+            except
+                on ELog: Exception do
+                    OutputDebugString(PChar('ProXML: ' + ELog.Message));
+            end;
+            messagedlg(Erro, mtError, [mbOk], 0);
+        end
+        else if Concluida and ListBoxLog.CanFocus then
+            //O app continua no Resumo, com o foco no log
+            ListBoxLog.SetFocus
+        else if btnProcessar.CanFocus then
+            btnProcessar.SetFocus;
+    except
+        on E: Exception do
+            Application.ShowException(E);
+    end;
+end;
+
+procedure TFormPrincipal.EncerrarLeituraParaFechar;
+begin
+    //"Sim" na pergunta 5.28: cancela e espera a thread terminar. O WaitFor da thread principal executa
+    //os avisos que ainda estão na fila e o OnTerminate, que não mexem mais na tela
+    FFechando := True;
+    FCancelamentoPedido := True;
+    if FLeitura <> nil then
+    begin
+        FLeitura.Terminate;
+        FLeitura.WaitFor;
+    end;
+end;
+
+procedure TFormPrincipal.CarregarNotasLidas(Resultado: TResultadoLeitura);
+var
+    I    : Integer;
+    Nota : TNotaLida;
+begin
+    //Leitura concluída: as notas lidas substituem as anteriores na grade, na thread principal. Pasta
+    //nova: o seletor de modelo volta para "Todos" e a busca da tela Notas é limpa (as notas novas
+    //aparecem todas)
+    SeletorModelo.ItemIndex := 0;
+    LimparBusca;
+
+    FDMemTable1.DisableControls;
+    try
+        //Limpa a grade: cards e relatórios refletem só a pasta atual
+        if FDMemTable1.Active then
+            FDMemTable1.EmptyDataSet
+        else
+            FDMemTable1.CreateDataSet;
+
+        for I := 0 to Resultado.Notas.Count - 1 do
+        begin
+            Nota := Resultado.Notas[I];
+            FDMemTable1.Append;
+            try
+                FDMemTable1.FieldByName('numero').AsInteger := Nota.Numero;
+                FDMemTable1.FieldByName('modelo').AsInteger := Nota.Modelo;
+
+                //Chave de 44 dígitos do Id da nota (D4), não o nome do arquivo
+                FDMemTable1.FieldByName('chave').AsString := Nota.Dados.Chave;
+
+                FDMemTable1.FieldByName('data').AsString := FormatarDataNota(Nota.Dados.DataEmissao);
+                //Data como aaaammdd: a grade ordena a coluna Data pela data real (etapa 4.5)
+                FDMemTable1.FieldByName('data_ordem').AsInteger := DataParaOrdem(Nota.Dados.DataEmissao);
+
+                //Na tela os valores aparecem com FormatarMoeda (pt-BR explícito, OnGetText dos campos)
+                FDMemTable1.FieldByName('vlicms').AsFloat := Nota.Dados.vICMS;
+                FDMemTable1.FieldByName('bcicms').AsFloat := Nota.Dados.vBC;
+                FDMemTable1.FieldByName('vtotal').AsFloat := Nota.Dados.vNF;
+
+                FDMemTable1.FieldByName('xml').AsString := Nota.Caminho;
+
+                //IBS/CBS (zerados quando a nota não tem o grupo IBSCBSTot)
+                FDMemTable1.FieldByName('tem_ibscbs').AsBoolean := Nota.Dados.TemIBSCBS;
+                FDMemTable1.FieldByName('vbcibscbs').AsFloat   := Nota.Dados.vBCIBSCBS;
+                FDMemTable1.FieldByName('vibsuf').AsFloat      := Nota.Dados.vIBSUF;
+                FDMemTable1.FieldByName('vibsmun').AsFloat     := Nota.Dados.vIBSMun;
+                FDMemTable1.FieldByName('vibs').AsFloat        := Nota.Dados.vIBS;
+                FDMemTable1.FieldByName('vcbs').AsFloat        := Nota.Dados.vCBS;
+
+                FDMemTable1.Post;
+            except
+                on E: Exception do
+                begin
+                    //Não deixa a linha em edição: a nota sai das autorizadas e o arquivo vira "não foi
+                    //possível ler" (5.20), como acontecia antes da 4.6
+                    FDMemTable1.Cancel;
+                    Dec(Resultado.Autorizadas);
+                    Inc(Resultado.ComErro);
+                    if Nota.Dados.Homologacao then
+                        Dec(Resultado.Homologacao);
+                    if Nota.Dados.Entrada then
+                        Dec(Resultado.Entrada);
+                    Resultado.AdicionarLog(llErro, ExtractFileName(Nota.Caminho) +
+                                                   ': não foi possível ler o arquivo (' + MotivoDoErro(E) + ').');
+                end;
+            end;
+        end;
+    finally
+        FDMemTable1.EnableControls;
+    end;
+
+    //Filtro "Todos" na grade, nos cards e nos relatórios: os cards passam a somar as notas novas
+    AplicarFiltroModelo;
+
+    //Pasta nova: nenhuma nota escolhida, lista no começo
+    FNotaSelecionada := False;
+    if FDMemTable1.Active then
+        FDMemTable1.First;
+    AtualizarTelaNotas;
+    DBGrid1.Refresh;
+end;
+
+procedure TFormPrincipal.MostrarResultadoLeitura(Resultado: TResultadoLeitura);
+var
+    I     : Integer;
+    Linha : TLinhaLog;
+begin
+    //Contadores (glossário 5.12 e 5.13): autorizadas, ignoradas, com erro e "{t} s · {n} arquivos lidos"
+    LabelNumeroAutorizadas.Caption := IntToStr(Resultado.Autorizadas);
+    LabelNumeroIgnoradas.Caption   := IntToStr(Resultado.Ignoradas);
+    LabelNumeroComErro.Caption     := IntToStr(Resultado.ComErro);
+    LabelNumeroTempo.Caption       := FormatFloat('0.0', Resultado.DuracaoMs / 1000, FormatoPtBR) + ' s';
+    LabelRotuloTempo.Caption       := TextoArquivosLidos(Resultado.ArquivosLidos);
+
+    //"Processado em dd/mm/aaaa hh:mm" (5.15)
+    LabelLogData.Caption := 'Processado em ' + FormatDateTime('dd"/"mm"/"yyyy hh":"nn', Now, FormatoPtBR);
+
+    //Log: uma linha por ocorrência, na ordem de leitura, e o fechamento (5.23 e 5.21)
+    ListBoxLog.Items.BeginUpdate;
+    try
+        ListBoxLog.Items.Clear;
+        for I := 0 to Resultado.Log.Count - 1 do
+        begin
+            Linha := Resultado.Log[I];
+            ListBoxLog.Items.AddObject(Linha.Texto, TObject(NativeInt(Ord(Linha.Tipo))));
+        end;
+
+        //5.23: só quando não há ignoradas nem erros (no plural: com 1 arquivo fica só a 5.21)
+        if (Resultado.Ignoradas = 0) and (Resultado.ComErro = 0) and (Resultado.ArquivosLidos > 1) then
+            ListBoxLog.Items.AddObject('Todos os ' + IntToStr(Resultado.ArquivosLidos) +
+                                       ' arquivos foram lidos sem ocorrências.', TObject(NativeInt(Ord(llSucesso))));
+
+        //5.21, com singular
+        if Resultado.Autorizadas = 1 then
+            ListBoxLog.Items.AddObject('1 nota autorizada carregada.', TObject(NativeInt(Ord(llSucesso))))
+        else
+            ListBoxLog.Items.AddObject(IntToStr(Resultado.Autorizadas) + ' notas autorizadas carregadas.',
+                                       TObject(NativeInt(Ord(llSucesso))));
+    finally
+        ListBoxLog.Items.EndUpdate;
+    end;
+    ListBoxLog.TopIndex := 0;
+
+    //Aviso de homologação e entrada (5.29 a 5.31) entre os contadores e o log
+    MostrarAvisoResumo(Resultado.Homologacao, Resultado.Entrada);
+
+    FEstadoResumo := esrConcluido;
+end;
+
+{ Envio do e-mail em segundo plano (etapa 4.6) }
+
+procedure TFormPrincipal.IniciarEnvio;
+var
+    Envio    : TThreadEnvioEmail;
+    Notas    : TFDMemTable;
+    Marcador : TBookmark;
+begin
+    //Tudo o que vem da tela é lido aqui, na thread principal: os XMLs das notas do filtro de modelo (a
+    //busca da tela Notas não vale para o Enviar: D5), o destino, o assunto e a mensagem. A configuração do
+    //ACBrMail já foi carregada ao abrir a tela Enviar (LerConfigEmail)
+    LiberarThreadEnvio;
+    Envio := TThreadEnvioEmail.Create(ACBrNFe, ExtractFilePath(ParamStr(0)), Trim(EditEmailEnviar.Text),
+                                      'Projeto Pro XML - XMLs de Nota Fiscal', MemoMensagem.Lines);
+    try
+        Notas := NotasDoModelo;
+        Notas.DisableControls;
+        try
+            Marcador := Notas.GetBookmark;
+            try
+                Notas.First;
+                while not Notas.Eof do
+                begin
+                    //A chave tem 44 dígitos (D4): o arquivo sai como <chave>-nfe.xml (H3)
+                    Envio.AdicionarXML(Notas.FieldByName('xml').AsString,
+                                       Notas.FieldByName('chave').AsString + '-nfe.xml');
+                    Notas.Next;
+                end;
+            finally
+                if (Marcador <> nil) and Notas.BookmarkValid(Marcador) then
+                    Notas.GotoBookmark(Marcador);
+                Notas.FreeBookmark(Marcador);
+            end;
+        finally
+            Notas.EnableControls;
+        end;
+        Envio.OnTerminate := EnvioTerminado;
+    except
+        //A thread ainda não começou: ao ser liberada ela termina sem compactar nem enviar
+        Envio.Free;
+        raise;
+    end;
+
+    //"Enviando…" (glossário 11.13; tokens.md 5.1, estado ocupado): botão desabilitado com o ícone
+    //loader-circle estático. Menu e barra de pasta ficam bloqueados até o fim do envio
+    FEnvio    := Envio;
+    FEnviando := True;
+    FLarguraEnviar := Panel11.Width;
+    btnEnviarEmail.Caption  := 'Enviando' + #$2026;
+    btnEnviarEmail.IconeSvg := IconeOcupado;
+    Panel11.Width := Max(FLarguraEnviar, btnEnviarEmail.LarguraIdeal);
+    btnEnviarEmail.Enabled := False;
+    DefinirBloqueio(blEnvio, True);
+    try
+        Envio.Start;
+    except
+        FEnvio    := nil;
+        FEnviando := False;
+        Envio.Free;
+        RestaurarBotaoEnviar;
+        DefinirBloqueio(blEnvio, False);
+        raise;
+    end;
+end;
+
+procedure TFormPrincipal.RestaurarBotaoEnviar;
+begin
+    //Botão Enviar como antes do envio (o visual da tela Enviar fica para a etapa 4.7)
+    btnEnviarEmail.Caption  := 'Enviar';
+    btnEnviarEmail.IconeSvg := '';
+    if FLarguraEnviar > 0 then
+        Panel11.Width := FLarguraEnviar;
+    btnEnviarEmail.Enabled := True;
+end;
+
+procedure TFormPrincipal.LiberarThreadEnvio;
+begin
+    //A thread do envio anterior já terminou (o fim dela devolveu a tela); falta liberar o objeto
+    if FEnvio <> nil then
+    begin
+        FEnvio.WaitFor;
+        FreeAndNil(FEnvio);
+    end;
+end;
+
+procedure TFormPrincipal.EnvioTerminado(Sender: TObject);
+var
+    Envio      : TThreadEnvioEmail;
+    Resultado  : TResultadoEnvio;
+    Erro       : string;
+    ClasseErro : string;
+begin
+    //OnTerminate da thread de envio: roda na thread principal; nenhuma exceção sai daqui
+    try
+        Envio      := Sender as TThreadEnvioEmail;
+        Resultado  := Envio.Resultado;
+        Erro       := Envio.Erro;
+        ClasseErro := Envio.ClasseErro;
+        try
+            FEnviando := False;
+            RestaurarBotaoEnviar;
+        finally
+            //Menu e barra de pasta voltam em qualquer caminho
+            DefinirBloqueio(blEnvio, False);
+        end;
+
+        if FFechando then
+            Exit;
+        if btnEnviarEmail.CanFocus then
+            btnEnviarEmail.SetFocus;
+
+        //Resultado com os textos atuais do app (os textos e a faixa do glossário 11.16 e 11.17 são da 4.7)
+        case Resultado of
+            reEnviado:
+                messagedlg('Email enviado com sucesso!!', mtInformation, [mbOk], 0);
+            reSemAnexo:
+                messagedlg('Sem arquivos para enviar!', mtInformation, [mbOk], 0);
+        else
+            try
+                DMConfig.CreateLog(ClasseErro, 'Enviar e-mail: ' + Erro);
+            except
+                on ELog: Exception do
+                    OutputDebugString(PChar('ProXML: ' + ELog.Message));
+            end;
+            messagedlg(Erro, mtError, [mbOk], 0);
+        end;
+    except
+        on E: Exception do
+            Application.ShowException(E);
+    end;
+end;
+
+procedure TFormPrincipal.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+    //Envio do e-mail em andamento: o app não fecha (glossário 5.36, aviso com OK)
+    if FEnviando then
+    begin
+        CanClose := False;
+        messagedlg('O e-mail ainda está sendo enviado. Aguarde terminar para fechar o ProXML.', mtWarning, [mbOk], 0);
+        Exit;
+    end;
+
+    //Leitura em andamento (glossário 5.28, Sim / Não): Sim cancela, espera a thread terminar e fecha
+    if FLendo then
+    begin
+        CanClose := messagedlg('A leitura dos XMLs ainda está em andamento.' + sLineBreak +
+                               'Deseja cancelar e fechar o ProXML?', mtConfirmation, [mbYes, mbNo], 0, mbNo) = mrYes;
+        if CanClose then
+            EncerrarLeituraParaFechar;
     end;
 end;
 

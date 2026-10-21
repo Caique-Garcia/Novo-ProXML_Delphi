@@ -15,6 +15,7 @@ object FormPrincipal: TFormPrincipal
   OldCreateOrder = False
   Position = poScreenCenter
   OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -722,96 +723,692 @@ object FormPrincipal: TFormPrincipal
               object TabSheet1: TTabSheet
                 Caption = 'TabSheet1'
                 TabVisible = False
-                object Gauge1: TGauge
-                  Left = 0
-                  Top = 441
-                  Width = 896
-                  Height = 32
-                  Align = alBottom
-                  BorderStyle = bsNone
-                  Color = clBlack
-                  ForeColor = 14987604
-                  MaxValue = 110
-                  ParentColor = False
-                  Progress = 0
-                  ShowText = False
-                  ExplicitLeft = -1
-                  ExplicitTop = 344
-                  ExplicitWidth = 746
-                end
-                object PnlAvisoPasta: TPanel
-                  AlignWithMargins = True
+                object PnlResumo: TPanel
                   Left = 0
                   Top = 0
                   Width = 896
-                  Height = 76
-                  Margins.Left = 0
-                  Margins.Top = 0
-                  Margins.Right = 0
-                  Margins.Bottom = 8
-                  Align = alTop
+                  Height = 473
+                  Align = alClient
                   BevelOuter = bvNone
                   ParentBackground = False
                   ShowCaption = False
-                  TabOrder = 1
-                  Visible = False
-                  object SkSvgAvisoPasta: TSkSvg
+                  TabOrder = 0
+                  object PnlAvisoPasta: TPanel
                     AlignWithMargins = True
-                    Left = 16
-                    Top = 12
-                    Width = 20
-                    Height = 20
-                    Margins.Left = 12
-                    Margins.Top = 12
-                    Margins.Right = 0
-                    Margins.Bottom = 44
-                    Align = alLeft
-                    ExplicitHeight = 52
-                  end
-                  object LabelAvisoPasta: TLabel
-                    AlignWithMargins = True
-                    Left = 48
-                    Top = 12
-                    Width = 832
-                    Height = 52
-                    Margins.Left = 12
-                    Margins.Top = 12
-                    Margins.Right = 16
-                    Margins.Bottom = 12
-                    Align = alClient
-                    AutoSize = False
-                    ShowAccelChar = False
-                    ExplicitWidth = 552
-                  end
-                  object PnlAvisoPastaBarra: TPanel
                     Left = 0
                     Top = 0
-                    Width = 4
+                    Width = 896
                     Height = 76
-                    Align = alLeft
+                    Margins.Left = 0
+                    Margins.Top = 0
+                    Margins.Right = 0
+                    Margins.Bottom = 8
+                    Align = alTop
                     BevelOuter = bvNone
                     ParentBackground = False
                     ShowCaption = False
                     TabOrder = 0
+                    Visible = False
+                    object SkSvgAvisoPasta: TSkSvg
+                      AlignWithMargins = True
+                      Left = 16
+                      Top = 12
+                      Width = 20
+                      Height = 20
+                      Margins.Left = 12
+                      Margins.Top = 12
+                      Margins.Right = 0
+                      Margins.Bottom = 44
+                      Align = alLeft
+                      ExplicitHeight = 52
+                    end
+                    object LabelAvisoPasta: TLabel
+                      AlignWithMargins = True
+                      Left = 48
+                      Top = 12
+                      Width = 832
+                      Height = 52
+                      Margins.Left = 12
+                      Margins.Top = 12
+                      Margins.Right = 16
+                      Margins.Bottom = 12
+                      Align = alClient
+                      AutoSize = False
+                      ShowAccelChar = False
+                      ExplicitWidth = 552
+                    end
+                    object PnlAvisoPastaBarra: TPanel
+                      Left = 0
+                      Top = 0
+                      Width = 4
+                      Height = 76
+                      Align = alLeft
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                    end
                   end
-                end
-                object Memo1: TMemo
-                  Left = 0
-                  Top = 84
-                  Width = 896
-                  Height = 357
-                  Align = alClient
-                  BevelInner = bvNone
-                  BevelOuter = bvNone
-                  BorderStyle = bsNone
-                  Font.Charset = DEFAULT_CHARSET
-                  Font.Color = 5258295
-                  Font.Height = -13
-                  Font.Name = 'Segoe UI'
-                  Font.Style = []
-                  ParentFont = False
-                  ReadOnly = True
-                  TabOrder = 0
+                  object PnlFaixaResumo: TPanel
+                    AlignWithMargins = True
+                    Left = 0
+                    Top = 84
+                    Width = 896
+                    Height = 68
+                    Margins.Left = 0
+                    Margins.Top = 0
+                    Margins.Right = 0
+                    Margins.Bottom = 16
+                    Align = alTop
+                    BevelOuter = bvNone
+                    ParentBackground = False
+                    ShowCaption = False
+                    TabOrder = 1
+                    Visible = False
+                    object PnlFaixaResumoBarra: TPanel
+                      Left = 0
+                      Top = 0
+                      Width = 4
+                      Height = 68
+                      Align = alLeft
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                    end
+                    object SkSvgFaixaResumo: TSkSvg
+                      AlignWithMargins = True
+                      Left = 20
+                      Top = 12
+                      Width = 20
+                      Height = 20
+                      Margins.Left = 16
+                      Margins.Top = 12
+                      Margins.Right = 0
+                      Margins.Bottom = 36
+                      Align = alLeft
+                    end
+                    object PbxFaixaResumo: TPaintBox
+                      AlignWithMargins = True
+                      Left = 52
+                      Top = 12
+                      Width = 828
+                      Height = 44
+                      Margins.Left = 12
+                      Margins.Top = 12
+                      Margins.Right = 16
+                      Margins.Bottom = 12
+                      Align = alClient
+                    end
+                  end
+                  object PnlResumoVazio: TPanel
+                    Left = 0
+                    Top = 84
+                    Width = 896
+                    Height = 389
+                    Align = alClient
+                    BevelOuter = bvNone
+                    Padding.Left = 1
+                    Padding.Top = 1
+                    Padding.Right = 1
+                    Padding.Bottom = 1
+                    ParentBackground = False
+                    ShowCaption = False
+                    TabOrder = 2
+                    object PnlResumoVazioFundo: TPanel
+                      Left = 1
+                      Top = 1
+                      Width = 894
+                      Height = 387
+                      Align = alClient
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                      object SkSvgResumoVazio: TSkSvg
+                        Left = 423
+                        Top = 96
+                        Width = 48
+                        Height = 48
+                      end
+                      object LabelResumoVazioTitulo: TLabel
+                        Left = 16
+                        Top = 152
+                        Width = 862
+                        Height = 21
+                        Alignment = taCenter
+                        AutoSize = False
+                        ShowAccelChar = False
+                        WordWrap = True
+                      end
+                      object LabelResumoVazioTexto: TLabel
+                        Left = 237
+                        Top = 181
+                        Width = 420
+                        Height = 34
+                        Alignment = taCenter
+                        AutoSize = False
+                        ShowAccelChar = False
+                        WordWrap = True
+                      end
+                      object LabelResumoVazioAtalhos: TLabel
+                        Left = 16
+                        Top = 279
+                        Width = 862
+                        Height = 15
+                        Alignment = taCenter
+                        AutoSize = False
+                        ShowAccelChar = False
+                        WordWrap = True
+                      end
+                      object PnlResumoVazioBotao: TPanel
+                        Left = 371
+                        Top = 227
+                        Width = 152
+                        Height = 40
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                      end
+                    end
+                  end
+                  object PnlProgresso: TPanel
+                    Left = 0
+                    Top = 84
+                    Width = 896
+                    Height = 389
+                    Align = alClient
+                    BevelOuter = bvNone
+                    Padding.Left = 1
+                    Padding.Top = 1
+                    Padding.Right = 1
+                    Padding.Bottom = 1
+                    ParentBackground = False
+                    ShowCaption = False
+                    TabOrder = 3
+                    Visible = False
+                    object PnlProgressoFundo: TPanel
+                      Left = 1
+                      Top = 1
+                      Width = 894
+                      Height = 387
+                      Align = alClient
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                      object LabelProgressoTitulo: TLabel
+                        Left = 48
+                        Top = 120
+                        Width = 798
+                        Height = 21
+                        AutoSize = False
+                        ShowAccelChar = False
+                      end
+                      object LabelProgressoContagem: TLabel
+                        Left = 48
+                        Top = 173
+                        Width = 120
+                        Height = 32
+                        AutoSize = False
+                        ShowAccelChar = False
+                        Layout = tlCenter
+                      end
+                      object LabelProgressoArquivo: TLabel
+                        Left = 184
+                        Top = 173
+                        Width = 662
+                        Height = 32
+                        Alignment = taRightJustify
+                        AutoSize = False
+                        ShowAccelChar = False
+                        Layout = tlCenter
+                      end
+                      object LabelProgressoDica: TLabel
+                        Left = 160
+                        Top = 225
+                        Width = 686
+                        Height = 32
+                        AutoSize = False
+                        EllipsisPosition = epEndEllipsis
+                        ShowAccelChar = False
+                        Layout = tlCenter
+                      end
+                      object PnlProgressoTrilho: TPanel
+                        Left = 48
+                        Top = 153
+                        Width = 798
+                        Height = 8
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object PnlProgressoBarra: TPanel
+                          Left = 0
+                          Top = 0
+                          Width = 0
+                          Height = 8
+                          Align = alLeft
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 0
+                        end
+                      end
+                      object PnlCancelar: TPanel
+                        Left = 44
+                        Top = 221
+                        Width = 112
+                        Height = 40
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 1
+                      end
+                    end
+                  end
+                  object PnlConcluido: TPanel
+                    Left = 0
+                    Top = 84
+                    Width = 896
+                    Height = 389
+                    Align = alClient
+                    BevelOuter = bvNone
+                    ParentBackground = False
+                    ShowCaption = False
+                    TabOrder = 4
+                    Visible = False
+                    object PnlContadores: TPanel
+                      AlignWithMargins = True
+                      Left = 0
+                      Top = 0
+                      Width = 896
+                      Height = 58
+                      Margins.Left = 0
+                      Margins.Top = 0
+                      Margins.Right = 0
+                      Margins.Bottom = 16
+                      Align = alTop
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                      object PnlContadorAutorizadas: TPanel
+                        Left = 0
+                        Top = 0
+                        Width = 218
+                        Height = 58
+                        BevelOuter = bvNone
+                        Padding.Left = 1
+                        Padding.Right = 1
+                        Padding.Bottom = 1
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object PnlContadorAutorizadasTopo: TPanel
+                          Left = 1
+                          Top = 0
+                          Width = 216
+                          Height = 4
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 0
+                        end
+                        object PnlContadorAutorizadasFundo: TPanel
+                          Left = 1
+                          Top = 4
+                          Width = 216
+                          Height = 53
+                          Align = alClient
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 1
+                          object SkSvgContadorAutorizadas: TSkSvg
+                            Left = 12
+                            Top = 14
+                            Width = 24
+                            Height = 24
+                          end
+                          object LabelNumeroAutorizadas: TLabel
+                            Left = 48
+                            Top = 5
+                            Width = 156
+                            Height = 28
+                            AutoSize = False
+                            ShowAccelChar = False
+                          end
+                          object LabelRotuloAutorizadas: TLabel
+                            Left = 48
+                            Top = 33
+                            Width = 156
+                            Height = 15
+                            AutoSize = False
+                            ShowAccelChar = False
+                          end
+                        end
+                      end
+                      object PnlContadorIgnoradas: TPanel
+                        Left = 226
+                        Top = 0
+                        Width = 218
+                        Height = 58
+                        BevelOuter = bvNone
+                        Padding.Left = 1
+                        Padding.Right = 1
+                        Padding.Bottom = 1
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 1
+                        object PnlContadorIgnoradasTopo: TPanel
+                          Left = 1
+                          Top = 0
+                          Width = 216
+                          Height = 4
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 0
+                        end
+                        object PnlContadorIgnoradasFundo: TPanel
+                          Left = 1
+                          Top = 4
+                          Width = 216
+                          Height = 53
+                          Align = alClient
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 1
+                          object SkSvgContadorIgnoradas: TSkSvg
+                            Left = 12
+                            Top = 14
+                            Width = 24
+                            Height = 24
+                          end
+                          object LabelNumeroIgnoradas: TLabel
+                            Left = 48
+                            Top = 5
+                            Width = 156
+                            Height = 28
+                            AutoSize = False
+                            ShowAccelChar = False
+                          end
+                          object LabelRotuloIgnoradas: TLabel
+                            Left = 48
+                            Top = 33
+                            Width = 156
+                            Height = 15
+                            AutoSize = False
+                            ShowAccelChar = False
+                          end
+                        end
+                      end
+                      object PnlContadorComErro: TPanel
+                        Left = 452
+                        Top = 0
+                        Width = 218
+                        Height = 58
+                        BevelOuter = bvNone
+                        Padding.Left = 1
+                        Padding.Right = 1
+                        Padding.Bottom = 1
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 2
+                        object PnlContadorComErroTopo: TPanel
+                          Left = 1
+                          Top = 0
+                          Width = 216
+                          Height = 4
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 0
+                        end
+                        object PnlContadorComErroFundo: TPanel
+                          Left = 1
+                          Top = 4
+                          Width = 216
+                          Height = 53
+                          Align = alClient
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 1
+                          object SkSvgContadorComErro: TSkSvg
+                            Left = 12
+                            Top = 14
+                            Width = 24
+                            Height = 24
+                          end
+                          object LabelNumeroComErro: TLabel
+                            Left = 48
+                            Top = 5
+                            Width = 156
+                            Height = 28
+                            AutoSize = False
+                            ShowAccelChar = False
+                          end
+                          object LabelRotuloComErro: TLabel
+                            Left = 48
+                            Top = 33
+                            Width = 156
+                            Height = 15
+                            AutoSize = False
+                            ShowAccelChar = False
+                          end
+                        end
+                      end
+                      object PnlContadorTempo: TPanel
+                        Left = 678
+                        Top = 0
+                        Width = 218
+                        Height = 58
+                        BevelOuter = bvNone
+                        Padding.Left = 1
+                        Padding.Right = 1
+                        Padding.Bottom = 1
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 3
+                        object PnlContadorTempoTopo: TPanel
+                          Left = 1
+                          Top = 0
+                          Width = 216
+                          Height = 4
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 0
+                        end
+                        object PnlContadorTempoFundo: TPanel
+                          Left = 1
+                          Top = 4
+                          Width = 216
+                          Height = 53
+                          Align = alClient
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 1
+                          object SkSvgContadorTempo: TSkSvg
+                            Left = 12
+                            Top = 14
+                            Width = 24
+                            Height = 24
+                          end
+                          object LabelNumeroTempo: TLabel
+                            Left = 48
+                            Top = 5
+                            Width = 156
+                            Height = 28
+                            AutoSize = False
+                            ShowAccelChar = False
+                          end
+                          object LabelRotuloTempo: TLabel
+                            Left = 48
+                            Top = 33
+                            Width = 156
+                            Height = 15
+                            AutoSize = False
+                            ShowAccelChar = False
+                          end
+                        end
+                      end
+                    end
+                    object PnlAvisoResumo: TPanel
+                      AlignWithMargins = True
+                      Left = 0
+                      Top = 74
+                      Width = 896
+                      Height = 36
+                      Margins.Left = 0
+                      Margins.Top = 0
+                      Margins.Right = 0
+                      Margins.Bottom = 16
+                      Align = alTop
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 1
+                      Visible = False
+                      object PnlAvisoResumoBarra: TPanel
+                        Left = 0
+                        Top = 0
+                        Width = 4
+                        Height = 36
+                        Align = alLeft
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                      end
+                      object SkSvgAvisoResumo: TSkSvg
+                        AlignWithMargins = True
+                        Left = 20
+                        Top = 8
+                        Width = 20
+                        Height = 20
+                        Margins.Left = 16
+                        Margins.Top = 8
+                        Margins.Right = 0
+                        Margins.Bottom = 8
+                        Align = alLeft
+                      end
+                      object PbxAvisoResumo: TPaintBox
+                        AlignWithMargins = True
+                        Left = 52
+                        Top = 8
+                        Width = 828
+                        Height = 20
+                        Margins.Left = 12
+                        Margins.Top = 8
+                        Margins.Right = 16
+                        Margins.Bottom = 8
+                        Align = alClient
+                      end
+                    end
+                    object PnlLog: TPanel
+                      Left = 0
+                      Top = 126
+                      Width = 896
+                      Height = 263
+                      Align = alClient
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 2
+                      object PnlLogFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 894
+                        Height = 261
+                        Align = alClient
+                        BevelOuter = bvNone
+                        Padding.Bottom = 4
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object PnlLogTitulo: TPanel
+                          Left = 0
+                          Top = 0
+                          Width = 894
+                          Height = 32
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 0
+                          object LabelLogTitulo: TLabel
+                            AlignWithMargins = True
+                            Left = 12
+                            Top = 0
+                            Width = 4
+                            Height = 32
+                            Margins.Left = 12
+                            Margins.Top = 0
+                            Margins.Right = 0
+                            Margins.Bottom = 0
+                            Align = alLeft
+                            ShowAccelChar = False
+                            Layout = tlCenter
+                          end
+                          object LabelLogData: TLabel
+                            AlignWithMargins = True
+                            Left = 878
+                            Top = 0
+                            Width = 4
+                            Height = 32
+                            Margins.Left = 0
+                            Margins.Top = 0
+                            Margins.Right = 12
+                            Margins.Bottom = 0
+                            Align = alRight
+                            ShowAccelChar = False
+                            Layout = tlCenter
+                          end
+                        end
+                        object PnlLogDivisoria: TPanel
+                          Left = 0
+                          Top = 32
+                          Width = 894
+                          Height = 1
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 1
+                        end
+                        object ListBoxLog: TListBox
+                          AlignWithMargins = True
+                          Left = 0
+                          Top = 37
+                          Width = 894
+                          Height = 220
+                          Margins.Left = 0
+                          Margins.Top = 4
+                          Margins.Right = 0
+                          Margins.Bottom = 0
+                          Style = lbOwnerDrawFixed
+                          Align = alClient
+                          BorderStyle = bsNone
+                          ItemHeight = 24
+                          TabOrder = 2
+                        end
+                      end
+                    end
+                  end
                 end
               end
               object TabSheet2: TTabSheet
