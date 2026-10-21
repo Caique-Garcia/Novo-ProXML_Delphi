@@ -128,6 +128,61 @@ const
     '><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path' +
     ' d="M12 9v4"/><path d="M12 17h.01"/></svg>';
 
+  //copy.svg: botão Copiar chave (tela Notas)
+  IconeCopiar =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0' +
+    '-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+
+  //file-down.svg: botão Gerar DANFE (tela Notas)
+  IconeGerarDanfe =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.' +
+    '4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M12 18v-6"/><' +
+    'path d="m9 15 3 3 3-3"/></svg>';
+
+  //sheet.svg: botão Exportar CSV (tela Notas)
+  IconeExportarCSV =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9' +
+    '"/><line x1="3" x2="21" y1="15" y2="15"/><line x1="9" x2="9" y1="9" y2="21"/><line x1="15"' +
+    ' x2="15" y1="9" y2="21"/></svg>';
+
+  //search.svg: campo Buscar (tela Notas)
+  IconeBuscar =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>';
+
+  //search-x.svg: busca sem resultado (tela Notas)
+  IconeBuscaVazia =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><path d="m13.5 8.5-5 5"/><path d="m8.5 8.5 5 5"/><circle cx="11" cy="11" r="8"/><path d="' +
+    'm21 21-4.3-4.3"/></svg>';
+
+  //inbox.svg: grade vazia (tela Notas)
+  IconeGradeVazia =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 ' +
+    '0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>';
+
+  //x.svg: botão Limpar busca (tela Notas)
+  IconeLimpar =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+
+  //check.svg: aviso flutuante "Chave copiada" (tela Notas)
+  IconeConfirmar =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
+    'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
+    '><path d="M20 6 9 17l-5-5"/></svg>';
+
 implementation
 
 end.

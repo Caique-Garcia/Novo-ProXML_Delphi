@@ -108,6 +108,8 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 5.31 | aviso no Resumo: os dois (novo) | F | — | **Os totais incluem {h} notas de homologação** (ambiente de testes, sem valor fiscal) **e {e} NF-e de entrada.** Confira se a pasta é a certa. | **Aprovado pelo usuário em 20/10/2026.** Exemplo no mockup `resumo.html`, estado "Concluído" |
 | 5.32 | log: nota de homologação (novo) | L | — | Nota Fiscal {n}: homologação (tpAmb 2), somada aos totais. | **Aprovado pelo usuário em 20/10/2026.** Uma linha por nota, ícone de aviso; não muda os contadores |
 | 5.33 | log: NF-e de entrada (novo) | L | — | Nota Fiscal {n}: NF-e de entrada (tpNF 0), somada aos totais. | **Aprovado pelo usuário em 20/10/2026.** Idem |
+| 5.34 | `LerNotaXML` (Id) (novo) | I/L | — | a chave de acesso da nota (atributo Id de infNFe) não tem 44 dígitos | Vira o `{motivo}` de 5.20 (decisão D4). Aprovado pelo usuário em 21/10/2026 |
+| 5.35 | `LerNotaXML` (chNFe) (novo) | I/L | — | a chave do protocolo de autorização (chNFe) é diferente da chave da nota | Vira o `{motivo}` de 5.20 (decisão D4). Aprovado pelo usuário em 21/10/2026 |
 
 ## 6. Notas (grade, ações, busca, CSV)
 
@@ -144,6 +146,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 6.29 | CSV: cabeçalho (novo) | R | — | Nº;Modelo;Data;Chave;Valor;Base ICMS;ICMS;Base IBS/CBS;IBS UF;IBS Mun.;IBS;CBS | PD-2; valores sem "R$", vírgula decimal |
 | 6.30 | CSV: sucesso (novo) | M | — | Arquivo CSV salvo:<br>{caminho} | Informação |
 | 6.31 | CSV: erro (novo) | M | — | Não foi possível salvar o arquivo CSV.<br><br>Motivo: {motivo} | Erro |
+| 6.32 | Copiar chave: área de transferência ocupada (novo) | M | — | Não foi possível copiar a chave: outro programa está usando a área de transferência. Tente de novo em alguns segundos. | Aviso (caixa com OK), depois de tentar de novo por cerca de 1 s. Aprovado pelo usuário em 21/10/2026 |
 
 ## 7. DANFE
 
@@ -171,7 +174,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 8.6 | opção 2 (novo) | F | — | Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS das notas que têm o grupo IBS/CBS. {x} de {n} notas têm IBS/CBS. | |
 | 8.7 | botões (novo) | B/H | — | Gerar relatório · *hint:* Gravar as notas e abrir a visualização do relatório | |
 | 8.8 | sem notas (novo) | F | — | Processe uma pasta para gerar relatórios. | Dica visível ao lado dos botões desabilitados |
-| 8.8a | sem notas no modelo (novo) | F | — | Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima. | Há notas carregadas, mas nenhuma no filtro de modelo. Aprovado em 20/10/2026 (4.4) |
+| 8.8a | sem notas no modelo (novo) | F | — | Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima. | Há notas carregadas, mas nenhuma no filtro de modelo. Aprovado em 20/10/2026 (4.4). Também no painel da tela Notas (sem busca), aprovado em 21/10/2026 (4.5) |
 | 8.9 | `GerarRelatorio` | M | Sem dados para gerar relatório !! | *(substituída pela 8.8)* | Botões desabilitados; se ainda for preciso: "Nenhuma nota para o relatório. Processe uma pasta primeiro." |
 | 8.10 | `AbrirRelatorioIBSCBS` | M | Nenhuma nota com IBS/CBS | Nenhuma nota do modelo selecionado tem IBS/CBS. | Vira dica visível com o botão IBS/CBS desabilitado; a caixa só se o botão for acionado mesmo assim |
 | 8.11 | rodapé da tela (novo) | F | — | Os relatórios usam as notas do modelo selecionado na barra de cima. A busca da tela Notas não é aplicada. | Depende da decisão D5 |

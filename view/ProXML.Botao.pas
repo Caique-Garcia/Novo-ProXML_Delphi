@@ -381,6 +381,7 @@ var
     X           : Integer;
     AreaTexto   : TRect;
     TextoBotao  : string;
+    CorIcone    : TColor;
 begin
     DesenharFundoDoPai;
 
@@ -437,8 +438,13 @@ begin
 
     if Icone > 0 then
     begin
+        //Tabela 5.1: o ícone do secundário habilitado é CorPrimaria; nos outros casos, a cor do texto
+        if Enabled and (FEstilo = ebSecundario) then
+            CorIcone := CorPrimaria
+        else
+            CorIcone := Texto;
         DesenharIcone(Rect(X, Face.Top + ((Face.Bottom - Face.Top) - Icone) div 2,
-                           X + Icone, Face.Top + ((Face.Bottom - Face.Top) - Icone) div 2 + Icone), Texto);
+                           X + Icone, Face.Top + ((Face.Bottom - Face.Top) - Icone) div 2 + Icone), CorIcone);
         Inc(X, Icone + EspacoIcone);
     end;
 
