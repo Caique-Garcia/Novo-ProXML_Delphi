@@ -822,99 +822,336 @@ object FormPrincipal: TFormPrincipal
                 ExplicitTop = 0
                 ExplicitWidth = 0
                 ExplicitHeight = 0
-                object Panel5: TPanel
+                object PnlNotas: TPanel
                   Left = 0
                   Top = 0
-                  Width = 616
-                  Height = 419
+                  Width = 896
+                  Height = 473
                   Align = alClient
                   BevelOuter = bvNone
-                  Color = clWhite
                   ParentBackground = False
+                  ShowCaption = False
                   TabOrder = 0
-                  object DBGrid1: TDBGrid
+                  object PnlNotasTitulo: TPanel
+                    AlignWithMargins = True
                     Left = 0
                     Top = 0
-                    Width = 616
-                    Height = 419
-                    Align = alClient
-                    BorderStyle = bsNone
-                    DataSource = DataSource1
-                    Font.Charset = DEFAULT_CHARSET
-                    Font.Color = 2169367
-                    Font.Height = -13
-                    Font.Name = 'Segoe UI'
-                    Font.Style = []
-                    Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleHotTrack]
-                    ParentFont = False
-                    PopupMenu = PopupMenu
-                    ReadOnly = True
+                    Width = 896
+                    Height = 40
+                    Margins.Left = 0
+                    Margins.Top = 0
+                    Margins.Right = 0
+                    Margins.Bottom = 12
+                    Align = alTop
+                    BevelOuter = bvNone
+                    ParentBackground = False
+                    ShowCaption = False
                     TabOrder = 0
-                    TitleFont.Charset = DEFAULT_CHARSET
-                    TitleFont.Color = 2169367
-                    TitleFont.Height = -13
-                    TitleFont.Name = 'Segoe UI'
-                    TitleFont.Style = []
-                    Columns = <
-                      item
-                        Expanded = False
-                        FieldName = 'numero'
-                        Title.Alignment = taCenter
-                        Title.Caption = 'N'#250'mero'
-                        Width = 53
-                        Visible = True
+                    object LabelNotasTitulo: TLabel
+                      Left = 0
+                      Top = 0
+                      Width = 39
+                      Height = 40
+                      Align = alLeft
+                      Caption = 'Notas'
+                      ShowAccelChar = False
+                      Layout = tlCenter
+                    end
+                    object LabelNotasContador: TLabel
+                      AlignWithMargins = True
+                      Left = 47
+                      Top = 0
+                      Width = 4
+                      Height = 40
+                      Margins.Left = 8
+                      Margins.Top = 0
+                      Margins.Right = 0
+                      Margins.Bottom = 0
+                      Align = alLeft
+                      ShowAccelChar = False
+                      Layout = tlCenter
+                    end
+                    object PnlCopiarChave: TPanel
+                      Left = 200
+                      Top = 0
+                      Width = 144
+                      Height = 40
+                      Align = alRight
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                    end
+                    object PnlGerarDanfe: TPanel
+                      Left = 344
+                      Top = 0
+                      Width = 144
+                      Height = 40
+                      Align = alRight
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 1
+                    end
+                    object PnlExportarCSV: TPanel
+                      Left = 488
+                      Top = 0
+                      Width = 156
+                      Height = 40
+                      Align = alRight
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 2
+                    end
+                    object PnlCampoBusca: TPanel
+                      AlignWithMargins = True
+                      Left = 648
+                      Top = 4
+                      Width = 248
+                      Height = 32
+                      Margins.Left = 4
+                      Margins.Top = 4
+                      Margins.Right = 0
+                      Margins.Bottom = 4
+                      Align = alRight
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 3
+                      object PnlCampoBuscaFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 246
+                        Height = 30
+                        Align = alClient
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object SkSvgBusca: TSkSvg
+                          AlignWithMargins = True
+                          Left = 8
+                          Top = 7
+                          Width = 16
+                          Height = 16
+                          Margins.Left = 8
+                          Margins.Top = 7
+                          Margins.Right = 0
+                          Margins.Bottom = 7
+                          Align = alLeft
+                        end
+                        object EditBusca: TEdit
+                          AlignWithMargins = True
+                          Left = 32
+                          Top = 6
+                          Width = 206
+                          Height = 18
+                          Margins.Left = 8
+                          Margins.Top = 6
+                          Margins.Right = 8
+                          Margins.Bottom = 6
+                          Align = alClient
+                          BevelInner = bvNone
+                          BevelOuter = bvNone
+                          BorderStyle = bsNone
+                          TabOrder = 0
+                          TextHint = 'Buscar por n'#250'mero ou chave'
+                        end
                       end
-                      item
+                    end
+                  end
+                  object Panel5: TPanel
+                    Left = 0
+                    Top = 52
+                    Width = 896
+                    Height = 421
+                    Align = alClient
+                    BevelOuter = bvNone
+                    Padding.Left = 1
+                    Padding.Top = 1
+                    Padding.Right = 1
+                    Padding.Bottom = 1
+                    ParentBackground = False
+                    ShowCaption = False
+                    TabOrder = 1
+                    object DBGrid1: TDBGrid
+                      Left = 1
+                      Top = 1
+                      Width = 894
+                      Height = 419
+                      Align = alClient
+                      BorderStyle = bsNone
+                      DataSource = DataSource1
+                      DefaultDrawing = False
+                      DrawingStyle = gdsClassic
+                      Font.Charset = DEFAULT_CHARSET
+                      Font.Height = -13
+                      Font.Name = 'Segoe UI'
+                      Font.Style = []
+                      Options = [dgTitles, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgTitleClick]
+                      ParentFont = False
+                      PopupMenu = PopupMenu
+                      ReadOnly = True
+                      TabOrder = 0
+                      TitleFont.Charset = DEFAULT_CHARSET
+                      TitleFont.Height = -13
+                      TitleFont.Name = 'Segoe UI Semibold'
+                      TitleFont.Style = []
+                      Columns = <
+                        item
+                          Alignment = taRightJustify
+                          Expanded = False
+                          FieldName = 'numero'
+                          Title.Alignment = taRightJustify
+                          Title.Caption = 'N'#186
+                          Width = 72
+                          Visible = True
+                        end
+                        item
+                          Alignment = taCenter
+                          Expanded = False
+                          FieldName = 'modelo'
+                          Title.Alignment = taCenter
+                          Title.Caption = 'Modelo'
+                          Width = 64
+                          Visible = True
+                        end
+                        item
+                          Expanded = False
+                          FieldName = 'data'
+                          Title.Caption = 'Data'
+                          Width = 88
+                          Visible = True
+                        end
+                        item
+                          Expanded = False
+                          FieldName = 'chave'
+                          Title.Caption = 'Chave'
+                          Width = 330
+                          Visible = True
+                        end
+                        item
+                          Alignment = taRightJustify
+                          Expanded = False
+                          FieldName = 'vtotal'
+                          Title.Alignment = taRightJustify
+                          Title.Caption = 'Valor'
+                          Width = 120
+                          Visible = True
+                        end
+                        item
+                          Alignment = taRightJustify
+                          Expanded = False
+                          FieldName = 'bcicms'
+                          Title.Alignment = taRightJustify
+                          Title.Caption = 'Base ICMS'
+                          Width = 120
+                          Visible = True
+                        end
+                        item
+                          Alignment = taRightJustify
+                          Expanded = False
+                          FieldName = 'vlicms'
+                          Title.Alignment = taRightJustify
+                          Title.Caption = 'ICMS'
+                          Width = 104
+                          Visible = True
+                        end
+                        item
+                          Alignment = taRightJustify
+                          Expanded = False
+                          FieldName = 'vibs'
+                          Title.Alignment = taRightJustify
+                          Title.Caption = 'IBS'
+                          Width = 88
+                          Visible = True
+                        end
+                        item
+                          Alignment = taRightJustify
+                          Expanded = False
+                          FieldName = 'vcbs'
+                          Title.Alignment = taRightJustify
+                          Title.Caption = 'CBS'
+                          Width = 96
+                          Visible = True
+                        end>
+                    end
+                    object PnlNotasVazio: TPanel
+                      Left = 1
+                      Top = 33
+                      Width = 894
+                      Height = 387
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 1
+                      Visible = False
+                      object SkSvgNotasVazio: TSkSvg
+                        Left = 423
+                        Top = 104
+                        Width = 48
+                        Height = 48
+                      end
+                      object LabelNotasVazioTitulo: TLabel
+                        Left = 16
+                        Top = 160
+                        Width = 862
+                        Height = 21
                         Alignment = taCenter
-                        Expanded = False
-                        FieldName = 'modelo'
-                        Title.Alignment = taCenter
-                        Title.Caption = 'Modelo'
-                        Width = 50
-                        Visible = True
+                        AutoSize = False
+                        ShowAccelChar = False
+                        WordWrap = True
                       end
-                      item
-                        Expanded = False
-                        FieldName = 'chave'
-                        Title.Alignment = taCenter
-                        Title.Caption = 'Chave'
-                        Width = 318
-                        Visible = True
-                      end
-                      item
-                        Expanded = False
-                        FieldName = 'vtotal'
-                        Title.Alignment = taCenter
-                        Title.Caption = 'Valor R$'
-                        Width = 94
-                        Visible = True
-                      end
-                      item
+                      object LabelNotasVazioTexto: TLabel
+                        Left = 237
+                        Top = 189
+                        Width = 420
+                        Height = 17
                         Alignment = taCenter
-                        Expanded = False
-                        FieldName = 'data'
-                        Title.Alignment = taCenter
-                        Title.Caption = 'Data'
-                        Width = 80
-                        Visible = True
+                        AutoSize = False
+                        ShowAccelChar = False
+                        WordWrap = True
                       end
-                      item
-                        Expanded = False
-                        FieldName = 'vlicms'
-                        Title.Alignment = taCenter
-                        Visible = False
+                      object PnlNotasVazioBotao: TPanel
+                        Left = 371
+                        Top = 210
+                        Width = 152
+                        Height = 40
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
                       end
-                      item
-                        Expanded = False
-                        FieldName = 'bcicms'
-                        Title.Alignment = taCenter
-                        Visible = False
+                    end
+                    object PnlChaveCopiada: TPanel
+                      Left = 383
+                      Top = 371
+                      Width = 128
+                      Height = 32
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 2
+                      Visible = False
+                      object SkSvgChaveCopiada: TSkSvg
+                        Left = 16
+                        Top = 8
+                        Width = 16
+                        Height = 16
                       end
-                      item
-                        Expanded = False
-                        FieldName = 'xml'
-                        Visible = False
-                      end>
+                      object LabelChaveCopiada: TLabel
+                        Left = 40
+                        Top = 8
+                        Width = 72
+                        Height = 15
+                        ShowAccelChar = False
+                      end
+                    end
                   end
                 end
               end
@@ -1861,6 +2098,10 @@ object FormPrincipal: TFormPrincipal
       item
         Name = 'vcbs'
         DataType = ftFloat
+      end
+      item
+        Name = 'data_ordem'
+        DataType = ftInteger
       end>
     IndexDefs = <>
     FetchOptions.AssignedValues = [evMode, evUnidirectional]
@@ -1879,71 +2120,6 @@ object FormPrincipal: TFormPrincipal
     StoreDefs = True
     Left = 1040
     Top = 377
-    Content = {
-      414442530F004A1E29050000FF00010001FF02FF03040016000000460044004D
-      0065006D005400610062006C006500310005000A0000005400610062006C0065
-      00060000000000070000080032000000090000FF0AFF0B04000C0000006E0075
-      006D00650072006F0005000C0000006E0075006D00650072006F000C00010000
-      000E000D000F000110000111000112000113000114000115000C0000006E0075
-      006D00650072006F00FEFF0B04000A0000006300680061007600650005000A00
-      0000630068006100760065000C00020000000E0016001700320000000F000110
-      000111000112000113000114000115000A000000630068006100760065001800
-      32000000FEFF0B04000800000064006100740061000500080000006400610074
-      0061000C00030000000E0016001700140000000F000110000111000112000113
-      00011400011500080000006400610074006100180014000000FEFF0B04000C00
-      000076006C00690063006D00730005000C00000076006C00690063006D007300
-      0C00040000000E0019000F000110000111000112000113000114000115000C00
-      000076006C00690063006D007300FEFF0B04000C00000062006300690063006D
-      00730005000C00000062006300690063006D0073000C00050000000E0019000F
-      000110000111000112000113000114000115000C00000062006300690063006D
-      007300FEFF0B04000C000000760074006F00740061006C0005000C0000007600
-      74006F00740061006C000C00060000000E0019000F0001100001110001120001
-      13000114000115000C000000760074006F00740061006C00FEFF0B0400060000
-      0078006D006C0005000600000078006D006C000C00070000000E001A001700C8
-      0000000F000110000111000112000113000114000115000600000078006D006C
-      001800C8000000FEFF0B04000C0000006D006F00640065006C006F0005000C00
-      00006D006F00640065006C006F000C00080000000E000D000F00011000011100
-      0112000113000114000115000C0000006D006F00640065006C006F00FEFF0B04
-      0014000000740065006D005F0069006200730063006200730005001400000074
-      0065006D005F006900620073006300620073000C00090000000E001B000F0001
-      100001110001120001130001140001150014000000740065006D005F00690062
-      007300630062007300FEFF0B0400120000007600620063006900620073006300
-      620073000500120000007600620063006900620073006300620073000C000A00
-      00000E0019000F00011000011100011200011300011400011500120000007600
-      62006300690062007300630062007300FEFF0B04000C00000076006900620073
-      007500660005000C0000007600690062007300750066000C000B0000000E0019
-      000F000110000111000112000113000114000115000C00000076006900620073
-      0075006600FEFF0B04000E00000076006900620073006D0075006E0005000E00
-      000076006900620073006D0075006E000C000C0000000E0019000F0001100001
-      11000112000113000114000115000E00000076006900620073006D0075006E00
-      FEFF0B040008000000760069006200730005000800000076006900620073000C
-      000D0000000E0019000F00011000011100011200011300011400011500080000
-      007600690062007300FEFF0B0400080000007600630062007300050008000000
-      76006300620073000C000E0000000E0019000F00011000011100011200011300
-      011400011500080000007600630062007300FEFEFF1CFEFF1DFEFF1EFEFEFEFF
-      1FFEFF20FF21FEFEFE0E004D0061006E0061006700650072001E005500700064
-      0061007400650073005200650067006900730074007200790012005400610062
-      006C0065004C006900730074000A005400610062006C00650008004E0061006D
-      006500140053006F0075007200630065004E0061006D0065000A005400610062
-      0049004400240045006E0066006F0072006300650043006F006E007300740072
-      00610069006E00740073001E004D0069006E0069006D0075006D004300610070
-      0061006300690074007900180043006800650063006B004E006F0074004E0075
-      006C006C00140043006F006C0075006D006E004C006900730074000C0043006F
-      006C0075006D006E00100053006F007500720063006500490044000E00640074
-      0049006E00740033003200100044006100740061005400790070006500140053
-      0065006100720063006800610062006C006500120041006C006C006F0077004E
-      0075006C006C000800420061007300650014004F0041006C006C006F0077004E
-      0075006C006C0012004F0049006E0055007000640061007400650010004F0049
-      006E00570068006500720065001A004F0072006900670069006E0043006F006C
-      004E0061006D006500180064007400570069006400650053007400720069006E
-      0067000800530069007A006500140053006F007500720063006500530069007A
-      00650010006400740044006F00750062006C00650018006400740041006E0073
-      00690053007400720069006E00670012006400740042006F006F006C00650061
-      006E001C0043006F006E00730074007200610069006E0074004C006900730074
-      00100056006900650077004C006900730074000E0052006F0077004C00690073
-      0074001800520065006C006100740069006F006E004C006900730074001C0055
-      007000640061007400650073004A006F00750072006E0061006C000E00430068
-      0061006E00670065007300}
     object FDMemTable1numero: TIntegerField
       FieldName = 'numero'
     end
@@ -1993,18 +2169,27 @@ object FormPrincipal: TFormPrincipal
       FieldName = 'vcbs'
       DisplayFormat = '#,##0.00'
     end
+    object FDMemTable1data_ordem: TIntegerField
+      FieldName = 'data_ordem'
+    end
   end
   object PopupMenu: TPopupMenu
     Left = 992
     Top = 373
-    object GerarPDF1: TMenuItem
-      Caption = 'Copiar Chave'
-      OnClick = GerarPDF1Click
+    object mnuCopiarChave: TMenuItem
+      Caption = 'Copiar chave'
+      OnClick = mnuCopiarChaveClick
     end
     object GerarDANFe1: TMenuItem
-      Caption = 'Gerar DANFe'
+      Caption = 'Gerar DANFE'
       OnClick = GerarDANFe1Click
     end
+  end
+  object TimerChaveCopiada: TTimer
+    Enabled = False
+    Interval = 2000
+    Left = 1040
+    Top = 516
   end
   object ACBrNFe: TACBrNFe
     MAIL = ACBrMail1

@@ -47,6 +47,8 @@ const
 
   //Texto e ícone do botão primário: o "branco" da tabela 5.1 do tokens.md (mesmo valor de CorSuperficie)
   CorTextoSobrePrimaria   = CorSuperficie;
+  //Texto do aviso flutuante sobre o marinho: o "branco" da tabela 2.1 do tokens.md
+  CorTextoSobreMarinho    = CorSuperficie;
 
   //--- Tipografia (tokens.md, seção 3) --------------------------------------------------
   //Semibold: usar FonteDestaque com Font.Style = []. fsBold na "Segoe UI" vira Bold (700), mais pesado
@@ -140,6 +142,30 @@ const
   LarguraAnimacao         = 160;
   AlturaAnimacao          = 134;
   EspacoCarregando        = 12;   //animação -> texto -> legenda
+
+  //Tela Notas (tokens.md, seções 4.1 e 5.7; mockup notas.html)
+  LarguraCampoBusca       = 248;  //campo Buscar na linha de título
+  LarguraMinimaCampoBusca = 160;  //o campo encolhe até aqui quando a linha de título não cabe
+  PaddingCelulaGrade      = 8;    //padding horizontal do texto nas células e nos títulos
+  MarcaSelecaoGrade       = 3;    //marca CorPrimaria na borda esquerda da 1ª célula da linha selecionada
+  DivisoriaGrade          = 1;    //linha inferior de cada linha e do título (CorBorda)
+  LarguraColunaNumero     = 72;   //Nº
+  LarguraColunaModelo     = 64;
+  LarguraColunaData       = 88;
+  LarguraColunaChaveMin   = 330;  //Chave: o resto da largura, no mínimo isto
+  LarguraColunaValor      = 120;
+  LarguraColunaBaseICMS   = 120;
+  LarguraColunaICMS       = 104;
+  LarguraColunaIBS        = 88;
+  LarguraColunaCBS        = 96;
+  LarguraTextoVazio       = 420;  //largura máxima do texto do estado vazio (mockup .vazio .t2)
+  EspacoVazio             = 8;    //ícone -> título -> texto -> botão no estado vazio
+
+  //Aviso flutuante (tokens.md, seção 5.11)
+  PaddingAvisoVertical    = 8;
+  PaddingAvisoHorizontal  = 16;
+  DistanciaAvisoBorda     = 16;   //acima da borda inferior da grade
+  DuracaoAvisoMs          = 2000; //some sozinho depois disto
 
   //Ícones
   TamanhoIconePequeno     = 16;   //botões, campos, cards

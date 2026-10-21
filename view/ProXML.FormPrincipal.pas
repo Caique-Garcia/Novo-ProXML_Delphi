@@ -81,6 +81,45 @@ type
   //destacado) e uma tela nova sem item (ex.: Sobre, etapa 4.7) deixa o menu sem item ativo
   TTelaMenu = tlResumo..tlConfiguracoes;
 
+  //Pintura do título de uma coluna da grade de notas (feita pela tela, com as cores do tema)
+  TDesenharTituloGrade = procedure(Sender: TObject; const Area: TRect; Coluna: TColumn) of object;
+
+  { Grade de notas (Plano 4, etapa 4.5; tokens.md 5.7). Classe intermediária com o mesmo nome do
+    TDBGrid da VCL: o .dfm continua declarando um TDBGrid comum e, em runtime, a grade ganha:
+    - altura fixa do título e das linhas, reaplicada sempre que a VCL recalcula as alturas (o TDBGrid
+      mede o título pela fonte a cada mudança de layout); fora do OnDrawColumnCell;
+    - título desenhado pela tela (OnDesenharTitulo): o TDBGrid não tem evento de pintura do título
+      e escreve o texto colado no topo da célula;
+    - aviso de redimensionamento (OnRedimensionar), inclusive quando a barra de rolagem aparece;
+    - aviso de clique numa nota (OnCliqueNota), com o botão esquerdo ou o direito: o TDBGrid move a
+      nota atual no clique, mas não dispara o OnMouseDown nas linhas de dados. }
+  TDBGrid = class(Vcl.DBGrids.TDBGrid)
+  private
+    FAlturaTitulo     : Integer;
+    FAlturaLinha      : Integer;
+    FAplicandoAlturas : Boolean;
+    FUltimoClique     : TPoint;
+    FOnDesenharTitulo : TDesenharTituloGrade;
+    FOnRedimensionar  : TNotifyEvent;
+    FOnCliqueNota     : TNotifyEvent;
+    procedure AplicarAlturas;
+  protected
+    procedure RowHeightsChanged; override;
+    procedure DrawCell(ACol, ARow: Longint; ARect: TRect; AState: TGridDrawState); override;
+    procedure Resize; override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+  public
+    //Alturas em pixels (já na escala da tela) do título e das linhas de dados
+    procedure DefinirAlturas(const AlturaTitulo, AlturaLinha: Integer);
+    //Linha de dados no ponto (coordenadas da grade): True se o ponto está sobre uma nota
+    function PontoEmNota(const X, Y: Integer): Boolean;
+    //O último clique (inclusive o duplo) foi sobre uma nota
+    function UltimoCliqueEmNota: Boolean;
+    property OnDesenharTitulo: TDesenharTituloGrade read FOnDesenharTitulo write FOnDesenharTitulo;
+    property OnRedimensionar: TNotifyEvent read FOnRedimensionar write FOnRedimensionar;
+    property OnCliqueNota: TNotifyEvent read FOnCliqueNota write FOnCliqueNota;
+  end;
+
   TFormPrincipal = class(TForm)
     PnlContainer: TPanel;
     PnlCabecalho: TPanel;
@@ -140,8 +179,31 @@ type
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     Memo1: TMemo;
+    //Tela Notas (etapa 4.5; mockup notas.html e glossário 6.1 a 6.32): linha de título com contador,
+    //ações e busca; grade com estado vazio e aviso flutuante "Chave copiada" por cima
+    PnlNotas: TPanel;
+    PnlNotasTitulo: TPanel;
+    LabelNotasTitulo: TLabel;
+    LabelNotasContador: TLabel;
+    PnlCopiarChave: TPanel;
+    PnlGerarDanfe: TPanel;
+    PnlExportarCSV: TPanel;
+    PnlCampoBusca: TPanel;
+    PnlCampoBuscaFundo: TPanel;
+    SkSvgBusca: TSkSvg;
+    EditBusca: TEdit;
     Panel5: TPanel;
     DBGrid1: TDBGrid;
+    PnlNotasVazio: TPanel;
+    SkSvgNotasVazio: TSkSvg;
+    LabelNotasVazioTitulo: TLabel;
+    LabelNotasVazioTexto: TLabel;
+    PnlNotasVazioBotao: TPanel;
+    PnlChaveCopiada: TPanel;
+    SkSvgChaveCopiada: TSkSvg;
+    LabelChaveCopiada: TLabel;
+    TimerChaveCopiada: TTimer;
+    FDMemTable1data_ordem: TIntegerField;
     DataSource1: TDataSource;
     FDMemTable1: TFDMemTable;
     FDMemTable1numero: TIntegerField;
@@ -158,7 +220,7 @@ type
     PnlMenuItens: TPanel;
     PnlMenuBorda: TPanel;
     PopupMenu: TPopupMenu;
-    GerarPDF1: TMenuItem;
+    mnuCopiarChave: TMenuItem;
     Loading: TTabSheet;
     FormRelatorio: TFormRelatorios;
     FDMemTable1xml: TStringField;
@@ -254,7 +316,7 @@ type
     procedure SelecionarPastaClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure GerarPDF1Click(Sender: TObject);
+    procedure mnuCopiarChaveClick(Sender: TObject);
     procedure GravarNotasDB(const Relatorio: TTipoRelatorio);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure GerarDANFe1Click(Sender: TObject);
@@ -280,8 +342,57 @@ type
     FFrameCarregando    : TFrameLoad;     //animação Lottie (ProXML.FrameLoad), criada em runtime
     FJanelaPaginas      : TWndMethod;     //WindowProc original do PageControl1
     FAjustandoRelatorios: Boolean;        //evita reentrada no layout da tela Relatórios
-    procedure SetTextoTranferencia(const Text: String);
+    //Etapa 4.5: tela Notas
+    FNotasModelo        : TFDMemTable;    //cópia do cursor da FDMemTable1 só com o filtro de modelo (cards, relatórios, Enviar)
+    FBusca              : string;         //texto da busca já normalizado (sem espaços); vazio = sem busca
+    FNotaSelecionada    : Boolean;        //o usuário escolheu uma nota na grade (clique ou teclado)
+    FColunaOrdem        : string;         //campo da coluna ordenada
+    FOrdemDecrescente   : Boolean;
+    FAjustandoColunas   : Boolean;        //evita reentrada no ajuste das colunas da grade
+    FAjustandoTituloNotas: Boolean;       //evita reentrada no layout da linha de título da tela Notas
+    function  CopiarTextoTolerante(const Texto: string): Boolean;
     procedure AjustarAlturaLinhasGrade;
+    procedure PrepararTelaNotas;
+    procedure PrepararColuna(Coluna: TColumn; const Largura: Integer; const Alinhamento: TAlignment);
+    procedure AtualizarTelaNotas;
+    procedure AtualizarFiltroGrade;
+    procedure AplicarBusca;
+    procedure LimparBusca;
+    procedure AplicarOrdenacao;
+    procedure AjustarLinhaTituloNotas;
+    procedure AjustarColunasGrade;
+    procedure AjustarEstadoVazio;
+    procedure AjustarAvisoChaveCopiada;
+    procedure AjustarEspacoCards(const Tela: TTela);
+    procedure MarcarNotaSelecionada(const Selecionada: Boolean);
+    procedure MostrarAvisoChaveCopiada;
+    procedure AtualizarBordaCampo(Borda: TPanel; Icone: TSkSvg; Edit: TEdit; const Margem: Integer;
+      const ComFoco: Boolean);
+    function  TituloColuna(const Campo: string): string;
+    function  TextoQuantidadeNotas(const Quantidade: Integer): string;
+    procedure FDMemTable1FiltrarBusca(DataSet: TDataSet; var Accept: Boolean);
+    procedure CampoMoedaGetText(Sender: TField; var Text: string; DisplayText: Boolean);
+    procedure DBGrid1DrawColumnCell(Sender: TObject; const Area: TRect; DataCol: Integer;
+      Column: TColumn; State: TGridDrawState);
+    procedure DBGrid1DesenharTitulo(Sender: TObject; const Area: TRect; Coluna: TColumn);
+    procedure DBGrid1Redimensionar(Sender: TObject);
+    procedure DBGrid1TitleClick(Column: TColumn);
+    procedure DBGrid1CliqueNota(Sender: TObject);
+    procedure DBGrid1DblClick(Sender: TObject);
+    procedure DBGrid1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure Panel5Resize(Sender: TObject);
+    procedure PnlNotasTituloResize(Sender: TObject);
+    procedure EditBuscaChange(Sender: TObject);
+    procedure EditBuscaKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure EditBuscaEnter(Sender: TObject);
+    procedure EditBuscaExit(Sender: TObject);
+    procedure PopupMenuPopup(Sender: TObject);
+    procedure TimerChaveCopiadaTimer(Sender: TObject);
+    procedure CopiarChaveClick(Sender: TObject);
+    procedure GerarDanfeClick(Sender: TObject);
+    procedure ExportarCSVClick(Sender: TObject);
+    procedure NotasVazioSelecionarPastaClick(Sender: TObject);
+    procedure NotasVazioLimparBuscaClick(Sender: TObject);
     procedure GerarRelatorio(const Relatorio: TTipoRelatorio);
     procedure FinalizaRelatorio(const Relatorio: TTipoRelatorio);
     procedure AbrirRelatorioIBSCBS;
@@ -300,7 +411,6 @@ type
     procedure CriarAtalhos;
     function  CriarRolagem(Painel: TPanel): TScrollBox;
     procedure RolagemResize(Sender: TObject);
-    function  TemNotaNaGrade: Boolean;
     procedure RestaurarPreferencias;
     procedure SalvarPreferencias;
     procedure GuardarUltimaPasta(const Pasta: string);
@@ -393,6 +503,28 @@ type
     //Botões "Gerar relatório" da tela Relatórios (criados em PrepararTelaRelatorios)
     btnGerarRelNotas   : TProBotao;
     btnGerarRelIBSCBS  : TProBotao;
+    //Tela Notas (etapa 4.5): ações da linha de título e botão do estado vazio (PrepararTelaNotas)
+    btnCopiarChave     : TProBotao;
+    btnGerarDanfe      : TProBotao;
+    btnExportarCSV     : TProBotao;
+    btnNotasVazio      : TProBotao;
+    //Notas do filtro de modelo (sem a busca): cards, relatórios, Enviar (PD-1 e D5)
+    function  NotasDoModelo: TFDMemTable;
+    function  TemNotaNoModelo: Boolean;
+    //Há linhas visíveis na grade (filtro de modelo + busca)
+    function  TemNotaVisivel: Boolean;
+    //Há uma nota escolhida pelo usuário na grade (Copiar chave e Gerar DANFE)
+    function  NotaSelecionada: Boolean;
+    //Copia a chave da nota selecionada (botão, menu da grade e Ctrl+C)
+    procedure CopiarChaveSelecionada;
+    //Gera o DANFE da nota selecionada (botão, menu da grade, duplo clique e Ctrl+D)
+    procedure GerarDanfeSelecionada;
+    //Conteúdo do CSV das linhas visíveis da grade (filtro + busca, na ordem da grade; PD-2)
+    function  MontarCSV: string;
+    //Grava o CSV em UTF-8 com BOM. Erros sobem como exceção
+    procedure ExportarCSV(const Caminho: string);
+    //Texto da busca já aplicado na grade
+    property  Busca: string read FBusca;
     //Troca de tela (única rotina): mostra a aba da tela e sincroniza o item ativo do menu
     procedure MostrarTela(const Tela: TTela);
     //Tela exibida agora (pela aba ativa do PageControl1)
@@ -418,9 +550,6 @@ type
     property Totais : TTotaisNotas read FTotais;
   end;
 
-Type
-  TDBGridPadrao = class(TDBGrid);
-
 var
   FormPrincipal: TFormPrincipal;
 
@@ -435,6 +564,7 @@ uses
   {$ENDIF}
   System.IOUtils,
   System.Math,
+  System.Types,
   Winapi.CommCtrl,
   ProXML.Icones;
 
@@ -443,6 +573,100 @@ uses
 const
   //Tempo máximo de espera pelo PDF do DANFE (milissegundos)
   TEMPO_LIMITE_PDF_MS = 15000;
+
+  //Copiar chave com a área de transferência presa por outro programa: tenta de novo por cerca de
+  //1 s (decisão da 4.2; glossário 6.32)
+  TEMPO_AREA_TRANSFERENCIA_MS     = 1000;
+  INTERVALO_AREA_TRANSFERENCIA_MS = 50;
+
+  //Seta no fim do título da coluna ordenada (tokens.md 5.7; glossário 6.10): triângulo para cima (U+25B2) crescente, para baixo (U+25BC) decrescente
+  SETA_CRESCENTE   = #$25B2;
+  SETA_DECRESCENTE = #$25BC;
+
+{ TDBGrid (grade de notas, etapa 4.5) }
+
+procedure TDBGrid.DefinirAlturas(const AlturaTitulo, AlturaLinha: Integer);
+begin
+    FAlturaTitulo := AlturaTitulo;
+    FAlturaLinha  := AlturaLinha;
+    AplicarAlturas;
+end;
+
+procedure TDBGrid.AplicarAlturas;
+begin
+    //A VCL mede de novo o título e as linhas a cada mudança de layout (abrir o DataSet, filtro,
+    //colunas, fonte, escala): as alturas da tela voltam logo em seguida. Alterar DefaultRowHeight
+    //zera as alturas individuais, por isso a do título vem depois
+    if FAplicandoAlturas or (FAlturaLinha <= 0) or (([csLoading, csDestroying] * ComponentState) <> []) then
+        Exit;
+
+    FAplicandoAlturas := True;
+    try
+        if DefaultRowHeight <> FAlturaLinha then
+            DefaultRowHeight := FAlturaLinha;
+        if (dgTitles in Options) and (RowCount > 0) and (RowHeights[0] <> FAlturaTitulo) then
+            RowHeights[0] := FAlturaTitulo;
+    finally
+        FAplicandoAlturas := False;
+    end;
+end;
+
+procedure TDBGrid.RowHeightsChanged;
+begin
+    inherited;
+    AplicarAlturas;
+end;
+
+procedure TDBGrid.DrawCell(ACol, ARow: Longint; ARect: TRect; AState: TGridDrawState);
+var
+    Coluna: TColumn;
+begin
+    //Título: pintado pela tela (fundo, texto centralizado na altura, seta e divisória)
+    if (ARow = 0) and (dgTitles in Options) and Assigned(FOnDesenharTitulo) and
+       (ACol >= IndicatorOffset) and (RawToDataColumn(ACol) < Columns.Count) then
+    begin
+        Coluna := Columns[RawToDataColumn(ACol)];
+        if Coluna.Showing then
+        begin
+            FOnDesenharTitulo(Self, ARect, Coluna);
+            Exit;
+        end;
+    end;
+
+    inherited;
+end;
+
+procedure TDBGrid.Resize;
+begin
+    inherited;
+    if Assigned(FOnRedimensionar) then
+        FOnRedimensionar(Self);
+end;
+
+function TDBGrid.PontoEmNota(const X, Y: Integer): Boolean;
+var
+    Celula: TGridCoord;
+begin
+    Celula := MouseCoord(X, Y);
+    Result := DataLink.Active and (not DataLink.DataSet.IsEmpty) and (Celula.X >= IndicatorOffset) and
+              (Celula.Y >= 1) and (Celula.Y < RowCount);
+end;
+
+function TDBGrid.UltimoCliqueEmNota: Boolean;
+begin
+    Result := PontoEmNota(FUltimoClique.X, FUltimoClique.Y);
+end;
+
+procedure TDBGrid.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+    //O TDBGrid move a nota atual para a linha clicada (botão esquerdo ou direito) e, no duplo
+    //clique, chama o DblClick: o ponto fica guardado para a tela saber onde foi o clique
+    FUltimoClique := Point(X, Y);
+    inherited;
+    if (not (ssDouble in Shift)) and (Button in [mbLeft, mbRight]) and PontoEmNota(X, Y) and
+       Assigned(FOnCliqueNota) then
+        FOnCliqueNota(Self);
+end;
 
 procedure TFormPrincipal.ApplicationException(Sender: TObject; E: Exception);
 begin
@@ -453,8 +677,9 @@ end;
 procedure TFormPrincipal.btnEnviarEmailClick(Sender: TObject);
 begin
     //Enviar Email com arquivos compactados.
-    //Os XMLs são separados e compactados agora, com o filtro de modelo atual da grade
-    if (not FDMemTable1.Active) or FDMemTable1.IsEmpty then
+    //Os XMLs são separados e compactados agora, com o filtro de modelo atual (a busca da tela
+    //Notas não vale para o Enviar: decisão D5)
+    if not TemNotaNoModelo then
     begin
         messagedlg('Sem arquivos para enviar!', mtInformation	, [mbOk], 0);
         Exit;
@@ -466,8 +691,9 @@ end;
 
 procedure TFormPrincipal.AtualizarTotais;
 begin
-    //Recalcula os totais a partir das notas da grade (respeita o filtro ativo)
-    FTotais := CalcularTotais(FDMemTable1);
+    //Recalcula os totais a partir das notas do filtro de modelo. A busca da tela Notas não entra
+    //nos cards (PD-1): por isso a soma usa a cópia do cursor só com o filtro de modelo
+    FTotais := CalcularTotais(NotasDoModelo);
 
     LabelValorTotal.Caption := FormatarMoeda(FTotais.ValorTotal);
     LabelbaseICMS.Caption   := FormatarMoeda(FTotais.BaseICMS);
@@ -480,6 +706,9 @@ begin
 
     //A tela Relatórios mostra o filtro e as contagens: acompanha o filtro de modelo e o Processar
     AtualizarTelaRelatorios;
+
+    //Tela Notas: contador, ações e estado vazio (etapa 4.5)
+    AtualizarTelaNotas;
 end;
 
 function TFormPrincipal.DescricaoFiltroModelo: string;
@@ -493,12 +722,10 @@ end;
 
 procedure TFormPrincipal.AjustarAlturaLinhasGrade;
 begin
-    //Linhas da grade com 25 px. Não chamar no OnDrawColumnCell: alterar DefaultRowHeight
-    //invalida a grade e ela fica se repintando sem parar.
-    //O DBGrid recalcula a altura quando o layout muda (ex.: abrir o DataSet), por isso
-    //reaplica depois de processar e de trocar o filtro.
-    if TDBGridPadrao(DBGrid1).DefaultRowHeight <> 25 then
-        TDBGridPadrao(DBGrid1).DefaultRowHeight := 25;
+    //Título de 32 px e linhas de 28 px (tokens.md 4.1 e 5.7), definidos uma vez aqui (FormCreate e
+    //troca de escala), fora do OnDrawColumnCell: alterar a altura durante a pintura faz a grade se
+    //repintar sem parar. A grade (TDBGrid desta unit) reaplica as alturas quando a VCL as recalcula
+    DBGrid1.DefinirAlturas(Escalar(AlturaTituloGrade), Escalar(AlturaLinhaGrade));
 end;
 
 function TFormPrincipal.ModeloSelecionado: Integer;
@@ -514,34 +741,35 @@ end;
 
 procedure TFormPrincipal.AplicarFiltroModelo;
 var
-    Modelo: Integer;
+    Modelo : Integer;
+    Notas  : TFDMemTable;
 begin
-    //Filtra a grade pelo modelo escolhido e recalcula todos os cards.
-    //O mesmo filtro vai para o DMConfig, usado pelos relatórios (QryNotas e QryNotasIBSCBS).
+    //Filtra a grade pelo modelo escolhido (junto com a busca da tela Notas) e recalcula todos os cards.
+    //O mesmo filtro vai para o DMConfig, usado pelos relatórios (QryNotas e QryNotasIBSCBS), e para a
+    //cópia do cursor sem a busca (NotasDoModelo), usada nos cards, nos relatórios e no Enviar
     Modelo := ModeloSelecionado;
 
-    FDMemTable1.DisableControls;
-    try
+    Notas := NotasDoModelo;
+    if Notas.Active then
+    begin
         if Modelo = FILTRO_MODELO_TODOS then
         begin
-            FDMemTable1.Filtered := False;
-            FDMemTable1.Filter   := '';
+            Notas.Filtered := False;
+            Notas.Filter   := '';
         end
         else
         begin
-            FDMemTable1.Filter   := 'modelo = ' + IntToStr(Modelo);
-            FDMemTable1.Filtered := True;
+            Notas.Filter   := 'modelo = ' + IntToStr(Modelo);
+            Notas.Filtered := True;
         end;
-
-        if FDMemTable1.Active then
-            FDMemTable1.First;
-    finally
-        FDMemTable1.EnableControls;
     end;
+
+    //Outro modelo: a nota escolhida deixa de valer
+    FNotaSelecionada := False;
+    AtualizarFiltroGrade;
 
     DMConfig.FiltroModelo := Modelo;
     AtualizarTotais;
-    AjustarAlturaLinhasGrade;
 end;
 
 procedure TFormPrincipal.SeletorModeloChange(Sender: TObject);
@@ -603,7 +831,7 @@ end;
 procedure TFormPrincipal.FinalizaRelatorio(const Relatorio: TTipoRelatorio);
 begin
    //Finaliza o relatório
-   //Garante que o relatório use o mesmo modelo da grade e dos cards
+   //Garante que o relatório use o mesmo modelo dos cards (a busca da tela Notas não entra: D5)
    DMConfig.FiltroModelo := ModeloSelecionado;
 
    if Relatorio = trIBSCBS then
@@ -617,7 +845,7 @@ begin
         FormRelatorio.SetTotal(LabelValorTotal.Caption);
         FormRelatorio.SetTotalBC(LabelbaseICMS.Caption);
         FormRelatorio.SetTotalICMS(LabelValorICMS.Caption);
-        FormRelatorio.SetQtRegistros(IntToStr(FDMemTable1.RecordCount));
+        FormRelatorio.SetQtRegistros(IntToStr(NotasDoModelo.RecordCount));
         FormRelatorio.SetDescricaoFiltro(DescricaoFiltroModelo);
         FormRelatorio.GerarRelatorio;
         //Visualização fechada: GravarNotasDB fecha a tela Carregando e volta para Relatórios
@@ -662,7 +890,7 @@ begin
     //Confere se a grade (filtrada) tem notas, grava no banco e abre o relatório escolhido.
     //Na tela Relatórios os botões ficam desabilitados nesses casos (dicas 8.8 e 8.10): as caixas
     //abaixo só aparecem se o relatório for pedido mesmo assim (glossário 8.9 e 8.10)
-    if not TemNotaNaGrade then
+    if not TemNotaNoModelo then
     begin
        messagedlg('Nenhuma nota para o relatório. Processe uma pasta primeiro.', mtInformation	, [mbOk], 0);
        Exit;
@@ -709,6 +937,8 @@ begin
    AplicarVisualCabecalho;
    CriarBarraPasta;
    PrepararCards;
+   //Etapa 4.5: tela Notas (linha de título, busca, ordenação, grade, estado vazio, aviso)
+   PrepararTelaNotas;
    FRolagemEnviar := CriarRolagem(Panel10);
    FRolagemConfig := CriarRolagem(PanelCorpoConfig);
 
@@ -749,6 +979,7 @@ var
   varPath: string;
   varDestino: string;
   Marcador: TBookmark;
+  Notas: TFDMemTable;
 begin
     //Comprime os arquivos XML
     varPath := ExtractFilePath(ParamStr(0));
@@ -761,27 +992,28 @@ begin
 
     if not SysUtils.DirectoryExists(varPath + 'NFCe\ProXML') then SysUtils.ForceDirectories(varPath + '\NFCe\ProXML');
 
-    //Copia as notas visíveis na grade (filtro atual) sem mexer na tela e
-    //sem perder o registro selecionado
-    FDMemTable1.DisableControls;
+    //Copia as notas do filtro de modelo (a busca da tela Notas não vale para o Enviar: D5), sem
+    //mexer na grade. A chave tem 44 dígitos (D4): o arquivo sai como <chave>-nfe.xml (H3)
+    Notas := NotasDoModelo;
+    Notas.DisableControls;
     try
-        Marcador := FDMemTable1.GetBookmark;
+        Marcador := Notas.GetBookmark;
         try
-            FDMemTable1.First;
-            while not FDMemTable1.Eof do
+            Notas.First;
+            while not Notas.Eof do
             begin
-                varDestino := varPath + 'NFCe\ProXML\'+FDMemTable1.FieldByName('chave').AsString+'-nfe.xml';
+                varDestino := varPath + 'NFCe\ProXML\'+Notas.FieldByName('chave').AsString+'-nfe.xml';
 
-                CopyFile(PChar(FDMemTable1.FieldByName('xml').AsString), PChar(varDestino), False);
-                FDMemTable1.Next;
+                CopyFile(PChar(Notas.FieldByName('xml').AsString), PChar(varDestino), False);
+                Notas.Next;
             end;
         finally
-            if (Marcador <> nil) and FDMemTable1.BookmarkValid(Marcador) then
-                FDMemTable1.GotoBookmark(Marcador);
-            FDMemTable1.FreeBookmark(Marcador);
+            if (Marcador <> nil) and Notas.BookmarkValid(Marcador) then
+                Notas.GotoBookmark(Marcador);
+            Notas.FreeBookmark(Marcador);
         end;
     finally
-        FDMemTable1.EnableControls;
+        Notas.EnableControls;
     end;
 
     if FileExists(varPath + 'NFCe\NFCe_ProXML.rar') then
@@ -835,12 +1067,7 @@ end;
 
 procedure TFormPrincipal.FormShow(Sender: TObject);
 begin
-   //Ajustar linhas DBGrid
-   try
-    AjustarAlturaLinhasGrade;
-   except
-   end;
-
+   //A altura das linhas da grade é definida uma vez no FormCreate (PrepararTelaNotas)
    try
     DataSource1.DataSet.First;
    except
@@ -864,10 +1091,32 @@ begin
    end;
 end;
 
-procedure TFormPrincipal.SetTextoTranferencia(const Text: String);
+function TFormPrincipal.CopiarTextoTolerante(const Texto: string): Boolean;
+var
+    Inicio: Cardinal;
 begin
-    //Setar texto do NCM na area de transferencia
-    Clipboard.AsText := Text;
+    //Copia o texto para a área de transferência. Se outro programa estiver com ela aberta, tenta
+    //de novo por cerca de 1 s; se ainda falhar, avisa numa caixa com OK (glossário 6.32).
+    //Nenhuma exceção sai daqui
+    Result := False;
+    Inicio := GetTickCount;
+    repeat
+        try
+            Clipboard.AsText := Texto;
+            Result := True;
+        except
+            on E: Exception do
+            begin
+                if (GetTickCount - Inicio) >= TEMPO_AREA_TRANSFERENCIA_MS then
+                    Break;
+                Sleep(INTERVALO_AREA_TRANSFERENCIA_MS);
+            end;
+        end;
+    until Result;
+
+    if not Result then
+        messagedlg('Não foi possível copiar a chave: outro programa está usando a área de transferência. ' +
+                   'Tente de novo em alguns segundos.', mtWarning, [mbOk], 0);
 end;
 
 function TFormPrincipal.ConfigurarLayoutDanfe(out Mensagem: string): Boolean;
@@ -973,6 +1222,7 @@ begin
 
     FGerandoDanfe := True;
     GerarDANFe1.Enabled := False;
+    AtualizarTelaNotas;
     //Tela Carregando com a animação durante a geração e a espera do PDF (glossário 7.8 e 7.9).
     //Em qualquer caminho (sucesso, erro ou exceção) o finally volta para Notas e reabilita o menu;
     //nos erros a tela volta antes da mensagem, para a caixa aparecer sobre a tela Notas
@@ -1054,27 +1304,46 @@ begin
         EncerrarCarregando(tlNotas);
         GerarDANFe1.Enabled := True;
         FGerandoDanfe := False;
+        AtualizarTelaNotas;
     end;
 end;
 
 procedure TFormPrincipal.GerarDANFe1Click(Sender: TObject);
 begin
-  if DBGrid1.DataSource.DataSet.IsEmpty then
-    Exit;
-
-  GerarDanfe(DBGrid1.DataSource.DataSet.FieldByName('xml').AsString,
-             DBGrid1.DataSource.DataSet.FieldByName('numero').AsString);
+  //"Gerar DANFE" do menu da grade (glossário 6.12): mesmo caminho do botão, do duplo clique e do Ctrl+D
+  GerarDanfeSelecionada;
 end;
 
-procedure TFormPrincipal.GerarPDF1Click(Sender: TObject);
+procedure TFormPrincipal.mnuCopiarChaveClick(Sender: TObject);
 begin
-   SetTextoTranferencia(DBGrid1.DataSource.DataSet.FieldByName('chave').Value);
+  //"Copiar chave" do menu da grade (glossário 6.11): mesmo caminho do botão e do Ctrl+C
+  CopiarChaveSelecionada;
+end;
+
+procedure TFormPrincipal.GerarDanfeSelecionada;
+begin
+  //A grade mostra só as notas do filtro de modelo e da busca: a nota atual é a escolhida na tela
+  if not TemNotaVisivel then
+    Exit;
+
+  GerarDanfe(FDMemTable1.FieldByName('xml').AsString, FDMemTable1.FieldByName('numero').AsString);
+end;
+
+procedure TFormPrincipal.CopiarChaveSelecionada;
+begin
+  //Chave de 44 dígitos (D4). Copiou: aviso flutuante "Chave copiada" (glossário 6.19)
+  if not TemNotaVisivel then
+    Exit;
+
+  if CopiarTextoTolerante(FDMemTable1.FieldByName('chave').AsString) then
+    MostrarAvisoChaveCopiada;
 end;
 
 procedure TFormPrincipal.GravarNotasDB(const Relatorio: TTipoRelatorio);
 var
   Titulo : string;
   Legenda: string;
+  Notas  : TFDMemTable;
 begin
   //Grava as notas no banco de dados SQLite e abre o relatório escolhido (notas ou IBS/CBS).
   //A gravação roda na thread principal, numa transação: a conexão DMConfig.Conexao também
@@ -1084,6 +1353,10 @@ begin
   if not FDMemTable1.Active then
     FDMemTable1.Open;
 
+  //Grava as notas lidas na ordem de leitura e conta só as do filtro de modelo: a busca e a ordenação
+  //da tela Notas não valem para os relatórios (decisão D5)
+  Notas := NotasDoModelo;
+
   //Tela Carregando antes de começar a gravar (glossário 8.15 e 8.16). Fluxo: Carregando ->
   //visualização do QuickReport -> volta para Relatórios, com sucesso ou erro (o finally garante
   //a volta e o menu reabilitado; nos erros a tela volta antes da mensagem)
@@ -1091,17 +1364,17 @@ begin
     Titulo := 'Gerando o Relatório IBS/CBS' + #$2026
   else
     Titulo := 'Gerando o Relatório de Notas' + #$2026;
-  if FDMemTable1.RecordCount = 1 then
+  if Notas.RecordCount = 1 then
     Legenda := 'Gravando 1 nota e montando a visualização.'
   else
-    Legenda := 'Gravando ' + IntToStr(FDMemTable1.RecordCount) + ' notas e montando a visualização.';
+    Legenda := 'Gravando ' + IntToStr(Notas.RecordCount) + ' notas e montando a visualização.';
 
   IniciarCarregando(Titulo, Legenda);
   try
     Screen.Cursor := crHourGlass;
     try
       try
-        DMConfig.GravarNotas(FDMemTable1);
+        DMConfig.GravarNotas(Notas);
       except
         on E: Exception do
         begin
@@ -1221,13 +1494,19 @@ begin
     //P3: "há pasta?" só olha se o campo está preenchido (a instrução fica no TextHint)
     if TemPasta then
     begin
-      //Nova pasta: o seletor de modelo volta para "Todos" (grade, cards e relatórios)
+      //Nova pasta: o seletor de modelo volta para "Todos" (grade, cards e relatórios) e a busca da
+      //tela Notas é limpa (as notas novas aparecem todas)
       SeletorModelo.ItemIndex := 0;
+      LimparBusca;
       AplicarFiltroModelo;
 
       CalculadoraXML.CaminhoDiretorio := Trim(EditCaminho.Text);
       CalculadoraXML.ProcessarXMLs;
-      AjustarAlturaLinhasGrade;
+      //Pasta nova: nenhuma nota escolhida, lista no começo
+      FNotaSelecionada := False;
+      if FDMemTable1.Active then
+        FDMemTable1.First;
+      AtualizarTelaNotas;
       DBGrid1.Refresh;
     end else
     begin
@@ -1276,9 +1555,42 @@ begin
     actGerarDanfe      := NovaAcao(Vcl.Menus.ShortCut(Ord('D'), [ssCtrl]), AcaoGerarDanfeExecute, AcaoGerarDanfeUpdate);
 end;
 
-function TFormPrincipal.TemNotaNaGrade: Boolean;
+function TFormPrincipal.NotasDoModelo: TFDMemTable;
+begin
+    //Cópia do cursor da FDMemTable1 (mesmos dados, sem cópia de memória) com o seu próprio filtro,
+    //só de modelo, sem a busca e sem a ordenação da grade (PD-1 e D5). Refeita se a FDMemTable1 for
+    //recriada (outra tabela em memória)
+    if FNotasModelo = nil then
+        FNotasModelo := TFDMemTable.Create(Self);
+
+    if FDMemTable1.Active and ((not FNotasModelo.Active) or (FNotasModelo.Table <> FDMemTable1.Table)) then
+    begin
+        //AReset = True: a cópia não herda o filtro, o índice nem o OnFilterRecord (busca) da grade
+        FNotasModelo.CloneCursor(FDMemTable1, True, False);
+        FNotasModelo.OnFilterRecord := nil;
+        if (SeletorModelo <> nil) and (ModeloSelecionado <> FILTRO_MODELO_TODOS) then
+        begin
+            FNotasModelo.Filter   := 'modelo = ' + IntToStr(ModeloSelecionado);
+            FNotasModelo.Filtered := True;
+        end;
+    end;
+
+    Result := FNotasModelo;
+end;
+
+function TFormPrincipal.TemNotaNoModelo: Boolean;
+begin
+    Result := NotasDoModelo.Active and (not NotasDoModelo.IsEmpty);
+end;
+
+function TFormPrincipal.TemNotaVisivel: Boolean;
 begin
     Result := FDMemTable1.Active and (not FDMemTable1.IsEmpty);
+end;
+
+function TFormPrincipal.NotaSelecionada: Boolean;
+begin
+    Result := FNotaSelecionada and TemNotaVisivel;
 end;
 
 procedure TFormPrincipal.AcaoSelecionarPastaExecute(Sender: TObject);
@@ -1300,35 +1612,38 @@ end;
 
 procedure TFormPrincipal.AcaoBuscarExecute(Sender: TObject);
 begin
-    //Ctrl+F: a busca chega na etapa 4.5; por enquanto leva para a tela Notas (com o menu
-    //sincronizado) e o foco para a grade de notas
+    //Ctrl+F: leva para a tela Notas (com o menu sincronizado) e põe o foco no campo Buscar
+    //(glossário 6.18), com o texto selecionado para digitar outra busca por cima
     MostrarTela(tlNotas);
-    if DBGrid1.CanFocus then
-        DBGrid1.SetFocus;
+    if EditBusca.CanFocus then
+    begin
+        EditBusca.SetFocus;
+        EditBusca.SelectAll;
+    end;
 end;
 
 procedure TFormPrincipal.AcaoCopiarChaveExecute(Sender: TObject);
 begin
-    //Ctrl+C: mesmo que "Copiar Chave" do menu da grade
-    GerarPDF1Click(GerarPDF1);
+    //Ctrl+C: mesmo que "Copiar chave" do botão e do menu da grade
+    CopiarChaveSelecionada;
 end;
 
 procedure TFormPrincipal.AcaoCopiarChaveUpdate(Sender: TObject);
 begin
-    //Só com a grade em foco: nos campos de texto o Ctrl+C continua copiando o texto
-    actCopiarChave.Enabled := (ActiveControl = DBGrid1) and TemNotaNaGrade;
+    //Só com a grade em foco e uma nota escolhida: nos campos de texto o Ctrl+C continua copiando o texto
+    actCopiarChave.Enabled := (ActiveControl = DBGrid1) and NotaSelecionada;
 end;
 
 procedure TFormPrincipal.AcaoGerarDanfeExecute(Sender: TObject);
 begin
-    //Ctrl+D: mesmo que "Gerar DANFe" do menu da grade
-    GerarDANFe1Click(GerarDANFe1);
+    //Ctrl+D: mesmo que "Gerar DANFE" do botão e do menu da grade
+    GerarDanfeSelecionada;
 end;
 
 procedure TFormPrincipal.AcaoGerarDanfeUpdate(Sender: TObject);
 begin
-    //Só na tela Notas, com nota na grade e sem outro DANFE em andamento
-    actGerarDanfe.Enabled := (TelaAtual = tlNotas) and TemNotaNaGrade and (not FGerandoDanfe);
+    //Só na tela Notas, com uma nota escolhida e sem outro DANFE em andamento
+    actGerarDanfe.Enabled := (TelaAtual = tlNotas) and NotaSelecionada and (not FGerandoDanfe);
 end;
 
 function TFormPrincipal.CriarRolagem(Painel: TPanel): TScrollBox;
@@ -1591,6 +1906,13 @@ begin
         AjustarLargurasBarraPasta;
         AtualizarBordaCampoPasta(EditCaminho.Focused);
         AjustarFonteValoresCards;
+        //Etapa 4.5: tela Notas (alturas da grade, colunas, linha de título e campo Buscar)
+        AjustarAlturaLinhasGrade;
+        AtualizarBordaCampo(PnlCampoBusca, SkSvgBusca, EditBusca, 0, EditBusca.Focused);
+        AjustarLinhaTituloNotas;
+        AjustarColunasGrade;
+        AjustarEstadoVazio;
+        AjustarEspacoCards(TelaAtual);
         //Etapa 4.4: tela Relatórios e tela Carregando
         AjustarIndicadorFiltro;
         AjustarLayoutRelatorios;
@@ -1747,8 +2069,15 @@ begin
 end;
 
 procedure TFormPrincipal.AtualizarBordaCampoPasta(const ComFoco: Boolean);
+begin
+    //Campo da pasta (tokens.md 5.3; a rotina é a mesma do campo Buscar da tela Notas)
+    AtualizarBordaCampo(PnlCampoPasta, SkSvgPasta, EditCaminho, 0, ComFoco);
+end;
+
+procedure TFormPrincipal.AtualizarBordaCampo(Borda: TPanel; Icone: TSkSvg; Edit: TEdit; const Margem: Integer;
+  const ComFoco: Boolean);
 var
-    Borda      : Integer;
+    Espessura  : Integer;
     Diferenca  : Integer;
     Interno    : Integer;
     AlturaTexto: Integer;
@@ -1756,38 +2085,38 @@ var
 begin
     //Campo (tokens.md 5.3): borda de 1 px CorBordaCampo; com foco, 2 px CorPrimaria.
     //A borda é o painel de fora (cor + Padding); ao engrossar, o espaço interno diminui o mesmo
-    //tanto para o ícone e o texto não mudarem de lugar
+    //tanto para o ícone e o texto não mudarem de lugar. Margem: reservado (0 nos dois campos)
     if ComFoco then
     begin
-        Borda := Escalar(BordaCampoFoco);
-        PnlCampoPasta.Color := CorPrimaria;
+        Espessura := Escalar(BordaCampoFoco);
+        Borda.Color := CorPrimaria;
     end
     else
     begin
-        Borda := Escalar(BordaCampo);
-        PnlCampoPasta.Color := CorBordaCampo;
+        Espessura := Escalar(BordaCampo);
+        Borda.Color := CorBordaCampo;
     end;
-    Diferenca := Borda - Escalar(BordaCampo);
-    PnlCampoPasta.Padding.SetBounds(Borda, Borda, Borda, Borda);
+    Diferenca := Espessura - Escalar(BordaCampo);
+    Borda.Padding.SetBounds(Espessura, Espessura + Margem, Espessura, Espessura + Margem);
 
     //Ícone de 16 px e texto centralizados na altura interna do campo
     Interno := Escalar(AlturaCampo) - 2 * Escalar(BordaCampo);
     Medida := TBitmap.Create;
     try
-        Medida.Canvas.Font.Assign(EditCaminho.Font);
+        Medida.Canvas.Font.Assign(Edit.Font);
         AlturaTexto := Medida.Canvas.TextHeight('Ag');
     finally
         Medida.Free;
     end;
 
-    SkSvgPasta.Margins.SetBounds(Escalar(PaddingCampo) - Diferenca,
-                                 Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca),
-                                 0,
-                                 Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca));
-    EditCaminho.Margins.SetBounds(Escalar(Espaco1),
-                                  Max(0, (Interno - AlturaTexto) div 2 - Diferenca),
-                                  Escalar(PaddingCampo) - Diferenca,
-                                  Max(0, Interno - AlturaTexto - (Interno - AlturaTexto) div 2 - Diferenca));
+    Icone.Margins.SetBounds(Escalar(PaddingCampo) - Diferenca,
+                            Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca),
+                            0,
+                            Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca));
+    Edit.Margins.SetBounds(Escalar(Espaco1),
+                           Max(0, (Interno - AlturaTexto) div 2 - Diferenca),
+                           Escalar(PaddingCampo) - Diferenca,
+                           Max(0, Interno - AlturaTexto - (Interno - AlturaTexto) div 2 - Diferenca));
 end;
 
 procedure TFormPrincipal.AplicarVisualCabecalho;
@@ -1955,6 +2284,7 @@ begin
     //Sender é a aba que acabou de aparecer (o ActivePage ainda pode ser a anterior)
     Tela := TelaDaAba(Sender as TTabSheet);
     PnlCards.Visible := not (Tela in [tlEnviar, tlConfiguracoes]);
+    AjustarEspacoCards(Tela);
 
     //Garantia extra: o item ativo do menu acompanha a aba mesmo se ela for trocada direto no
     //PageControl (a troca normal passa por MostrarTela)
@@ -2010,7 +2340,7 @@ begin
 
     for I := Low(Valores) to High(Valores) do
     begin
-        if TemNotaNaGrade then
+        if TemNotaNoModelo then
             AplicarFonte(Valores[I].Font, FonteDestaque, TamanhoValorCard, CorTexto)
         else
             AplicarFonte(Valores[I].Font, FonteTexto, TamanhoValorCard, CorTextoSecundario);
@@ -2154,6 +2484,7 @@ begin
 
     //D2: os cards só somem em Enviar e Configurações
     PnlCards.Visible := not (Tela in [tlEnviar, tlConfiguracoes]);
+    AjustarEspacoCards(Tela);
     SincronizarMenu(Tela);
 
     if Tela = tlRelatorios then
@@ -2188,10 +2519,10 @@ end;
 
 function TFormPrincipal.TelaSemMoldura(const Tela: TTela): Boolean;
 begin
-    //Telas no visual novo, com os próprios quadros sobre CorFundo (mockups relatorios.html e
-    //carregando.html): ocupam a área inteira do PageControl1, sem a moldura do controle.
-    //As outras telas mantêm a moldura até as etapas delas (4.5 e 4.7)
-    Result := Tela in [tlRelatorios, tlCarregando];
+    //Telas no visual novo, com os próprios quadros sobre CorFundo (mockups notas.html, relatorios.html
+    //e carregando.html): ocupam a área inteira do PageControl1, sem a moldura do controle.
+    //As outras telas mantêm a moldura até a etapa delas (4.7)
+    Result := Tela in [tlNotas, tlRelatorios, tlCarregando];
 end;
 
 procedure TFormPrincipal.JanelaPaginas(var Message: TMessage);
@@ -2399,7 +2730,7 @@ begin
     if FDMemTable1.Active then
     begin
         Carregadas := FDMemTable1.Table.Rows.Count;   //todas as notas lidas, sem o filtro de modelo
-        Total      := FDMemTable1.RecordCount;        //notas do filtro de modelo atual
+        Total      := NotasDoModelo.RecordCount;      //notas do filtro de modelo atual (sem a busca: D5)
     end;
     ComIBSCBS := FTotais.QuantidadeIBSCBS;
 
@@ -2665,6 +2996,983 @@ begin
     if (FFocoAntesCarregando <> nil) and FFocoAntesCarregando.CanFocus then
         FFocoAntesCarregando.SetFocus;
     FFocoAntesCarregando := nil;
+end;
+
+{ Plano 4, etapa 4.5: tela Notas (barra de ações, busca, ordenação, grade, CSV, estado vazio, aviso) }
+
+function TFormPrincipal.TituloColuna(const Campo: string): string;
+begin
+    //Títulos das colunas da grade (glossário 6.3 a 6.8)
+    if Campo = 'numero' then
+        Result := 'Nº'
+    else if Campo = 'modelo' then
+        Result := 'Modelo'
+    else if Campo = 'data' then
+        Result := 'Data'
+    else if Campo = 'chave' then
+        Result := 'Chave'
+    else if Campo = 'vtotal' then
+        Result := 'Valor'
+    else if Campo = 'bcicms' then
+        Result := 'Base ICMS'
+    else if Campo = 'vlicms' then
+        Result := 'ICMS'
+    else if Campo = 'vibs' then
+        Result := 'IBS'
+    else if Campo = 'vcbs' then
+        Result := 'CBS'
+    else
+        Result := Campo;
+end;
+
+function TFormPrincipal.TextoQuantidadeNotas(const Quantidade: Integer): string;
+begin
+    //Contagem com singular e plural (regra 6 de tom do glossário)
+    if Quantidade = 1 then
+        Result := '1 nota'
+    else
+        Result := IntToStr(Quantidade) + ' notas';
+end;
+
+procedure TFormPrincipal.PrepararColuna(Coluna: TColumn; const Largura: Integer; const Alinhamento: TAlignment);
+begin
+    //Coluna da grade (tokens.md 5.7): título com o mesmo alinhamento do dado, fundo CorFundo
+    Coluna.Width           := Escalar(Largura);
+    Coluna.Alignment       := Alinhamento;
+    Coluna.Title.Alignment := Alinhamento;
+    Coluna.Title.Color     := CorFundo;
+    Coluna.Title.Caption   := TituloColuna(Coluna.FieldName);
+end;
+
+procedure TFormPrincipal.PrepararTelaNotas;
+var
+    I     : Integer;
+    Coluna: TColumn;
+begin
+    //Tela Notas sem moldura, sobre CorFundo (mockup notas.html): linha de título de 32 px com título,
+    //contador, ações e busca; 16 px abaixo, a grade com borda de 1 px CorBorda
+    PnlNotas.Color       := CorFundo;
+    PnlNotasTitulo.Color := CorFundo;
+    PnlNotasTitulo.OnResize := PnlNotasTituloResize;
+
+    //Título 14 pt Semibold (6.1) e contador 9 pt CorTextoSecundario (6.2)
+    AplicarFonte(LabelNotasTitulo.Font, FonteDestaque, TamanhoTituloTela, CorTexto);
+    LabelNotasTitulo.Layout  := tlCenter;
+    LabelNotasTitulo.Caption := 'Notas';
+    AplicarFonte(LabelNotasContador.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelNotasContador.Layout  := tlCenter;
+    LabelNotasContador.Caption := '';
+
+    //Ações (6.13, 6.14 e 6.16): TProBotao secundários com ícone. Desabilitados, a dica 6.15 fica
+    //no painel de encaixe (tokens.md 5.12: a VCL não mostra o hint de um controle desabilitado)
+    PnlCopiarChave.Color := CorFundo;
+    PnlGerarDanfe.Color  := CorFundo;
+    PnlExportarCSV.Color := CorFundo;
+    PnlCopiarChave.ShowHint := True;
+    PnlGerarDanfe.ShowHint  := True;
+    PnlExportarCSV.ShowHint := True;
+    btnCopiarChave := TProBotao.CriarEm(PnlCopiarChave, 'Copiar chave', ebSecundario, CopiarChaveClick);
+    btnCopiarChave.IconeSvg := IconeCopiar;
+    btnCopiarChave.Hint     := 'Copiar a chave de acesso da nota selecionada (Ctrl+C)';
+    btnCopiarChave.ShowHint := True;
+    btnGerarDanfe := TProBotao.CriarEm(PnlGerarDanfe, 'Gerar DANFE', ebSecundario, GerarDanfeClick);
+    btnGerarDanfe.IconeSvg := IconeGerarDanfe;
+    btnGerarDanfe.Hint     := 'Gerar o PDF do DANFE da nota selecionada (Ctrl+D ou duplo clique)';
+    btnGerarDanfe.ShowHint := True;
+    btnExportarCSV := TProBotao.CriarEm(PnlExportarCSV, 'Exportar CSV', ebSecundario, ExportarCSVClick);
+    btnExportarCSV.IconeSvg := IconeExportarCSV;
+    btnExportarCSV.Hint     := 'Salvar as notas da lista num arquivo CSV (abre no Excel)';
+    btnExportarCSV.ShowHint := True;
+
+    //Campo Buscar (6.17 e 6.18): mesmo campo da barra de pasta (tokens.md 5.3), com o ícone search
+    PnlCampoBuscaFundo.Color := CorSuperficie;
+    EditBusca.Color := CorSuperficie;
+    AplicarFonte(EditBusca.Font, FonteTexto, TamanhoCorpo, CorTexto);
+    EditBusca.TextHint := 'Buscar por número ou chave';
+    EditBusca.Hint     := 'Ctrl+F para buscar. Esc limpa.';
+    EditBusca.ShowHint := True;
+    EditBusca.OnChange  := EditBuscaChange;
+    EditBusca.OnKeyDown := EditBuscaKeyDown;
+    EditBusca.OnEnter   := EditBuscaEnter;
+    EditBusca.OnExit    := EditBuscaExit;
+    SkSvgBusca.Svg.Source        := IconeBuscar;
+    SkSvgBusca.Svg.OverrideColor := CorAlpha(CorTextoSecundario);
+    AtualizarBordaCampo(PnlCampoBusca, SkSvgBusca, EditBusca, 0, False);
+
+    //Grade (tokens.md 5.7): borda de 1 px CorBorda no painel de fora; pintura própria das células
+    //(DefaultDrawing = False no .dfm) e do título (TDBGrid desta unit)
+    Panel5.Color := CorBorda;
+    Panel5.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
+    Panel5.OnResize := Panel5Resize;
+    DBGrid1.Color      := CorSuperficie;
+    DBGrid1.FixedColor := CorFundo;
+    AplicarFonte(DBGrid1.Font, FonteTexto, TamanhoCorpo, CorTexto);
+    AplicarFonte(DBGrid1.TitleFont, FonteDestaque, TamanhoBotao, CorTexto);
+    DBGrid1.OnDrawColumnCell := DBGrid1DrawColumnCell;
+    DBGrid1.OnDesenharTitulo := DBGrid1DesenharTitulo;
+    DBGrid1.OnRedimensionar  := DBGrid1Redimensionar;
+    DBGrid1.OnCliqueNota     := DBGrid1CliqueNota;
+    DBGrid1.OnTitleClick     := DBGrid1TitleClick;
+    DBGrid1.OnDblClick       := DBGrid1DblClick;
+    DBGrid1.OnKeyDown        := DBGrid1KeyDown;
+
+    //Colunas: Nº e valores à direita, Modelo centralizado, Data e Chave à esquerda (larguras da 5.7;
+    //a Chave fica com o resto e as colunas de valor extras entram conforme a largura, decisão D3)
+    for I := 0 to DBGrid1.Columns.Count - 1 do
+    begin
+        Coluna := DBGrid1.Columns[I];
+        if Coluna.FieldName = 'numero' then
+            PrepararColuna(Coluna, LarguraColunaNumero, taRightJustify)
+        else if Coluna.FieldName = 'modelo' then
+            PrepararColuna(Coluna, LarguraColunaModelo, taCenter)
+        else if Coluna.FieldName = 'data' then
+            PrepararColuna(Coluna, LarguraColunaData, taLeftJustify)
+        else if Coluna.FieldName = 'chave' then
+            PrepararColuna(Coluna, LarguraColunaChaveMin, taLeftJustify)
+        else if Coluna.FieldName = 'vtotal' then
+            PrepararColuna(Coluna, LarguraColunaValor, taRightJustify)
+        else if Coluna.FieldName = 'bcicms' then
+            PrepararColuna(Coluna, LarguraColunaBaseICMS, taRightJustify)
+        else if Coluna.FieldName = 'vlicms' then
+            PrepararColuna(Coluna, LarguraColunaICMS, taRightJustify)
+        else if Coluna.FieldName = 'vibs' then
+            PrepararColuna(Coluna, LarguraColunaIBS, taRightJustify)
+        else if Coluna.FieldName = 'vcbs' then
+            PrepararColuna(Coluna, LarguraColunaCBS, taRightJustify);
+    end;
+
+    //Valores "R$ 1.234,56" com o formato pt-BR explícito da 4.3 (glossário 6.9), na grade e em
+    //qualquer DisplayText: não dependem do separador decimal do Windows
+    FDMemTable1vtotal.OnGetText    := CampoMoedaGetText;
+    FDMemTable1bcicms.OnGetText    := CampoMoedaGetText;
+    FDMemTable1vlicms.OnGetText    := CampoMoedaGetText;
+    FDMemTable1vbcibscbs.OnGetText := CampoMoedaGetText;
+    FDMemTable1vibsuf.OnGetText    := CampoMoedaGetText;
+    FDMemTable1vibsmun.OnGetText   := CampoMoedaGetText;
+    FDMemTable1vibs.OnGetText      := CampoMoedaGetText;
+    FDMemTable1vcbs.OnGetText      := CampoMoedaGetText;
+
+    //Busca (OnFilterRecord, junto com o filtro de modelo) e ordenação padrão por Nº crescente
+    FDMemTable1.OnFilterRecord := FDMemTable1FiltrarBusca;
+    FColunaOrdem      := 'numero';
+    FOrdemDecrescente := False;
+    AplicarOrdenacao;
+
+    //Estado vazio e busca sem resultado (tokens.md 5.7): painel por cima da grade, abaixo do título
+    PnlNotasVazio.Color := CorSuperficie;
+    PnlNotasVazio.Visible := False;
+    SkSvgNotasVazio.Svg.OverrideColor := CorAlpha(CorTextoSecundario);
+    AplicarFonte(LabelNotasVazioTitulo.Font, FonteDestaque, TamanhoSubtitulo, CorTexto);
+    AplicarFonte(LabelNotasVazioTexto.Font, FonteTexto, TamanhoCorpo, CorTextoSecundario);
+    PnlNotasVazioBotao.Color := CorSuperficie;
+    btnNotasVazio := TProBotao.CriarEm(PnlNotasVazioBotao, 'Selecionar pasta' + #$2026, ebSecundario,
+                                       NotasVazioSelecionarPastaClick);
+    btnNotasVazio.IconeSvg := IconePastaAberta;
+
+    //Aviso flutuante "Chave copiada" (tokens.md 5.11; glossário 6.19)
+    PnlChaveCopiada.Color   := CorMarinho;
+    PnlChaveCopiada.Visible := False;
+    SkSvgChaveCopiada.Svg.Source        := IconeConfirmar;
+    SkSvgChaveCopiada.Svg.OverrideColor := CorAlpha(CorSucessoSobreMarinho);
+    AplicarFonte(LabelChaveCopiada.Font, FonteDestaque, TamanhoLegenda, CorTextoSobreMarinho);
+    LabelChaveCopiada.Caption := 'Chave copiada';
+    TimerChaveCopiada.Enabled  := False;
+    TimerChaveCopiada.Interval := DuracaoAvisoMs;
+    TimerChaveCopiada.OnTimer  := TimerChaveCopiadaTimer;
+
+    //Menu da grade (glossário 6.11 e 6.12): continua como atalho
+    PopupMenu.OnPopup := PopupMenuPopup;
+
+    AjustarAlturaLinhasGrade;
+    AjustarLinhaTituloNotas;
+    AjustarColunasGrade;
+    AtualizarTelaNotas;
+end;
+
+procedure TFormPrincipal.AjustarEspacoCards(const Tela: TTela);
+begin
+    //Espaço de 16 px entre os cards e a tela. Na tela Notas a linha de título é mais alta que 32 px
+    //(margem do contorno de foco dos botões em cima e embaixo): o espaço desconta essa margem para a
+    //face dos botões, o campo Buscar e o título ficarem na mesma posição do mockup
+    if btnCopiarChave = nil then
+        Exit;
+
+    if Tela = tlNotas then
+        PnlCards.Margins.Bottom := Escalar(Espaco2) - btnCopiarChave.MargemFoco
+    else
+        PnlCards.Margins.Bottom := Escalar(Espaco2);
+end;
+
+procedure TFormPrincipal.AjustarLinhaTituloNotas;
+var
+    Margem : Integer;
+    Livre  : Integer;
+begin
+    //Linha de título: "Notas" e o contador à esquerda; Copiar chave, Gerar DANFE, Exportar CSV e o
+    //campo Buscar à direita, com 8 px entre eles (mockup .trow)
+    if (btnCopiarChave = nil) or FAjustandoTituloNotas then
+        Exit;
+
+    FAjustandoTituloNotas := True;
+    PnlNotasTitulo.DisableAlign;
+    try
+        Margem := btnCopiarChave.MargemFoco;
+        PnlNotasTitulo.Height := Escalar(AlturaTituloTela) + 2 * Margem;
+        PnlNotasTitulo.Margins.SetBounds(0, 0, 0, Escalar(Espaco2) - Margem);
+
+        PnlCopiarChave.Width := btnCopiarChave.LarguraIdeal;
+        PnlGerarDanfe.Width  := btnGerarDanfe.LarguraIdeal;
+        PnlExportarCSV.Width := btnExportarCSV.LarguraIdeal;
+        LabelNotasContador.Margins.SetBounds(Escalar(Espaco1), 0, 0, 0);
+        PnlCampoBusca.Margins.SetBounds(Escalar(Espaco1) - Margem, Margem, 0, Margem);
+
+        //Campo Buscar com 248 px; se a linha não couber (janela mínima, contador longo), ele encolhe
+        //até LarguraMinimaCampoBusca
+        Livre := PnlNotasTitulo.ClientWidth - LabelNotasTitulo.Width - LabelNotasContador.Margins.Left -
+                 LabelNotasContador.Width - Escalar(Espaco1) - PnlCopiarChave.Width - PnlGerarDanfe.Width -
+                 PnlExportarCSV.Width - PnlCampoBusca.Margins.Left;
+        PnlCampoBusca.Width := Max(Escalar(LarguraMinimaCampoBusca), Min(Escalar(LarguraCampoBusca), Livre));
+
+        //A VCL ordena os alRight pela borda direita: da direita para a esquerda ficam Buscar,
+        //Exportar CSV, Gerar DANFE e Copiar chave. Os alLeft vão pela borda esquerda menos a margem:
+        //o título primeiro e depois o contador (que tem 8 px de margem)
+        PnlCampoBusca.Left  := 40000;
+        PnlExportarCSV.Left := 30000;
+        PnlGerarDanfe.Left  := 20000;
+        PnlCopiarChave.Left := 10000;
+        LabelNotasTitulo.Left   := 0;
+        LabelNotasContador.Left := 5000;
+    finally
+        PnlNotasTitulo.EnableAlign;
+        FAjustandoTituloNotas := False;
+    end;
+end;
+
+procedure TFormPrincipal.PnlNotasTituloResize(Sender: TObject);
+begin
+    AjustarLinhaTituloNotas;
+end;
+
+procedure TFormPrincipal.AjustarColunasGrade;
+var
+    Coluna   : TColumn;
+    Chave    : TColumn;
+    Extras   : array[0..3] of TColumn;
+    Larguras : array[0..3] of Integer;
+    Ocupado  : Integer;
+    Disponivel: Integer;
+    Resto    : Integer;
+    Cabe     : Boolean;
+    I        : Integer;
+
+    function ColunaDoCampo(const Campo: string): TColumn;
+    var
+        J: Integer;
+    begin
+        Result := nil;
+        for J := 0 to DBGrid1.Columns.Count - 1 do
+            if DBGrid1.Columns[J].FieldName = Campo then
+                Exit(DBGrid1.Columns[J]);
+    end;
+
+begin
+    //Decisão D3: Nº, Modelo, Data, Chave e Valor sempre. As colunas extras entram em pares, cada par
+    //só quando couber inteiro sem a Chave ficar abaixo do mínimo: primeiro Base ICMS + ICMS, depois
+    //IBS + CBS (nunca IBS sem CBS; decisão do usuário de 21/10/2026). A barra de rolagem vertical conta
+    //sempre, para a coluna não aparecer e sumir junto com ela. A Chave fica com o resto da largura
+    if FAjustandoColunas or (btnCopiarChave = nil) then
+        Exit;
+
+    Chave     := ColunaDoCampo('chave');
+    Extras[0] := ColunaDoCampo('bcicms');
+    Extras[1] := ColunaDoCampo('vlicms');
+    Extras[2] := ColunaDoCampo('vibs');
+    Extras[3] := ColunaDoCampo('vcbs');
+    if (Chave = nil) or (Extras[0] = nil) or (Extras[1] = nil) or (Extras[2] = nil) or (Extras[3] = nil) then
+        Exit;
+    Larguras[0] := Escalar(LarguraColunaBaseICMS);
+    Larguras[1] := Escalar(LarguraColunaICMS);
+    Larguras[2] := Escalar(LarguraColunaIBS);
+    Larguras[3] := Escalar(LarguraColunaCBS);
+
+    FAjustandoColunas := True;
+    DBGrid1.Columns.BeginUpdate;
+    try
+        Disponivel := DBGrid1.Width - MulDiv(GetSystemMetrics(SM_CXVSCROLL), PPIAtual, Screen.PixelsPerInch);
+        Ocupado := Escalar(LarguraColunaNumero) + Escalar(LarguraColunaModelo) + Escalar(LarguraColunaData) +
+                   Escalar(LarguraColunaChaveMin) + Escalar(LarguraColunaValor);
+        Cabe := True;
+        I := Low(Extras);
+        while I < High(Extras) do
+        begin
+            //Par I e I + 1: (Base ICMS, ICMS) e (IBS, CBS)
+            Cabe := Cabe and (Ocupado + Larguras[I] + Larguras[I + 1] <= Disponivel);
+            if Cabe then
+                Inc(Ocupado, Larguras[I] + Larguras[I + 1]);
+            Extras[I].Width       := Larguras[I];
+            Extras[I + 1].Width   := Larguras[I + 1];
+            Extras[I].Visible     := Cabe;
+            Extras[I + 1].Visible := Cabe;
+            Inc(I, 2);
+        end;
+
+        Resto := DBGrid1.ClientWidth;
+        for I := 0 to DBGrid1.Columns.Count - 1 do
+        begin
+            Coluna := DBGrid1.Columns[I];
+            if (Coluna <> Chave) and Coluna.Visible then
+                Dec(Resto, Coluna.Width);
+        end;
+        Chave.Width := Max(Escalar(LarguraColunaChaveMin), Resto);
+    finally
+        DBGrid1.Columns.EndUpdate;
+        FAjustandoColunas := False;
+    end;
+end;
+
+procedure TFormPrincipal.DBGrid1Redimensionar(Sender: TObject);
+begin
+    //Janela redimensionada ou barra de rolagem que aparece/some: colunas, estado vazio e aviso
+    AjustarColunasGrade;
+    AjustarEstadoVazio;
+    AjustarAvisoChaveCopiada;
+end;
+
+procedure TFormPrincipal.Panel5Resize(Sender: TObject);
+begin
+    AjustarEstadoVazio;
+    AjustarAvisoChaveCopiada;
+end;
+
+procedure TFormPrincipal.AtualizarTelaNotas;
+var
+    Total       : Integer;
+    Visiveis    : Integer;
+    Carregadas  : Integer;
+    Selecionada : Boolean;
+begin
+    //Contador (6.2), ações (6.13 a 6.16) e estado vazio (6.20 a 6.25). Cards ficam de fora (PD-1)
+    if (btnCopiarChave = nil) or (SeletorModelo = nil) then
+        Exit;
+
+    Total      := 0;
+    Visiveis   := 0;
+    Carregadas := 0;
+    if FDMemTable1.Active then
+    begin
+        Carregadas := FDMemTable1.Table.Rows.Count;
+        Total      := NotasDoModelo.RecordCount;
+        Visiveis   := FDMemTable1.RecordCount;
+    end;
+
+    //"{n} notas"; com busca, "{x} de {n} notas" (n = notas do modelo, x = linhas visíveis)
+    if Carregadas = 0 then
+        LabelNotasContador.Caption := ''
+    else if FBusca <> '' then
+        LabelNotasContador.Caption := IntToStr(Visiveis) + ' de ' + TextoQuantidadeNotas(Total)
+    else
+        LabelNotasContador.Caption := TextoQuantidadeNotas(Total);
+
+    //Copiar chave e Gerar DANFE só com uma nota escolhida; Exportar CSV só com linhas visíveis
+    Selecionada := NotaSelecionada;
+    btnCopiarChave.Enabled := Selecionada;
+    btnGerarDanfe.Enabled  := Selecionada and (not FGerandoDanfe);
+    btnExportarCSV.Enabled := Visiveis > 0;
+    if Selecionada then
+    begin
+        PnlCopiarChave.Hint := '';
+        PnlGerarDanfe.Hint  := '';
+    end
+    else
+    begin
+        PnlCopiarChave.Hint := 'Selecione uma nota na lista.';
+        PnlGerarDanfe.Hint  := 'Selecione uma nota na lista.';
+    end;
+
+    AjustarLinhaTituloNotas;
+    AjustarEstadoVazio;
+    DBGrid1.Invalidate;
+end;
+
+procedure TFormPrincipal.AjustarEstadoVazio;
+var
+    Vazia         : Boolean;
+    SemResultado  : Boolean;
+    ModeloVazio   : Boolean;
+    ComBotao      : Boolean;
+    Largura       : Integer;
+    LarguraTitulo : Integer;
+    AlturaTitulo  : Integer;
+    AlturaTexto   : Integer;
+    Icone         : Integer;
+    Espaco        : Integer;
+    Margem        : Integer;
+    AlturaEncaixe : Integer;
+    Total         : Integer;
+    Topo          : Integer;
+    Modelo        : string;
+begin
+    //Nenhuma nota lida: estado vazio (6.20 a 6.22). Busca sem nenhuma linha: 6.23 a 6.25. Notas lidas,
+    //mas nenhuma no modelo escolhido e sem busca: texto 8.8a, sem botão. O painel fica por cima da
+    //grade, abaixo da linha de títulos (mockup notas.html)
+    if (btnNotasVazio = nil) or (SeletorModelo = nil) then
+        Exit;
+
+    Vazia        := (not FDMemTable1.Active) or (FDMemTable1.Table.Rows.Count = 0);
+    SemResultado := (not Vazia) and (FBusca <> '') and FDMemTable1.IsEmpty;
+    ModeloVazio  := (not Vazia) and (FBusca = '') and FDMemTable1.IsEmpty;
+    ComBotao     := not ModeloVazio;
+    if not (Vazia or SemResultado or ModeloVazio) then
+    begin
+        PnlNotasVazio.Visible := False;
+        Exit;
+    end;
+
+    if Vazia then
+    begin
+        SkSvgNotasVazio.Svg.Source    := IconeGradeVazia;
+        LabelNotasVazioTitulo.Caption := 'Nenhuma nota carregada';
+        LabelNotasVazioTexto.Caption  := 'Selecione uma pasta com XMLs e clique em Processar.';
+        btnNotasVazio.Caption  := 'Selecionar pasta' + #$2026;
+        btnNotasVazio.IconeSvg := IconePastaAberta;
+        btnNotasVazio.OnClick  := NotasVazioSelecionarPastaClick;
+    end
+    else if ModeloVazio then
+    begin
+        //Glossário 8.8a (aprovado em 20/10/2026), em duas linhas como os outros estados: o que houve e
+        //o que fazer. Sem botão (decisão do usuário de 21/10/2026)
+        SkSvgNotasVazio.Svg.Source    := IconeGradeVazia;
+        LabelNotasVazioTitulo.Caption := 'Nenhuma nota do modelo selecionado.';
+        LabelNotasVazioTexto.Caption  := 'Escolha outro modelo na barra de cima.';
+    end
+    else
+    begin
+        Modelo := SeletorModelo.Itens[SeletorModelo.ItemIndex];
+        SkSvgNotasVazio.Svg.Source    := IconeBuscaVazia;
+        LabelNotasVazioTitulo.Caption := 'Nenhuma nota encontrada para ' + #$201C + Trim(EditBusca.Text) + #$201D;
+        LabelNotasVazioTexto.Caption  := 'Confira o número ou a chave. A busca considera só o modelo selecionado (' +
+                                         Modelo + ').';
+        btnNotasVazio.Caption  := 'Limpar busca';
+        btnNotasVazio.IconeSvg := IconeLimpar;
+        btnNotasVazio.OnClick  := NotasVazioLimparBuscaClick;
+    end;
+
+    //Painel: a área da grade abaixo do título
+    PnlNotasVazio.SetBounds(DBGrid1.Left, DBGrid1.Top + Escalar(AlturaTituloGrade), DBGrid1.Width,
+                            Max(0, DBGrid1.Height - Escalar(AlturaTituloGrade)));
+
+    //Ícone 48 px, título 12 pt Semibold, texto 10 pt (até 420 px) e o botão, 8 px entre eles, no centro
+    Espaco  := Escalar(EspacoVazio);
+    Icone   := Escalar(TamanhoIconeVazio);
+    Margem  := btnNotasVazio.MargemFoco;
+    LarguraTitulo := Max(1, PnlNotasVazio.ClientWidth - 2 * Escalar(Espaco2));
+    Largura := Min(Escalar(LarguraTextoVazio), LarguraTitulo);
+    AlturaTitulo := AlturaTextoQuebrado(LabelNotasVazioTitulo, LarguraTitulo);
+    AlturaTexto  := AlturaTextoQuebrado(LabelNotasVazioTexto, Largura);
+    AlturaEncaixe := Escalar(AlturaBotao) + 2 * Margem;
+    PnlNotasVazioBotao.Width  := btnNotasVazio.LarguraIdeal;
+    PnlNotasVazioBotao.Height := AlturaEncaixe;
+
+    PnlNotasVazioBotao.Visible := ComBotao;
+    Total := Icone + Espaco + AlturaTitulo + Espaco + AlturaTexto;
+    if ComBotao then
+        Inc(Total, Espaco - Margem + AlturaEncaixe - Margem);
+    Topo  := Max(0, (PnlNotasVazio.ClientHeight - Total) div 2);
+    SkSvgNotasVazio.SetBounds((PnlNotasVazio.ClientWidth - Icone) div 2, Topo, Icone, Icone);
+    Inc(Topo, Icone + Espaco);
+    LabelNotasVazioTitulo.SetBounds((PnlNotasVazio.ClientWidth - LarguraTitulo) div 2, Topo, LarguraTitulo, AlturaTitulo);
+    Inc(Topo, AlturaTitulo + Espaco);
+    LabelNotasVazioTexto.SetBounds((PnlNotasVazio.ClientWidth - Largura) div 2, Topo, Largura, AlturaTexto);
+    Inc(Topo, AlturaTexto + Espaco - Margem);
+    PnlNotasVazioBotao.SetBounds((PnlNotasVazio.ClientWidth - PnlNotasVazioBotao.Width) div 2, Topo,
+                                 PnlNotasVazioBotao.Width, AlturaEncaixe);
+
+    PnlNotasVazio.Visible := True;
+    PnlNotasVazio.BringToFront;
+end;
+
+procedure TFormPrincipal.NotasVazioSelecionarPastaClick(Sender: TObject);
+begin
+    //"Selecionar pasta…" do estado vazio (6.22): mesmo seletor do Ctrl+O
+    SelecionarPasta;
+end;
+
+procedure TFormPrincipal.NotasVazioLimparBuscaClick(Sender: TObject);
+begin
+    //"Limpar busca" (6.25): volta a mostrar todas as notas do modelo, com o foco no campo Buscar
+    LimparBusca;
+    if EditBusca.CanFocus then
+        EditBusca.SetFocus;
+end;
+
+procedure TFormPrincipal.FDMemTable1FiltrarBusca(DataSet: TDataSet; var Accept: Boolean);
+begin
+    //Busca por número ou trecho da chave (glossário 6.17), somada ao filtro de modelo (Filter)
+    Accept := (FBusca = '') or
+              (Pos(FBusca, DataSet.FieldByName('chave').AsString) > 0) or
+              (Pos(FBusca, DataSet.FieldByName('numero').AsString) > 0);
+end;
+
+procedure TFormPrincipal.AtualizarFiltroGrade;
+var
+    Modelo: Integer;
+begin
+    //Filtro da grade = modelo (Filter) + busca (OnFilterRecord). Desligar e religar o Filtered refaz
+    //a busca com o texto novo. A cópia do cursor dos cards (NotasDoModelo) não é afetada
+    if SeletorModelo = nil then
+        Exit;
+
+    Modelo := ModeloSelecionado;
+    FDMemTable1.DisableControls;
+    try
+        if Modelo = FILTRO_MODELO_TODOS then
+            FDMemTable1.Filter := ''
+        else
+            FDMemTable1.Filter := 'modelo = ' + IntToStr(Modelo);
+        FDMemTable1.Filtered := False;
+        FDMemTable1.Filtered := (FDMemTable1.Filter <> '') or (FBusca <> '');
+
+        if FDMemTable1.Active then
+            FDMemTable1.First;
+    finally
+        FDMemTable1.EnableControls;
+    end;
+end;
+
+procedure TFormPrincipal.AplicarBusca;
+var
+    Texto: string;
+begin
+    //Filtra enquanto digita. Os espaços saem do texto: a chave copiada do DANFE vem em grupos de 4
+    Texto := StringReplace(Trim(EditBusca.Text), ' ', '', [rfReplaceAll]);
+    if Texto <> FBusca then
+    begin
+        FBusca := Texto;
+        //Outra lista: a nota escolhida deixa de valer e a lista volta ao começo
+        FNotaSelecionada := False;
+        AtualizarFiltroGrade;
+    end;
+    AtualizarTelaNotas;
+end;
+
+procedure TFormPrincipal.LimparBusca;
+begin
+    //Esc no campo, "Limpar busca" e Processar (pasta nova)
+    if EditBusca.Text <> '' then
+        EditBusca.Text := ''   //o OnChange aplica a busca vazia
+    else if FBusca <> '' then
+        AplicarBusca;
+end;
+
+procedure TFormPrincipal.EditBuscaChange(Sender: TObject);
+begin
+    AplicarBusca;
+end;
+
+procedure TFormPrincipal.EditBuscaKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    //Esc limpa a busca (glossário 6.18)
+    if Key = VK_ESCAPE then
+    begin
+        LimparBusca;
+        Key := 0;
+    end;
+end;
+
+procedure TFormPrincipal.EditBuscaEnter(Sender: TObject);
+begin
+    AtualizarBordaCampo(PnlCampoBusca, SkSvgBusca, EditBusca, 0, True);
+end;
+
+procedure TFormPrincipal.EditBuscaExit(Sender: TObject);
+begin
+    AtualizarBordaCampo(PnlCampoBusca, SkSvgBusca, EditBusca, 0, False);
+end;
+
+procedure TFormPrincipal.AplicarOrdenacao;
+var
+    Campo   : string;
+    Indice  : string;
+    Seta    : string;
+    Marcador: TBookmark;
+    I       : Integer;
+    Coluna  : TColumn;
+begin
+    //Ordenação pelo índice da FDMemTable1 (só a grade; a cópia dos cards não tem índice). Data pela
+    //data real (data_ordem = aaaammdd); empate desfeito pelo Nº crescente
+    Campo := FColunaOrdem;
+    if Campo = 'data' then
+        Campo := 'data_ordem';
+    Indice := Campo;
+    if FOrdemDecrescente then
+        Indice := Indice + ':D';
+    if Campo <> 'numero' then
+        Indice := Indice + ';numero';
+
+    FDMemTable1.DisableControls;
+    try
+        Marcador := nil;
+        if NotaSelecionada then
+            Marcador := FDMemTable1.GetBookmark;
+        try
+            FDMemTable1.IndexFieldNames := Indice;
+            //Nota escolhida continua escolhida (a grade vai até ela); sem nota, a lista volta ao começo
+            if (Marcador <> nil) and FDMemTable1.BookmarkValid(Marcador) then
+                FDMemTable1.GotoBookmark(Marcador)
+            else if FDMemTable1.Active then
+                FDMemTable1.First;
+        finally
+            if Marcador <> nil then
+                FDMemTable1.FreeBookmark(Marcador);
+        end;
+    finally
+        FDMemTable1.EnableControls;
+    end;
+
+    //Seta (U+25B2/U+25BC) no fim do título da coluna ordenada (glossário 6.10); a cor vem na pintura do título
+    if FOrdemDecrescente then
+        Seta := SETA_DECRESCENTE
+    else
+        Seta := SETA_CRESCENTE;
+    for I := 0 to DBGrid1.Columns.Count - 1 do
+    begin
+        Coluna := DBGrid1.Columns[I];
+        if Coluna.FieldName = FColunaOrdem then
+            Coluna.Title.Caption := TituloColuna(Coluna.FieldName) + ' ' + Seta
+        else
+            Coluna.Title.Caption := TituloColuna(Coluna.FieldName);
+    end;
+    DBGrid1.Invalidate;
+end;
+
+procedure TFormPrincipal.DBGrid1TitleClick(Column: TColumn);
+begin
+    //Clique no título: ordena pela coluna (crescente); de novo na mesma coluna, inverte
+    if Column.FieldName = '' then
+        Exit;
+
+    if Column.FieldName = FColunaOrdem then
+        FOrdemDecrescente := not FOrdemDecrescente
+    else
+    begin
+        FColunaOrdem      := Column.FieldName;
+        FOrdemDecrescente := False;
+    end;
+    AplicarOrdenacao;
+end;
+
+procedure TFormPrincipal.MarcarNotaSelecionada(const Selecionada: Boolean);
+begin
+    FNotaSelecionada := Selecionada and TemNotaVisivel;
+    AtualizarTelaNotas;
+end;
+
+procedure TFormPrincipal.DBGrid1CliqueNota(Sender: TObject);
+begin
+    //Clique (esquerdo ou direito) numa nota: ela fica escolhida (o TDBGrid já a tornou a atual)
+    MarcarNotaSelecionada(True);
+end;
+
+procedure TFormPrincipal.DBGrid1DblClick(Sender: TObject);
+begin
+    //Duplo clique numa nota = Gerar DANFE (glossário 6.14), pelo mesmo caminho do botão e do menu
+    if DBGrid1.UltimoCliqueEmNota and NotaSelecionada then
+        GerarDanfeSelecionada;
+end;
+
+procedure TFormPrincipal.DBGrid1KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    //Teclado: sem nota escolhida, a primeira seta (ou Espaço) escolhe a nota atual sem andar;
+    //depois, as teclas de navegação andam normalmente e a nota atual continua escolhida
+    if not TemNotaVisivel then
+        Exit;
+
+    case Key of
+        VK_UP, VK_DOWN, VK_SPACE:
+            if not FNotaSelecionada then
+            begin
+                MarcarNotaSelecionada(True);
+                Key := 0;
+            end;
+        VK_PRIOR, VK_NEXT, VK_HOME, VK_END:
+            if not FNotaSelecionada then
+                MarcarNotaSelecionada(True);
+    end;
+end;
+
+procedure TFormPrincipal.PopupMenuPopup(Sender: TObject);
+begin
+    //Menu da grade: os itens seguem os botões da linha de título
+    mnuCopiarChave.Enabled := NotaSelecionada;
+    GerarDANFe1.Enabled    := NotaSelecionada and (not FGerandoDanfe);
+end;
+
+procedure TFormPrincipal.CopiarChaveClick(Sender: TObject);
+begin
+    CopiarChaveSelecionada;
+end;
+
+procedure TFormPrincipal.GerarDanfeClick(Sender: TObject);
+begin
+    GerarDanfeSelecionada;
+end;
+
+procedure TFormPrincipal.CampoMoedaGetText(Sender: TField; var Text: string; DisplayText: Boolean);
+begin
+    //Valores em "R$ 1.234,56" com o formato pt-BR explícito (FormatarMoeda, etapa 4.3)
+    if Sender.IsNull then
+        Text := ''
+    else if DisplayText then
+        Text := FormatarMoeda(Sender.AsFloat)
+    else
+        Text := Sender.AsString;
+end;
+
+procedure TFormPrincipal.DBGrid1DesenharTitulo(Sender: TObject; const Area: TRect; Coluna: TColumn);
+const
+    ALINHAMENTO: array[TAlignment] of Cardinal = (DT_LEFT, DT_RIGHT, DT_CENTER);
+var
+    Tela  : TCanvas;
+    Texto : TRect;
+    Titulo: string;
+begin
+    //Título da coluna (tokens.md 5.7): fundo CorFundo, 10 pt Semibold CorTexto (a coluna ordenada em
+    //CorPrimariaHover), alinhado como o dado, centralizado na altura, divisória inferior CorBorda
+    Tela := DBGrid1.Canvas;
+    Tela.Brush.Style := bsSolid;
+    Tela.Brush.Color := CorFundo;
+    Tela.FillRect(Rect(Area.Left, Area.Top, Area.Right, Area.Bottom - Escalar(DivisoriaGrade)));
+    Tela.Brush.Color := CorBorda;
+    Tela.FillRect(Rect(Area.Left, Area.Bottom - Escalar(DivisoriaGrade), Area.Right, Area.Bottom));
+
+    Tela.Font.Assign(DBGrid1.TitleFont);
+    if Coluna.FieldName = FColunaOrdem then
+        Tela.Font.Color := CorPrimariaHover
+    else
+        Tela.Font.Color := CorTexto;
+    Titulo := Coluna.Title.Caption;
+    Texto  := Rect(Area.Left + Escalar(PaddingCelulaGrade), Area.Top, Area.Right - Escalar(PaddingCelulaGrade),
+                   Area.Bottom - Escalar(DivisoriaGrade));
+    Tela.Brush.Style := bsClear;
+    DrawText(Tela.Handle, PChar(Titulo), Length(Titulo), Texto,
+             DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX or DT_END_ELLIPSIS or ALINHAMENTO[Coluna.Title.Alignment]);
+    Tela.Brush.Style := bsSolid;
+end;
+
+procedure TFormPrincipal.DBGrid1DrawColumnCell(Sender: TObject; const Area: TRect; DataCol: Integer;
+  Column: TColumn; State: TGridDrawState);
+const
+    ALINHAMENTO: array[TAlignment] of Cardinal = (DT_LEFT, DT_RIGHT, DT_CENTER);
+var
+    Tela       : TCanvas;
+    Fundo      : TColor;
+    Selecionada: Boolean;
+    Divisoria  : Integer;
+    Texto      : TRect;
+    Valor      : string;
+begin
+    //Linha (tokens.md 5.7): 10 pt CorTexto; linhas pares CorZebra; a nota escolhida em CorPrimariaSuave
+    //com a marca de 3 px CorPrimaria na 1ª célula; divisória inferior de 1 px CorBorda
+    Tela := DBGrid1.Canvas;
+    Divisoria   := Escalar(DivisoriaGrade);
+    Selecionada := FNotaSelecionada and (gdSelected in State);
+    if Selecionada then
+        Fundo := CorPrimariaSuave
+    else if (DBGrid1.DataSource.DataSet.RecNo mod 2) = 0 then
+        Fundo := CorZebra
+    else
+        Fundo := CorSuperficie;
+
+    Tela.Brush.Style := bsSolid;
+    Tela.Brush.Color := Fundo;
+    Tela.FillRect(Rect(Area.Left, Area.Top, Area.Right, Area.Bottom - Divisoria));
+    Tela.Brush.Color := CorBorda;
+    Tela.FillRect(Rect(Area.Left, Area.Bottom - Divisoria, Area.Right, Area.Bottom));
+    if Selecionada and (Column.Index = 0) then
+    begin
+        Tela.Brush.Color := CorPrimaria;
+        Tela.FillRect(Rect(Area.Left, Area.Top, Area.Left + Escalar(MarcaSelecaoGrade), Area.Bottom - Divisoria));
+    end;
+
+    //Texto: valores pelo OnGetText (R$ pt-BR), centralizado na altura, com reticências se não couber
+    Valor := '';
+    if Column.Field <> nil then
+        Valor := Column.Field.DisplayText;
+    Tela.Font.Assign(DBGrid1.Font);
+    Tela.Font.Color := CorTexto;
+    Texto := Rect(Area.Left + Escalar(PaddingCelulaGrade), Area.Top, Area.Right - Escalar(PaddingCelulaGrade),
+                  Area.Bottom - Divisoria);
+    Tela.Brush.Style := bsClear;
+    DrawText(Tela.Handle, PChar(Valor), Length(Valor), Texto,
+             DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX or DT_END_ELLIPSIS or ALINHAMENTO[Column.Alignment]);
+    Tela.Brush.Style := bsSolid;
+end;
+
+procedure TFormPrincipal.AjustarAvisoChaveCopiada;
+var
+    Medida      : TBitmap;
+    LarguraTexto: Integer;
+    AlturaTexto : Integer;
+    Icone       : Integer;
+    Largura     : Integer;
+    Altura      : Integer;
+begin
+    //Aviso flutuante (tokens.md 5.11): padding 8 x 16, ícone check 16 px + 8 px + texto, centralizado
+    //na base da grade, 16 px acima da borda
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelChaveCopiada.Font);
+        LarguraTexto := Medida.Canvas.TextWidth(LabelChaveCopiada.Caption);
+        AlturaTexto  := Medida.Canvas.TextHeight('Ag');
+    finally
+        Medida.Free;
+    end;
+
+    Icone   := Escalar(TamanhoIconePequeno);
+    Largura := 2 * Escalar(PaddingAvisoHorizontal) + Icone + Escalar(Espaco1) + LarguraTexto;
+    Altura  := 2 * Escalar(PaddingAvisoVertical) + Max(Icone, AlturaTexto);
+    PnlChaveCopiada.SetBounds(DBGrid1.Left + (DBGrid1.Width - Largura) div 2,
+                              DBGrid1.Top + DBGrid1.Height - Escalar(DistanciaAvisoBorda) - Altura, Largura, Altura);
+    SkSvgChaveCopiada.SetBounds(Escalar(PaddingAvisoHorizontal), (Altura - Icone) div 2, Icone, Icone);
+    LabelChaveCopiada.SetBounds(Escalar(PaddingAvisoHorizontal) + Icone + Escalar(Espaco1), (Altura - AlturaTexto) div 2,
+                                LarguraTexto, AlturaTexto);
+end;
+
+procedure TFormPrincipal.MostrarAvisoChaveCopiada;
+begin
+    //"Chave copiada" (6.19) por 2 s; copiar de novo reinicia o tempo
+    AjustarAvisoChaveCopiada;
+    TimerChaveCopiada.Enabled := False;
+    PnlChaveCopiada.Visible := True;
+    PnlChaveCopiada.BringToFront;
+    TimerChaveCopiada.Enabled := True;
+end;
+
+procedure TFormPrincipal.TimerChaveCopiadaTimer(Sender: TObject);
+begin
+    TimerChaveCopiada.Enabled := False;
+    PnlChaveCopiada.Visible := False;
+end;
+
+function TFormPrincipal.MontarCSV: string;
+var
+    Linhas  : TStringBuilder;
+    Marcador: TBookmark;
+
+    function Valor(const Campo: string): string;
+    begin
+        //Vírgula decimal, sem "R$" e sem separador de milhar (PD-2), independente do Windows
+        Result := FormatFloat('0.00', FDMemTable1.FieldByName(Campo).AsFloat, FormatoPtBR);
+    end;
+
+begin
+    //Linhas visíveis na grade (filtro de modelo + busca), na ordem da grade; separador ";" (PD-2)
+    Linhas := TStringBuilder.Create;
+    try
+        //Cabeçalho (glossário 6.29)
+        Linhas.Append('Nº;Modelo;Data;Chave;Valor;Base ICMS;ICMS;Base IBS/CBS;IBS UF;IBS Mun.;IBS;CBS');
+        Linhas.Append(sLineBreak);
+
+        if TemNotaVisivel then
+        begin
+            FDMemTable1.DisableControls;
+            try
+                Marcador := FDMemTable1.GetBookmark;
+                try
+                    FDMemTable1.First;
+                    while not FDMemTable1.Eof do
+                    begin
+                        Linhas.Append(FDMemTable1.FieldByName('numero').AsString).Append(';');
+                        Linhas.Append(FDMemTable1.FieldByName('modelo').AsString).Append(';');
+                        Linhas.Append(FDMemTable1.FieldByName('data').AsString).Append(';');
+                        //Chave como texto (D4): ="..." faz o Excel mostrar os 44 dígitos, sem notação científica
+                        Linhas.Append('="').Append(FDMemTable1.FieldByName('chave').AsString).Append('";');
+                        Linhas.Append(Valor('vtotal')).Append(';');
+                        Linhas.Append(Valor('bcicms')).Append(';');
+                        Linhas.Append(Valor('vlicms')).Append(';');
+                        Linhas.Append(Valor('vbcibscbs')).Append(';');
+                        Linhas.Append(Valor('vibsuf')).Append(';');
+                        Linhas.Append(Valor('vibsmun')).Append(';');
+                        Linhas.Append(Valor('vibs')).Append(';');
+                        Linhas.Append(Valor('vcbs'));
+                        Linhas.Append(sLineBreak);
+                        FDMemTable1.Next;
+                    end;
+                finally
+                    if (Marcador <> nil) and FDMemTable1.BookmarkValid(Marcador) then
+                        FDMemTable1.GotoBookmark(Marcador);
+                    FDMemTable1.FreeBookmark(Marcador);
+                end;
+            finally
+                FDMemTable1.EnableControls;
+            end;
+        end;
+
+        Result := Linhas.ToString;
+    finally
+        Linhas.Free;
+    end;
+end;
+
+procedure TFormPrincipal.ExportarCSV(const Caminho: string);
+var
+    Arquivo   : TFileStream;
+    Preambulo : TBytes;
+    Dados     : TBytes;
+begin
+    //UTF-8 com BOM: o Excel pt-BR abre direto, com os acentos do cabeçalho
+    Preambulo := TEncoding.UTF8.GetPreamble;
+    Dados     := TEncoding.UTF8.GetBytes(MontarCSV);
+    Arquivo := TFileStream.Create(Caminho, fmCreate);
+    try
+        if Length(Preambulo) > 0 then
+            Arquivo.WriteBuffer(Preambulo[0], Length(Preambulo));
+        if Length(Dados) > 0 then
+            Arquivo.WriteBuffer(Dados[0], Length(Dados));
+    finally
+        Arquivo.Free;
+    end;
+end;
+
+procedure TFormPrincipal.ExportarCSVClick(Sender: TObject);
+var
+    Dialogo: TSaveDialog;
+begin
+    //Exportar CSV (glossário 6.26 a 6.31): pergunta onde salvar e grava as linhas visíveis
+    if not TemNotaVisivel then
+        Exit;
+
+    Dialogo := TSaveDialog.Create(Self);
+    try
+        Dialogo.Title      := 'Exportar notas para CSV';
+        Dialogo.Filter     := 'Arquivo CSV (separado por ;) (*.csv)|*.csv';
+        Dialogo.DefaultExt := 'csv';
+        Dialogo.FileName   := 'ProXML-notas-' + FormatDateTime('yyyy"-"mm"-"dd', Date, FormatoPtBR) + '.csv';
+        Dialogo.Options    := [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofNoReadOnlyReturn, ofEnableSizing];
+        if not Dialogo.Execute then
+            Exit;
+
+        try
+            ExportarCSV(Dialogo.FileName);
+        except
+            on E: Exception do
+            begin
+                try
+                    DMConfig.CreateLog(E.ClassName, 'Exportar CSV: ' + E.Message);
+                except
+                    on ELog: Exception do
+                        OutputDebugString(PChar('ProXML: ' + ELog.Message));
+                end;
+                messagedlg('Não foi possível salvar o arquivo CSV.' + sLineBreak + sLineBreak + 'Motivo: ' + E.Message,
+                           mtError, [mbOk], 0);
+                Exit;
+            end;
+        end;
+
+        messagedlg('Arquivo CSV salvo:' + sLineBreak + Dialogo.FileName, mtInformation, [mbOk], 0);
+    finally
+        Dialogo.Free;
+    end;
 end;
 
 end.

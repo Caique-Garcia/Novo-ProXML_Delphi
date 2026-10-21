@@ -3,12 +3,14 @@ unit uCalculadoraXML;
 interface
 
 uses
+  System.SysUtils,
   Data.DB;
 
 type
   //Dados lidos de um XML de Nota Fiscal (NF-e modelo 55 ou NFC-e modelo 65)
   TDadosNotaXML = record
     NumeroNF     : String;
+    Chave        : String;   //chave de acesso: NFe/infNFe/@Id sem o prefixo "NFe" (44 dígitos, decisão D4)
     DataEmissao  : String;   //ide/dhEmi como veio no XML
     Modelo       : String;   //ide/mod
     FalhaModelo  : Boolean;  //não foi possível ler ide/mod
@@ -40,6 +42,10 @@ type
     CBS              : Double;
   end;
 
+  //Chave de acesso inválida (decisão D4): a nota vira "não processada" com o motivo no log
+  //(glossário 5.20, com os motivos 5.34 e 5.35)
+  EChaveNotaInvalida = class(Exception);
+
   TCalculadoraXML = class
   private
     FCaminhoDiretorio: String;
@@ -59,6 +65,10 @@ type
   //Lê os dados de um XML de Nota Fiscal, sem acessar a tela
   function LerNotaXML(const CaminhoXML: String): TDadosNotaXML;
 
+  //Data de emissão (ide/dhEmi, "aaaa-mm-dd...") como número aaaammdd, usado para ordenar a grade
+  //por data real. Data fora do formato vale 0
+  function DataParaOrdem(const DataEmissao: String): Integer;
+
   //Soma as notas do DataSet (só os registros visíveis pelo filtro ativo)
   function CalcularTotais(DataSet: TDataSet): TTotaisNotas;
 
@@ -76,7 +86,7 @@ uses
   Xml.XMLIntf,
   Xml.XMLDoc,
   System.IOUtils,
-  System.SysUtils,
+  System.Variants,
   Vcl.Dialogs,
   ProXML.FormPrincipal,
   System.Types,
@@ -97,6 +107,45 @@ end;
 function XMLParaFloat(const Valor: String): Double;
 begin
   Result := StrToFloat(Trim(Valor), FormatoNumeroXML);
+end;
+
+function SoDigitos(const Texto: String; const Tamanho: Integer): Boolean;
+var
+  I: Integer;
+begin
+  //Texto com exatamente Tamanho caracteres, todos algarismos de 0 a 9
+  Result := Length(Texto) = Tamanho;
+  if not Result then
+    Exit;
+  for I := 1 to Length(Texto) do
+    if not CharInSet(Texto[I], ['0'..'9']) then
+      Exit(False);
+end;
+
+function DataParaOrdem(const DataEmissao: String): Integer;
+var
+  Texto: String;
+begin
+  //"2026-10-21T14:32:00-03:00" -> 20261021
+  Texto := Copy(DataEmissao, 1, 4) + Copy(DataEmissao, 6, 2) + Copy(DataEmissao, 9, 2);
+  if SoDigitos(Texto, 8) then
+    Result := StrToInt(Texto)
+  else
+    Result := 0;
+end;
+
+function ChaveDoId(NodeinfNFe: IXMLNode): String;
+begin
+  //Decisão D4: a chave vem do atributo Id de infNFe ("NFe" + 44 dígitos), não do nome do arquivo
+  Result := '';
+  if NodeinfNFe.HasAttribute('Id') then
+    Result := Trim(VarToStr(NodeinfNFe.Attributes['Id']));
+  if SameText(Copy(Result, 1, 3), 'NFe') then
+    Delete(Result, 1, 3);
+
+  //Glossário 5.34
+  if not SoDigitos(Result, 44) then
+    raise EChaveNotaInvalida.Create('a chave de acesso da nota (atributo Id de infNFe) não tem 44 dígitos');
 end;
 
 function NoFilho(Node: IXMLNode; const Nome: String): IXMLNode;
@@ -134,10 +183,12 @@ function LerNotaXML(const CaminhoXML: String): TDadosNotaXML;
 var
   XMLDocument: IXMLDocument;
   NodenfeProc, NodeinfNFe, NodeprotNFe, NodeIde, NodeTotal, NodeICMSTot, NodeIBSCBSTot, NodegIBS : IXMLNode;
+  NodeinfProt, NodechNFe : IXMLNode;
 begin
   //Função que lê os dados do arquivo XML
   //XML fora da estrutura esperada (ex.: sem nfeProc) gera exceção
   Result.NumeroNF     := '';
+  Result.Chave        := '';
   Result.DataEmissao  := '';
   Result.Modelo       := '';
   Result.FalhaModelo  := False;
@@ -188,6 +239,9 @@ begin
   if not Result.ModeloValido then
     Exit;
 
+  //Chave de acesso (decisão D4): Id sem 44 dígitos gera exceção ("não processada", motivo 5.34)
+  Result.Chave := ChaveDoId(NodeinfNFe);
+
   //Aqui vamos pegar o cStat do protocolo de autorização.
   //nfeProc sem protNFe: nota sem protocolo (cStat vazio, não autorizada).
   //protNFe sem infProt/cStat é XML fora da estrutura esperada: gera exceção
@@ -195,7 +249,16 @@ begin
   if NodeprotNFe = nil then
     Result.cStat := ''
   else
-    Result.cStat := Trim(NoFilhoObrigatorio(NoFilhoObrigatorio(NodeprotNFe, 'infProt'), 'cStat').Text);
+  begin
+    NodeinfProt  := NoFilhoObrigatorio(NodeprotNFe, 'infProt');
+    Result.cStat := Trim(NoFilhoObrigatorio(NodeinfProt, 'cStat').Text);
+
+    //chNFe do protocolo só confere a chave (D4): diferente do Id, a nota não é processada (5.35).
+    //Protocolo sem chNFe não é conferido
+    NodechNFe := NoFilho(NodeinfProt, 'chNFe');
+    if (NodechNFe <> nil) and (Trim(NodechNFe.Text) <> Result.Chave) then
+      raise EChaveNotaInvalida.Create('a chave do protocolo de autorização (chNFe) é diferente da chave da nota');
+  end;
 
   Result.Autorizada := NFeAutorizada(Result.cStat);
   if not Result.Autorizada then
@@ -281,7 +344,6 @@ procedure TCalculadoraXML.GetTagValueFromXML(var CaminhoXML: string);
   var
     Dados: TDadosNotaXML;
     Numero, Modelo: Integer;
-  Chave: String;
 begin
     //Função que trabalha os dados do arquivo
     Dados := LerNotaXML(CaminhoXML);
@@ -305,26 +367,22 @@ begin
       Numero := StrToInt(Dados.NumeroNF);
       Modelo := StrToInt(Dados.Modelo);
 
-      Chave := ExtractFileName(CaminhoXML);
-      Chave := ChangeFileExt(Chave, '');
-
       //Aqui exibimos os registros no grid
       FormPrincipal.FDMemTable1.Append;
       try
           FormPrincipal.FDMemTable1.FieldByName('numero').AsInteger := Numero;
           FormPrincipal.FDMemTable1.FieldByName('modelo').AsInteger := Modelo;
 
-          FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Chave;
+          //Chave de 44 dígitos do Id da nota (D4), não o nome do arquivo
+          FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Dados.Chave;
 
           FormPrincipal.FDMemTable1.FieldByName('data').AsString := FormataDataStr(Copy(Dados.DataEmissao, 1, 10));
+          //Data como aaaammdd: a grade ordena a coluna Data pela data real (etapa 4.5)
+          FormPrincipal.FDMemTable1.FieldByName('data_ordem').AsInteger := DataParaOrdem(Dados.DataEmissao);
 
-          TFloatField(FormPrincipal.FDMemTable1.FieldByName('vlicms')).DisplayFormat := '#,##0.00';
+          //Na tela os valores aparecem com FormatarMoeda (pt-BR explícito, OnGetText dos campos)
           FormPrincipal.FDMemTable1.FieldByName('vlicms').AsFloat := Dados.vICMS;
-
-          TFloatField(FormPrincipal.FDMemTable1.FieldByName('bcicms')).DisplayFormat := '#,##0.00';
           FormPrincipal.FDMemTable1.FieldByName('bcicms').AsFloat := Dados.vBC;
-
-          TFloatField(FormPrincipal.FDMemTable1.FieldByName('vtotal')).DisplayFormat := '#,##0.00';
           FormPrincipal.FDMemTable1.FieldByName('vtotal').AsFloat := Dados.vNF;
 
           FormPrincipal.FDMemTable1.FieldByName('xml').AsString := CaminhoXML;
@@ -418,8 +476,18 @@ begin
         try
             GetTagValueFromXML(files[i]);
         except
-            ErroNaLeitura:= ErroNaLeitura + 1;
-            FormPrincipal.Memo1.Lines.Add('Arquivo não processado: ' + ExtractFileName(files[i]));
+            on E: EChaveNotaInvalida do
+            begin
+                //Decisão D4: linha no formato 5.20 do glossário, com o motivo 5.34 ou 5.35
+                ErroNaLeitura:= ErroNaLeitura + 1;
+                FormPrincipal.Memo1.Lines.Add(ExtractFileName(files[i]) + ': não foi possível ler o arquivo (' +
+                                              E.Message + ').');
+            end;
+            on E: Exception do
+            begin
+                ErroNaLeitura:= ErroNaLeitura + 1;
+                FormPrincipal.Memo1.Lines.Add('Arquivo não processado: ' + ExtractFileName(files[i]));
+            end;
         end;
         FormPrincipal.Gauge1.Progress := FormPrincipal.Gauge1.Progress + 1;
     end;
