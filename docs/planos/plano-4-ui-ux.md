@@ -1,6 +1,6 @@
 # Plano 4 — Redesign de UI/UX (v1.1.0, junto com o Plano 1)
 
-> **Status:** ▶️ Em execução: 4.1, 4.2 e 4.3 concluídas (commits locais); próxima etapa **4.4**
+> **Status:** ▶️ Em execução: 4.1 a 4.4 concluídas (até `d72f450`, já no GitHub, sem tag nem Release); próxima etapa **4.5**
 > **Análise feita em:** 19/10/2026, sobre o commit `5ae82ac` (antes da etapa 1.2 do Plano 1)
 > **Atualizado em:** 19/10/2026, sobre o commit `b593076` (Plano 1 concluído e aprovado pelo QA; v1.1.0 preparada, **não publicada**). Ver a seção [2.10](#210-o-que-o-plano-1-já-mudou)
 > **Escopo:** tela principal (todas as abas), relatório de notas e relatório IBS/CBS (QuickReport), layouts do DANFE (`.fr3`) e textos da interface
@@ -211,6 +211,7 @@ Legenda de severidade: 🔴 **Alta** (atrapalha o uso ou passa informação erra
 | **Processar travado após erro (20/10/2026)** | Defeito antigo (o `Enabled := True` fora de `finally`): corrigir na **4.6**, junto com o processamento em segundo plano |
 | **Decisões da 4.3 (20/10/2026)** | Pasta salva que não existe mais: mensagem 2.14 do glossário **ao abrir o app** (não modal), campo vazio. Caminho longo: **aceito como está** (cortado no fim, caminho completo na dica). Aperto da barra/cards em 125%/150% na janela mínima: **tratar na 4.10** com prints reais. Link "Sobre" visível e sem ação até a 4.7. Menu lateral com 200 px (visual do menu na 4.4) |
 | **Decisões da 4.4 (20/10/2026)** | Menu feito com **`TProBotao` em modo menu** (5 itens; o `TCategoryButtons` sai). Enquanto a tela Carregando está aberta, **só o menu** fica bloqueado já na 4.4; o bloqueio completo (H4) continua na 4.6. Salvar configurações **só deixa de trocar de tela**; a mensagem atual fica até a 4.7 (rótulo inline do glossário). **D10 revista:** o `FrameLoad` tinha uma engrenagem (`#5EA4E3`/`#C1C6C8`), não o spinner ciano + preto da D10; a tela Carregando usa **o spinner** (`src/json`) recolorido para `CorPrimaria`/`CorMarinho`. Texto novo **8.8a** no glossário (há notas, mas nenhuma no modelo escolhido). Aceitas as escolhas de teclado do `delphi-dev`: menu é uma parada só do Tab, antes do conteúdo; o `PageControl1` sai do Tab; ao sair da Carregando o foco volta para a grade ou para "Gerar relatório"; Relatórios e Carregando sem a moldura do `PageControl1` |
+| **4.4 no GitHub (21/10/2026)** | A 4.4 foi aprovada pelo usuário no teste na IDE e commitada por ele em `d72f450` ("Ajuste UI/UX"), que já foi enviado ao `origin/main` junto com a 4.2, a 4.3 e os commits do Plano 3. Decisão: **deixar como está** (sem reescrever o histórico; nenhum dado sensível). Continua valendo: sem tag e sem Release até a 4.12. O `notas.db` desse commit tinha a última pasta e a janela do teste: voltou à versão vazia e **continua versionado**; saíram as duas linhas `bin/db/notas.db` do `.gitignore`, que não tinham efeito |
 | **QA (20/10/2026)** | O `qa-reviewer` revisa só nos pontos de controle maiores (4.10, cobrindo da 4.3 em diante). Nas etapas, vale a bateria do `delphi-dev` + teste do usuário na IDE |
 | **Textos** | O `ux-designer` propõe um **glossário de mensagens** (antes → depois) e o usuário aprova junto com os mockups |
 
