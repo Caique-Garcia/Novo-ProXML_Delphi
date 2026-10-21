@@ -1,9 +1,18 @@
 unit uCalculadoraXML;
 
+{ Leitura dos XMLs de Nota Fiscal (NF-e modelo 55 e NFC-e modelo 65) e cálculo dos totais.
+
+  Plano 4, etapa 4.6: a unit não acessa a tela nem o banco. A leitura devolve um resultado
+  (TResultadoLeitura: notas autorizadas, linhas do log e contadores) e avisa o progresso por
+  callback. TThreadLeituraXML faz a leitura fora da thread principal; quem a cria recebe os avisos
+  de progresso e o fim na thread principal (TThread.Queue e OnTerminate) e só então mexe na tela. }
+
 interface
 
 uses
   System.SysUtils,
+  System.Classes,
+  System.Generics.Collections,
   Data.DB;
 
 type
@@ -17,6 +26,8 @@ type
     ModeloValido : Boolean;  //modelo 55 ou 65
     cStat        : String;   //protNFe/infProt/cStat
     Autorizada   : Boolean;  //cStat 100 ou 150
+    Homologacao  : Boolean;  //ide/tpAmb = 2 (ambiente de homologação); só informativo (glossário 5.29 a 5.32)
+    Entrada      : Boolean;  //NF-e (55) com ide/tpNF = 0; só informativo (glossário 5.30, 5.31 e 5.33)
     vNF          : Double;
     vBC          : Double;
     vICMS        : Double;
@@ -46,17 +57,89 @@ type
   //(glossário 5.20, com os motivos 5.34 e 5.35)
   EChaveNotaInvalida = class(Exception);
 
-  TCalculadoraXML = class
-  private
-    FCaminhoDiretorio: String;
-    procedure SetCaminhoDiretorio(const Value: String);
-    function FormataDataStr(const DataStr: String): String;
+  //Tipo da linha do log do Resumo: define o ícone e a cor na lista (tokens.md 5.8 e mockup resumo.html)
+  TTipoLinhaLog = (llSucesso, llAviso, llErro);
 
+  //Uma linha do log "Detalhes da leitura" (glossário 5.16 a 5.27 e 5.32 a 5.35)
+  TLinhaLog = record
+    Tipo : TTipoLinhaLog;
+    Texto: String;
+  end;
 
+  //Nota autorizada lida de um XML: vai para a grade quando a leitura termina
+  TNotaLida = record
+    Caminho : String;    //caminho completo do XML
+    Numero  : Integer;   //ide/nNF convertido
+    Modelo  : Integer;   //ide/mod convertido
+    Dados   : TDadosNotaXML;
+  end;
+
+  //Resultado da leitura de uma pasta. Preenchido pela thread de leitura e usado pela tela depois
+  //que a thread termina (nunca pelas duas ao mesmo tempo)
+  TResultadoLeitura = class
   public
-    property CaminhoDiretorio : String read FCaminhoDiretorio write SetCaminhoDiretorio;
-    procedure ProcessarXMLs;
-    procedure GetTagValueFromXML(var CaminhoXML: string);
+    Pasta         : String;
+    Notas         : TList<TNotaLida>;
+    Log           : TList<TLinhaLog>;
+    TotalArquivos : Integer;   //XMLs encontrados na pasta
+    ArquivosLidos : Integer;   //XMLs já lidos (menor que o total quando a leitura foi cancelada)
+    Autorizadas   : Integer;   //notas autorizadas carregadas
+    Ignoradas     : Integer;   //não autorizadas ou de outro modelo
+    ComErro       : Integer;   //não foi possível ler o arquivo
+    Homologacao   : Integer;   //autorizadas com tpAmb 2 (somadas aos totais)
+    Entrada       : Integer;   //NF-e autorizadas com tpNF 0 (somadas aos totais)
+    Cancelado     : Boolean;   //a leitura parou antes do último arquivo
+    DuracaoMs     : Cardinal;  //tempo da leitura
+    constructor Create;
+    destructor Destroy; override;
+    procedure AdicionarLog(const Tipo: TTipoLinhaLog; const Texto: String);
+  end;
+
+  //Aviso de progresso: Lidos de Total arquivos, Arquivo = nome do arquivo que está sendo lido.
+  //Chamado na thread de leitura (TThreadLeituraXML repassa para a thread principal)
+  TAvisoProgressoLeitura = procedure(const Lidos, Total: Integer; const Arquivo: String) of object;
+
+  //Pergunta à leitura se ela deve parar (cancelamento cooperativo, conferido a cada arquivo)
+  TConsultaCancelamento = function: Boolean of object;
+
+  TCalculadoraXML = class
+  public
+    //Lê os XMLs da pasta e preenche o Resultado (notas autorizadas, log e contadores).
+    //Não acessa a tela nem o banco: pode rodar fora da thread principal (com o COM inicializado
+    //na thread, por causa do TXMLDocument). Exceção fora da leitura de um arquivo (ex.: pasta que
+    //não existe mais) sobe para quem chamou
+    class procedure ProcessarXMLs(const Pasta: String; Resultado: TResultadoLeitura;
+      const AoProgredir: TAvisoProgressoLeitura; const Cancelado: TConsultaCancelamento);
+  end;
+
+  { Leitura dos XMLs numa thread própria (Plano 4, etapa 4.6).
+    - Cancelamento cooperativo: Terminate faz a leitura parar antes do próximo arquivo.
+    - Progresso: AoProgredir é chamado na thread principal (TThread.Queue), no máximo a cada
+      INTERVALO_PROGRESSO_MS e nunca com dois avisos na fila (1000+ arquivos não travam a tela).
+    - Fim: o OnTerminate (thread principal) pega o resultado com ExtrairResultado.
+    - A thread não acessa a tela nem o banco (a conexão FireDAC é da thread principal). }
+  TThreadLeituraXML = class(TThread)
+  private
+    FPasta       : String;
+    FResultado   : TResultadoLeitura;
+    FErro        : String;
+    FClasseErro  : String;
+    FAoProgredir : TAvisoProgressoLeitura;
+    FAvisoNaFila : Integer;    //1 = um aviso de progresso ainda espera a thread principal
+    FUltimoAviso : Cardinal;
+    procedure AvisarProgresso(const Lidos, Total: Integer; const Arquivo: String);
+    function  Cancelada: Boolean;
+  protected
+    procedure Execute; override;
+  public
+    //Criada suspensa: quem cria liga o OnTerminate e chama Start
+    constructor Create(const Pasta: String; const AoProgredir: TAvisoProgressoLeitura);
+    destructor Destroy; override;
+    //Entrega o resultado para quem chamou, que passa a ser o dono (só depois do fim da thread)
+    function ExtrairResultado: TResultadoLeitura;
+    //Erro fora da leitura de um arquivo (vazio se não houve)
+    property Erro: String read FErro;
+    property ClasseErro: String read FClasseErro;
   end;
 
   //Converte um valor numérico do XML (sempre com ponto decimal), sem depender do idioma do Windows
@@ -69,34 +152,35 @@ type
   //por data real. Data fora do formato vale 0
   function DataParaOrdem(const DataEmissao: String): Integer;
 
+  //Data de emissão (ide/dhEmi, "aaaa-mm-dd...") no padrão dd/mm/aaaa da grade
+  function FormatarDataNota(const DataEmissao: String): String;
+
   //Soma as notas do DataSet (só os registros visíveis pelo filtro ativo)
   function CalcularTotais(DataSet: TDataSet): TTotaisNotas;
 
-  var
-     ContadorXML, ErroNaLeitura: Integer;
+  //Motivo de um erro de leitura para a linha 5.20 do log: mensagem numa linha só, sem o ponto final
+  function MotivoDoErro(E: Exception): String;
 
+const
+  //Intervalo mínimo entre dois avisos de progresso da thread de leitura (milissegundos)
+  INTERVALO_PROGRESSO_MS = 50;
 
 implementation
 
 uses
-
-  {$IFDEF MSWINDOWS}
-    Vcl.FileCtrl,
-  {$ENDIF}
+  Winapi.Windows,
+  Winapi.ActiveX,
   Xml.XMLIntf,
   Xml.XMLDoc,
   System.IOUtils,
   System.Variants,
-  Vcl.Dialogs,
-  ProXML.FormPrincipal,
+  System.SyncObjs,
   System.Types,
   System.StrUtils;
 
 var
   //Formato dos números no XML: ponto decimal e sem separador de milhar
   FormatoNumeroXML: TFormatSettings;
-
-{ TCalculadoraXML }
 
 function NFeAutorizada(const cStat: string): Boolean;
 begin
@@ -134,6 +218,15 @@ begin
     Result := 0;
 end;
 
+function FormatarDataNota(const DataEmissao: String): String;
+var
+  DataStr : String;
+begin
+  //Formata a data no padrão dd/mm/aaaa a partir de "aaaa-mm-dd..." (mesma conta de antes da 4.6)
+  DataStr := Copy(DataEmissao, 1, 10);
+  Result  := Copy(DataStr, 9, 2) + '/' + Copy(DataStr, 6, 2) + '/' + Copy(DataStr, 1, 4);
+end;
+
 function ChaveDoId(NodeinfNFe: IXMLNode): String;
 begin
   //Decisão D4: a chave vem do atributo Id de infNFe ("NFe" + 44 dígitos), não do nome do arquivo
@@ -159,8 +252,20 @@ end;
 function NoFilhoObrigatorio(Node: IXMLNode; const Nome: String): IXMLNode;
 begin
   Result := NoFilho(Node, Nome);
+  //Glossário 5.24 (vira o motivo da linha 5.20 do log)
   if Result = nil then
-    raise Exception.Create('Tag ' + Nome + ' não encontrada no XML');
+    raise Exception.Create('falta a tag ' + Nome);
+end;
+
+function TextoOpcional(Node: IXMLNode; const Nome: String): String;
+var
+  NodeTexto: IXMLNode;
+begin
+  //Texto da tag ou vazio quando ela (ou o grupo pai) não existe
+  Result := '';
+  NodeTexto := NoFilho(Node, Nome);
+  if NodeTexto <> nil then
+    Result := Trim(NodeTexto.Text);
 end;
 
 function ValorObrigatorio(Node: IXMLNode; const Nome: String): Double;
@@ -195,6 +300,8 @@ begin
   Result.ModeloValido := False;
   Result.cStat        := '';
   Result.Autorizada   := False;
+  Result.Homologacao  := False;
+  Result.Entrada      := False;
   Result.vNF          := 0;
   Result.vBC          := 0;
   Result.vICMS        := 0;
@@ -209,17 +316,17 @@ begin
 
   //Aqui carregamos o arquivo XML no objeto XMLDocument
   XMLDocument.LoadFromFile(CaminhoXML);
-  //Sem nfeProc (ou sem NFe/infNFe/ide) o arquivo não é processado: a exceção vira
-  //"Arquivo não processado" em ProcessarXMLs
+  //Sem nfeProc (ou sem NFe/infNFe/ide) o arquivo não é processado: a exceção vira a linha 5.20
+  //do log ("não foi possível ler o arquivo"), com o motivo do glossário (5.24 a 5.26)
   NodenfeProc := XMLDocument.ChildNodes.FindNode('nfeProc');
   if NodenfeProc = nil then
-    raise Exception.Create('Tag nfeProc não encontrada no XML');
+    raise Exception.Create('o arquivo não é uma Nota Fiscal com protocolo de autorização (falta a tag nfeProc)');
   NodeinfNFe  := NoFilhoObrigatorio(NoFilhoObrigatorio(NodenfeProc, 'NFe'), 'infNFe');
   NodeIde     := NoFilhoObrigatorio(NodeinfNFe, 'ide');
-  //nNF obrigatório: tag ausente ou vazia gera exceção ("Arquivo não processado")
+  //nNF obrigatório: tag ausente ou vazia gera exceção (arquivo não processado)
   Result.NumeroNF := Trim(NoFilhoObrigatorio(NodeIde, 'nNF').Text);
   if Result.NumeroNF = '' then
-    raise Exception.Create('Tag nNF vazia no XML');
+    raise Exception.Create('tag nNF vazia');
 
   //Tentando recuperar a data do XML
   try
@@ -263,6 +370,12 @@ begin
   Result.Autorizada := NFeAutorizada(Result.cStat);
   if not Result.Autorizada then
     Exit;
+
+  //Ambiente (tpAmb) e tipo da operação (tpNF): só informativos, para os avisos do Resumo
+  //(glossário 5.29 a 5.33). Não mudam os totais nem os contadores; tag ausente não gera aviso.
+  //Entrada vale só para a NF-e (modelo 55), como no glossário 5.30
+  Result.Homologacao := TextoOpcional(NodeIde, 'tpAmb') = '2';
+  Result.Entrada     := (Result.Modelo = '55') and (TextoOpcional(NodeIde, 'tpNF') = '0');
 
   //Totais do ICMS (obrigatórios)
   NodeTotal   := NoFilhoObrigatorio(NodeinfNFe, 'total');
@@ -340,168 +453,244 @@ begin
   end;
 end;
 
-procedure TCalculadoraXML.GetTagValueFromXML(var CaminhoXML: string);
-  var
-    Dados: TDadosNotaXML;
-    Numero, Modelo: Integer;
+function MotivoDoErro(E: Exception): String;
 begin
-    //Função que trabalha os dados do arquivo
+  //Motivo da linha 5.20 do log: a mensagem da exceção numa linha só (as do MSXML vêm com quebras
+  //de linha) e sem o ponto final, que já fecha a frase do log
+  Result := StringReplace(E.Message, #13#10, ' ', [rfReplaceAll]);
+  Result := StringReplace(Result, #13, ' ', [rfReplaceAll]);
+  Result := StringReplace(Result, #10, ' ', [rfReplaceAll]);
+  Result := StringReplace(Result, #9, ' ', [rfReplaceAll]);
+  while Pos('  ', Result) > 0 do
+    Result := StringReplace(Result, '  ', ' ', [rfReplaceAll]);
+  Result := Trim(Result);
+  if (Result <> '') and (Result[Length(Result)] = '.') then
+    Delete(Result, Length(Result), 1);
+end;
+
+procedure LerArquivoXML(const CaminhoXML: String; Resultado: TResultadoLeitura);
+var
+  Dados  : TDadosNotaXML;
+  Nota   : TNotaLida;
+  Arquivo: String;
+begin
+  //Lê um XML e registra no resultado: nota autorizada, ignorada ou com erro, com a linha do log
+  Arquivo := ExtractFileName(CaminhoXML);
+  try
     Dados := LerNotaXML(CaminhoXML);
 
     if Dados.FalhaModelo then
     begin
-        FormPrincipal.Memo1.Lines.Add('XML ' + ExtractFileName(CaminhoXML) + ' - Falha ao recuperar modelo');
-        Exit;
+      //Glossário 5.16: conta como "Com erro"
+      Inc(Resultado.ComErro);
+      Resultado.AdicionarLog(llErro, Arquivo + ': não foi possível identificar o modelo.');
+      Exit;
     end;
 
     if not Dados.ModeloValido then
     begin
-        FormPrincipal.Memo1.Lines.Add('XML ' + ExtractFileName(CaminhoXML) + ' - modelo diferente de 55/65');
-        Exit;
+      //Glossário 5.17: conta como "Ignorada"
+      Inc(Resultado.Ignoradas);
+      Resultado.AdicionarLog(llAviso, Arquivo + ': modelo ' + Dados.Modelo +
+                                      ' ignorado (o ProXML lê só os modelos 55 e 65).');
+      Exit;
     end;
 
     //Aqui vamos verificar se a nota foi autorizada (cStat 100 ou 150)
-    if Dados.Autorizada then
+    if not Dados.Autorizada then
     begin
-      //Conversões antes do Append para não deixar registro pela metade em caso de erro
-      Numero := StrToInt(Dados.NumeroNF);
-      Modelo := StrToInt(Dados.Modelo);
-
-      //Aqui exibimos os registros no grid
-      FormPrincipal.FDMemTable1.Append;
-      try
-          FormPrincipal.FDMemTable1.FieldByName('numero').AsInteger := Numero;
-          FormPrincipal.FDMemTable1.FieldByName('modelo').AsInteger := Modelo;
-
-          //Chave de 44 dígitos do Id da nota (D4), não o nome do arquivo
-          FormPrincipal.FDMemTable1.FieldByName('chave').AsString := Dados.Chave;
-
-          FormPrincipal.FDMemTable1.FieldByName('data').AsString := FormataDataStr(Copy(Dados.DataEmissao, 1, 10));
-          //Data como aaaammdd: a grade ordena a coluna Data pela data real (etapa 4.5)
-          FormPrincipal.FDMemTable1.FieldByName('data_ordem').AsInteger := DataParaOrdem(Dados.DataEmissao);
-
-          //Na tela os valores aparecem com FormatarMoeda (pt-BR explícito, OnGetText dos campos)
-          FormPrincipal.FDMemTable1.FieldByName('vlicms').AsFloat := Dados.vICMS;
-          FormPrincipal.FDMemTable1.FieldByName('bcicms').AsFloat := Dados.vBC;
-          FormPrincipal.FDMemTable1.FieldByName('vtotal').AsFloat := Dados.vNF;
-
-          FormPrincipal.FDMemTable1.FieldByName('xml').AsString := CaminhoXML;
-
-          //IBS/CBS (zerados quando a nota não tem o grupo IBSCBSTot)
-          FormPrincipal.FDMemTable1.FieldByName('tem_ibscbs').AsBoolean := Dados.TemIBSCBS;
-          FormPrincipal.FDMemTable1.FieldByName('vbcibscbs').AsFloat   := Dados.vBCIBSCBS;
-          FormPrincipal.FDMemTable1.FieldByName('vibsuf').AsFloat      := Dados.vIBSUF;
-          FormPrincipal.FDMemTable1.FieldByName('vibsmun').AsFloat     := Dados.vIBSMun;
-          FormPrincipal.FDMemTable1.FieldByName('vibs').AsFloat        := Dados.vIBS;
-          FormPrincipal.FDMemTable1.FieldByName('vcbs').AsFloat        := Dados.vCBS;
-
-          FormPrincipal.FDMemTable1.Post;
-      except
-          //Não deixa a linha em edição: desfaz o Append e o arquivo vira "Arquivo não processado"
-          FormPrincipal.FDMemTable1.Cancel;
-          raise;
-      end;
-
-      //Só conta como processado depois que o registro foi gravado na grade
-      ContadorXML := ContadorXML + 1;
-
-      FormPrincipal.DataSource1.DataSet.First;
-    end
-    else
-    begin
-      // Aqui executamos caso a nota não esteja autorizada (cStat diferente de 100/150)
+      //Glossário 5.18 e 5.19: contam como "Ignorada"
+      Inc(Resultado.Ignoradas);
       if Dados.cStat = '' then
-        FormPrincipal.Memo1.Lines.Add('Nota Fiscal ' +Dados.NumeroNF + ' - não autorizada (sem protocolo)')
+        Resultado.AdicionarLog(llAviso, 'Nota Fiscal ' + Dados.NumeroNF +
+                                        ': não autorizada (sem protocolo de autorização).')
       else
-        FormPrincipal.Memo1.Lines.Add('Nota Fiscal ' +Dados.NumeroNF + ' - não autorizada (cStat ' + Dados.cStat + ')');
-    end;
-end;
-
-function TCalculadoraXML.FormataDataStr(const DataStr: String): String;
-var
-  DateStr       : string;
-  //FormattedDate : string;
-  Dia           : string;
-  Mes           : string;
-  Ano           : string;
-
-begin
-  //Função que formata data no padrão dd/mm/yyyy
-  Result:= '';
-
-  // String de data no formato YYYY-MM-DD
-  DateStr := DataStr;
-
-  Ano := Copy(DateStr, 1, 4);
-  Mes := Copy(DateStr, 6, 2);
-  Dia := Copy(DateStr, 9, 2);
-
-  // Exibir o resultado
-  Result := Dia+'/'+Mes+'/'+Ano;
-end;
-
-procedure TCalculadoraXML.ProcessarXMLs;
-var
-  //files: TArray<string>;
-  files: TStringDynArray;
-  i: integer;
-begin
-  //Função que processar XMLS no diretorio
-  ContadorXML           := 0;
-  ErroNaLeitura         := 0;
-
-  //Limpa a grade: cards e relatório refletem só a pasta atual
-  if FormPrincipal.FDMemTable1.Active then
-    FormPrincipal.FDMemTable1.EmptyDataSet
-  else
-    FormPrincipal.FDMemTable1.CreateDataSet;
-  FormPrincipal.AtualizarTotais;
-
-  //Pegando arquivos e jogando num array de nomes de arquivos
-  files := TDirectory.GetFiles(CaminhoDiretorio + '\', '*.xml');
-
-  try
-    FormPrincipal.Gauge1.MaxValue := High(files);
-  except
-    begin
-      FormPrincipal.Memo1.Lines.Add('Não encontrado arquivos XMLs no diretótio selecionado!');
+        Resultado.AdicionarLog(llAviso, 'Nota Fiscal ' + Dados.NumeroNF + ': não autorizada (cStat ' +
+                                        Dados.cStat + ').');
       Exit;
     end;
-  end;
 
-    //Passando pelo Arraay com os nomes dos XMLs
-    for  i := 0 to High(files) do
+    //Conversões antes de registrar a nota: número ou modelo inválido vira "não foi possível ler"
+    Nota.Numero  := StrToInt(Dados.NumeroNF);
+    Nota.Modelo  := StrToInt(Dados.Modelo);
+    Nota.Caminho := CaminhoXML;
+    Nota.Dados   := Dados;
+    Resultado.Notas.Add(Nota);
+    Inc(Resultado.Autorizadas);
+
+    //Avisos da nota somada aos totais (glossário 5.32 e 5.33): não mudam os contadores
+    if Dados.Homologacao then
     begin
-        ////Aqui executamos a função que faz a leitura dos dados do arquivo XML
-        try
-            GetTagValueFromXML(files[i]);
-        except
-            on E: EChaveNotaInvalida do
-            begin
-                //Decisão D4: linha no formato 5.20 do glossário, com o motivo 5.34 ou 5.35
-                ErroNaLeitura:= ErroNaLeitura + 1;
-                FormPrincipal.Memo1.Lines.Add(ExtractFileName(files[i]) + ': não foi possível ler o arquivo (' +
-                                              E.Message + ').');
-            end;
-            on E: Exception do
-            begin
-                ErroNaLeitura:= ErroNaLeitura + 1;
-                FormPrincipal.Memo1.Lines.Add('Arquivo não processado: ' + ExtractFileName(files[i]));
-            end;
-        end;
-        FormPrincipal.Gauge1.Progress := FormPrincipal.Gauge1.Progress + 1;
+      Inc(Resultado.Homologacao);
+      Resultado.AdicionarLog(llAviso, 'Nota Fiscal ' + Dados.NumeroNF +
+                                      ': homologação (tpAmb 2), somada aos totais.');
     end;
-
-    //Aqui vamos exibir a Soma (calculada a partir das notas da grade)
-    FormPrincipal.AtualizarTotais;
-
-    FormPrincipal.Memo1.Lines.Add('Foram processasdos ' + IntToSTr(ContadorXML) + ' Arquivos XMLs');
-    FormPrincipal.Memo1.Lines.Add(IntToStr(ErroNaLeitura) + ' Arquivos com problemas para serem processados.');
+    if Dados.Entrada then
+    begin
+      Inc(Resultado.Entrada);
+      Resultado.AdicionarLog(llAviso, 'Nota Fiscal ' + Dados.NumeroNF +
+                                      ': NF-e de entrada (tpNF 0), somada aos totais.');
+    end;
+  except
+    on E: Exception do
+    begin
+      //Glossário 5.20, com o motivo 5.24 a 5.27, 5.34 ou 5.35: conta como "Com erro"
+      Inc(Resultado.ComErro);
+      Resultado.AdicionarLog(llErro, Arquivo + ': não foi possível ler o arquivo (' + MotivoDoErro(E) + ').');
+    end;
+  end;
 end;
 
-procedure TCalculadoraXML.SetCaminhoDiretorio(const Value: String);
+{ TResultadoLeitura }
+
+constructor TResultadoLeitura.Create;
 begin
-  FCaminhoDiretorio := Value;
+  inherited Create;
+  Notas := TList<TNotaLida>.Create;
+  Log   := TList<TLinhaLog>.Create;
+end;
+
+destructor TResultadoLeitura.Destroy;
+begin
+  Log.Free;
+  Notas.Free;
+  inherited;
+end;
+
+procedure TResultadoLeitura.AdicionarLog(const Tipo: TTipoLinhaLog; const Texto: String);
+var
+  Linha: TLinhaLog;
+begin
+  Linha.Tipo  := Tipo;
+  Linha.Texto := Texto;
+  Log.Add(Linha);
+end;
+
+{ TCalculadoraXML }
+
+class procedure TCalculadoraXML.ProcessarXMLs(const Pasta: String; Resultado: TResultadoLeitura;
+  const AoProgredir: TAvisoProgressoLeitura; const Cancelado: TConsultaCancelamento);
+var
+  Arquivos: TStringDynArray;
+  Inicio  : Cardinal;
+  I       : Integer;
+begin
+  //Função que processa os XMLs da pasta (só leitura: a tela recebe o resultado no fim)
+  Inicio := GetTickCount;
+  Resultado.Pasta := Pasta;
+  try
+    //Pegando arquivos e jogando num array de nomes de arquivos
+    Arquivos := TDirectory.GetFiles(Pasta + '\', '*.xml');
+    Resultado.TotalArquivos := Length(Arquivos);
+
+    //Passando pelo array com os nomes dos XMLs
+    for I := 0 to High(Arquivos) do
+    begin
+      //Cancelamento cooperativo: conferido antes de cada arquivo
+      if Assigned(Cancelado) and Cancelado then
+      begin
+        Resultado.Cancelado := True;
+        Break;
+      end;
+
+      if Assigned(AoProgredir) then
+        AoProgredir(I, Resultado.TotalArquivos, ExtractFileName(Arquivos[I]));
+
+      LerArquivoXML(Arquivos[I], Resultado);
+      Resultado.ArquivosLidos := I + 1;
+    end;
+  finally
+    Resultado.DuracaoMs := GetTickCount - Inicio;
+  end;
+end;
+
+{ TThreadLeituraXML }
+
+constructor TThreadLeituraXML.Create(const Pasta: String; const AoProgredir: TAvisoProgressoLeitura);
+begin
+  inherited Create(True);
+  FreeOnTerminate := False;
+  FPasta       := Pasta;
+  FAoProgredir := AoProgredir;
+  FResultado   := TResultadoLeitura.Create;
+end;
+
+destructor TThreadLeituraXML.Destroy;
+begin
+  //O resultado que não foi entregue (ExtrairResultado) é liberado junto com a thread
+  inherited;
+  FResultado.Free;
+end;
+
+function TThreadLeituraXML.ExtrairResultado: TResultadoLeitura;
+begin
+  Result     := FResultado;
+  FResultado := nil;
+end;
+
+function TThreadLeituraXML.Cancelada: Boolean;
+begin
+  Result := Terminated;
+end;
+
+procedure TThreadLeituraXML.AvisarProgresso(const Lidos, Total: Integer; const Arquivo: String);
+var
+  Agora   : Cardinal;
+  LidosQ  : Integer;
+  TotalQ  : Integer;
+  ArquivoQ: String;
+begin
+  //Roda na thread de leitura. O primeiro aviso sai sempre; os outros, no máximo a cada
+  //INTERVALO_PROGRESSO_MS e só quando a thread principal já mostrou o anterior
+  if not Assigned(FAoProgredir) then
+    Exit;
+
+  Agora := GetTickCount;
+  if (Lidos > 0) and ((Agora - FUltimoAviso) < INTERVALO_PROGRESSO_MS) then
+    Exit;
+  if TInterlocked.CompareExchange(FAvisoNaFila, 1, 0) <> 0 then
+    Exit;
+  FUltimoAviso := Agora;
+
+  //Cópias dos valores: o aviso roda depois, na thread principal
+  LidosQ   := Lidos;
+  TotalQ   := Total;
+  ArquivoQ := Arquivo;
+  Queue(
+    procedure
+    begin
+      TInterlocked.Exchange(FAvisoNaFila, 0);
+      FAoProgredir(LidosQ, TotalQ, ArquivoQ);
+    end);
+end;
+
+procedure TThreadLeituraXML.Execute;
+var
+  ResultadoCOM: HResult;
+begin
+  NameThreadForDebugging('ProXML.LeituraXML');
+
+  //Liberada sem ter sido iniciada (a VCL a inicia já terminada): não lê nada
+  if Terminated then
+    Exit;
+
+  //O TXMLDocument usa o MSXML (COM): a thread inicializa o COM para si e encerra no fim
+  ResultadoCOM := CoInitialize(nil);
+  try
+    try
+      TCalculadoraXML.ProcessarXMLs(FPasta, FResultado, AvisarProgresso, Cancelada);
+    except
+      on E: Exception do
+      begin
+        //Erro fora da leitura de um arquivo (ex.: pasta apagada): a tela mostra na thread principal
+        FClasseErro := E.ClassName;
+        FErro       := E.Message;
+      end;
+    end;
+  finally
+    if Succeeded(ResultadoCOM) then
+      CoUninitialize;
+  end;
 end;
 
 initialization

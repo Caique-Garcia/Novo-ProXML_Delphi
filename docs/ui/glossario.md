@@ -110,6 +110,8 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 5.33 | log: NF-e de entrada (novo) | L | — | Nota Fiscal {n}: NF-e de entrada (tpNF 0), somada aos totais. | **Aprovado pelo usuário em 20/10/2026.** Idem |
 | 5.34 | `LerNotaXML` (Id) (novo) | I/L | — | a chave de acesso da nota (atributo Id de infNFe) não tem 44 dígitos | Vira o `{motivo}` de 5.20 (decisão D4). Aprovado pelo usuário em 21/10/2026 |
 | 5.35 | `LerNotaXML` (chNFe) (novo) | I/L | — | a chave do protocolo de autorização (chNFe) é diferente da chave da nota | Vira o `{motivo}` de 5.20 (decisão D4). Aprovado pelo usuário em 21/10/2026 |
+| 5.36 | fechar durante o envio do e-mail (novo) | M | — | O e-mail ainda está sendo enviado. Aguarde terminar para fechar o ProXML. | Aviso com OK; o app não fecha. Aprovado pelo usuário em 21/10/2026 (4.6) |
+| 5.37 | cancelado no primeiro uso (novo) | F | — | As notas e os totais continuam como estavam antes de Processar. | Abaixo da faixa 5.10/5.11, sem botão. Texto do mockup, aprovado pelo usuário em 21/10/2026 (4.6) |
 
 ## 6. Notas (grade, ações, busca, CSV)
 

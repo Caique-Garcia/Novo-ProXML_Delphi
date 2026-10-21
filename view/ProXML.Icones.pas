@@ -121,7 +121,7 @@ const
     ' 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="' +
     '12" r="3"/></svg>';
 
-  //triangle-alert.svg: faixa de aviso
+  //triangle-alert.svg: faixa de aviso, contador Ignoradas e linha de aviso do log do Resumo
   IconeAviso =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
     'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
@@ -171,7 +171,7 @@ const
     '><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 ' +
     '0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>';
 
-  //x.svg: botão Limpar busca (tela Notas)
+  //x.svg: botão Limpar busca (tela Notas) e Cancelar (leitura dos XMLs no Resumo)
   IconeLimpar =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
     'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
@@ -182,6 +182,37 @@ const
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
     'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
     '><path d="M20 6 9 17l-5-5"/></svg>';
+
+  //folder-input.svg: estado vazio do Resumo (arrastar a pasta para a janela)
+  IconePastaEntrada =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="M2 9V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2' +
+    'v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1"/><path d="M2 13h10"/><path d="m9 16 3-3-3-3"/></svg>';
+
+  //circle-check.svg: sucesso (contador Autorizadas e linha do log do Resumo)
+  IconeSucesso =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg>';
+
+  //circle-x.svg: erro (contador Com erro e linha do log do Resumo)
+  IconeErro =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>';
+
+  //clock.svg: tempo do processamento (4º contador do Resumo)
+  IconeTempo =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+
+  //loader-circle.svg: botão ocupado ("Enviando…"), estático
+  IconeOcupado =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
 
 implementation
 
