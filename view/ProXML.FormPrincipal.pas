@@ -73,18 +73,51 @@ type
   //Relatório aberto depois de gravar as notas no banco (GravarNotasDB)
   TTipoRelatorio = (trNotas, trIBSCBS);
 
+const
+  //Erro ao ler as configurações de e-mail no FormCreate: a caixa 12.18 aparece depois que a janela abre
+  WM_PROXML_ERRO_CONFIG = WM_APP + 44;
+
+type
+
   //Telas da área de conteúdo (Plano 4, etapa 4.4). Cada tela é uma aba do PageControl1 e toda
   //troca de tela passa por TFormPrincipal.MostrarTela, que também sincroniza o item ativo do menu
-  TTela = (tlResumo, tlNotas, tlRelatorios, tlEnviar, tlConfiguracoes, tlCarregando);
+  TTela = (tlResumo, tlNotas, tlRelatorios, tlEnviar, tlConfiguracoes, tlCarregando, tlSobre);
   //Telas com item no menu lateral. Carregando não tem item (o item da tela de origem continua
-  //destacado) e uma tela nova sem item (ex.: Sobre, etapa 4.7) deixa o menu sem item ativo
+  //destacado) e a tela Sobre (etapa 4.7, aberta pelo cabeçalho) deixa o menu sem item ativo
   TTelaMenu = tlResumo..tlConfiguracoes;
 
-  //Motivos de bloqueio da tela (tokens.md 5.13; etapa 4.6): leitura dos XMLs, envio do e-mail e tela
-  //Carregando (DANFE e relatórios, H4). Com qualquer motivo ativo ficam desabilitados o menu, a barra de
-  //pasta (campo, Selecionar…, modelo e Processar), o "Sobre" do cabeçalho e os atalhos
-  TMotivoBloqueio = (blLeitura, blEnvio, blCarregando);
+  //Motivos de bloqueio da tela (tokens.md 5.13; etapas 4.6 e 4.7): leitura dos XMLs, envio do e-mail,
+  //tela Carregando (DANFE e relatórios, H4) e Testar conexão. Com qualquer motivo ativo ficam
+  //desabilitados o menu, a barra de pasta (campo, Selecionar…, modelo e Processar), o "Sobre" do
+  //cabeçalho e os atalhos
+  TMotivoBloqueio = (blLeitura, blEnvio, blCarregando, blTeste);
   TBloqueios = set of TMotivoBloqueio;
+
+  //Tipo da faixa de status (tokens.md 5.8): cor do fundo, da barra e do ícone
+  TTipoFaixa = (tfSucesso, tfAviso, tfErro, tfInformacao);
+
+  //Validação de um campo de formulário: devolve a mensagem de erro do glossário ('' = válido)
+  TValidarCampo = function(const Texto: string): string of object;
+
+  { Campo de formulário com borda própria (Plano 4, etapa 4.7; tokens.md 5.3): contêiner com a cor da
+    borda (Padding = espessura), fundo, ícone opcional à esquerda, ícone clicável opcional à direita
+    (olho da senha), o TEdit/TMemo sem borda e a linha de erro abaixo (circle-alert 14 px + texto 9 pt
+    CorErro). Só guarda as referências e o estado: o visual e a posição ficam na tela. }
+  TCampoFormulario = class
+  public
+    Borda     : TPanel;
+    Fundo     : TPanel;
+    Icone     : TSkSvg;        //nil: sem ícone à esquerda
+    Edit      : TCustomEdit;   //TEdit ou TMemo
+    Acao      : TSkSvg;        //nil: sem ícone à direita
+    IconeErro : TSkSvg;        //nil: campo sem validação
+    LabelErro : TLabel;
+    Validar   : TValidarCampo;
+    Validando : Boolean;       //saiu do campo com erro: passa a validar a cada digitação
+    Erro      : string;        //mensagem de erro visível ('' = sem erro na tela)
+    //O texto atual passa na validação (independe de o erro estar visível)
+    function Valido: Boolean;
+  end;
 
   //Resumo sem leitura em andamento: nenhuma pasta processada ainda ou o resultado da última leitura
   TEstadoResumo = (esrVazio, esrConcluido);
@@ -309,41 +342,98 @@ type
     ACBrNFe: TACBrNFe;
     GerarDANFe1: TMenuItem;
     ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF;
+    //Tela Enviar (etapa 4.7; mockup enviar.html e glossário 11.1 a 11.22): quadro com borda (Panel10,
+    //dentro da rolagem de reserva), título, faixa de resultado, anexo, Para, Mensagem, remetente e Enviar
     Enviar: TTabSheet;
+    Panel10: TPanel;
+    PnlEnviarFundo: TPanel;
+    Label11: TLabel;
+    PnlFaixaEnviar: TPanel;
+    PnlFaixaEnviarBarra: TPanel;
+    SkSvgFaixaEnviar: TSkSvg;
+    PbxFaixaEnviar: TPaintBox;
+    PnlAnexo: TPanel;
+    PnlAnexoFundo: TPanel;
+    SkSvgAnexo: TSkSvg;
+    LabelAnexoTitulo: TLabel;
+    LabelAnexoDetalhe: TLabel;
+    Label15: TLabel;
+    PnlCampoPara: TPanel;
+    PnlCampoParaFundo: TPanel;
+    SkSvgPara: TSkSvg;
+    EditEmailEnviar: TEdit;
+    SkSvgErroPara: TSkSvg;
+    LabelErroPara: TLabel;
+    Label17: TLabel;
+    PnlCampoMensagem: TPanel;
+    PnlCampoMensagemFundo: TPanel;
+    MemoMensagem: TMemo;
+    LabelRemetente: TLabel;
+    PnlAlterarConfig: TPanel;
+    Panel11: TPanel;
+    LabelEnviando: TLabel;
+    //Tela Configurações (etapa 4.7; mockup configuracoes.html e glossário 12.1 a 12.25)
     Config: TTabSheet;
     PanelCorpoConfig: TPanel;
+    PnlConfigFundo: TPanel;
     Label1: TLabel;
     Label2: TLabel;
-    Shape2: TShape;
-    Shape3: TShape;
-    Shape10: TShape;
-    Shape11: TShape;
-    Shape12: TShape;
+    PnlFaixaConfig: TPanel;
+    PnlFaixaConfigBarra: TPanel;
+    SkSvgFaixaConfig: TSkSvg;
+    PbxFaixaConfig: TPaintBox;
     Label4: TLabel;
+    PnlCampoSMTP: TPanel;
+    PnlCampoSMTPFundo: TPanel;
+    EditSMTP: TEdit;
+    SkSvgErroSMTP: TSkSvg;
+    LabelErroSMTP: TLabel;
     Label7: TLabel;
-    Label8: TLabel;
-    Label9: TLabel;
-    Label10: TLabel;
+    PnlCampoPorta: TPanel;
+    PnlCampoPortaFundo: TPanel;
+    EditPorta: TEdit;
+    SkSvgErroPorta: TSkSvg;
+    LabelErroPorta: TLabel;
+    LabelSeguranca: TLabel;
     CheckBoxSSL: TCheckBox;
     CheckBoxTSL: TCheckBox;
-    EditSMTP: TEdit;
-    EditPorta: TEdit;
+    LabelAjudaSeguranca: TLabel;
+    Label8: TLabel;
+    PnlCampoEmail: TPanel;
+    PnlCampoEmailFundo: TPanel;
+    SkSvgEmail: TSkSvg;
     EditEmail: TEdit;
-    EditPass: TEdit;
-    MemoMsg: TMemo;
-    Panel9: TPanel;
+    SkSvgErroEmail: TSkSvg;
+    LabelErroEmail: TLabel;
+    Label9: TLabel;
+    PnlCampoSenha: TPanel;
+    PnlCampoSenhaFundo: TPanel;
     SkSvg5: TSkSvg;
+    EditPass: TEdit;
+    LabelAjudaSenha: TLabel;
+    Label10: TLabel;
+    PnlCampoMsg: TPanel;
+    PnlCampoMsgFundo: TPanel;
+    MemoMsg: TMemo;
+    PnlTestarConexao: TPanel;
+    LabelTestando: TLabel;
+    SkSvgConfigSalva: TSkSvg;
+    LabelConfigSalva: TLabel;
+    Panel9: TPanel;
+    TimerConfigSalva: TTimer;
+    TimerTesteConexao: TTimer;
+    //Tela Sobre (etapa 4.7; mockup sobre.html e glossário 13.1 a 13.6), aberta pelo "Sobre" do cabeçalho
+    TelaSobre: TTabSheet;
+    PnlTelaSobre: TPanel;
+    PnlTelaSobreFundo: TPanel;
+    SkSvgSobreLogo: TSkSvg;
+    LabelSobreVersao: TLabel;
+    LabelSobreDescricao: TLabel;
+    LabelSobreAutor: TLabel;
+    PnlSobreLink: TPanel;
+    LabelSobreCreditos: TLabel;
+    PnlSobreAtivo: TPanel;
     ACBrMail1: TACBrMail;
-    Panel10: TPanel;
-    Label11: TLabel;
-    Label12: TLabel;
-    Shape15: TShape;
-    Shape17: TShape;
-    Label15: TLabel;
-    Label17: TLabel;
-    EditEmailEnviar: TEdit;
-    MemoMensagem: TMemo;
-    Panel11: TPanel;
     ACBrNFeDANFEFR: TACBrNFeDANFEFR;
     LabelFiltroModelo: TLabel;
     //Faixa de aviso no Resumo (etapa 4.3): pasta salva que não existe mais (glossário 2.14)
@@ -443,7 +533,26 @@ type
     FIconesLog          : array[TTipoLinhaLog] of TBitmap;   //ícones do log já desenhados na escala atual
     FEnvio              : TThread;        //thread do último envio de e-mail
     FEnviando           : Boolean;        //envio do e-mail em andamento
-    FLarguraEnviar      : Integer;        //largura do encaixe do botão Enviar antes do "Enviando…"
+    //Etapa 4.7: campos com borda própria, Enviar, Configurações, Testar conexão e Sobre
+    FCampos             : array of TCampoFormulario;  //todos os campos com borda própria (liberados no fim)
+    FCampoPara          : TCampoFormulario;
+    FCampoMensagemEnviar: TCampoFormulario;
+    FCampoServidor      : TCampoFormulario;
+    FCampoPorta         : TCampoFormulario;
+    FCampoEmail         : TCampoFormulario;
+    FCampoSenha         : TCampoFormulario;
+    FCampoMensagemConfig: TCampoFormulario;
+    FAjustandoRolagem   : Boolean;        //evita reentrada no ajuste das telas com rolagem de reserva
+    FTrechosFaixaEnviar : TTrechosTexto;  //texto da faixa da tela Enviar
+    FResultadoEnvio     : Boolean;        //a faixa mostra o resultado do último envio (fica até sair da tela)
+    FAnexoQuantidade    : Integer;        //XMLs do filtro de modelo (quadro do anexo, 11.3)
+    FAnexoBytes         : Int64;          //soma do tamanho dos XMLs, sem compactar (11.4)
+    FTrechosFaixaConfig : TTrechosTexto;  //texto da faixa de Configurações (resultado do Testar conexão)
+    FTeste              : TThread;        //thread do Testar conexão em andamento (TThreadTesteSMTP)
+    FTestesEncerrados   : TList;          //testes que passaram do limite de 15 s e ainda não terminaram
+    FTestando           : Boolean;        //Testar conexão em andamento
+    FErroLeituraConfig  : string;         //12.18 no FormCreate: a caixa aparece depois que a janela abre
+    FPastaLeitura       : string;         //pasta do último Processar (texto 5.38)
     function  CopiarTextoTolerante(const Texto: string): Boolean;
     procedure AjustarAlturaLinhasGrade;
     procedure PrepararTelaNotas;
@@ -460,8 +569,8 @@ type
     procedure AjustarEspacoCards(const Tela: TTela);
     procedure MarcarNotaSelecionada(const Selecionada: Boolean);
     procedure MostrarAvisoChaveCopiada;
-    procedure AtualizarBordaCampo(Borda: TPanel; Icone: TSkSvg; Edit: TEdit; const Margem: Integer;
-      const ComFoco: Boolean);
+    procedure AtualizarBordaCampo(Borda: TPanel; Icone: TSkSvg; Edit: TCustomEdit; const Margem: Integer;
+      const ComFoco: Boolean; const ComErro: Boolean = False; Acao: TSkSvg = nil);
     function  TituloColuna(const Campo: string): string;
     function  TextoQuantidadeNotas(const Quantidade: Integer): string;
     procedure FDMemTable1FiltrarBusca(DataSet: TDataSet; var Accept: Boolean);
@@ -621,6 +730,55 @@ type
     procedure LiberarThreadEnvio;
     procedure EnvioTerminado(Sender: TObject);
     procedure RestaurarBotaoEnviar;
+    //Plano 4, etapa 4.7: campos com borda própria, Enviar, Configurações, Testar conexão e Sobre
+    function  CriarCampo(Borda, Fundo: TPanel; Icone: TSkSvg; Edit: TCustomEdit; Acao, IconeErro: TSkSvg;
+      LabelErro: TLabel; const Validar: TValidarCampo): TCampoFormulario;
+    function  CampoDoControle(Controle: TObject): TCampoFormulario;
+    procedure AtualizarCampo(Campo: TCampoFormulario);
+    procedure HabilitarCampo(Campo: TCampoFormulario; const Habilitar: Boolean);
+    procedure ValidarCampo(Campo: TCampoFormulario);
+    function  PosicionarCampo(Campo: TCampoFormulario; Rotulo: TLabel; const X, Y, Largura, Altura: Integer): Integer;
+    function  PosicionarLegenda(Rotulo: TLabel; const X, Y, Largura: Integer): Integer;
+    procedure CampoEnter(Sender: TObject);
+    procedure CampoExit(Sender: TObject);
+    procedure CampoChange(Sender: TObject);
+    function  ValidarEmailDestino(const Texto: string): string;
+    function  ValidarServidor(const Texto: string): string;
+    function  ValidarPorta(const Texto: string): string;
+    function  ValidarEmailRemetente(const Texto: string): string;
+    procedure DefinirTipoFaixa(Faixa, Barra: TPanel; Icone: TSkSvg; const Tipo: TTipoFaixa);
+    procedure AjustarRolagem(Caixa: TScrollBox);
+    procedure GravarLog(const Classe, Texto: string);
+    procedure PrepararTelaEnviar;
+    function  AjustarLayoutEnviar: Integer;
+    procedure AtualizarAnexoEnviar;
+    procedure AtualizarTelaEnviar;
+    procedure MostrarFaixaEnviar(const Tipo: TTipoFaixa; const Trechos: TTrechosTexto; const Resultado: Boolean);
+    procedure OcultarResultadoEnvio;
+    procedure PbxFaixaEnviarPaint(Sender: TObject);
+    procedure AlterarConfigClick(Sender: TObject);
+    function  SMTPConfigurado: Boolean;
+    procedure PrepararTelaConfig;
+    function  AjustarLayoutConfig: Integer;
+    procedure CarregarConfigNaTela;
+    procedure AtualizarEstadoConfig;
+    procedure MostrarFaixaConfig(const Tipo: TTipoFaixa; const Trechos: TTrechosTexto);
+    procedure OcultarFaixaConfig;
+    procedure PbxFaixaConfigPaint(Sender: TObject);
+    procedure TimerConfigSalvaTimer(Sender: TObject);
+    procedure TestarConexaoClick(Sender: TObject);
+    procedure IniciarTesteConexao;
+    procedure TesteConexaoTerminado(Sender: TObject);
+    procedure TimerTesteConexaoTimer(Sender: TObject);
+    procedure EncerrarTesteConexao;
+    procedure LiberarThreadsTeste(const Fechando: Boolean);
+    procedure PrepararTelaSobre;
+    procedure AjustarLayoutSobre;
+    procedure PnlTelaSobreFundoResize(Sender: TObject);
+    procedure SobreClick(Sender: TObject);
+    procedure LinkGitHubClick(Sender: TObject);
+    procedure AtualizarVisualSobre;
+    procedure WMProXMLErroConfig(var Message: TMessage); message WM_PROXML_ERRO_CONFIG;
 
   protected
     procedure CreateWnd; override;
@@ -659,9 +817,17 @@ type
     //Resumo (etapa 4.6): Cancelar da leitura e "Selecionar pasta…" do estado vazio (PrepararResumo)
     btnCancelar        : TProBotao;
     btnResumoVazio     : TProBotao;
+    //Etapa 4.7: Testar conexão (Configurações), "alterar em Configurações" (Enviar) e o link do GitHub (Sobre)
+    btnTestarConexao   : TProBotao;
+    btnAlterarConfig   : TProBotao;
+    btnLinkGitHub      : TProBotao;
     //Leitura dos XMLs em andamento (thread) e envio do e-mail em andamento
     property  Lendo: Boolean read FLendo;
     property  Enviando: Boolean read FEnviando;
+    //Testar conexão em andamento (thread)
+    property  Testando: Boolean read FTestando;
+    //Versão do executável (VersionInfo), ex.: "1.1.0" (tela Sobre, glossário 13.1)
+    function  VersaoDoExecutavel: string;
     //Algum motivo de bloqueio ativo (leitura, envio ou tela Carregando)
     function  Bloqueado: Boolean;
     //Notas do filtro de modelo (sem a busca): cards, relatórios, Enviar (PD-1 e D5)
@@ -723,6 +889,11 @@ uses
   System.Types,
   Winapi.CommCtrl,
   Winapi.ActiveX,
+  //Synapse (o mesmo do ACBrMail): Testar conexão sem enviar e-mail (etapa 4.7)
+  synsock,
+  blcksock,
+  smtpsend,
+  ssl_openssl,
   ProXML.Icones;
 
 {$R *.dfm}
@@ -740,12 +911,24 @@ const
   SETA_CRESCENTE   = #$25B2;
   SETA_DECRESCENTE = #$25BC;
 
-  //A tela Sobre chega na etapa 4.7: até lá o link do cabeçalho aparece, mas fica sem ação
-  SOBRE_DISPONIVEL = False;
+  //Testar conexão (etapa 4.7, glossário 12.22): sem resposta do servidor em 15 s, o teste acaba com o
+  //texto "não respondeu"
+  TEMPO_LIMITE_TESTE_MS = 15000;
+
+  //Título de todas as caixas de mensagem (glossário 15.1)
+  TITULO_CAIXAS = 'ProXML';
+
+  //Link da tela Sobre (glossário 13.4)
+  URL_GITHUB   = 'https://github.com/Caique-Garcia/Novo-ProXML_Delphi';
+  TEXTO_GITHUB = 'github.com/Caique-Garcia/Novo-ProXML_Delphi';
 
 type
-  //Resultado do envio do e-mail, mostrado na thread principal
-  TResultadoEnvio = (reEnviado, reSemAnexo, reErro);
+  //Resultado do envio do e-mail, mostrado na thread principal. reSemWinRAR: o WinRAR.exe não está na
+  //pasta do ProXML (11.20); reSemAnexo: o WinRAR rodou, mas o .rar não foi gerado
+  TResultadoEnvio = (reEnviado, reSemWinRAR, reSemAnexo, reErro);
+
+  //Acesso às propriedades protegidas de TCustomEdit (Font, Color e eventos) para TEdit e TMemo
+  TEditAcesso = class(TCustomEdit);
 
   { Compactação (WinRAR) e envio do e-mail numa thread própria (Plano 4, etapa 4.6).
     TThread própria em vez de ACBrMail.UseThread: a compactação também precisa sair da thread principal
@@ -772,10 +955,240 @@ type
     constructor Create(ACBrNFe: TACBrNFe; const PastaApp, Para, Assunto: string; Mensagem: TStrings);
     destructor Destroy; override;
     procedure AdicionarXML(const Origem, Nome: string);
+    //Destino (um só endereço, 11.18) e assunto (11.21; definido antes do Start)
+    property Para: string read FPara;
+    property Assunto: string read FAssunto write FAssunto;
     property Resultado: TResultadoEnvio read FResultado;
     property Erro: string read FErro;
     property ClasseErro: string read FClasseErro;
   end;
+
+  { Testar conexão (Plano 4, etapa 4.7; PD-4 e glossário 12.19 a 12.22): só conecta e autentica no
+    servidor SMTP com o TSMTPSend do Synapse (o mesmo que o ACBrMail usa), sem enviar e-mail.
+    Os dados vêm da tela (copiados na thread principal antes do Start) e nada é gravado.
+    Limite de 15 s: o socket do Synapse tem 15 s para cada resposta (a conexão é bloqueante, para a porta
+    fechada voltar na hora), e a tela tem um cronômetro próprio de 15 s. Se ele vencer antes, a tela mostra "não respondeu" e chama Abortar, que
+    fecha o socket para a thread terminar logo. Aqui nada toca em controles nem no banco. }
+  TThreadTesteSMTP = class(TThread)
+  private
+    FSMTP      : TSMTPSend;
+    FServidor  : string;
+    FPorta     : string;
+    FConectou  : Boolean;   //conectou e o servidor aceitou o usuário e a senha
+    FRespondeu : Boolean;   //o servidor mandou alguma resposta SMTP (False: não respondeu)
+    FSemAuth   : Boolean;   //conectou, mas o servidor não ofereceu autenticação (AUTH) nesta conexão
+    FMotivo    : string;    //resposta do servidor (ou do socket) quando não conectou
+    FAbortado  : Boolean;   //a tela desistiu do teste (limite de 15 s ou fim do app)
+  protected
+    procedure Execute; override;
+  public
+    //Criada suspensa: quem cria liga o OnTerminate e chama Start
+    constructor Create(const Servidor, Porta, Usuario, Senha: string; const SSL, TLS: Boolean);
+    destructor Destroy; override;
+    //Thread principal: fecha o socket em uso para a conexão, a leitura ou o SSL pararem na hora
+    procedure Abortar;
+    property Servidor: string read FServidor;
+    property Porta: string read FPorta;
+    property Conectou: Boolean read FConectou;
+    property Respondeu: Boolean read FRespondeu;
+    property SemAutenticacao: Boolean read FSemAuth;
+    property Motivo: string read FMotivo;
+    property Abortado: Boolean read FAbortado;
+  end;
+
+function CaixaMensagem(const Texto: string; const Tipo: TMsgDlgType;
+  const Botoes: TMsgDlgButtons = [mbOK]; const Padrao: TMsgDlgBtn = mbOK): Integer;
+var
+    Opcoes: Cardinal;
+begin
+    //Caixa de mensagem única do app (glossário 15.1 a 15.3). O MessageDlg do Delphi 10.2 usa os textos
+    //da VCL (título "Information"/"Error"/"Warning"/"Confirm" e botões "Yes"/"No" em inglês, de
+    //Vcl.Consts); o MessageBox do Windows usa o título informado ("ProXML") e os botões no idioma do
+    //Windows (Sim / Não). O ícone continua o do Windows para cada tipo
+    case Tipo of
+        mtWarning      : Opcoes := MB_ICONWARNING;
+        mtError        : Opcoes := MB_ICONERROR;
+        mtConfirmation : Opcoes := MB_ICONQUESTION;
+    else
+        Opcoes := MB_ICONINFORMATION;
+    end;
+
+    //Sim / Não só na pergunta 5.28; nas outras caixas, OK
+    if (mbYes in Botoes) and (mbNo in Botoes) then
+    begin
+        Opcoes := Opcoes or MB_YESNO;
+        if Padrao = mbNo then
+            Opcoes := Opcoes or MB_DEFBUTTON2;
+    end
+    else
+        Opcoes := Opcoes or MB_OK;
+
+    case Application.MessageBox(PChar(Texto), PChar(TITULO_CAIXAS), Opcoes) of
+        IDYES : Result := mrYes;
+        IDNO  : Result := mrNo;
+    else
+        Result := mrOk;
+    end;
+end;
+
+function EmailValido(const Texto: string): Boolean;
+var
+    Arroba  : Integer;
+    Usuario : string;
+    Dominio : string;
+    I       : Integer;
+begin
+    //Validação simples de um único endereço (glossário 11.18 e 12.24): usuario@dominio.ext, sem espaços,
+    //sem segundo destinatário (vírgula ou ponto e vírgula) e com um ponto no domínio
+    Result := False;
+    if (Texto = '') or (Pos('@', Texto) = 0) then
+        Exit;
+    for I := 1 to Length(Texto) do
+        if CharInSet(Texto[I], [' ', #9, ',', ';', '<', '>', '"', '(', ')', '[', ']', '\', ':']) then
+            Exit;
+
+    Arroba  := Pos('@', Texto);
+    Usuario := Copy(Texto, 1, Arroba - 1);
+    Dominio := Copy(Texto, Arroba + 1, MaxInt);
+    if (Usuario = '') or (Dominio = '') or (Pos('@', Dominio) > 0) then
+        Exit;
+    if (Pos('.', Dominio) = 0) or (Dominio[1] = '.') or (Dominio[Length(Dominio)] = '.') or
+       (Pos('..', Dominio) > 0) or (Usuario[1] = '.') or (Usuario[Length(Usuario)] = '.') then
+        Exit;
+
+    Result := True;
+end;
+
+function TamanhoArquivo(const Caminho: string): Int64;
+var
+    Dados: TWin32FileAttributeData;
+begin
+    //Tamanho do arquivo em bytes, sem abrir o arquivo; 0 se ele não existe mais
+    Result := 0;
+    if GetFileAttributesEx(PChar(Caminho), GetFileExInfoStandard, @Dados) and
+       ((Dados.dwFileAttributes and FILE_ATTRIBUTE_DIRECTORY) = 0) then
+        Result := (Int64(Dados.nFileSizeHigh) shl 32) or Dados.nFileSizeLow;
+end;
+
+function FormatarTamanho(const Bytes: Int64): string;
+begin
+    //Glossário 11.4: KB ou MB com vírgula e uma casa ("845,3 KB", "3,4 MB"), base 1024
+    if Bytes < 1024 * 1024 then
+        Result := FormatFloat('0.0', Bytes / 1024, FormatoPtBR) + ' KB'
+    else
+        Result := FormatFloat('0.0', Bytes / (1024 * 1024), FormatoPtBR) + ' MB';
+end;
+
+function MotivoNumaLinha(const Texto: string): string;
+begin
+    //Motivo técnico (servidor, ACBr, Synapse) numa linha só, sem espaços repetidos e sem o ponto final
+    //(a frase do glossário põe a pontuação)
+    Result := StringReplace(Texto, #13#10, ' ', [rfReplaceAll]);
+    Result := StringReplace(Result, #13, ' ', [rfReplaceAll]);
+    Result := StringReplace(Result, #10, ' ', [rfReplaceAll]);
+    while Pos('  ', Result) > 0 do
+        Result := StringReplace(Result, '  ', ' ', [rfReplaceAll]);
+    Result := Trim(Result);
+    while (Result <> '') and (Result[Length(Result)] = '.') do
+        Delete(Result, Length(Result), 1);
+end;
+
+{ TCampoFormulario }
+
+function TCampoFormulario.Valido: Boolean;
+begin
+    Result := (not Assigned(Validar)) or (Validar(Edit.Text) = '');
+end;
+
+{ TThreadTesteSMTP }
+
+constructor TThreadTesteSMTP.Create(const Servidor, Porta, Usuario, Senha: string; const SSL, TLS: Boolean);
+begin
+    inherited Create(True);
+    FreeOnTerminate := False;
+    FServidor := Servidor;
+    FPorta    := Porta;
+    //Mesma configuração do ACBrMail (LerConfigEmail): SSL = conexão segura desde o início (FullSSL),
+    //TLS = STARTTLS quando o servidor oferece (AutoTLS)
+    FSMTP := TSMTPSend.Create;
+    FSMTP.TargetHost := Servidor;
+    FSMTP.TargetPort := Porta;
+    FSMTP.UserName   := Usuario;
+    FSMTP.Password   := Senha;
+    FSMTP.FullSSL    := SSL;
+    FSMTP.AutoTLS    := TLS;
+    FSMTP.Sock.SSL.SSLType := LT_all;
+    //15 s para cada resposta do servidor. A conexão fica bloqueante (sem ConnectionTimeout): no Windows o
+    //connect com prazo do Synapse não percebe a recusa (porta fechada) e esperaria os 15 s inteiros. O
+    //limite total continua garantido pelo cronômetro da tela, que fecha o socket (Abortar)
+    FSMTP.Timeout := TEMPO_LIMITE_TESTE_MS;
+end;
+
+destructor TThreadTesteSMTP.Destroy;
+begin
+    inherited;
+    FSMTP.Free;
+end;
+
+procedure TThreadTesteSMTP.Abortar;
+var
+    Socket: TSocket;
+begin
+    //Só fecha o socket do sistema (a thread recebe erro na operação em andamento e termina); o objeto do
+    //Synapse continua sendo da thread
+    FAbortado := True;
+    Socket := FSMTP.Sock.Socket;
+    if Socket <> INVALID_SOCKET then
+        synsock.CloseSocket(Socket);
+end;
+
+procedure TThreadTesteSMTP.Execute;
+begin
+    NameThreadForDebugging('ProXML.TesteConexao');
+
+    //Liberada sem ter sido iniciada (a VCL a inicia já terminada): não conecta
+    if Terminated then
+        Exit;
+
+    try
+        //Login: conecta, lê a saudação, EHLO, STARTTLS (TLS) e AUTH com o usuário e a senha. O Login do
+        //Synapse devolve True mesmo se a autenticação falhar: o resultado da AUTH fica em AuthDone
+        if FSMTP.Login then
+        begin
+            if FSMTP.AuthDone or ((FSMTP.UserName = '') and (FSMTP.Password = '')) then
+            begin
+                FConectou := True;
+                FSMTP.Logout;
+                Exit;
+            end;
+
+            //Conectou, mas o servidor não ofereceu AUTH (ex.: Gmail sem TLS na porta 587): glossário 12.22a
+            if (FSMTP.FindCap('AUTH ') = '') and (FSMTP.FindCap('AUTH=') = '') then
+            begin
+                FRespondeu := True;
+                FSemAuth   := True;
+                FSMTP.Logout;
+                Exit;
+            end;
+        end;
+
+        //Sem nenhuma resposta SMTP (endereço errado, porta fechada, sem internet, tempo esgotado ou SSL
+        //recusado): "não respondeu" (12.22). Com resposta: o texto do servidor vira o motivo
+        FRespondeu := FSMTP.ResultCode <> 0;
+        FMotivo    := Trim(FSMTP.ResultString);
+        if FMotivo = '' then
+            FMotivo := Trim(FSMTP.Sock.LastErrorDesc);
+        if FRespondeu then
+            FSMTP.Logout;
+    except
+        on E: Exception do
+        begin
+            FConectou  := False;
+            FRespondeu := False;
+            FMotivo    := E.Message;
+        end;
+    end;
+end;
 
 function ExecutarOculto(const Comando: string): Boolean;
 var
@@ -880,9 +1293,16 @@ begin
     ResultadoCOM := CoInitialize(nil);
     try
         try
+            //WinRAR fora da pasta do ProXML: não compacta nem envia (glossário 11.20)
+            if not FileExists(FPastaApp + 'WinRAR.exe') then
+            begin
+                FResultado := reSemWinRAR;
+                Exit;
+            end;
+
             Compactar;
 
-            //WinRAR ausente ou com falha: sem anexo, como antes da 4.6
+            //WinRAR com falha (o .rar não foi gerado): não envia
             Anexo := FPastaApp + 'NFCe\NFCe_ProXML.rar';
             if not FileExists(Anexo) then
             begin
@@ -1009,12 +1429,17 @@ begin
     //(TThreadEnvioEmail) e a tela continua respondendo, com o botão em "Enviando…".
     //Os XMLs são separados e compactados agora, com o filtro de modelo atual (a busca da tela
     //Notas não vale para o Enviar: decisão D5)
-    if FEnviando or Bloqueado then
+    //Etapa 4.7: sem notas, sem e-mail de envio configurado ou com o "Para" inválido o botão fica
+    //desabilitado e a tela mostra o motivo (11.5/11.6, 11.19 e 11.18): aqui só a conferência de segurança
+    if FEnviando or Bloqueado or (not TemNotaNoModelo) or (not SMTPConfigurado) then
         Exit;
 
-    if not TemNotaNoModelo then
+    if not FCampoPara.Valido then
     begin
-        messagedlg('Sem arquivos para enviar!', mtInformation	, [mbOk], 0);
+        FCampoPara.Validando := True;
+        ValidarCampo(FCampoPara);
+        if EditEmailEnviar.CanFocus then
+            EditEmailEnviar.SetFocus;
         Exit;
     end;
 
@@ -1041,6 +1466,13 @@ begin
 
     //Tela Notas: contador, ações e estado vazio (etapa 4.5)
     AtualizarTelaNotas;
+
+    //Tela Enviar aberta (etapa 4.7): o anexo acompanha o filtro de modelo e as notas carregadas
+    if (PageControl1.ActivePage = Enviar) and (not FEnviando) then
+    begin
+        AtualizarAnexoEnviar;
+        AtualizarTelaEnviar;
+    end;
 end;
 
 function TFormPrincipal.DescricaoFiltroModelo: string;
@@ -1111,21 +1543,54 @@ begin
 end;
 
 procedure TFormPrincipal.btnSalvarConfigClick(Sender: TObject);
+var
+    Config: TConfig;
 begin
-    //Salvar dados Config       
-    ConfigEmail.SMTP        := EditSMTP.Text;
-    ConfigEmail.Porta       := EditPorta.Text;
-    ConfigEmail.Email       := EditEmail.Text;
-    ConfigEmail.Senha       := EditPass.Text;
-    ConfigEmail.Mensagem    := MemoMsg.Text;
-    ConfigEmail.SSL         := CheckBoxSSL.Checked;
-    ConfigEmail.TSL         := CheckBoxTSl.Checked;
+    //Salvar (glossário 12.15 a 12.17). Habilitado só com servidor, porta (1 a 65535) e e-mail válidos;
+    //senha e mensagem podem ficar vazias. Salvar não troca de tela (N5): a confirmação "Configurações
+    //salvas" aparece 3 s ao lado do botão. Erro: caixa 12.17 e LOG (fim do except vazio, E1)
+    if FTestando or (not FCampoServidor.Valido) or (not FCampoPorta.Valido) or (not FCampoEmail.Valido) then
+        Exit;
+
+    Config := TConfig.Create;
     try
-        DMConfig.UpdateConfig(ConfigEmail);
-        //Etapa 4.4 (N5): salvar não troca de tela. A mensagem muda na 4.7 (glossário)
-        messagedlg('Configuração salva com sucesso !!', mtInformation	, [mbOk], 0);
-    except
+        Config.SMTP     := Trim(EditSMTP.Text);
+        Config.Porta    := Trim(EditPorta.Text);
+        Config.Email    := Trim(EditEmail.Text);
+        Config.Senha    := EditPass.Text;
+        Config.Mensagem := MemoMsg.Text;
+        Config.SSL      := CheckBoxSSL.Checked;
+        Config.TSL      := CheckBoxTSL.Checked;   //rótulo "TLS" na tela; o nome interno TSL não muda
+        try
+            DMConfig.UpdateConfig(Config);
+        except
+            on E: Exception do
+            begin
+                GravarLog(E.ClassName, 'Salvar configurações: ' + E.Message);
+                CaixaMensagem('Não foi possível salvar as configurações.' + sLineBreak + sLineBreak +
+                              'Motivo: ' + E.Message, mtError);
+                Exit;
+            end;
+        end;
+
+        //Salvo: a configuração em memória acompanha o banco (a tela Enviar usa o e-mail de envio)
+        ConfigEmail.SMTP     := Config.SMTP;
+        ConfigEmail.Porta    := Config.Porta;
+        ConfigEmail.Email    := Config.Email;
+        ConfigEmail.Senha    := Config.Senha;
+        ConfigEmail.Mensagem := Config.Mensagem;
+        ConfigEmail.SSL      := Config.SSL;
+        ConfigEmail.TSL      := Config.TSL;
+    finally
+        Config.Free;
     end;
+
+    //"Configurações salvas" (tokens.md 5.11): check 14 px + 9 pt Semibold CorSucesso, por 3 s
+    TimerConfigSalva.Enabled := False;
+    SkSvgConfigSalva.Visible := True;
+    LabelConfigSalva.Visible := True;
+    AjustarRolagem(FRolagemConfig);
+    TimerConfigSalva.Enabled := True;
 end;
 
 procedure TFormPrincipal.FinalizaRelatorio(const Relatorio: TTipoRelatorio);
@@ -1176,7 +1641,7 @@ begin
             //Nenhuma nota do filtro atual tem IBS/CBS: não abre a visualização (glossário 8.10).
             //Com o botão desabilitado nesse caso, a caixa só aparece se o relatório for pedido mesmo assim
             EncerrarCarregando(tlRelatorios);
-            messagedlg('Nenhuma nota do modelo selecionado tem IBS/CBS.', mtInformation, [mbOk], 0);
+            CaixaMensagem('Nenhuma nota do modelo selecionado tem IBS/CBS.', mtInformation);
         end;
 
         //Visualização fechada: GravarNotasDB fecha a tela Carregando e volta para Relatórios
@@ -1192,14 +1657,14 @@ begin
     //abaixo só aparecem se o relatório for pedido mesmo assim (glossário 8.9 e 8.10)
     if not TemNotaNoModelo then
     begin
-       messagedlg('Nenhuma nota para o relatório. Processe uma pasta primeiro.', mtInformation	, [mbOk], 0);
+       CaixaMensagem('Nenhuma nota para o relatório. Processe uma pasta primeiro.', mtInformation);
        Exit;
     end;
 
     if (Relatorio = trIBSCBS) and (FTotais.QuantidadeIBSCBS = 0) then
     begin
        //Sem nota com IBS/CBS no filtro: não grava nada no banco
-       messagedlg('Nenhuma nota do modelo selecionado tem IBS/CBS.', mtInformation, [mbOk], 0);
+       CaixaMensagem('Nenhuma nota do modelo selecionado tem IBS/CBS.', mtInformation);
        Exit;
     end;
 
@@ -1211,10 +1676,7 @@ begin
   //Guarda a pasta e a janela para a próxima execução
   SalvarPreferencias;
 
-  try
-    action := cafree;
-  except
-  end;
+  Action := caFree;
   Application.Terminate;
 end;
 
@@ -1223,8 +1685,8 @@ begin
    //Create do Form
    //Application.OnException := DMConfig.GravaLog;
 
-   //Tema (fonte base), botões e atalhos criados em runtime e rolagem nas telas
-   //Enviar e Configurações quando a janela fica menor que o layout atual
+   //Tema (fonte base), botões e atalhos criados em runtime e rolagem de reserva nas telas
+   //Enviar e Configurações (só aparece se o conteúdo não couber, ex.: 150% na janela mínima)
    AplicarTema(Self);
    FixarTamanhoMinimo;
    CriarBotoes;
@@ -1241,21 +1703,26 @@ begin
    PrepararTelaNotas;
    //Etapa 4.6: Resumo (estado vazio, leitura em andamento, contadores, avisos e log)
    PrepararResumo;
+   //Etapa 4.7: telas Enviar, Configurações e Sobre
+   PrepararTelaEnviar;
+   PrepararTelaConfig;
+   PrepararTelaSobre;
    FRolagemEnviar := CriarRolagem(Panel10);
    FRolagemConfig := CriarRolagem(PanelCorpoConfig);
 
-   try          
+   //Configurações de e-mail do banco. Erro: LOG e a caixa 12.18 depois que a janela abre (fim do except
+   //vazio, E1); a tela continua com os campos vazios
+   try
     ConfigEmail := DMConfig.GetConfig;
-
-    EditSMTP.Text        := ConfigEmail.SMTP;
-    EditPorta.Text       := ConfigEmail.Porta;
-    EditEmail.Text       := ConfigEmail.Email;
-    EditPass.Text        := ConfigEmail.Senha;
-    MemoMsg.Text         := ConfigEmail.Mensagem;
-    CheckBoxSSL.Checked  := ConfigEmail.SSL;
-    CheckBoxTSl.Checked  := ConfigEmail.TSL;
    except
+    on E: Exception do
+    begin
+        ConfigEmail := TConfig.Create;
+        FErroLeituraConfig := E.Message;
+        GravarLog(E.ClassName, 'Ler configurações de e-mail: ' + E.Message);
+    end;
    end;
+   CarregarConfigNaTela;
 
    //Seletor de modelo começa em "Todos"
    SeletorModelo.ItemIndex := 0;
@@ -1269,18 +1736,29 @@ begin
 end;
 
 procedure TFormPrincipal.FormDestroy(Sender: TObject);
+var
+  I: Integer;
 begin
-  //ConfigEmail.Free;
   //Threads que ainda existam. Normalmente já terminaram: o FormCloseQuery espera a leitura e não deixa
-  //fechar durante o envio. O fim delas não mexe mais na tela
+  //fechar durante o envio. O fim delas não mexe mais na tela.
+  //Testar conexão em andamento (etapa 4.7): o app fecha sem perguntar; o teste é abortado (o socket é
+  //fechado) e a thread é esperada aqui, para não ficar processo pendurado
   FFechando := True;
+  TimerTesteConexao.Enabled := False;
+  TimerConfigSalva.Enabled  := False;
   if FLeitura <> nil then
     FLeitura.OnTerminate := nil;
   if FEnvio <> nil then
     FEnvio.OnTerminate := nil;
   LiberarThreadLeitura;
   LiberarThreadEnvio;
+  LiberarThreadsTeste(True);
+  FreeAndNil(FTestesEncerrados);
   LiberarIconesLog;
+  for I := 0 to High(FCampos) do
+    FCampos[I].Free;
+  FCampos := nil;
+  FreeAndNil(ConfigEmail);
   //Devolve o WindowProc original do PageControl1 (trocado em PrepararTelaRelatorios)
   if Assigned(FJanelaPaginas) then
     PageControl1.WindowProc := FJanelaPaginas;
@@ -1329,18 +1807,25 @@ end;
 procedure TFormPrincipal.FormShow(Sender: TObject);
 begin
    //A altura das linhas da grade é definida uma vez no FormCreate (PrepararTelaNotas)
-   try
+   if (DataSource1.DataSet <> nil) and DataSource1.DataSet.Active then
     DataSource1.DataSet.First;
-   except
-   end;
 
    //Abre no Resumo, com o item do menu sincronizado
    MostrarTela(tlResumo);
 
+   //Pastas e caminhos do ACBr (DANFE). Falha aqui não impede o app de abrir: vai para o LOG e o erro
+   //aparece ao gerar o DANFE
    try
     ConfigACBR();
    except
+    on E: Exception do
+      GravarLog(E.ClassName, 'Configurar o ACBr: ' + E.Message);
    end;
+
+   //12.18: as configurações de e-mail não puderam ser lidas no FormCreate. A caixa aparece depois que a
+   //janela estiver na tela
+   if FErroLeituraConfig <> '' then
+    PostMessage(Handle, WM_PROXML_ERRO_CONFIG, 0, 0);
 
    //Janela salva maximizada: maximiza só agora, com a janela já criada no tamanho normal.
    //Maximizando no FormCreate, a VCL cria a janela com o tamanho do .dfm (ClientWidth/ClientHeight)
@@ -1376,8 +1861,8 @@ begin
     until Result;
 
     if not Result then
-        messagedlg('Não foi possível copiar a chave: outro programa está usando a área de transferência. ' +
-                   'Tente de novo em alguns segundos.', mtWarning, [mbOk], 0);
+        CaixaMensagem('Não foi possível copiar a chave: outro programa está usando a área de transferência. ' +
+                      'Tente de novo em alguns segundos.', mtWarning);
 end;
 
 function TFormPrincipal.ConfigurarLayoutDanfe(out Mensagem: string): Boolean;
@@ -1421,16 +1906,18 @@ begin
                     ACBrNFe.DANFE.TipoDANFE := tiPaisagem;
                 end;
             else
-                Mensagem := 'Layout de DANFE não suportado (tpImp ' + TpImpToStr(TipoImp) + ').' + sLineBreak +
-                            'O ProXML gera o DANFE da NF-e (modelo 55) apenas nos layouts retrato (tpImp 1) ' +
-                            'e paisagem (tpImp 2).';
+                //Glossário 7.3
+                Mensagem := 'Esta NF-e usa um layout de DANFE que o ProXML não gera (tpImp ' + TpImpToStr(TipoImp) +
+                            ').' + sLineBreak + sLineBreak + 'O ProXML gera o DANFE da NF-e (55) só nos layouts ' +
+                            'retrato (tpImp 1) e paisagem (tpImp 2).';
                 Exit;
             end;
 
             ACBrNFeDANFEFR.FastFileEvento := PathReport + 'EVENTOS.fr3';
         end;
     else
-        Mensagem := 'Modelo de documento não suportado para gerar o DANFE (modelo ' + IntToStr(Modelo) + ').';
+        //Glossário 7.4
+        Mensagem := 'O ProXML não gera DANFE para o modelo ' + IntToStr(Modelo) + '. Só NF-e (55) e NFC-e (65).';
         Exit;
     end;
 
@@ -1502,8 +1989,9 @@ begin
             begin
                 DMConfig.CreateLog(E.ClassName, E.Message);
                 EncerrarCarregando(tlNotas);
-                messagedlg('Não foi possível carregar o XML da nota:' + sLineBreak + CaminhoArq + sLineBreak +
-                           sLineBreak + E.Message, mtError, [mbOk], 0);
+                //Glossário 7.1 (o motivo pode ser o texto 7.2)
+                CaixaMensagem('Não foi possível abrir o XML da nota.' + sLineBreak + sLineBreak + 'Arquivo: ' +
+                              CaminhoArq + sLineBreak + 'Motivo: ' + E.Message, mtError);
                 Exit;
             end;
         end;
@@ -1512,7 +2000,7 @@ begin
         if not ConfigurarLayoutDanfe(Mensagem) then
         begin
             EncerrarCarregando(tlNotas);
-            messagedlg(Mensagem, mtWarning, [mbOk], 0);
+            CaixaMensagem(Mensagem, mtWarning);
             Exit;
         end;
 
@@ -1542,7 +2030,9 @@ begin
             begin
                 DMConfig.CreateLog(E.ClassName, E.Message);
                 EncerrarCarregando(tlNotas);
-                messagedlg('Erro ao gerar o DANFE:' + sLineBreak + sLineBreak + E.Message, mtError, [mbOk], 0);
+                //Glossário 7.5
+                CaixaMensagem('Não foi possível gerar o DANFE.' + sLineBreak + sLineBreak + 'Motivo: ' + E.Message,
+                              mtError);
                 Exit;
             end;
         end;
@@ -1552,11 +2042,13 @@ begin
             if Application.Terminated then
                 Exit;
 
-            DMConfig.CreateLog('GerarDanfe', 'PDF do DANFE não gerado: ' + CaminhoArq);
+            //Glossário 7.7 (LOG) e 7.6 (caixa)
+            GravarLog('GerarDanfe', 'PDF do DANFE não ficou pronto em ' + IntToStr(TEMPO_LIMITE_PDF_MS div 1000) +
+                                    ' s: ' + CaminhoArq);
             EncerrarCarregando(tlNotas);
-            messagedlg('O PDF do DANFE não foi gerado em ' + IntToStr(TEMPO_LIMITE_PDF_MS div 1000) +
-                       ' segundos.' + sLineBreak + sLineBreak + 'Pasta esperada: ' + ACBrNFe.DANFE.PathPDF,
-                       mtError, [mbOk], 0);
+            CaixaMensagem('O PDF do DANFE não ficou pronto em ' + IntToStr(TEMPO_LIMITE_PDF_MS div 1000) +
+                          ' segundos.' + sLineBreak + sLineBreak + 'Confira a pasta: ' + ACBrNFe.DANFE.PathPDF,
+                          mtError);
             Exit;
         end;
 
@@ -1642,8 +2134,8 @@ begin
           //GravarNotas já desfez a transação: o banco continua como estava (glossário 8.12)
           Screen.Cursor := crDefault;
           EncerrarCarregando(tlRelatorios);
-          messagedlg('Não foi possível gravar as notas no banco de dados. O relatório não foi gerado.' +
-                     sLineBreak + sLineBreak + 'Motivo: ' + E.Message, mtError, [mbOk], 0);
+          CaixaMensagem('Não foi possível gravar as notas no banco de dados. O relatório não foi gerado.' +
+                        sLineBreak + sLineBreak + 'Motivo: ' + E.Message, mtError);
           Exit;
         end;
       end;
@@ -1660,8 +2152,8 @@ begin
       on E: Exception do
       begin
         EncerrarCarregando(tlRelatorios);
-        messagedlg('Não foi possível gerar o relatório.' + sLineBreak + sLineBreak + 'Motivo: ' + E.Message,
-                   mtError, [mbOk], 0);
+        CaixaMensagem('Não foi possível gerar o relatório.' + sLineBreak + sLineBreak + 'Motivo: ' + E.Message,
+                      mtError);
         DMConfig.CreateLog(E.ClassName, E.Message);
       end;
     end;
@@ -1670,10 +2162,15 @@ begin
   end;
 end;
 
-procedure TFormPrincipal.LerConfigEmail;             
+procedure TFormPrincipal.LerConfigEmail;
+var
+    Nova: TConfig;
 begin
-    //Configurações do email
-    ConfigEmail := DMConfig.GetConfig;
+    //Configurações do e-mail salvas no banco (as da tela Configurações só valem depois de Salvar).
+    //Erro sobe como exceção (quem chama mostra a caixa 12.18)
+    Nova := DMConfig.GetConfig;
+    ConfigEmail.Free;
+    ConfigEmail := Nova;
 
     ACBrMail1.Host        := Trim(ConfigEmail.SMTP);
     ACBrMail1.Port        := Trim(ConfigEmail.Porta);
@@ -1684,7 +2181,7 @@ begin
     ACBrMail1.SetTLS      := ConfigEmail.TSL; // Auto TLS
     ACBrMail1.ReadingConfirmation := False; // Pede confirmacao de leitura do email
     ACBrMail1.UseThread := False;           // O envio já roda numa thread própria (TThreadEnvioEmail, etapa 4.6)
-    ACBrMail1.FromName  := 'Projeto Pro XML';
+    ACBrMail1.FromName  := 'ProXML';        // Nome do remetente visto pelo destinatário (glossário 11.22)
 
     MemoMensagem.Text := ConfigEmail.Mensagem;
 end;
@@ -1713,11 +2210,24 @@ end;
 
 procedure TFormPrincipal.SkSvg5Click(Sender: TObject);
 begin
-   //Ver senha
-   if EditPass.PasswordChar = '*' then
-        EditPass.PasswordChar := #0
+    //Olho da senha (tokens.md 5.3; glossário 12.12): eye mostra a senha, eye-off volta a ocultar.
+    //O hint acompanha a ação do próximo clique
+    if (not PnlCampoSenha.Enabled) or FTestando then
+        Exit;
+
+    if EditPass.PasswordChar <> #0 then
+    begin
+        EditPass.PasswordChar := #0;
+        SkSvg5.Svg.Source := IconeOcultarSenha;
+        SkSvg5.Hint       := 'Ocultar senha';
+    end
     else
-        EditPass.PasswordChar := '*';
+    begin
+        EditPass.PasswordChar := #$2022;
+        SkSvg5.Svg.Source := IconeMostrarSenha;
+        SkSvg5.Hint       := 'Mostrar senha';
+    end;
+    Application.CancelHint;
 end;
 
 procedure TFormPrincipal.SpeedButton1Click(Sender: TObject);
@@ -1731,7 +2241,7 @@ begin
   if not TemPasta then
   begin
     //Só por segurança: sem pasta o botão fica desabilitado (glossário 2.13)
-    messagedlg('Selecione uma pasta com XMLs.', mtInformation	, [mbOk], 0);
+    CaixaMensagem('Selecione uma pasta com XMLs.', mtInformation);
     Exit;
   end;
 
@@ -1743,7 +2253,8 @@ end;
 procedure TFormPrincipal.CriarBotoes;
 begin
     //Os painéis Panel7, Panel11 e Panel9 do .dfm são só o ponto de encaixe.
-    //Mesmos OnClick e textos de antes (os textos do glossário entram na etapa 4.7)
+    //Ícones e dicas do Enviar e do Salvar (glossário 11.11, 11.12 e 12.15) ficam em PrepararTelaEnviar e
+    //PrepararTelaConfig (etapa 4.7)
     btnProcessar    := TProBotao.CriarEm(Panel7,  'Processar', ebPrimario, SpeedButton1Click);
     btnEnviarEmail  := TProBotao.CriarEm(Panel11, 'Enviar',    ebPrimario, btnEnviarEmailClick);
     btnSalvarConfig := TProBotao.CriarEm(Panel9,  'Salvar',    ebPrimario, btnSalvarConfigClick);
@@ -1864,28 +2375,11 @@ begin
 end;
 
 function TFormPrincipal.CriarRolagem(Painel: TPanel): TScrollBox;
-var
-    I        : Integer;
-    Largura  : Integer;
-    Altura   : Integer;
-    Controle : TControl;
 begin
-    //Com a janela menor que o tamanho antigo (1136x699) as telas Enviar e Configurações não
-    //cabem. O painel passa para dentro de uma caixa com rolagem e nunca fica menor que o
-    //necessário para os seus controles: abaixo disso aparecem as barras de rolagem.
-    //Provisório até o novo layout dessas telas (etapa 4.7).
-    Largura := 0;
-    Altura  := 0;
-    for I := 0 to Painel.ControlCount - 1 do
-    begin
-        Controle := Painel.Controls[I];
-        if Controle.Align = alNone then
-        begin
-            Largura := Max(Largura, Controle.Left + Controle.Width);
-            Altura  := Max(Altura, Controle.Top + Controle.Height);
-        end;
-    end;
-
+    //Rolagem de reserva das telas Enviar e Configurações (etapa 4.7): o layout cabe em 1024x640 a 100%
+    //sem barra; a caixa de rolagem só mostra barras se o conteúdo não couber (ex.: 150% na janela
+    //mínima). O quadro da tela fica dentro da caixa, com a largura da caixa (no mínimo
+    //LarguraMinimaFormulario) e a altura que o layout pedir (AjustarRolagem)
     Result := TScrollBox.Create(Self);
     Result.Parent           := Painel.Parent;
     Result.Align            := alClient;
@@ -1894,28 +2388,47 @@ begin
     Result.HorzScrollBar.Tracking := True;
     Result.VertScrollBar.Tracking := True;
 
-    Painel.Constraints.MinWidth  := Largura + Espaco1;
-    Painel.Constraints.MinHeight := Altura + Espaco1;
     Painel.Align  := alNone;
     Painel.Parent := Result;
-    Painel.SetBounds(0, 0, Max(Painel.Width, Painel.Constraints.MinWidth), Max(Painel.Height, Painel.Constraints.MinHeight));
+    Painel.SetBounds(0, 0, Painel.Width, Painel.Height);
     Result.OnResize := RolagemResize;
 end;
 
 procedure TFormPrincipal.RolagemResize(Sender: TObject);
-var
-    Caixa  : TScrollBox;
-    Painel : TControl;
 begin
-    //O painel ocupa a caixa inteira, mas não encolhe abaixo do mínimo (aí entra a rolagem)
-    Caixa := Sender as TScrollBox;
-    if Caixa.ControlCount = 0 then
+    AjustarRolagem(Sender as TScrollBox);
+end;
+
+procedure TFormPrincipal.AjustarRolagem(Caixa: TScrollBox);
+var
+    Painel : TControl;
+    Largura: Integer;
+    Altura : Integer;
+    Passo  : Integer;
+begin
+    //O quadro ocupa a caixa inteira; o layout da tela devolve a altura de que precisa. Se ela for maior
+    //que a caixa, aparece a barra vertical, a largura útil diminui e o layout é refeito (segundo passo)
+    if (Caixa = nil) or (Caixa.ControlCount = 0) or FAjustandoRolagem then
         Exit;
 
-    Painel := Caixa.Controls[0];
-    Painel.SetBounds(Painel.Left, Painel.Top,
-                     Max(Caixa.ClientWidth, Painel.Constraints.MinWidth),
-                     Max(Caixa.ClientHeight, Painel.Constraints.MinHeight));
+    FAjustandoRolagem := True;
+    try
+        Painel := Caixa.Controls[0];
+        for Passo := 1 to 2 do
+        begin
+            Largura := Max(Caixa.ClientWidth, Escalar(LarguraMinimaFormulario));
+            Painel.SetBounds(Painel.Left, Painel.Top, Largura, Max(Painel.Height, Caixa.ClientHeight));
+            if Painel = Panel10 then
+                Altura := AjustarLayoutEnviar
+            else
+                Altura := AjustarLayoutConfig;
+            Painel.SetBounds(Painel.Left, Painel.Top, Largura, Max(Caixa.ClientHeight, Altura));
+            if Max(Caixa.ClientWidth, Escalar(LarguraMinimaFormulario)) = Largura then
+                Break;
+        end;
+    finally
+        FAjustandoRolagem := False;
+    end;
 end;
 
 procedure TFormPrincipal.RegistrarFalhaPreferencias(E: Exception);
@@ -2114,6 +2627,8 @@ begin
 end;
 
 procedure TFormPrincipal.AposMudarEscala;
+var
+    I: Integer;
 begin
     FixarTamanhoMinimo;
 
@@ -2138,6 +2653,12 @@ begin
         LiberarIconesLog;
         ListBoxLog.ItemHeight := Escalar(AlturaLinhaLog);
         AjustarLayoutResumo;
+        //Etapa 4.7: campos com borda própria, telas Enviar, Configurações e Sobre
+        for I := 0 to High(FCampos) do
+            AtualizarCampo(FCampos[I]);
+        AjustarRolagem(FRolagemEnviar);
+        AjustarRolagem(FRolagemConfig);
+        AjustarLayoutSobre;
     end;
 end;
 
@@ -2320,19 +2841,27 @@ begin
     end;
 end;
 
-procedure TFormPrincipal.AtualizarBordaCampo(Borda: TPanel; Icone: TSkSvg; Edit: TEdit; const Margem: Integer;
-  const ComFoco: Boolean);
+procedure TFormPrincipal.AtualizarBordaCampo(Borda: TPanel; Icone: TSkSvg; Edit: TCustomEdit; const Margem: Integer;
+  const ComFoco: Boolean; const ComErro: Boolean = False; Acao: TSkSvg = nil);
 var
     Espessura  : Integer;
     Diferenca  : Integer;
     Interno    : Integer;
     AlturaTexto: Integer;
     Medida     : TBitmap;
+    Direita    : Integer;
 begin
-    //Campo (tokens.md 5.3): borda de 1 px CorBordaCampo; com foco, 2 px CorPrimaria.
-    //A borda é o painel de fora (cor + Padding); ao engrossar, o espaço interno diminui o mesmo
-    //tanto para o ícone e o texto não mudarem de lugar. Margem: reservado (0 nos dois campos)
-    if ComFoco then
+    //Campo (tokens.md 5.3): borda de 1 px CorBordaCampo; com foco, 2 px CorPrimaria; com erro (etapa 4.7),
+    //2 px CorErro, mesmo com foco. A borda é o painel de fora (cor + Padding); ao engrossar, o espaço
+    //interno diminui o mesmo tanto para o ícone e o texto não mudarem de lugar. Margem: reservado (0).
+    //Icone (à esquerda) e Acao (à direita, ex.: olho da senha) são opcionais; o TMemo fica alinhado ao
+    //topo com o padding do campo (mockup .fld.area)
+    if ComErro then
+    begin
+        Espessura := Escalar(BordaCampoFoco);
+        Borda.Color := CorErro;
+    end
+    else if ComFoco then
     begin
         Espessura := Escalar(BordaCampoFoco);
         Borda.Color := CorPrimaria;
@@ -2345,24 +2874,45 @@ begin
     Diferenca := Espessura - Escalar(BordaCampo);
     Borda.Padding.SetBounds(Espessura, Espessura + Margem, Espessura, Espessura + Margem);
 
-    //Ícone de 16 px e texto centralizados na altura interna do campo
+    //Ícones de 16 px e texto centralizados na altura interna do campo
     Interno := Escalar(AlturaCampo) - 2 * Escalar(BordaCampo);
     Medida := TBitmap.Create;
     try
-        Medida.Canvas.Font.Assign(Edit.Font);
+        Medida.Canvas.Font.Assign(TEditAcesso(Edit).Font);
         AlturaTexto := Medida.Canvas.TextHeight('Ag');
     finally
         Medida.Free;
     end;
 
-    Icone.Margins.SetBounds(Escalar(PaddingCampo) - Diferenca,
-                            Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca),
-                            0,
-                            Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca));
-    Edit.Margins.SetBounds(Escalar(Espaco1),
-                           Max(0, (Interno - AlturaTexto) div 2 - Diferenca),
-                           Escalar(PaddingCampo) - Diferenca,
-                           Max(0, Interno - AlturaTexto - (Interno - AlturaTexto) div 2 - Diferenca));
+    if Icone <> nil then
+        Icone.Margins.SetBounds(Escalar(PaddingCampo) - Diferenca,
+                                Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca),
+                                0,
+                                Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca));
+    if Acao <> nil then
+    begin
+        Acao.Margins.SetBounds(0,
+                               Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca),
+                               Escalar(PaddingCampo) - Diferenca,
+                               Max(0, (Interno - Escalar(TamanhoIconePequeno)) div 2 - Diferenca));
+        Direita := Escalar(Espaco1);
+    end
+    else
+        Direita := Escalar(PaddingCampo) - Diferenca;
+
+    if Edit is TCustomMemo then
+        Edit.Margins.SetBounds(Escalar(PaddingCampo) - Diferenca, Escalar(PaddingCampo) - Diferenca,
+                               Direita, Escalar(PaddingCampo) - Diferenca)
+    else if Icone <> nil then
+        Edit.Margins.SetBounds(Escalar(Espaco1),
+                               Max(0, (Interno - AlturaTexto) div 2 - Diferenca),
+                               Direita,
+                               Max(0, Interno - AlturaTexto - (Interno - AlturaTexto) div 2 - Diferenca))
+    else
+        Edit.Margins.SetBounds(Escalar(PaddingCampo) - Diferenca,
+                               Max(0, (Interno - AlturaTexto) div 2 - Diferenca),
+                               Direita,
+                               Max(0, Interno - AlturaTexto - (Interno - AlturaTexto) div 2 - Diferenca));
 end;
 
 procedure TFormPrincipal.AplicarVisualCabecalho;
@@ -2379,8 +2929,17 @@ begin
     PnlSobre.Hint      := 'Sobre o ProXML';
     PnlSobre.ShowHint  := True;
 
-    //A tela Sobre chega na etapa 4.7: por enquanto o link aparece, mas não tem ação
-    PnlSobre.Enabled := False;
+    //Etapa 4.7: o link abre a tela Sobre (clique no painel, no ícone ou no texto). Com a tela aberta, o
+    //texto fica branco com a linha de 2 px CorPrimaria embaixo (mockup sobre.html, .hlink.on)
+    PnlSobre.Cursor   := crHandPoint;
+    SkSvgSobre.Cursor := crHandPoint;
+    LabelSobre.Cursor := crHandPoint;
+    PnlSobre.OnClick   := SobreClick;
+    SkSvgSobre.OnClick := SobreClick;
+    LabelSobre.OnClick := SobreClick;
+    PnlSobreAtivo.Color   := CorPrimaria;
+    PnlSobreAtivo.Visible := False;
+    PnlSobre.Enabled := True;
 end;
 
 procedure TFormPrincipal.CriarBarraPasta;
@@ -2461,6 +3020,8 @@ begin
 
     PnlSobre.Width := SkSvgSobre.Margins.Left + SkSvgSobre.Width + LabelSobre.Margins.Left +
                       LabelSobre.Width + LabelSobre.Margins.Right;
+    PnlSobreAtivo.SetBounds(0, PnlSobre.ClientHeight - Escalar(MarcaSobreAtivo), PnlSobre.ClientWidth,
+                            Escalar(MarcaSobreAtivo));
 end;
 
 procedure TFormPrincipal.PrepararCards;
@@ -2513,14 +3074,15 @@ begin
 
     PnlCards.OnResize := PnlCardsResize;
 
-    //D2: cards visíveis em Resumo, Notas, Relatórios e Carregando; ocultos em Enviar e Configurações.
-    //O OnShow da aba dispara também quando a troca vem do código (ActivePageIndex)
+    //D2: cards visíveis em Resumo, Notas, Relatórios e Carregando; ocultos em Enviar, Configurações e
+    //Sobre. O OnShow da aba dispara também quando a troca vem do código (ActivePageIndex)
     TabSheet1.OnShow  := PaginaShow;
     TabSheet2.OnShow  := PaginaShow;
     Relatorios.OnShow := PaginaShow;
     Loading.OnShow    := PaginaShow;
     Enviar.OnShow     := PaginaShow;
     Config.OnShow     := PaginaShow;
+    TelaSobre.OnShow  := PaginaShow;
 end;
 
 procedure TFormPrincipal.PaginaShow(Sender: TObject);
@@ -2529,7 +3091,7 @@ var
 begin
     //Sender é a aba que acabou de aparecer (o ActivePage ainda pode ser a anterior)
     Tela := TelaDaAba(Sender as TTabSheet);
-    PnlCards.Visible := not (Tela in [tlEnviar, tlConfiguracoes]);
+    PnlCards.Visible := not (Tela in [tlEnviar, tlConfiguracoes, tlSobre]);
     AjustarEspacoCards(Tela);
 
     //Garantia extra: o item ativo do menu acompanha a aba mesmo se ela for trocada direto no
@@ -2670,14 +3232,9 @@ procedure TFormPrincipal.ItemMenuClick(Sender: TObject);
 var
     Tela: TTela;
 begin
-    //Clique, Enter ou Espaço num item do menu: só abre a tela
+    //Clique, Enter ou Espaço num item do menu: só abre a tela. Enviar carrega a configuração do e-mail ao
+    //abrir (MostrarTela); os XMLs só são separados e compactados no clique em "Enviar" da própria tela
     Tela := TTela((Sender as TComponent).Tag);
-
-    //Enviar: carrega a configuração do e-mail; os XMLs só são separados e compactados no
-    //clique em "Enviar" da própria tela (btnEnviarEmailClick)
-    if Tela = tlEnviar then
-        LerConfigEmail;
-
     MostrarTela(Tela);
 end;
 
@@ -2689,6 +3246,7 @@ begin
         tlRelatorios    : Result := Relatorios;
         tlEnviar        : Result := Enviar;
         tlConfiguracoes : Result := Config;
+        tlSobre         : Result := TelaSobre;
     else
         Result := Loading;
     end;
@@ -2706,6 +3264,8 @@ begin
         Result := tlConfiguracoes
     else if Aba = Loading then
         Result := tlCarregando
+    else if Aba = TelaSobre then
+        Result := tlSobre
     else
         Result := tlResumo;
 end;
@@ -2722,19 +3282,48 @@ begin
     //Única rotina de troca de tela: mostra a aba da tela e sincroniza o item ativo do menu.
     //Nenhum outro ponto do código troca a aba do PageControl1
     Aba := AbaDaTela(Tela);
+
+    //Etapa 4.7: saindo de Enviar, a faixa do último envio (sucesso ou erro) deixa de valer; saindo de
+    //Configurações, a faixa do Testar conexão também
+    if (PageControl1.ActivePage = Enviar) and (Aba <> Enviar) then
+        OcultarResultadoEnvio;
+    if (PageControl1.ActivePage = Config) and (Aba <> Config) then
+        OcultarFaixaConfig;
+
     if PageControl1.ActivePage <> Aba then
         PageControl1.ActivePage := Aba;
 
-    //Relatórios e Carregando ocupam o PageControl inteiro (sem a moldura): realinha as abas
+    //Todas as telas ocupam o PageControl inteiro (sem a moldura): realinha as abas
     PageControl1.Realign;
 
-    //D2: os cards só somem em Enviar e Configurações
-    PnlCards.Visible := not (Tela in [tlEnviar, tlConfiguracoes]);
+    //D2: os cards somem em Enviar, Configurações e Sobre
+    PnlCards.Visible := not (Tela in [tlEnviar, tlConfiguracoes, tlSobre]);
     AjustarEspacoCards(Tela);
     SincronizarMenu(Tela);
+    AtualizarVisualSobre;
 
     if Tela = tlRelatorios then
         AtualizarTelaRelatorios;
+
+    //Enviar: configuração de e-mail salva (remetente e 11.19), anexo do filtro de modelo e estado da tela
+    if (Tela = tlEnviar) and (not FEnviando) then
+    begin
+        try
+            LerConfigEmail;
+        except
+            on E: Exception do
+            begin
+                GravarLog(E.ClassName, 'Ler configurações de e-mail: ' + E.Message);
+                CaixaMensagem('Não foi possível ler as configurações de e-mail.' + sLineBreak + sLineBreak +
+                              'Motivo: ' + E.Message, mtError);
+            end;
+        end;
+        AtualizarAnexoEnviar;
+        AtualizarTelaEnviar;
+    end;
+
+    if Tela = tlConfiguracoes then
+        AtualizarEstadoConfig;
 end;
 
 procedure TFormPrincipal.SincronizarMenu(const Tela: TTela);
@@ -2745,7 +3334,7 @@ begin
     if Tela = tlCarregando then
         Exit;
 
-    //Item ativo = tela exibida. Uma tela sem item (ex.: Sobre, etapa 4.7) deixa todos inativos
+    //Item ativo = tela exibida. Uma tela sem item (Sobre, etapa 4.7) deixa todos inativos
     for Item := Low(TTelaMenu) to High(TTelaMenu) do
         if ItensMenu[Item] <> nil then
             ItensMenu[Item].Ativo := (Ord(Item) = Ord(Tela));
@@ -2766,9 +3355,9 @@ end;
 function TFormPrincipal.TelaSemMoldura(const Tela: TTela): Boolean;
 begin
     //Telas no visual novo, com os próprios quadros sobre CorFundo (mockups resumo.html, notas.html,
-    //relatorios.html e carregando.html): ocupam a área inteira do PageControl1, sem a moldura do controle.
-    //As outras telas mantêm a moldura até a etapa delas (4.7)
-    Result := Tela in [tlResumo, tlNotas, tlRelatorios, tlCarregando];
+    //relatorios.html, carregando.html e, desde a etapa 4.7, enviar.html, configuracoes.html e sobre.html):
+    //ocupam a área inteira do PageControl1, sem a moldura do controle
+    Result := Tela in [tlResumo, tlNotas, tlRelatorios, tlCarregando, tlEnviar, tlConfiguracoes, tlSobre];
 end;
 
 procedure TFormPrincipal.JanelaPaginas(var Message: TMessage);
@@ -4209,13 +4798,13 @@ begin
                     on ELog: Exception do
                         OutputDebugString(PChar('ProXML: ' + ELog.Message));
                 end;
-                messagedlg('Não foi possível salvar o arquivo CSV.' + sLineBreak + sLineBreak + 'Motivo: ' + E.Message,
-                           mtError, [mbOk], 0);
+                CaixaMensagem('Não foi possível salvar o arquivo CSV.' + sLineBreak + sLineBreak + 'Motivo: ' +
+                              E.Message, mtError);
                 Exit;
             end;
         end;
 
-        messagedlg('Arquivo CSV salvo:' + sLineBreak + Dialogo.FileName, mtInformation, [mbOk], 0);
+        CaixaMensagem('Arquivo CSV salvo:' + sLineBreak + Dialogo.FileName, mtInformation);
     finally
         Dialogo.Free;
     end;
@@ -4264,23 +4853,18 @@ begin
         btnSelecionar.Enabled := Livre;
     if SeletorModelo <> nil then
         SeletorModelo.Enabled := Livre;
-    PnlSobre.Enabled := Livre and SOBRE_DISPONIVEL;
-    //"Sobre" bloqueado em CorTextoDesabilitado (decisão da 4.6); livre, volta para CorMarinhoTexto
-    if Livre then
-    begin
-        LabelSobre.Font.Color := CorMarinhoTexto;
-        SkSvgSobre.Svg.OverrideColor := CorAlpha(CorMarinhoTexto);
-    end
-    else
-    begin
-        LabelSobre.Font.Color := CorTextoDesabilitado;
-        SkSvgSobre.Svg.OverrideColor := CorAlpha(CorTextoDesabilitado);
-    end;
+    //"Sobre" bloqueado em CorTextoDesabilitado (decisão da 4.6); livre, volta para CorMarinhoTexto (ou
+    //branco com a linha CorPrimaria, se a tela Sobre estiver aberta)
+    PnlSobre.Enabled := Livre;
+    AtualizarVisualSobre;
     AtualizarEstadoProcessar;
 
-    //Botões que abrem trabalho nas telas Relatórios e Notas (H4)
+    //Botões que abrem trabalho nas telas Relatórios e Notas (H4) e o estado das telas Enviar e
+    //Configurações (etapa 4.7: Enviar, Testar conexão, Salvar e o link "alterar em Configurações")
     AtualizarTelaRelatorios;
     AtualizarTelaNotas;
+    AtualizarTelaEnviar;
+    AtualizarEstadoConfig;
 end;
 
 procedure TFormPrincipal.AcaoSelecionarPastaUpdate(Sender: TObject);
@@ -5129,6 +5713,7 @@ begin
     //Processar (P1): a leitura roda numa thread e a tela continua respondendo. O Resumo mostra o
     //progresso; grade, cards, Relatórios e Enviar ficam como estavam até a leitura terminar (PD-3)
     LiberarThreadLeitura;
+    FPastaLeitura       := Pasta;
     FCancelamentoPedido := False;
     FVazioAposCancelar  := False;
     FProgressoLidos     := 0;
@@ -5276,13 +5861,12 @@ begin
 
         if Erro <> '' then
         begin
-            try
-                DMConfig.CreateLog(ClasseErro, 'Processar: ' + Erro);
-            except
-                on ELog: Exception do
-                    OutputDebugString(PChar('ProXML: ' + ELog.Message));
-            end;
-            messagedlg(Erro, mtError, [mbOk], 0);
+            //Erro fora da leitura de um arquivo (pasta apagada ou sem acesso durante o Processar): caixa de
+            //erro 5.38 com a pasta e o motivo, e LOG. As notas carregadas antes continuam na tela
+            GravarLog(ClasseErro, 'Processar: ' + FPastaLeitura + ': ' + Erro);
+            CaixaMensagem('Não foi possível ler a pasta selecionada.' + sLineBreak + FPastaLeitura + sLineBreak +
+                          sLineBreak + 'Motivo: ' + Erro + sLineBreak + sLineBreak +
+                          'As notas carregadas antes continuam na tela.', mtError);
         end
         else if Concluida and ListBoxLog.CanFocus then
             //O app continua no Resumo, com o foco no log
@@ -5291,7 +5875,7 @@ begin
             btnProcessar.SetFocus;
     except
         on E: Exception do
-            Application.ShowException(E);
+            CaixaMensagem(E.Message, mtError);
     end;
 end;
 
@@ -5437,20 +6021,37 @@ begin
     FEstadoResumo := esrConcluido;
 end;
 
-{ Envio do e-mail em segundo plano (etapa 4.6) }
+{ Envio do e-mail em segundo plano (etapas 4.6 e 4.7) }
 
 procedure TFormPrincipal.IniciarEnvio;
 var
-    Envio    : TThreadEnvioEmail;
-    Notas    : TFDMemTable;
-    Marcador : TBookmark;
+    Envio      : TThreadEnvioEmail;
+    Notas      : TFDMemTable;
+    Marcador   : TBookmark;
+    Quantidade : Integer;
+    DataMenor  : Integer;
+    DataMaior  : Integer;
+    DataNota   : Integer;
+    Assunto    : string;
+
+    function DataDaOrdem(const Ordem: Integer): string;
+    begin
+        //aaaammdd -> dd/mm/aaaa
+        Result := Format('%.2d/%.2d/%.4d', [Ordem mod 100, (Ordem div 100) mod 100, Ordem div 10000]);
+    end;
+
 begin
     //Tudo o que vem da tela é lido aqui, na thread principal: os XMLs das notas do filtro de modelo (a
     //busca da tela Notas não vale para o Enviar: D5), o destino, o assunto e a mensagem. A configuração do
     //ACBrMail já foi carregada ao abrir a tela Enviar (LerConfigEmail)
     LiberarThreadEnvio;
-    Envio := TThreadEnvioEmail.Create(ACBrNFe, ExtractFilePath(ParamStr(0)), Trim(EditEmailEnviar.Text),
-                                      'Projeto Pro XML - XMLs de Nota Fiscal', MemoMensagem.Lines);
+    OcultarResultadoEnvio;
+
+    Quantidade := 0;
+    DataMenor  := 0;
+    DataMaior  := 0;
+    Envio := TThreadEnvioEmail.Create(ACBrNFe, ExtractFilePath(ParamStr(0)), Trim(EditEmailEnviar.Text), '',
+                                      MemoMensagem.Lines);
     try
         Notas := NotasDoModelo;
         Notas.DisableControls;
@@ -5463,6 +6064,17 @@ begin
                     //A chave tem 44 dígitos (D4): o arquivo sai como <chave>-nfe.xml (H3)
                     Envio.AdicionarXML(Notas.FieldByName('xml').AsString,
                                        Notas.FieldByName('chave').AsString + '-nfe.xml');
+                    Inc(Quantidade);
+
+                    //Período do assunto: menor e maior data das notas enviadas (data_ordem = aaaammdd)
+                    DataNota := Notas.FieldByName('data_ordem').AsInteger;
+                    if DataNota > 0 then
+                    begin
+                        if (DataMenor = 0) or (DataNota < DataMenor) then
+                            DataMenor := DataNota;
+                        if DataNota > DataMaior then
+                            DataMaior := DataNota;
+                    end;
                     Notas.Next;
                 end;
             finally
@@ -5473,6 +6085,19 @@ begin
         finally
             Notas.EnableControls;
         end;
+
+        //Assunto (glossário 11.21): "XMLs de Nota Fiscal · {período} · {n} notas"; todas as notas com a mesma
+        //data: a data única (decisão de 26/10/2026). Sem nenhuma data válida, o período fica de fora
+        Assunto := 'XMLs de Nota Fiscal ' + #$00B7 + ' ';
+        if DataMenor > 0 then
+        begin
+            if DataMenor = DataMaior then
+                Assunto := Assunto + DataDaOrdem(DataMenor)
+            else
+                Assunto := Assunto + DataDaOrdem(DataMenor) + ' a ' + DataDaOrdem(DataMaior);
+            Assunto := Assunto + ' ' + #$00B7 + ' ';
+        end;
+        Envio.Assunto := Assunto + TextoQuantidadeNotas(Quantidade);
         Envio.OnTerminate := EnvioTerminado;
     except
         //A thread ainda não começou: ao ser liberada ela termina sem compactar nem enviar
@@ -5480,15 +6105,20 @@ begin
         raise;
     end;
 
-    //"Enviando…" (glossário 11.13; tokens.md 5.1, estado ocupado): botão desabilitado com o ícone
-    //loader-circle estático. Menu e barra de pasta ficam bloqueados até o fim do envio
+    //"Enviando…" (glossário 11.13 e 11.14; tokens.md 5.1, estado ocupado): botão desabilitado com o ícone
+    //loader-circle estático e a legenda ao lado. Campos, menu e barra de pasta ficam bloqueados até o fim
     FEnvio    := Envio;
     FEnviando := True;
-    FLarguraEnviar := Panel11.Width;
     btnEnviarEmail.Caption  := 'Enviando' + #$2026;
     btnEnviarEmail.IconeSvg := IconeOcupado;
-    Panel11.Width := Max(FLarguraEnviar, btnEnviarEmail.LarguraIdeal);
-    btnEnviarEmail.Enabled := False;
+    btnEnviarEmail.Enabled  := False;
+    if Quantidade = 1 then
+        LabelEnviando.Caption := 'Compactando e enviando 1 XML. Isso pode levar alguns segundos.'
+    else
+        LabelEnviando.Caption := 'Compactando e enviando ' + IntToStr(Quantidade) +
+                                 ' XMLs. Isso pode levar alguns segundos.';
+    LabelEnviando.Visible := True;
+    //O bloqueio atualiza a tela Enviar (campos desabilitados e a largura do botão no layout)
     DefinirBloqueio(blEnvio, True);
     try
         Envio.Start;
@@ -5504,12 +6134,11 @@ end;
 
 procedure TFormPrincipal.RestaurarBotaoEnviar;
 begin
-    //Botão Enviar como antes do envio (o visual da tela Enviar fica para a etapa 4.7)
+    //Botão Enviar como antes do envio (glossário 11.11 e 11.12)
     btnEnviarEmail.Caption  := 'Enviar';
-    btnEnviarEmail.IconeSvg := '';
-    if FLarguraEnviar > 0 then
-        Panel11.Width := FLarguraEnviar;
-    btnEnviarEmail.Enabled := True;
+    btnEnviarEmail.IconeSvg := IconeEnviar;
+    LabelEnviando.Visible := False;
+    AtualizarTelaEnviar;
 end;
 
 procedure TFormPrincipal.LiberarThreadEnvio;
@@ -5528,6 +6157,7 @@ var
     Resultado  : TResultadoEnvio;
     Erro       : string;
     ClasseErro : string;
+    Trechos    : TTrechosTexto;
 begin
     //OnTerminate da thread de envio: roda na thread principal; nenhuma exceção sai daqui
     try
@@ -5537,7 +6167,8 @@ begin
         ClasseErro := Envio.ClasseErro;
         try
             FEnviando := False;
-            RestaurarBotaoEnviar;
+            if not FFechando then
+                RestaurarBotaoEnviar;
         finally
             //Menu e barra de pasta voltam em qualquer caminho
             DefinirBloqueio(blEnvio, False);
@@ -5545,27 +6176,52 @@ begin
 
         if FFechando then
             Exit;
-        if btnEnviarEmail.CanFocus then
-            btnEnviarEmail.SetFocus;
 
-        //Resultado com os textos atuais do app (os textos e a faixa do glossário 11.16 e 11.17 são da 4.7)
+        //Resultado numa faixa da própria tela (etapa 4.7), sem caixa de diálogo. Fica até sair da tela ou
+        //enviar de novo. Os erros também vão para o LOG
+        Trechos := nil;
         case Resultado of
             reEnviado:
-                messagedlg('Email enviado com sucesso!!', mtInformation, [mbOk], 0);
-            reSemAnexo:
-                messagedlg('Sem arquivos para enviar!', mtInformation, [mbOk], 0);
-        else
-            try
-                DMConfig.CreateLog(ClasseErro, 'Enviar e-mail: ' + Erro);
-            except
-                on ELog: Exception do
-                    OutputDebugString(PChar('ProXML: ' + ELog.Message));
+            begin
+                //11.16
+                AdicionarTrecho(Trechos, 'E-mail enviado', etrDestaque);
+                AdicionarTrecho(Trechos, ' para ' + Envio.Para + ' às ' +
+                                         FormatDateTime('hh":"nn', Now, FormatoPtBR) + '.', etrNormal);
+                MostrarFaixaEnviar(tfSucesso, Trechos, True);
             end;
-            messagedlg(Erro, mtError, [mbOk], 0);
+            reSemWinRAR:
+            begin
+                //11.20
+                GravarLog('Enviar e-mail', 'WinRAR não encontrado em ' + ExtractFilePath(ParamStr(0)));
+                AdicionarTrecho(Trechos, 'Não foi possível compactar os XMLs.', etrDestaque);
+                AdicionarTrecho(Trechos, ' WinRAR não encontrado em ' +
+                                         ExcludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + '.', etrNormal);
+                MostrarFaixaEnviar(tfErro, Trechos, True);
+            end;
+            reSemAnexo:
+            begin
+                //11.20a: o WinRAR rodou, mas o .rar não foi gerado
+                GravarLog('Enviar e-mail', 'O WinRAR não gerou o arquivo ' + ExtractFilePath(ParamStr(0)) +
+                                           'NFCe\NFCe_ProXML.rar');
+                AdicionarTrecho(Trechos, 'Não foi possível compactar os XMLs.', etrDestaque);
+                AdicionarTrecho(Trechos, ' O arquivo .rar não foi gerado. Tente de novo; se continuar, confira o ' +
+                                         'espaço em disco e a pasta do ProXML.', etrNormal);
+                MostrarFaixaEnviar(tfErro, Trechos, True);
+            end;
+        else
+            //11.17
+            GravarLog(ClasseErro, 'Enviar e-mail: ' + Erro);
+            AdicionarTrecho(Trechos, 'Não foi possível enviar o e-mail.', etrDestaque);
+            AdicionarTrecho(Trechos, 'O servidor respondeu: ' + MotivoNumaLinha(Erro) + '. Confira os dados em ' +
+                                     'Configurações e use Testar conexão.', etrNormal, True);
+            MostrarFaixaEnviar(tfErro, Trechos, True);
         end;
+
+        if btnEnviarEmail.CanFocus then
+            btnEnviarEmail.SetFocus;
     except
         on E: Exception do
-            Application.ShowException(E);
+            CaixaMensagem(E.Message, mtError);
     end;
 end;
 
@@ -5575,17 +6231,1298 @@ begin
     if FEnviando then
     begin
         CanClose := False;
-        messagedlg('O e-mail ainda está sendo enviado. Aguarde terminar para fechar o ProXML.', mtWarning, [mbOk], 0);
+        CaixaMensagem('O e-mail ainda está sendo enviado. Aguarde terminar para fechar o ProXML.', mtWarning);
         Exit;
     end;
+
+    //Testar conexão em andamento (etapa 4.7): fecha sem perguntar. O FormDestroy aborta o teste (fecha o
+    //socket) e espera a thread terminar
 
     //Leitura em andamento (glossário 5.28, Sim / Não): Sim cancela, espera a thread terminar e fecha
     if FLendo then
     begin
-        CanClose := messagedlg('A leitura dos XMLs ainda está em andamento.' + sLineBreak +
-                               'Deseja cancelar e fechar o ProXML?', mtConfirmation, [mbYes, mbNo], 0, mbNo) = mrYes;
+        CanClose := CaixaMensagem('A leitura dos XMLs ainda está em andamento.' + sLineBreak +
+                                  'Deseja cancelar e fechar o ProXML?', mtConfirmation, [mbYes, mbNo], mbNo) = mrYes;
         if CanClose then
             EncerrarLeituraParaFechar;
+    end;
+end;
+
+{ Plano 4, etapa 4.7: campos com borda própria, Enviar, Configurações, Testar conexão e Sobre }
+
+procedure TFormPrincipal.GravarLog(const Classe, Texto: string);
+begin
+    //LOG no banco sem deixar exceção sair (o banco pode ser a causa do erro). Se nem o LOG puder ser
+    //gravado, resta a saída de depuração
+    try
+        DMConfig.CreateLog(Classe, Texto);
+    except
+        on ELog: Exception do
+            OutputDebugString(PChar('ProXML: ' + Texto + ' (' + ELog.Message + ')'));
+    end;
+end;
+
+procedure TFormPrincipal.WMProXMLErroConfig(var Message: TMessage);
+begin
+    //Glossário 12.18: as configurações de e-mail não puderam ser lidas no FormCreate (já foi para o LOG)
+    if FErroLeituraConfig = '' then
+        Exit;
+    CaixaMensagem('Não foi possível ler as configurações de e-mail.' + sLineBreak + sLineBreak + 'Motivo: ' +
+                  FErroLeituraConfig, mtError);
+    FErroLeituraConfig := '';
+end;
+
+{ Campos com borda própria (tokens.md 5.3) }
+
+function TFormPrincipal.CriarCampo(Borda, Fundo: TPanel; Icone: TSkSvg; Edit: TCustomEdit; Acao, IconeErro: TSkSvg;
+  LabelErro: TLabel; const Validar: TValidarCampo): TCampoFormulario;
+begin
+    //Liga o campo do .dfm ao visual do tema: fundo CorSuperficie, texto 10 pt CorTexto, ícones de 16 px
+    //CorTextoSecundario e a linha de erro (circle-alert 14 px + texto 9 pt CorErro), escondida
+    Result := TCampoFormulario.Create;
+    Result.Borda     := Borda;
+    Result.Fundo     := Fundo;
+    Result.Icone     := Icone;
+    Result.Edit      := Edit;
+    Result.Acao      := Acao;
+    Result.IconeErro := IconeErro;
+    Result.LabelErro := LabelErro;
+    Result.Validar   := Validar;
+    SetLength(FCampos, Length(FCampos) + 1);
+    FCampos[High(FCampos)] := Result;
+
+    AplicarFonte(TEditAcesso(Edit).Font, FonteTexto, TamanhoCorpo, CorTexto);
+    TEditAcesso(Edit).OnEnter  := CampoEnter;
+    TEditAcesso(Edit).OnExit   := CampoExit;
+    TEditAcesso(Edit).OnChange := CampoChange;
+    if Icone <> nil then
+        Icone.Width := Escalar(TamanhoIconePequeno);
+    if Acao <> nil then
+        Acao.Width := Escalar(TamanhoIconePequeno);
+    if IconeErro <> nil then
+    begin
+        IconeErro.Svg.Source        := IconeErroCampo;
+        IconeErro.Svg.OverrideColor := CorAlpha(CorErro);
+        IconeErro.Visible := False;
+        AplicarFonte(LabelErro.Font, FonteTexto, TamanhoLegenda, CorErro);
+        LabelErro.WordWrap := True;
+        LabelErro.Visible  := False;
+    end;
+    AtualizarCampo(Result);
+end;
+
+function TFormPrincipal.CampoDoControle(Controle: TObject): TCampoFormulario;
+var
+    I: Integer;
+begin
+    Result := nil;
+    for I := 0 to High(FCampos) do
+        if FCampos[I].Edit = Controle then
+            Exit(FCampos[I]);
+end;
+
+procedure TFormPrincipal.AtualizarCampo(Campo: TCampoFormulario);
+var
+    Habilitado : Boolean;
+    ComErro    : Boolean;
+    CorIcone   : TColor;
+begin
+    //Estados do campo (tokens.md 5.3): normal, foco (2 px CorPrimaria), erro (2 px CorErro, mensagem
+    //abaixo) e desabilitado (1 px CorBorda, fundo CorFundoDesabilitado, texto CorTextoDesabilitado).
+    //Desabilitado é o contêiner da borda (o TEdit continua habilitado, como no campo da pasta)
+    if Campo = nil then
+        Exit;
+
+    Habilitado := Campo.Borda.Enabled;
+    ComErro    := Habilitado and (Campo.Erro <> '');
+    AtualizarBordaCampo(Campo.Borda, Campo.Icone, Campo.Edit, 0, Habilitado and Campo.Edit.Focused, ComErro,
+                        Campo.Acao);
+
+    if Habilitado then
+    begin
+        Campo.Fundo.Color := CorSuperficie;
+        TEditAcesso(Campo.Edit).Color      := CorSuperficie;
+        TEditAcesso(Campo.Edit).Font.Color := CorTexto;
+        CorIcone := CorTextoSecundario;
+    end
+    else
+    begin
+        Campo.Borda.Color := CorBorda;
+        Campo.Fundo.Color := CorFundoDesabilitado;
+        TEditAcesso(Campo.Edit).Color      := CorFundoDesabilitado;
+        TEditAcesso(Campo.Edit).Font.Color := CorTextoDesabilitado;
+        CorIcone := CorTextoDesabilitado;
+    end;
+    if Campo.Icone <> nil then
+        Campo.Icone.Svg.OverrideColor := CorAlpha(CorIcone);
+    if Campo.Acao <> nil then
+        Campo.Acao.Svg.OverrideColor := CorAlpha(CorIcone);
+
+    if Campo.IconeErro <> nil then
+    begin
+        Campo.LabelErro.Caption   := Campo.Erro;
+        Campo.LabelErro.Visible   := ComErro;
+        Campo.IconeErro.Visible   := ComErro;
+        Campo.IconeErro.Width     := Escalar(TamanhoIconeErroCampo);
+        Campo.IconeErro.Height    := Escalar(TamanhoIconeErroCampo);
+    end;
+end;
+
+procedure TFormPrincipal.HabilitarCampo(Campo: TCampoFormulario; const Habilitar: Boolean);
+begin
+    if (Campo <> nil) and (Campo.Borda.Enabled <> Habilitar) then
+    begin
+        Campo.Borda.Enabled := Habilitar;
+        AtualizarCampo(Campo);
+    end;
+end;
+
+procedure TFormPrincipal.ValidarCampo(Campo: TCampoFormulario);
+begin
+    //A mensagem só aparece depois que o usuário sai do campo com erro (Validando); a partir daí ela
+    //acompanha cada digitação (tokens.md 5.3)
+    if Campo = nil then
+        Exit;
+
+    if Assigned(Campo.Validar) and Campo.Validando then
+        Campo.Erro := Campo.Validar(Campo.Edit.Text)
+    else
+        Campo.Erro := '';
+    AtualizarCampo(Campo);
+end;
+
+procedure TFormPrincipal.CampoEnter(Sender: TObject);
+begin
+    //Foco: borda de 2 px CorPrimaria (ou CorErro, se o campo estiver com erro)
+    AtualizarCampo(CampoDoControle(Sender));
+end;
+
+procedure TFormPrincipal.CampoExit(Sender: TObject);
+var
+    Campo: TCampoFormulario;
+begin
+    //Validação ao sair do campo: com erro, a mensagem aparece e o campo passa a validar a cada digitação
+    Campo := CampoDoControle(Sender);
+    if Campo = nil then
+        Exit;
+
+    if Assigned(Campo.Validar) and (Campo.Validar(Campo.Edit.Text) <> '') then
+        Campo.Validando := True;
+    ValidarCampo(Campo);
+
+    if Campo.Borda.Parent = PnlEnviarFundo then
+        AtualizarTelaEnviar
+    else
+        AtualizarEstadoConfig;
+end;
+
+procedure TFormPrincipal.CampoChange(Sender: TObject);
+var
+    Campo: TCampoFormulario;
+begin
+    //Digitação: revalida (se o campo já mostrou erro) e atualiza o Enviar ou o Salvar, que só ficam
+    //habilitados com os campos válidos
+    Campo := CampoDoControle(Sender);
+    if Campo = nil then
+        Exit;
+
+    if Campo.Validando then
+        ValidarCampo(Campo);
+
+    if Campo.Borda.Parent = PnlEnviarFundo then
+        AtualizarTelaEnviar
+    else
+        AtualizarEstadoConfig;
+end;
+
+function TFormPrincipal.ValidarEmailDestino(const Texto: string): string;
+begin
+    //Glossário 11.18 (um só destinatário, decisão de 26/10/2026)
+    if EmailValido(Trim(Texto)) then
+        Result := ''
+    else
+        Result := 'Informe um e-mail válido. Exemplo: nome@empresa.com.br';
+end;
+
+function TFormPrincipal.ValidarServidor(const Texto: string): string;
+begin
+    //Glossário 12.25
+    if Trim(Texto) <> '' then
+        Result := ''
+    else
+        Result := 'Informe o servidor SMTP.';
+end;
+
+function TFormPrincipal.ValidarPorta(const Texto: string): string;
+var
+    Porta: Integer;
+    I    : Integer;
+begin
+    //Glossário 12.23: só algarismos, de 1 a 65535
+    Result := 'Informe uma porta entre 1 e 65535.';
+    if (Trim(Texto) = '') or (Length(Trim(Texto)) > 5) then
+        Exit;
+    for I := 1 to Length(Trim(Texto)) do
+        if not CharInSet(Trim(Texto)[I], ['0'..'9']) then
+            Exit;
+    Porta := StrToIntDef(Trim(Texto), 0);
+    if (Porta >= 1) and (Porta <= 65535) then
+        Result := '';
+end;
+
+function TFormPrincipal.ValidarEmailRemetente(const Texto: string): string;
+begin
+    //Glossário 12.24
+    if EmailValido(Trim(Texto)) then
+        Result := ''
+    else
+        Result := 'Informe um e-mail válido.';
+end;
+
+function TFormPrincipal.PosicionarCampo(Campo: TCampoFormulario; Rotulo: TLabel; const X, Y, Largura,
+  Altura: Integer): Integer;
+var
+    Medida      : TBitmap;
+    AlturaRotulo: Integer;
+    AlturaErro  : Integer;
+    Topo        : Integer;
+    Icone       : Integer;
+begin
+    //Rótulo (9 pt Semibold), 4 px, o campo e, com erro, 4 px e a mensagem (ícone 14 px + texto que quebra
+    //na largura do campo). Devolve a altura usada
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(Rotulo.Font);
+        AlturaRotulo := Medida.Canvas.TextHeight('Ag');
+    finally
+        Medida.Free;
+    end;
+    Rotulo.SetBounds(X, Y, Largura, AlturaRotulo);
+    Topo := Y + AlturaRotulo + Escalar(EspacoMeio);
+    Campo.Borda.SetBounds(X, Topo, Largura, Altura);
+    Inc(Topo, Altura);
+
+    if (Campo.IconeErro <> nil) and Campo.LabelErro.Visible then
+    begin
+        Icone := Escalar(TamanhoIconeErroCampo);
+        Inc(Topo, Escalar(EspacoMeio));
+        AlturaErro := AlturaTextoQuebrado(Campo.LabelErro, Largura - Icone - Escalar(EspacoMeio));
+        Campo.LabelErro.SetBounds(X + Icone + Escalar(EspacoMeio), Topo, Max(1, Largura - Icone - Escalar(EspacoMeio)),
+                                  AlturaErro);
+        //Ícone centralizado na primeira linha da mensagem
+        Medida := TBitmap.Create;
+        try
+            Medida.Canvas.Font.Assign(Campo.LabelErro.Font);
+            Campo.IconeErro.SetBounds(X, Topo + Max(0, (Medida.Canvas.TextHeight('Ag') - Icone) div 2), Icone, Icone);
+        finally
+            Medida.Free;
+        end;
+        Inc(Topo, AlturaErro);
+    end;
+
+    Result := Topo - Y;
+end;
+
+function TFormPrincipal.PosicionarLegenda(Rotulo: TLabel; const X, Y, Largura: Integer): Integer;
+begin
+    //Legenda 9 pt que quebra na largura da coluna; devolve a altura
+    Result := AlturaTextoQuebrado(Rotulo, Largura);
+    Rotulo.SetBounds(X, Y, Max(1, Largura), Result);
+end;
+
+procedure TFormPrincipal.DefinirTipoFaixa(Faixa, Barra: TPanel; Icone: TSkSvg; const Tipo: TTipoFaixa);
+begin
+    //Faixa de status (tokens.md 5.8): sucesso, aviso, erro ou informação
+    case Tipo of
+        tfSucesso : PrepararFaixa(Faixa, Barra, Icone, CorSucessoSuave, CorSucesso, IconeSucesso);
+        tfAviso   : PrepararFaixa(Faixa, Barra, Icone, CorAvisoSuave, CorAviso, IconeAviso);
+        tfErro    : PrepararFaixa(Faixa, Barra, Icone, CorErroSuave, CorErro, IconeErro);
+    else
+        PrepararFaixa(Faixa, Barra, Icone, CorPrimariaSuave, CorPrimaria, IconeInfo);
+    end;
+end;
+
+{ Tela Enviar (mockup enviar.html; glossário 11.1 a 11.22) }
+
+procedure TFormPrincipal.PrepararTelaEnviar;
+begin
+    //Quadro com borda de 1 px CorBorda e fundo CorSuperficie (mockup .panel), padding 16 x 24 e 12 px
+    //entre os blocos. As posições ficam em AjustarLayoutEnviar
+    Panel10.Color := CorBorda;
+    Panel10.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
+    PnlEnviarFundo.Color := CorSuperficie;
+
+    //Título (11.1)
+    AplicarFonte(Label11.Font, FonteDestaque, TamanhoTituloTela, CorTexto);
+    Label11.Layout  := tlCenter;
+    Label11.Caption := 'Enviar por e-mail';
+
+    //Faixa de resultado e de e-mail de envio não configurado (11.16, 11.17, 11.19 e 11.20)
+    DefinirTipoFaixa(PnlFaixaEnviar, PnlFaixaEnviarBarra, SkSvgFaixaEnviar, tfInformacao);
+    PbxFaixaEnviar.OnPaint := PbxFaixaEnviarPaint;
+    PnlFaixaEnviar.Visible := False;
+
+    //Quadro do anexo (mockup .anexo): borda CorBorda, fundo CorFundo, paperclip 20 px CorPrimaria, título
+    //10 pt Semibold e detalhe 9 pt CorTextoSecundario (11.3 a 11.6)
+    PnlAnexo.Color := CorBorda;
+    PnlAnexo.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
+    PnlAnexoFundo.Color := CorFundo;
+    SkSvgAnexo.Svg.Source        := IconeAnexo;
+    SkSvgAnexo.Svg.OverrideColor := CorAlpha(CorPrimaria);
+    AplicarFonte(LabelAnexoTitulo.Font, FonteDestaque, TamanhoCorpo, CorTexto);
+    AplicarFonte(LabelAnexoDetalhe.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelAnexoDetalhe.WordWrap := True;
+
+    //Para (11.7, 11.8 e 11.18) e Mensagem (11.9)
+    AplicarFonte(Label15.Font, FonteDestaque, TamanhoRotuloCampo, CorTexto);
+    Label15.Caption := 'Para';
+    AplicarFonte(Label17.Font, FonteDestaque, TamanhoRotuloCampo, CorTexto);
+    Label17.Caption := 'Mensagem';
+    SkSvgPara.Svg.Source := IconeEmail;
+    EditEmailEnviar.TextHint := 'nome@empresa.com.br';
+    FCampoPara := CriarCampo(PnlCampoPara, PnlCampoParaFundo, SkSvgPara, EditEmailEnviar, nil, SkSvgErroPara,
+                             LabelErroPara, ValidarEmailDestino);
+    FCampoMensagemEnviar := CriarCampo(PnlCampoMensagem, PnlCampoMensagemFundo, nil, MemoMensagem, nil, nil, nil, nil);
+
+    //Remetente com o link para Configurações (11.10)
+    AplicarFonte(LabelRemetente.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelRemetente.Caption := '';
+    PnlAlterarConfig.Color := CorSuperficie;
+    btnAlterarConfig := TProBotao.CriarEm(PnlAlterarConfig, 'alterar em Configurações', ebLink, AlterarConfigClick);
+    AplicarFonte(btnAlterarConfig.Font, FonteTexto, TamanhoLegenda, CorPrimaria);
+
+    //Enviar (11.11 e 11.12) e a legenda do "Enviando…" (11.14)
+    Panel11.Color := CorSuperficie;
+    btnEnviarEmail.IconeSvg := IconeEnviar;
+    btnEnviarEmail.Hint     := 'Compactar os XMLs e enviar por e-mail';
+    btnEnviarEmail.ShowHint := True;
+    AplicarFonte(LabelEnviando.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelEnviando.Layout  := tlCenter;
+    LabelEnviando.Visible := False;
+end;
+
+function TFormPrincipal.SMTPConfigurado: Boolean;
+begin
+    //E-mail de envio salvo em Configurações com servidor, porta e e-mail válidos (mesma regra do Salvar)
+    Result := (ConfigEmail <> nil) and (ValidarServidor(ConfigEmail.SMTP) = '') and
+              (ValidarPorta(ConfigEmail.Porta) = '') and EmailValido(Trim(ConfigEmail.Email));
+end;
+
+procedure TFormPrincipal.AtualizarAnexoEnviar;
+var
+    Notas    : TFDMemTable;
+    Marcador : TBookmark;
+begin
+    //Quadro do anexo (11.3 e 11.4): quantidade de XMLs do filtro de modelo e a soma do tamanho dos XMLs,
+    //sem compactar (o .rar só é gerado no clique em Enviar). XML apagado depois da leitura conta 0 byte
+    FAnexoQuantidade := 0;
+    FAnexoBytes      := 0;
+    if not TemNotaNoModelo then
+        Exit;
+
+    Notas := NotasDoModelo;
+    Notas.DisableControls;
+    try
+        Marcador := Notas.GetBookmark;
+        try
+            Notas.First;
+            while not Notas.Eof do
+            begin
+                Inc(FAnexoQuantidade);
+                Inc(FAnexoBytes, TamanhoArquivo(Notas.FieldByName('xml').AsString));
+                Notas.Next;
+            end;
+        finally
+            if (Marcador <> nil) and Notas.BookmarkValid(Marcador) then
+                Notas.GotoBookmark(Marcador);
+            Notas.FreeBookmark(Marcador);
+        end;
+    finally
+        Notas.EnableControls;
+    end;
+end;
+
+procedure TFormPrincipal.AtualizarTelaEnviar;
+var
+    TemNotas   : Boolean;
+    Carregadas : Boolean;
+    Trechos    : TTrechosTexto;
+begin
+    //Estado da tela Enviar: anexo (ou "Nenhuma nota para enviar"), faixa 11.19 sem e-mail de envio,
+    //remetente, campos e o botão Enviar (habilitado só com notas, e-mail de envio configurado e o "Para"
+    //válido; tokens.md 5.12: o motivo do bloqueio fica visível na tela)
+    if (btnEnviarEmail = nil) or (FCampoPara = nil) or (btnAlterarConfig = nil) or (SeletorModelo = nil) then
+        Exit;
+
+    TemNotas   := TemNotaNoModelo;
+    Carregadas := FDMemTable1.Active and (FDMemTable1.Table.Rows.Count > 0);
+
+    if TemNotas then
+    begin
+        if FAnexoQuantidade = 1 then
+            LabelAnexoTitulo.Caption := 'Anexo: 1 XML (.rar)'
+        else
+            LabelAnexoTitulo.Caption := 'Anexo: ' + IntToStr(FAnexoQuantidade) + ' XMLs (.rar)';
+        LabelAnexoDetalhe.Caption := 'Modelo: ' + SeletorModelo.Itens[SeletorModelo.ItemIndex] + ' ' + #$00B7 +
+                                     ' os XMLs somam ' + FormatarTamanho(FAnexoBytes) + ' ' + #$00B7 +
+                                     ' compactado só ao clicar em Enviar';
+    end
+    else
+    begin
+        LabelAnexoTitulo.Caption := 'Nenhuma nota para enviar';
+        //Há notas carregadas, mas nenhuma no modelo escolhido: o mesmo texto 8.8a das telas Notas e Relatórios
+        if Carregadas then
+            LabelAnexoDetalhe.Caption := 'Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima.'
+        else
+            LabelAnexoDetalhe.Caption := 'Processe uma pasta para gerar o anexo.';
+    end;
+
+    //Sem resultado de envio na tela: faixa informativa 11.19 enquanto o e-mail de envio não estiver configurado
+    if not FResultadoEnvio then
+    begin
+        if SMTPConfigurado then
+        begin
+            PnlFaixaEnviar.Visible := False;
+            FTrechosFaixaEnviar := nil;
+        end
+        else
+        begin
+            Trechos := nil;
+            AdicionarTrecho(Trechos, 'Configure o e-mail de envio em Configurações antes de enviar.', etrDestaque);
+            FTrechosFaixaEnviar := Trechos;
+            DefinirTipoFaixa(PnlFaixaEnviar, PnlFaixaEnviarBarra, SkSvgFaixaEnviar, tfInformacao);
+            PnlFaixaEnviar.Visible := True;
+            PbxFaixaEnviar.Invalidate;
+        end;
+    end;
+
+    //Remetente (11.10): só com o e-mail de envio configurado
+    LabelRemetente.Visible   := SMTPConfigurado;
+    PnlAlterarConfig.Visible := SMTPConfigurado;
+    if SMTPConfigurado then
+        LabelRemetente.Caption := 'Enviado de ' + Trim(ConfigEmail.Email) + ' ' + #$00B7 + ' ';
+
+    //Sem notas os campos ficam desabilitados (mockup, estado sem notas); durante o envio também
+    HabilitarCampo(FCampoPara, TemNotas and (not Bloqueado));
+    HabilitarCampo(FCampoMensagemEnviar, TemNotas and (not Bloqueado));
+    btnEnviarEmail.Enabled   := TemNotas and SMTPConfigurado and FCampoPara.Valido and (not Bloqueado);
+    btnAlterarConfig.Enabled := not Bloqueado;
+
+    AjustarRolagem(FRolagemEnviar);
+end;
+
+function TFormPrincipal.AjustarLayoutEnviar: Integer;
+var
+    Medida        : TBitmap;
+    X, Y, W       : Integer;
+    Espaco        : Integer;
+    Margem        : Integer;
+    AlturaTitulo  : Integer;
+    AlturaDetalhe : Integer;
+    AlturaLegenda : Integer;
+    Conteudo      : Integer;
+    Interno       : Integer;
+    Icone         : Integer;
+    AlturaAnexo   : Integer;
+    LarguraTexto  : Integer;
+    Esquerda      : Integer;
+begin
+    //Blocos empilhados no quadro (mockup enviar.html): título 32 px, faixa, anexo, Para, Mensagem (72 px),
+    //remetente e a linha do Enviar, 12 px entre eles. Devolve a altura do quadro (com a borda)
+    Result := 0;
+    if (btnEnviarEmail = nil) or (FCampoPara = nil) or (btnAlterarConfig = nil) then
+        Exit;
+
+    //Largura pelo quadro (Panel10): antes de a aba aparecer pela primeira vez o painel interno ainda não
+    //foi realinhado
+    X      := Escalar(PaddingPainelHorizontal);
+    W      := Max(1, Panel10.Width - 2 * Escalar(BordaQuadro) - 2 * X);
+    Y      := Escalar(PaddingPainelVertical);
+    Espaco := Escalar(EspacoFormulario);
+    Margem := btnEnviarEmail.MargemFoco;
+
+    Label11.SetBounds(X, Y, W, Escalar(AlturaTituloTela));
+    Inc(Y, Escalar(AlturaTituloTela) + Espaco);
+
+    if PnlFaixaEnviar.Visible then
+    begin
+        PnlFaixaEnviar.SetBounds(X, Y, W, PnlFaixaEnviar.Height);
+        AjustarFaixa(PnlFaixaEnviar, PnlFaixaEnviarBarra, SkSvgFaixaEnviar, PbxFaixaEnviar, FTrechosFaixaEnviar,
+                     PaddingFaixaVertical);
+        Inc(Y, PnlFaixaEnviar.Height + Espaco);
+    end;
+
+    //Anexo: ícone 20 px, 12 px e as duas linhas de texto centralizadas na altura
+    Icone   := Escalar(TamanhoIconeMenu);
+    Interno := Max(1, W - 2 * Escalar(BordaQuadro) - 2 * Escalar(PaddingAnexoHorizontal) - Icone -
+                      Escalar(EspacoIconeAnexo));
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelAnexoTitulo.Font);
+        AlturaTitulo := Medida.Canvas.TextHeight('Ag');
+    finally
+        Medida.Free;
+    end;
+    AlturaDetalhe := AlturaTextoQuebrado(LabelAnexoDetalhe, Interno);
+    Conteudo      := Max(Icone, AlturaTitulo + AlturaDetalhe);
+    AlturaAnexo   := 2 * Escalar(BordaQuadro) + 2 * Escalar(PaddingAnexoVertical) + Conteudo;
+    PnlAnexo.SetBounds(X, Y, W, AlturaAnexo);
+    Esquerda := Escalar(PaddingAnexoHorizontal);
+    SkSvgAnexo.SetBounds(Esquerda, Escalar(PaddingAnexoVertical) + (Conteudo - Icone) div 2, Icone, Icone);
+    Inc(Esquerda, Icone + Escalar(EspacoIconeAnexo));
+    LabelAnexoTitulo.SetBounds(Esquerda, Escalar(PaddingAnexoVertical) + (Conteudo - AlturaTitulo - AlturaDetalhe) div 2,
+                               Interno, AlturaTitulo);
+    LabelAnexoDetalhe.SetBounds(Esquerda, LabelAnexoTitulo.Top + AlturaTitulo, Interno, AlturaDetalhe);
+    Inc(Y, AlturaAnexo + Espaco);
+
+    //Para e Mensagem
+    Inc(Y, PosicionarCampo(FCampoPara, Label15, X, Y, W, Escalar(AlturaCampo)) + Espaco);
+    Inc(Y, PosicionarCampo(FCampoMensagemEnviar, Label17, X, Y, W, Escalar(AlturaMensagemEnviar)) + Espaco);
+
+    //"Enviado de {e-mail} · alterar em Configurações": legenda e o link logo depois, na mesma linha
+    if LabelRemetente.Visible then
+    begin
+        Medida := TBitmap.Create;
+        try
+            Medida.Canvas.Font.Assign(LabelRemetente.Font);
+            AlturaLegenda := Medida.Canvas.TextHeight('Ag');
+            LarguraTexto  := Medida.Canvas.TextWidth(LabelRemetente.Caption);
+        finally
+            Medida.Free;
+        end;
+        LabelRemetente.SetBounds(X, Y, Min(LarguraTexto, W), AlturaLegenda);
+        PnlAlterarConfig.SetBounds(X + LabelRemetente.Width - btnAlterarConfig.MargemFoco,
+                                   Y + (AlturaLegenda - btnAlterarConfig.AlturaIdeal) div 2,
+                                   btnAlterarConfig.LarguraIdeal, btnAlterarConfig.AlturaIdeal);
+        Inc(Y, AlturaLegenda + Espaco);
+    end;
+
+    //Enviar (120 px; "Enviando…" pode precisar de mais) e a legenda 11.14 ao lado, 8 px depois
+    Panel11.SetBounds(X - Margem, Y - Margem, Max(Escalar(LarguraBotaoDestaque) + 2 * Margem, btnEnviarEmail.LarguraIdeal),
+                      Escalar(AlturaBotao) + 2 * Margem);
+    LabelEnviando.SetBounds(Panel11.Left + Panel11.Width - Margem + Escalar(Espaco1), Y,
+                            Max(0, X + W - (Panel11.Left + Panel11.Width - Margem + Escalar(Espaco1))),
+                            Escalar(AlturaBotao));
+    Inc(Y, Escalar(AlturaBotao) + Escalar(PaddingPainelVertical));
+
+    Result := Y + 2 * Escalar(BordaQuadro);
+end;
+
+procedure TFormPrincipal.MostrarFaixaEnviar(const Tipo: TTipoFaixa; const Trechos: TTrechosTexto;
+  const Resultado: Boolean);
+begin
+    //Faixa entre o título e o anexo (mockup enviar.html, estados Enviado e Erro). Resultado do envio: fica
+    //até sair da tela ou enviar de novo
+    FTrechosFaixaEnviar := Trechos;
+    FResultadoEnvio     := Resultado;
+    DefinirTipoFaixa(PnlFaixaEnviar, PnlFaixaEnviarBarra, SkSvgFaixaEnviar, Tipo);
+    PnlFaixaEnviar.Visible := True;
+    AjustarRolagem(FRolagemEnviar);
+    PbxFaixaEnviar.Invalidate;
+end;
+
+procedure TFormPrincipal.OcultarResultadoEnvio;
+begin
+    //Saiu da tela Enviar ou enviou de novo: a faixa do último envio some (a 11.19 pode voltar)
+    if not FResultadoEnvio then
+        Exit;
+
+    FResultadoEnvio := False;
+    FTrechosFaixaEnviar := nil;
+    PnlFaixaEnviar.Visible := False;
+    AtualizarTelaEnviar;
+end;
+
+procedure TFormPrincipal.PbxFaixaEnviarPaint(Sender: TObject);
+begin
+    DesenharTrechos(PbxFaixaEnviar.Canvas, FTrechosFaixaEnviar, PbxFaixaEnviar.ClientRect, True);
+end;
+
+procedure TFormPrincipal.AlterarConfigClick(Sender: TObject);
+begin
+    //"alterar em Configurações" (11.10): abre a tela Configurações, com o menu sincronizado
+    if Bloqueado then
+        Exit;
+    MostrarTela(tlConfiguracoes);
+    if EditSMTP.CanFocus then
+        EditSMTP.SetFocus;
+end;
+
+{ Tela Configurações (mockup configuracoes.html; glossário 12.1 a 12.25) }
+
+procedure TFormPrincipal.PrepararTelaConfig;
+begin
+    //Quadro com borda (mockup .panel). Linha 1: Servidor SMTP (resto), Porta (120 px) e Segurança (200 px);
+    //linha 2: E-mail (usuário) e Senha, metade cada; linha 3: Mensagem padrão (56 px); embaixo, Testar
+    //conexão à esquerda e Salvar à direita. As posições ficam em AjustarLayoutConfig
+    PanelCorpoConfig.Color := CorBorda;
+    PanelCorpoConfig.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro),
+                                       Escalar(BordaQuadro));
+    PnlConfigFundo.Color := CorSuperficie;
+
+    //Título (12.1) e subtítulo (12.2)
+    AplicarFonte(Label1.Font, FonteDestaque, TamanhoTituloTela, CorTexto);
+    Label1.Layout  := tlCenter;
+    Label1.Caption := 'Configurações';
+    AplicarFonte(Label2.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    Label2.Layout  := tlCenter;
+    Label2.Caption := 'E-mail de envio (SMTP)';
+
+    //Rótulos dos campos (12.3, 12.5, 12.6, 12.10, 12.11 e 12.14): 9 pt Semibold
+    AplicarFonte(Label4.Font, FonteDestaque, TamanhoRotuloCampo, CorTexto);
+    Label4.Caption := 'Servidor SMTP';
+    AplicarFonte(Label7.Font, FonteDestaque, TamanhoRotuloCampo, CorTexto);
+    Label7.Caption := 'Porta';
+    AplicarFonte(LabelSeguranca.Font, FonteDestaque, TamanhoRotuloCampo, CorTexto);
+    LabelSeguranca.Caption := 'Segurança';
+    AplicarFonte(Label8.Font, FonteDestaque, TamanhoRotuloCampo, CorTexto);
+    Label8.Caption := 'E-mail (usuário)';
+    AplicarFonte(Label9.Font, FonteDestaque, TamanhoRotuloCampo, CorTexto);
+    Label9.Caption := 'Senha';
+    AplicarFonte(Label10.Font, FonteDestaque, TamanhoRotuloCampo, CorTexto);
+    Label10.Caption := 'Mensagem padrão do e-mail';
+
+    //Legendas (12.9 e 12.13): 9 pt CorTextoSecundario
+    AplicarFonte(LabelAjudaSeguranca.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelAjudaSeguranca.WordWrap := True;
+    LabelAjudaSeguranca.Caption  := 'Porta 587 usa TLS; porta 465 usa SSL.';
+    AplicarFonte(LabelAjudaSenha.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelAjudaSenha.WordWrap := True;
+    LabelAjudaSenha.Caption  := 'No Gmail, use uma senha de app.';
+
+    //Campos (12.4, 12.5, 12.10 e 12.11) com validação de servidor (12.25), porta (12.23) e e-mail (12.24)
+    EditSMTP.TextHint  := 'Ex.: smtp.gmail.com';
+    EditPorta.TextHint := '587';
+    SkSvgEmail.Svg.Source := IconeEmail;
+    FCampoServidor := CriarCampo(PnlCampoSMTP, PnlCampoSMTPFundo, nil, EditSMTP, nil, SkSvgErroSMTP, LabelErroSMTP,
+                                 ValidarServidor);
+    FCampoPorta    := CriarCampo(PnlCampoPorta, PnlCampoPortaFundo, nil, EditPorta, nil, SkSvgErroPorta,
+                                 LabelErroPorta, ValidarPorta);
+    FCampoEmail    := CriarCampo(PnlCampoEmail, PnlCampoEmailFundo, SkSvgEmail, EditEmail, nil, SkSvgErroEmail,
+                                 LabelErroEmail, ValidarEmailRemetente);
+
+    //Senha com o olho à direita (12.12): eye mostra, eye-off oculta
+    EditPass.PasswordChar := #$2022;
+    SkSvg5.Svg.Source := IconeMostrarSenha;
+    SkSvg5.Hint       := 'Mostrar senha';
+    SkSvg5.ShowHint   := True;
+    SkSvg5.Cursor     := crHandPoint;
+    FCampoSenha := CriarCampo(PnlCampoSenha, PnlCampoSenhaFundo, nil, EditPass, SkSvg5, nil, nil, nil);
+    FCampoMensagemConfig := CriarCampo(PnlCampoMsg, PnlCampoMsgFundo, nil, MemoMsg, nil, nil, nil, nil);
+
+    //SSL e TLS (12.7 e 12.8; tokens.md 5.4): TCheckBox nativo, 10 pt CorTexto. O nome interno TSL
+    //(CheckBoxTSL, TConfig.TSL e a coluna do banco) não muda
+    AplicarFonte(CheckBoxSSL.Font, FonteTexto, TamanhoCorpo, CorTexto);
+    AplicarFonte(CheckBoxTSL.Font, FonteTexto, TamanhoCorpo, CorTexto);
+    CheckBoxSSL.Caption := 'SSL';
+    CheckBoxTSL.Caption := 'TLS';
+
+    //Testar conexão (12.19, secundário com plug-zap) e Salvar (12.15, primário com save, 120 px)
+    PnlTestarConexao.Color := CorSuperficie;
+    Panel9.Color := CorSuperficie;
+    btnTestarConexao := TProBotao.CriarEm(PnlTestarConexao, 'Testar conexão', ebSecundario, TestarConexaoClick);
+    btnTestarConexao.IconeSvg := IconeTestarConexao;
+    btnTestarConexao.Hint     := 'Conectar e autenticar no servidor, sem enviar e-mail';
+    btnTestarConexao.ShowHint := True;
+    btnSalvarConfig.IconeSvg := IconeSalvar;
+    btnSalvarConfig.Hint     := 'Salvar as configurações de e-mail';
+    btnSalvarConfig.ShowHint := True;
+
+    //"Conectando a {servidor}:{porta}…" ao lado do Testar conexão (12.20)
+    AplicarFonte(LabelTestando.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelTestando.Layout  := tlCenter;
+    LabelTestando.Visible := False;
+
+    //"Configurações salvas" (12.16; tokens.md 5.11): check 14 px + 9 pt Semibold CorSucesso, 3 s
+    SkSvgConfigSalva.Svg.Source        := IconeConfirmar;
+    SkSvgConfigSalva.Svg.OverrideColor := CorAlpha(CorSucesso);
+    SkSvgConfigSalva.Visible := False;
+    AplicarFonte(LabelConfigSalva.Font, FonteDestaque, TamanhoLegenda, CorSucesso);
+    LabelConfigSalva.Layout  := tlCenter;
+    LabelConfigSalva.Caption := 'Configurações salvas';
+    LabelConfigSalva.Visible := False;
+    TimerConfigSalva.Enabled  := False;
+    TimerConfigSalva.Interval := DuracaoConfigSalvaMs;
+    TimerConfigSalva.OnTimer  := TimerConfigSalvaTimer;
+
+    //Resultado do Testar conexão (12.21 e 12.22) numa faixa abaixo do título
+    DefinirTipoFaixa(PnlFaixaConfig, PnlFaixaConfigBarra, SkSvgFaixaConfig, tfSucesso);
+    PbxFaixaConfig.OnPaint := PbxFaixaConfigPaint;
+    PnlFaixaConfig.Visible := False;
+
+    //Limite de 15 s do Testar conexão (cronômetro da tela)
+    TimerTesteConexao.Enabled  := False;
+    TimerTesteConexao.Interval := TEMPO_LIMITE_TESTE_MS;
+    TimerTesteConexao.OnTimer  := TimerTesteConexaoTimer;
+    FTestesEncerrados := TList.Create;
+end;
+
+procedure TFormPrincipal.CarregarConfigNaTela;
+var
+    I: Integer;
+begin
+    //Valores salvos no banco (TConfig). Os campos começam sem mensagem de erro
+    EditSMTP.Text       := ConfigEmail.SMTP;
+    EditPorta.Text      := ConfigEmail.Porta;
+    EditEmail.Text      := ConfigEmail.Email;
+    EditPass.Text       := ConfigEmail.Senha;
+    MemoMsg.Text        := ConfigEmail.Mensagem;
+    CheckBoxSSL.Checked := ConfigEmail.SSL;
+    CheckBoxTSL.Checked := ConfigEmail.TSL;
+    for I := 0 to High(FCampos) do
+        if FCampos[I].Borda.Parent = PnlConfigFundo then
+        begin
+            FCampos[I].Validando := False;
+            ValidarCampo(FCampos[I]);
+        end;
+    AtualizarEstadoConfig;
+end;
+
+procedure TFormPrincipal.AtualizarEstadoConfig;
+var
+    Livre: Boolean;
+begin
+    //Durante o Testar conexão: campos, caixas, olho e Salvar bloqueados (mockup, estado testando). Salvar
+    //habilitado só com servidor, porta (1 a 65535) e e-mail válidos (decisão de 26/10/2026)
+    if (btnTestarConexao = nil) or (btnSalvarConfig = nil) or (FCampoServidor = nil) then
+        Exit;
+
+    Livre := not FTestando;
+    HabilitarCampo(FCampoServidor, Livre);
+    HabilitarCampo(FCampoPorta, Livre);
+    HabilitarCampo(FCampoEmail, Livre);
+    HabilitarCampo(FCampoSenha, Livre);
+    HabilitarCampo(FCampoMensagemConfig, Livre);
+    CheckBoxSSL.Enabled := Livre;
+    CheckBoxTSL.Enabled := Livre;
+
+    btnSalvarConfig.Enabled  := Livre and (not Bloqueado) and FCampoServidor.Valido and FCampoPorta.Valido and
+                                FCampoEmail.Valido;
+    btnTestarConexao.Enabled := not Bloqueado;
+    LabelTestando.Visible    := FTestando;
+
+    AjustarRolagem(FRolagemConfig);
+end;
+
+function TFormPrincipal.AjustarLayoutConfig: Integer;
+var
+    Medida         : TBitmap;
+    X, Y, W        : Integer;
+    Espaco         : Integer;
+    Coluna         : Integer;
+    Margem         : Integer;
+    LarguraPorta   : Integer;
+    LarguraSeg     : Integer;
+    LarguraServ    : Integer;
+    LarguraMetade  : Integer;
+    XSeg           : Integer;
+    X2             : Integer;
+    AlturaRotulo   : Integer;
+    AlturaCaixa    : Integer;
+    AlturaLinha    : Integer;
+    Altura         : Integer;
+    LarguraTexto   : Integer;
+    Caixa          : Integer;
+begin
+    //Formulário em grade (mockup configuracoes.html): colunas com 16 px entre elas e linhas com 12 px.
+    //Devolve a altura do quadro (com a borda)
+    Result := 0;
+    if (btnTestarConexao = nil) or (btnSalvarConfig = nil) or (FCampoServidor = nil) then
+        Exit;
+
+    //Largura pelo quadro (PanelCorpoConfig), como em AjustarLayoutEnviar
+    X      := Escalar(PaddingPainelHorizontal);
+    W      := Max(1, PanelCorpoConfig.Width - 2 * Escalar(BordaQuadro) - 2 * X);
+    Y      := Escalar(PaddingPainelVertical);
+    Espaco := Escalar(EspacoFormulario);
+    Coluna := Escalar(EspacoColunasFormulario);
+    Margem := btnSalvarConfig.MargemFoco;
+
+    //Título e subtítulo na mesma linha de 32 px, 8 px entre eles
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(Label1.Font);
+        LarguraTexto := Medida.Canvas.TextWidth(Label1.Caption);
+        Label1.SetBounds(X, Y, LarguraTexto, Escalar(AlturaTituloTela));
+        Medida.Canvas.Font.Assign(Label2.Font);
+        Label2.SetBounds(X + LarguraTexto + Escalar(Espaco1), Y, Medida.Canvas.TextWidth(Label2.Caption),
+                         Escalar(AlturaTituloTela));
+        Medida.Canvas.Font.Assign(LabelSeguranca.Font);
+        AlturaRotulo := Medida.Canvas.TextHeight('Ag');
+        Medida.Canvas.Font.Assign(CheckBoxSSL.Font);
+        AlturaCaixa := Max(Medida.Canvas.TextHeight('Ag'), Escalar(TamanhoIconePequeno));
+        //Caixa do Windows (13 px a 100%) + 4 px + texto
+        Caixa := MulDiv(GetSystemMetrics(SM_CXMENUCHECK), PPIAtual, Screen.PixelsPerInch) + Escalar(EspacoMeio) +
+                 Escalar(EspacoMeio);
+        CheckBoxSSL.Width := Caixa + Medida.Canvas.TextWidth(CheckBoxSSL.Caption);
+        CheckBoxTSL.Width := Caixa + Medida.Canvas.TextWidth(CheckBoxTSL.Caption);
+    finally
+        Medida.Free;
+    end;
+    Inc(Y, Escalar(AlturaTituloTela) + Espaco);
+
+    if PnlFaixaConfig.Visible then
+    begin
+        PnlFaixaConfig.SetBounds(X, Y, W, PnlFaixaConfig.Height);
+        AjustarFaixa(PnlFaixaConfig, PnlFaixaConfigBarra, SkSvgFaixaConfig, PbxFaixaConfig, FTrechosFaixaConfig,
+                     PaddingFaixaVertical);
+        Inc(Y, PnlFaixaConfig.Height + Espaco);
+    end;
+
+    //Linha 1: Servidor SMTP | Porta | Segurança (SSL e TLS numa linha de 32 px e a legenda 12.9 embaixo)
+    LarguraPorta := Escalar(LarguraCampoPorta);
+    LarguraSeg   := Escalar(LarguraColunaSeguranca);
+    LarguraServ  := Max(1, W - LarguraPorta - LarguraSeg - 2 * Coluna);
+    AlturaLinha  := PosicionarCampo(FCampoServidor, Label4, X, Y, LarguraServ, Escalar(AlturaCampo));
+    AlturaLinha  := Max(AlturaLinha, PosicionarCampo(FCampoPorta, Label7, X + LarguraServ + Coluna, Y, LarguraPorta,
+                                                     Escalar(AlturaCampo)));
+    XSeg := X + LarguraServ + Coluna + LarguraPorta + Coluna;
+    LabelSeguranca.SetBounds(XSeg, Y, LarguraSeg, AlturaRotulo);
+    Altura := AlturaRotulo + Escalar(EspacoMeio);
+    CheckBoxSSL.SetBounds(XSeg, Y + Altura + (Escalar(AlturaCampo) - AlturaCaixa) div 2, CheckBoxSSL.Width, AlturaCaixa);
+    CheckBoxTSL.SetBounds(XSeg + CheckBoxSSL.Width + Escalar(EspacoCaixasSelecao), CheckBoxSSL.Top, CheckBoxTSL.Width,
+                          AlturaCaixa);
+    Inc(Altura, Escalar(AlturaCampo) + Escalar(EspacoMeio));
+    Inc(Altura, PosicionarLegenda(LabelAjudaSeguranca, XSeg, Y + Altura, LarguraSeg));
+    AlturaLinha := Max(AlturaLinha, Altura);
+    Inc(Y, AlturaLinha + Espaco);
+
+    //Linha 2: E-mail (usuário) | Senha (com a legenda 12.13 embaixo)
+    LarguraMetade := Max(1, (W - Coluna) div 2);
+    X2 := X + LarguraMetade + Coluna;
+    AlturaLinha := PosicionarCampo(FCampoEmail, Label8, X, Y, LarguraMetade, Escalar(AlturaCampo));
+    Altura := PosicionarCampo(FCampoSenha, Label9, X2, Y, Max(1, X + W - X2), Escalar(AlturaCampo));
+    Inc(Altura, Escalar(EspacoMeio));
+    Inc(Altura, PosicionarLegenda(LabelAjudaSenha, X2, Y + Altura, Max(1, X + W - X2)));
+    AlturaLinha := Max(AlturaLinha, Altura);
+    Inc(Y, AlturaLinha + Espaco);
+
+    //Linha 3: Mensagem padrão do e-mail, largura inteira
+    Inc(Y, PosicionarCampo(FCampoMensagemConfig, Label10, X, Y, W, Escalar(AlturaMensagemConfig)) + Espaco +
+           Escalar(EspacoAcoesFormulario));
+
+    //Botões: Testar conexão (e a legenda 12.20) à esquerda; "Configurações salvas" e Salvar (120 px) à direita
+    PnlTestarConexao.SetBounds(X - Margem, Y - Margem, btnTestarConexao.LarguraIdeal, Escalar(AlturaBotao) + 2 * Margem);
+    Panel9.Width := Max(Escalar(LarguraBotaoDestaque) + 2 * Margem, btnSalvarConfig.LarguraIdeal);
+    Panel9.SetBounds(X + W + Margem - Panel9.Width, Y - Margem, Panel9.Width, Escalar(AlturaBotao) + 2 * Margem);
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelConfigSalva.Font);
+        LarguraTexto := Medida.Canvas.TextWidth(LabelConfigSalva.Caption);
+    finally
+        Medida.Free;
+    end;
+    LabelConfigSalva.SetBounds(Panel9.Left + Margem - Escalar(Espaco1) - LarguraTexto, Y, LarguraTexto,
+                               Escalar(AlturaBotao));
+    SkSvgConfigSalva.SetBounds(LabelConfigSalva.Left - Escalar(EspacoMeio) - Escalar(TamanhoIconeDica),
+                               Y + (Escalar(AlturaBotao) - Escalar(TamanhoIconeDica)) div 2,
+                               Escalar(TamanhoIconeDica), Escalar(TamanhoIconeDica));
+    LabelTestando.SetBounds(PnlTestarConexao.Left + PnlTestarConexao.Width - Margem + Escalar(Espaco1), Y,
+                            Max(0, SkSvgConfigSalva.Left - Escalar(Espaco1) -
+                                   (PnlTestarConexao.Left + PnlTestarConexao.Width - Margem + Escalar(Espaco1))),
+                            Escalar(AlturaBotao));
+    Inc(Y, Escalar(AlturaBotao) + Escalar(PaddingPainelVertical));
+
+    Result := Y + 2 * Escalar(BordaQuadro);
+end;
+
+procedure TFormPrincipal.MostrarFaixaConfig(const Tipo: TTipoFaixa; const Trechos: TTrechosTexto);
+begin
+    //Resultado do Testar conexão entre o título e o formulário (mockup, estados Conexão OK e falhou)
+    FTrechosFaixaConfig := Trechos;
+    DefinirTipoFaixa(PnlFaixaConfig, PnlFaixaConfigBarra, SkSvgFaixaConfig, Tipo);
+    PnlFaixaConfig.Visible := True;
+    AjustarRolagem(FRolagemConfig);
+    PbxFaixaConfig.Invalidate;
+end;
+
+procedure TFormPrincipal.OcultarFaixaConfig;
+begin
+    if (PnlFaixaConfig = nil) or (not PnlFaixaConfig.Visible) then
+        Exit;
+    PnlFaixaConfig.Visible := False;
+    FTrechosFaixaConfig := nil;
+    AjustarRolagem(FRolagemConfig);
+end;
+
+procedure TFormPrincipal.PbxFaixaConfigPaint(Sender: TObject);
+begin
+    DesenharTrechos(PbxFaixaConfig.Canvas, FTrechosFaixaConfig, PbxFaixaConfig.ClientRect, True);
+end;
+
+procedure TFormPrincipal.TimerConfigSalvaTimer(Sender: TObject);
+begin
+    //"Configurações salvas" some depois de 3 s
+    TimerConfigSalva.Enabled := False;
+    SkSvgConfigSalva.Visible := False;
+    LabelConfigSalva.Visible := False;
+end;
+
+{ Testar conexão (PD-4; glossário 12.19 a 12.22) }
+
+procedure TFormPrincipal.TestarConexaoClick(Sender: TObject);
+var
+    Campos   : array[0..2] of TCampoFormulario;
+    Primeiro : TCampoFormulario;
+    I        : Integer;
+begin
+    //Usa os dados digitados na tela, sem salvar (decisão de 26/10/2026). Servidor, porta ou e-mail
+    //inválidos: as mensagens dos campos aparecem e o teste não começa
+    if FTestando or Bloqueado then
+        Exit;
+
+    Campos[0] := FCampoServidor;
+    Campos[1] := FCampoPorta;
+    Campos[2] := FCampoEmail;
+    Primeiro  := nil;
+    for I := Low(Campos) to High(Campos) do
+        if not Campos[I].Valido then
+        begin
+            Campos[I].Validando := True;
+            ValidarCampo(Campos[I]);
+            if Primeiro = nil then
+                Primeiro := Campos[I];
+        end;
+
+    if Primeiro <> nil then
+    begin
+        AtualizarEstadoConfig;
+        if Primeiro.Edit.CanFocus then
+            Primeiro.Edit.SetFocus;
+        Exit;
+    end;
+
+    IniciarTesteConexao;
+end;
+
+procedure TFormPrincipal.IniciarTesteConexao;
+var
+    Teste    : TThreadTesteSMTP;
+    Servidor : string;
+    Porta    : string;
+begin
+    //Thread própria (TThreadTesteSMTP): a tela continua respondendo. "Testando…" com loader-circle
+    //estático, a legenda 12.20, campos e Salvar bloqueados e o menu, a barra de pasta e o "Sobre"
+    //bloqueados como no envio (tokens.md 5.13). O cronômetro de 15 s fecha o teste sem resposta
+    LiberarThreadsTeste(False);
+    OcultarFaixaConfig;
+
+    Servidor := Trim(EditSMTP.Text);
+    Porta    := Trim(EditPorta.Text);
+    Teste := TThreadTesteSMTP.Create(Servidor, Porta, Trim(EditEmail.Text), Trim(EditPass.Text),
+                                     CheckBoxSSL.Checked, CheckBoxTSL.Checked);
+    Teste.OnTerminate := TesteConexaoTerminado;
+
+    FTeste    := Teste;
+    FTestando := True;
+    btnTestarConexao.Caption  := 'Testando' + #$2026;
+    btnTestarConexao.IconeSvg := IconeOcupado;
+    LabelTestando.Caption     := 'Conectando a ' + Servidor + ':' + Porta + #$2026;
+    DefinirBloqueio(blTeste, True);
+    TimerTesteConexao.Enabled := False;
+    TimerTesteConexao.Enabled := True;
+    try
+        Teste.Start;
+    except
+        FTeste := nil;
+        Teste.Free;
+        EncerrarTesteConexao;
+        raise;
+    end;
+end;
+
+procedure TFormPrincipal.EncerrarTesteConexao;
+begin
+    //Fim do teste (resposta, limite de 15 s ou erro ao iniciar): tudo volta como antes
+    TimerTesteConexao.Enabled := False;
+    FTestando := False;
+    btnTestarConexao.Caption  := 'Testar conexão';
+    btnTestarConexao.IconeSvg := IconeTestarConexao;
+    LabelTestando.Visible     := False;
+    DefinirBloqueio(blTeste, False);
+end;
+
+procedure TFormPrincipal.TesteConexaoTerminado(Sender: TObject);
+var
+    Teste   : TThreadTesteSMTP;
+    Trechos : TTrechosTexto;
+begin
+    //OnTerminate da thread do teste: roda na thread principal; nenhuma exceção sai daqui. Teste que já
+    //passou do limite de 15 s (a tela já mostrou "não respondeu") ou fim do app: nada muda na tela
+    try
+        Teste := Sender as TThreadTesteSMTP;
+        if FFechando or (Sender <> FTeste) or Teste.Abortado then
+            Exit;
+
+        EncerrarTesteConexao;
+
+        Trechos := nil;
+        if Teste.Conectou then
+        begin
+            //12.21
+            AdicionarTrecho(Trechos, 'Conexão OK.', etrDestaque);
+            AdicionarTrecho(Trechos, ' O servidor ' + Teste.Servidor + ':' + Teste.Porta + ' aceitou o usuário e a ' +
+                                     'senha. Nenhum e-mail foi enviado.', etrNormal);
+            MostrarFaixaConfig(tfSucesso, Trechos);
+        end
+        else
+        begin
+            //12.22: com resposta do servidor, o motivo; sem resposta, "não respondeu"
+            if Teste.SemAutenticacao then
+            begin
+                //12.22a: o servidor não pediu usuário e senha nesta conexão
+                AdicionarTrecho(Trechos, 'Não foi possível autenticar.', etrDestaque);
+                AdicionarTrecho(Trechos, ' O servidor ' + Teste.Servidor + ':' + Teste.Porta + ' não pediu usuário ' +
+                                         'e senha nesta conexão. Confira a porta e as opções SSL e TLS.', etrNormal);
+                MostrarFaixaConfig(tfErro, Trechos);
+                if btnTestarConexao.CanFocus then
+                    btnTestarConexao.SetFocus;
+                Exit;
+            end;
+
+            AdicionarTrecho(Trechos, 'Não foi possível conectar.', etrDestaque);
+            if Teste.Respondeu then
+                AdicionarTrecho(Trechos, 'O servidor respondeu: ' + MotivoNumaLinha(Teste.Motivo), etrNormal, True)
+            else
+                AdicionarTrecho(Trechos, 'O servidor ' + Teste.Servidor + ':' + Teste.Porta + ' não respondeu. Confira ' +
+                                         'o endereço, a porta e a conexão com a internet.', etrNormal, True);
+            MostrarFaixaConfig(tfErro, Trechos);
+        end;
+
+        if btnTestarConexao.CanFocus then
+            btnTestarConexao.SetFocus;
+    except
+        on E: Exception do
+            CaixaMensagem(E.Message, mtError);
+    end;
+end;
+
+procedure TFormPrincipal.TimerTesteConexaoTimer(Sender: TObject);
+var
+    Teste   : TThreadTesteSMTP;
+    Trechos : TTrechosTexto;
+begin
+    //15 s sem resposta (glossário 12.22, "não respondeu"): o teste é abortado (o socket é fechado) e a tela
+    //volta na hora. A thread termina sozinha e é liberada depois (LiberarThreadsTeste)
+    TimerTesteConexao.Enabled := False;
+    if (not FTestando) or (FTeste = nil) then
+        Exit;
+
+    Teste := TThreadTesteSMTP(FTeste);
+    Teste.Abortar;
+    FTestesEncerrados.Add(Teste);
+    FTeste := nil;
+    EncerrarTesteConexao;
+
+    Trechos := nil;
+    AdicionarTrecho(Trechos, 'Não foi possível conectar.', etrDestaque);
+    AdicionarTrecho(Trechos, 'O servidor ' + Teste.Servidor + ':' + Teste.Porta + ' não respondeu. Confira o ' +
+                             'endereço, a porta e a conexão com a internet.', etrNormal, True);
+    MostrarFaixaConfig(tfErro, Trechos);
+    if btnTestarConexao.CanFocus then
+        btnTestarConexao.SetFocus;
+end;
+
+procedure TFormPrincipal.LiberarThreadsTeste(const Fechando: Boolean);
+var
+    Teste : TThreadTesteSMTP;
+    I     : Integer;
+begin
+    //Teste anterior que já terminou: falta liberar o objeto. Testes abortados pelo limite de 15 s são
+    //liberados quando a thread terminar. No fim do app (Fechando) tudo é abortado e esperado aqui
+    if (FTeste <> nil) and (Fechando or (not FTestando)) then
+    begin
+        Teste := TThreadTesteSMTP(FTeste);
+        if Fechando then
+        begin
+            Teste.OnTerminate := nil;
+            Teste.Abortar;
+        end;
+        Teste.WaitFor;
+        FreeAndNil(FTeste);
+    end;
+
+    if FTestesEncerrados = nil then
+        Exit;
+    for I := FTestesEncerrados.Count - 1 downto 0 do
+    begin
+        Teste := TThreadTesteSMTP(FTestesEncerrados[I]);
+        if Fechando then
+        begin
+            Teste.OnTerminate := nil;
+            Teste.Abortar;
+        end;
+        if Fechando or Teste.Finished then
+        begin
+            Teste.WaitFor;
+            Teste.Free;
+            FTestesEncerrados.Delete(I);
+        end;
+    end;
+end;
+
+{ Tela Sobre (mockup sobre.html; glossário 13.1 a 13.6) }
+
+function TFormPrincipal.VersaoDoExecutavel: string;
+var
+    Tamanho : DWORD;
+    Ignorar : DWORD;
+    Dados   : TBytes;
+    Info    : PVSFixedFileInfo;
+    Largura : UINT;
+begin
+    //VersionInfo do executável (o mesmo do .dproj), no formato "1.1.0" (maior.menor.revisão). Sem
+    //VersionInfo: vazio
+    Result  := '';
+    Tamanho := GetFileVersionInfoSize(PChar(ParamStr(0)), Ignorar);
+    if Tamanho = 0 then
+        Exit;
+
+    SetLength(Dados, Tamanho);
+    if GetFileVersionInfo(PChar(ParamStr(0)), 0, Tamanho, @Dados[0]) and
+       VerQueryValue(@Dados[0], '\', Pointer(Info), Largura) and (Largura >= SizeOf(TVSFixedFileInfo)) then
+        Result := IntToStr(HiWord(Info^.dwFileVersionMS)) + '.' + IntToStr(LoWord(Info^.dwFileVersionMS)) + '.' +
+                  IntToStr(HiWord(Info^.dwFileVersionLS));
+end;
+
+procedure TFormPrincipal.PrepararTelaSobre;
+var
+    Versao: string;
+begin
+    //Quadro com borda (mockup .panel.sobre) e o conteúdo centralizado: logo claro vetorial (216 x 44, no
+    //.dfm), "ProXML v{versão}" 14 pt Semibold, descrição 10 pt CorTextoSecundario, autor 10 pt, link do
+    //GitHub (external-link) e os créditos 9 pt. As posições ficam em AjustarLayoutSobre
+    PnlTelaSobre.Color := CorBorda;
+    PnlTelaSobre.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
+    PnlTelaSobreFundo.Color    := CorSuperficie;
+    PnlTelaSobreFundo.OnResize := PnlTelaSobreFundoResize;
+
+    //13.1: versão lida do VersionInfo, nunca escrita no código
+    Versao := VersaoDoExecutavel;
+    AplicarFonte(LabelSobreVersao.Font, FonteDestaque, TamanhoTituloTela, CorTexto);
+    if Versao <> '' then
+        LabelSobreVersao.Caption := 'ProXML v' + Versao
+    else
+        LabelSobreVersao.Caption := 'ProXML';
+
+    AplicarFonte(LabelSobreDescricao.Font, FonteTexto, TamanhoCorpo, CorTextoSecundario);
+    LabelSobreDescricao.Caption := 'Totalizador de XMLs de NF-e (55) e NFC-e (65) com IBS/CBS, DANFE e relatórios.';
+    AplicarFonte(LabelSobreAutor.Font, FonteTexto, TamanhoCorpo, CorTexto);
+    LabelSobreAutor.Caption := 'Desenvolvido por Caique Garcia';
+    AplicarFonte(LabelSobreCreditos.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
+    LabelSobreCreditos.Caption := 'Ícones: Lucide (licença ISC) ' + #$00B7 + ' Componentes: ACBr, Skia4Delphi';
+
+    //13.4 e 13.5: link que abre o navegador
+    PnlSobreLink.Color := CorSuperficie;
+    btnLinkGitHub := TProBotao.CriarEm(PnlSobreLink, TEXTO_GITHUB, ebLink, LinkGitHubClick);
+    AplicarFonte(btnLinkGitHub.Font, FonteTexto, TamanhoCorpo, CorPrimaria);
+    btnLinkGitHub.IconeSvg := IconeLinkExterno;
+    btnLinkGitHub.Hint     := 'Abrir no navegador';
+    btnLinkGitHub.ShowHint := True;
+end;
+
+procedure TFormPrincipal.AjustarLayoutSobre;
+var
+    Medida        : TBitmap;
+    W, H          : Integer;
+    Largura       : Integer;
+    Espaco        : Integer;
+    AlturaVersao  : Integer;
+    AlturaDescr   : Integer;
+    AlturaAutor   : Integer;
+    AlturaLink    : Integer;
+    AlturaCredito : Integer;
+    Total         : Integer;
+    Topo          : Integer;
+begin
+    //Coluna centralizada na largura e na altura do quadro (mockup .sobre: gap 8; logo com 8 px em cima e
+    //embaixo e mais 8 de margem; autor com mais 8 em cima; créditos com mais 16 em cima)
+    if btnLinkGitHub = nil then
+        Exit;
+
+    W       := PnlTelaSobreFundo.ClientWidth;
+    H       := PnlTelaSobreFundo.ClientHeight;
+    Largura := Max(1, W - 2 * Escalar(PaddingPainelHorizontal));
+    Espaco  := Escalar(EspacoSobre);
+
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(LabelSobreVersao.Font);
+        AlturaVersao := Medida.Canvas.TextHeight('Ag');
+        Medida.Canvas.Font.Assign(LabelSobreAutor.Font);
+        AlturaAutor := Medida.Canvas.TextHeight('Ag');
+    finally
+        Medida.Free;
+    end;
+    AlturaDescr   := AlturaTextoQuebrado(LabelSobreDescricao, Largura);
+    AlturaCredito := AlturaTextoQuebrado(LabelSobreCreditos, Largura);
+    AlturaLink    := btnLinkGitHub.AlturaIdeal - 2 * btnLinkGitHub.MargemFoco;
+
+    Total := 2 * Escalar(PaddingLogoSobre) + Escalar(AlturaLogoSobre) + Escalar(PaddingLogoSobre) + Espaco +
+             AlturaVersao + Espaco + AlturaDescr + Espaco + Escalar(EspacoAutorSobre) + AlturaAutor + Espaco +
+             AlturaLink + Espaco + Escalar(EspacoCreditosSobre) + AlturaCredito;
+    Topo := Max(0, (H - Total) div 2);
+
+    Inc(Topo, Escalar(PaddingLogoSobre));
+    SkSvgSobreLogo.SetBounds((W - Escalar(LarguraLogoSobre)) div 2, Topo, Escalar(LarguraLogoSobre),
+                             Escalar(AlturaLogoSobre));
+    Inc(Topo, Escalar(AlturaLogoSobre) + 2 * Escalar(PaddingLogoSobre) + Espaco);
+    LabelSobreVersao.SetBounds((W - Largura) div 2, Topo, Largura, AlturaVersao);
+    Inc(Topo, AlturaVersao + Espaco);
+    LabelSobreDescricao.SetBounds((W - Largura) div 2, Topo, Largura, AlturaDescr);
+    Inc(Topo, AlturaDescr + Espaco + Escalar(EspacoAutorSobre));
+    LabelSobreAutor.SetBounds((W - Largura) div 2, Topo, Largura, AlturaAutor);
+    Inc(Topo, AlturaAutor + Espaco);
+    PnlSobreLink.SetBounds((W - btnLinkGitHub.LarguraIdeal) div 2, Topo - btnLinkGitHub.MargemFoco,
+                           btnLinkGitHub.LarguraIdeal, btnLinkGitHub.AlturaIdeal);
+    Inc(Topo, AlturaLink + Espaco + Escalar(EspacoCreditosSobre));
+    LabelSobreCreditos.SetBounds((W - Largura) div 2, Topo, Largura, AlturaCredito);
+end;
+
+procedure TFormPrincipal.PnlTelaSobreFundoResize(Sender: TObject);
+begin
+    AjustarLayoutSobre;
+end;
+
+procedure TFormPrincipal.SobreClick(Sender: TObject);
+begin
+    //"Sobre" do cabeçalho (glossário 1.3): abre a tela Sobre, sem item ativo no menu e sem os cards (D2).
+    //Bloqueado durante a leitura, o envio, o teste de conexão e a tela Carregando (tokens.md 5.13)
+    if Bloqueado then
+        Exit;
+    MostrarTela(tlSobre);
+end;
+
+procedure TFormPrincipal.LinkGitHubClick(Sender: TObject);
+begin
+    //13.4: abre o repositório no navegador padrão
+    ShellExecute(Handle, 'open', PChar(URL_GITHUB), nil, nil, SW_SHOWNORMAL);
+end;
+
+procedure TFormPrincipal.AtualizarVisualSobre;
+begin
+    //"Sobre" do cabeçalho: CorMarinhoTexto; com a tela Sobre aberta, branco com a linha de 2 px
+    //CorPrimaria embaixo (mockup .hlink.on); bloqueado, CorTextoDesabilitado (decisão da 4.6)
+    if (LabelSobre = nil) or (PnlSobreAtivo = nil) then
+        Exit;
+
+    if not PnlSobre.Enabled then
+    begin
+        LabelSobre.Font.Color := CorTextoDesabilitado;
+        SkSvgSobre.Svg.OverrideColor := CorAlpha(CorTextoDesabilitado);
+        PnlSobreAtivo.Visible := False;
+    end
+    else if PageControl1.ActivePage = TelaSobre then
+    begin
+        LabelSobre.Font.Color := CorTextoSobreMarinho;
+        SkSvgSobre.Svg.OverrideColor := CorAlpha(CorTextoSobreMarinho);
+        PnlSobreAtivo.Visible := True;
+    end
+    else
+    begin
+        LabelSobre.Font.Color := CorMarinhoTexto;
+        SkSvgSobre.Svg.OverrideColor := CorAlpha(CorMarinhoTexto);
+        PnlSobreAtivo.Visible := False;
     end;
 end;
 

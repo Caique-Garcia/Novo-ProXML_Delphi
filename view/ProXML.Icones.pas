@@ -33,7 +33,7 @@ const
     '><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 1' +
     '9z"/></svg>';
 
-  //info.svg: Sobre (cabeçalho) e dicas visíveis da tela Relatórios
+  //info.svg: Sobre (cabeçalho), dicas visíveis da tela Relatórios e faixa informativa (tela Enviar)
   IconeInfo =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
     'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
@@ -103,7 +103,7 @@ const
     'th d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" r' +
     'x="1"/></svg>';
 
-  //send.svg: menu Enviar
+  //send.svg: menu Enviar e botão Enviar
   IconeEnviar =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
     'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
@@ -177,7 +177,7 @@ const
     'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
     '><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
 
-  //check.svg: aviso flutuante "Chave copiada" (tela Notas)
+  //check.svg: aviso flutuante "Chave copiada" (tela Notas) e "Configurações salvas"
   IconeConfirmar =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="n' +
     'one" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' +
@@ -190,13 +190,13 @@ const
     'path d="M2 9V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2' +
     'v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1"/><path d="M2 13h10"/><path d="m9 16 3-3-3-3"/></svg>';
 
-  //circle-check.svg: sucesso (contador Autorizadas e linha do log do Resumo)
+  //circle-check.svg: sucesso (contador Autorizadas, linha do log do Resumo e faixas de sucesso)
   IconeSucesso =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
     'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
     'circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/></svg>';
 
-  //circle-x.svg: erro (contador Com erro e linha do log do Resumo)
+  //circle-x.svg: erro (contador Com erro, linha do log do Resumo e faixas de erro)
   IconeErro =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
     'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
@@ -208,11 +208,71 @@ const
     'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
     'circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
 
-  //loader-circle.svg: botão ocupado ("Enviando…"), estático
+  //loader-circle.svg: botão ocupado ("Enviando…", "Testando…"), estático
   IconeOcupado =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
     'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
     'path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+
+  //paperclip.svg: quadro do anexo da tela Enviar
+  IconeAnexo =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.' +
+    '551a6 6 0 1 0 8.485 8.485l8.379-8.551"/></svg>';
+
+  //mail.svg: campos de e-mail (Para, na tela Enviar, e E-mail (usuário), em Configurações)
+  IconeEmail =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" ' +
+    'rx="2"/></svg>';
+
+  //circle-alert.svg: mensagem de erro abaixo do campo (14 px)
+  IconeErroCampo =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.0' +
+    '1" y1="16" y2="16"/></svg>';
+
+  //eye.svg: mostrar a senha (Configurações)
+  IconeMostrarSenha =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10' +
+    '.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>';
+
+  //eye-off.svg: ocultar a senha (Configurações)
+  IconeOcultarSenha =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1' +
+    '-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75' +
+    ' 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20' +
+    ' 20"/></svg>';
+
+  //plug-zap.svg: botão Testar conexão (Configurações)
+  IconeTestarConexao =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"/><path d="m2' +
+    ' 22 3-3"/><path d="M7.5 13.5 10 11"/><path d="M10.5 16.5 13 14"/><path d="m18 3-4 4h6l-4 4"' +
+    '/></svg>';
+
+  //save.svg: botão Salvar (Configurações)
+  IconeSalvar =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5' +
+    'a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 ' +
+    '0 0 0 1 1h7"/></svg>';
+
+  //external-link.svg: link do GitHub (tela Sobre)
+  IconeLinkExterno =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V' +
+    '8a2 2 0 0 1 2-2h6"/></svg>';
 
 implementation
 
