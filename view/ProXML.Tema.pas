@@ -190,9 +190,34 @@ const
   EspacoAtalhosVazio      = 4;    //botão -> legenda dos atalhos no estado vazio do Resumo
   EspacoIconeFaixa        = 12;   //ícone -> texto nas faixas de status (mockup .banner)
 
+  //Telas Enviar, Configurações e Sobre (mockups enviar.html, configuracoes.html e sobre.html), etapa 4.7
+  PaddingPainelVertical   = 16;   //quadro da tela (mockup .panel: padding 16 24)
+  PaddingPainelHorizontal = 24;
+  EspacoFormulario        = 12;   //entre os blocos do quadro e entre as linhas do formulário (gap 12)
+  EspacoColunasFormulario = 16;   //entre as colunas do formulário (gap 12 16)
+  EspacoAcoesFormulario   = 4;    //espaço extra acima da linha de botões de Configurações (margin-top 4)
+  LarguraMinimaFormulario = 600;  //abaixo disto aparece a rolagem de reserva (Enviar e Configurações)
+  LarguraCampoPorta       = 120;  //coluna Porta
+  LarguraColunaSeguranca  = 200;  //coluna Segurança (SSL e TLS)
+  EspacoCaixasSelecao     = 24;   //entre as caixas SSL e TLS
+  AlturaMensagemEnviar    = 72;   //campo Mensagem da tela Enviar
+  AlturaMensagemConfig    = 56;   //campo "Mensagem padrão do e-mail"
+  PaddingAnexoVertical    = 12;   //quadro do anexo (mockup .anexo: padding 12 16, gap 12)
+  PaddingAnexoHorizontal  = 16;
+  EspacoIconeAnexo        = 12;
+  TamanhoIconeErroCampo   = 14;   //circle-alert da mensagem de erro do campo (tokens.md 5.3)
+  DuracaoConfigSalvaMs    = 3000; //"Configurações salvas" (tokens.md 5.11)
+  LarguraLogoSobre        = 216;  //logo claro da tela Sobre (mockup .sobre .lg img)
+  AlturaLogoSobre         = 44;
+  PaddingLogoSobre        = 8;    //respiro do logo em cima e embaixo (.lg: padding 8 0, margin-bottom 8)
+  EspacoSobre             = 8;    //entre as linhas da tela Sobre (gap 8)
+  EspacoAutorSobre        = 8;    //espaço extra acima de "Desenvolvido por" (margin-top 8)
+  EspacoCreditosSobre     = 16;   //espaço extra acima dos créditos (margin-top 16)
+  MarcaSobreAtivo         = 2;    //linha CorPrimaria embaixo do "Sobre" do cabeçalho com a tela aberta
+
   //Ícones
   TamanhoIconePequeno     = 16;   //botões, campos, cards
-  TamanhoIconeDica        = 14;   //dicas visíveis e indicador do filtro
+  TamanhoIconeDica        = 14;   //dicas visíveis, indicador do filtro e "Configurações salvas"
   TamanhoIconeMenu        = 20;   //menu, faixas, título das opções de relatório
   TamanhoIconeContador    = 24;   //contadores do Resumo
   TamanhoIconeVazio       = 48;   //estados vazios

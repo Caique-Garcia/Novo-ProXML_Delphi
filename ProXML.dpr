@@ -17,6 +17,8 @@ uses
 
 begin
   Application.Initialize;
+  //Glossário 1.2: título do app na barra de tarefas e nas caixas de mensagem
+  Application.Title := 'ProXML';
   //Application.OnException := GravaLog;
   Application.MainFormOnTaskbar := True;
   Application.CreateForm(TDMConfig, DMConfig);

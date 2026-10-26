@@ -28,8 +28,10 @@ uses
   Skia.Vcl;
 
 type
-  //Estilo do botão (tokens.md 5.1). Um único primário por tela
-  TEstiloBotao = (ebPrimario, ebSecundario);
+  //Estilo do botão (tokens.md 5.1). Um único primário por tela.
+  //Link (etapa 4.7): texto CorPrimaria sublinhado, sem fundo nem borda e sem padding, com ícone opcional
+  //à esquerda ("alterar em Configurações" e o endereço do GitHub na tela Sobre). A fonte é a do controle
+  TEstiloBotao = (ebPrimario, ebSecundario, ebLink);
 
   TProBotao = class(TCustomControl)
   private
@@ -48,6 +50,8 @@ type
     procedure CoresDoEstado(out Fundo, Borda, Texto: TColor);
     procedure DesenharFundoDoPai;
     procedure DesenharIcone(const Destino: TRect; const Cor: TColor);
+    procedure PintarLink;
+    function  AlturaTexto: Integer;
     procedure CMMouseEnter(var Message: TMessage); message CM_MOUSEENTER;
     procedure CMMouseLeave(var Message: TMessage); message CM_MOUSELEAVE;
     procedure CMEnabledChanged(var Message: TMessage); message CM_ENABLEDCHANGED;
@@ -77,6 +81,8 @@ type
     //Largura do painel de encaixe para mostrar ícone e texto inteiros (padding, largura mínima
     //do tema e margem do foco incluídos)
     function LarguraIdeal: Integer;
+    //Altura do painel de encaixe: face de 32 px (link: altura do texto) mais a margem do foco
+    function AlturaIdeal: Integer;
     property Estilo: TEstiloBotao read FEstilo write SetEstilo;
     //Conteúdo SVG do ícone (ex.: um arquivo de docs/ui/icones). Vazio = sem ícone.
     //O traço é pintado com a cor do texto do estado atual (OverrideColor do Skia)
@@ -183,6 +189,7 @@ type
 implementation
 
 uses
+  System.Math,
   Vcl.Forms,
   Vcl.Menus,
   Vcl.Themes,
@@ -250,6 +257,15 @@ begin
         Medida.Free;
     end;
 
+    //Link: só o ícone, o meio passo e o texto (sem padding nem largura mínima)
+    if FEstilo = ebLink then
+    begin
+        if FIconeSvg <> '' then
+            Inc(Largura, Escalar(TamanhoIconePequeno) + Escalar(EspacoMeio));
+        Result := Largura + 2 * MargemFoco;
+        Exit;
+    end;
+
     if FIconeSvg <> '' then
     begin
         Inc(Largura, Escalar(TamanhoIconePequeno));
@@ -260,6 +276,32 @@ begin
     if Largura < Escalar(LarguraMinimaBotao) then
         Largura := Escalar(LarguraMinimaBotao);
     Result := Largura + 2 * MargemFoco;
+end;
+
+function TProBotao.AlturaTexto: Integer;
+var
+    Medida: TBitmap;
+begin
+    Medida := TBitmap.Create;
+    try
+        Medida.Canvas.Font.Assign(Font);
+        Result := Medida.Canvas.TextHeight('Ag');
+    finally
+        Medida.Free;
+    end;
+end;
+
+function TProBotao.AlturaIdeal: Integer;
+begin
+    if FEstilo = ebLink then
+    begin
+        Result := AlturaTexto;
+        if FIconeSvg <> '' then
+            Result := Max(Result, Escalar(TamanhoIconePequeno));
+        Inc(Result, 2 * MargemFoco);
+    end
+    else
+        Result := Escalar(AlturaBotao) + 2 * MargemFoco;
 end;
 
 function TProBotao.Pressionado: Boolean;
@@ -289,6 +331,22 @@ end;
 procedure TProBotao.CoresDoEstado(out Fundo, Borda, Texto: TColor);
 begin
     //Tabela 5.1 do tokens.md: fundo / borda / texto (o ícone usa a cor do texto)
+    if FEstilo = ebLink then
+    begin
+        //Link: transparente, sem borda; o texto muda de cor (hover e pressionado também sublinhados)
+        Fundo := CorSuperficie;
+        Borda := CorSuperficie;
+        if not Enabled then
+            Texto := CorTextoDesabilitado
+        else if Pressionado then
+            Texto := CorPrimariaPressionada
+        else if FMouseSobre then
+            Texto := CorPrimariaHover
+        else
+            Texto := CorPrimaria;
+        Exit;
+    end;
+
     if not Enabled then
     begin
         Fundo := CorFundoDesabilitado;
@@ -383,6 +441,12 @@ var
     TextoBotao  : string;
     CorIcone    : TColor;
 begin
+    if FEstilo = ebLink then
+    begin
+        PintarLink;
+        Exit;
+    end;
+
     DesenharFundoDoPai;
 
     //Face do botão: a área toda menos a margem do contorno de foco
@@ -455,6 +519,66 @@ begin
             AreaTexto.Right := Face.Right;
         DrawText(Canvas.Handle, PChar(TextoBotao), Length(TextoBotao), AreaTexto,
                  DT_LEFT or DT_VCENTER or DT_SINGLELINE or DT_END_ELLIPSIS);
+    end;
+end;
+
+procedure TProBotao.PintarLink;
+var
+    Face      : TRect;
+    Contorno  : TRect;
+    Fundo     : TColor;
+    Borda     : TColor;
+    Texto     : TColor;
+    Icone     : Integer;
+    X         : Integer;
+    I         : Integer;
+    AreaTexto : TRect;
+    TextoLink : string;
+begin
+    //Link (tokens.md 5.1): fundo do pai, ícone (opcional) e texto sublinhado alinhados à esquerda da face.
+    //O contorno de foco é o mesmo dos outros estilos, em volta da face
+    DesenharFundoDoPai;
+
+    Face := ClientRect;
+    InflateRect(Face, -MargemFoco, -MargemFoco);
+    if (Face.Right <= Face.Left) or (Face.Bottom <= Face.Top) then
+        Exit;
+
+    CoresDoEstado(Fundo, Borda, Texto);
+
+    if Focused and FMostrarFoco and Enabled then
+    begin
+        Canvas.Brush.Style := bsClear;
+        Canvas.Pen.Style   := psSolid;
+        Canvas.Pen.Width   := 1;
+        Canvas.Pen.Color   := CorPrimaria;
+        for I := 1 to Escalar(EspessuraFoco) do
+        begin
+            Contorno := Face;
+            InflateRect(Contorno, Escalar(AfastamentoFoco) + I - 1, Escalar(AfastamentoFoco) + I - 1);
+            Canvas.Rectangle(Contorno);
+        end;
+    end;
+
+    X := Face.Left;
+    if FIconeSvg <> '' then
+    begin
+        Icone := Escalar(TamanhoIconePequeno);
+        DesenharIcone(Rect(X, Face.Top + ((Face.Bottom - Face.Top) - Icone) div 2,
+                           X + Icone, Face.Top + ((Face.Bottom - Face.Top) - Icone) div 2 + Icone), Texto);
+        Inc(X, Icone + Escalar(EspacoMeio));
+    end;
+
+    TextoLink := Caption;
+    if TextoLink <> '' then
+    begin
+        Canvas.Font.Assign(Font);
+        Canvas.Font.Style  := Canvas.Font.Style + [fsUnderline];
+        Canvas.Font.Color  := Texto;
+        Canvas.Brush.Style := bsClear;
+        AreaTexto := Rect(X, Face.Top, Face.Right, Face.Bottom);
+        DrawText(Canvas.Handle, PChar(TextoLink), Length(TextoLink), AreaTexto,
+                 DT_LEFT or DT_VCENTER or DT_SINGLELINE or DT_END_ELLIPSIS or DT_NOPREFIX);
     end;
 end;
 

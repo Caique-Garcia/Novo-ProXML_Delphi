@@ -1,7 +1,7 @@
 object FormPrincipal: TFormPrincipal
   Left = 0
   Top = 0
-  Caption = 'Pro XML'
+  Caption = 'ProXML'
   ClientHeight = 699
   ClientWidth = 1136
   Color = clBtnFace
@@ -133,6 +133,17 @@ object FormPrincipal: TFormPrincipal
           Caption = 'Sobre'
           Layout = tlCenter
           ExplicitHeight = 13
+        end
+        object PnlSobreAtivo: TPanel
+          Left = 0
+          Top = 26
+          Width = 70
+          Height = 2
+          BevelOuter = bvNone
+          ParentBackground = False
+          ShowCaption = False
+          TabOrder = 0
+          Visible = False
         end
       end
     end
@@ -1826,102 +1837,296 @@ object FormPrincipal: TFormPrincipal
                 object Panel10: TPanel
                   Left = 0
                   Top = 0
-                  Width = 616
-                  Height = 419
+                  Width = 904
+                  Height = 483
                   Align = alClient
                   BevelOuter = bvNone
-                  Font.Charset = DEFAULT_CHARSET
-                  Font.Color = clGray
-                  Font.Height = -13
-                  Font.Name = 'Segoe UI'
-                  Font.Style = []
-                  ParentFont = False
+                  Padding.Left = 1
+                  Padding.Top = 1
+                  Padding.Right = 1
+                  Padding.Bottom = 1
+                  ParentBackground = False
                   ShowCaption = False
                   TabOrder = 0
-                  object Label11: TLabel
-                    AlignWithMargins = True
-                    Left = 10
-                    Top = 3
-                    Width = 57
-                    Height = 25
-                    Margins.Left = 10
-                    Align = alTop
-                    Caption = 'Enviar '
-                    Font.Charset = DEFAULT_CHARSET
-                    Font.Color = clGray
-                    Font.Height = -19
-                    Font.Name = 'Segoe UI'
-                    Font.Style = []
-                    ParentFont = False
-                  end
-                  object Label12: TLabel
-                    AlignWithMargins = True
-                    Left = 10
-                    Top = 34
-                    Width = 149
-                    Height = 17
-                    Margins.Left = 10
-                    Align = alTop
-                    Caption = 'Enviar arquivos por email'
-                    Font.Charset = DEFAULT_CHARSET
-                    Font.Color = clGray
-                    Font.Height = -13
-                    Font.Name = 'Segoe UI'
-                    Font.Style = []
-                    ParentFont = False
-                  end
-                  object Shape15: TShape
-                    Left = 16
-                    Top = 97
-                    Width = 409
-                    Height = 40
-                    Pen.Color = clGray
-                  end
-                  object Shape17: TShape
-                    Left = 16
-                    Top = 184
-                    Width = 532
-                    Height = 101
-                    Pen.Color = clGray
-                  end
-                  object Label15: TLabel
-                    Left = 16
-                    Top = 74
-                    Width = 31
-                    Height = 17
-                    Caption = 'Email'
-                  end
-                  object Label17: TLabel
-                    Left = 16
-                    Top = 161
-                    Width = 65
-                    Height = 17
-                    Caption = 'Mensagem'
-                  end
-                  object EditEmailEnviar: TEdit
-                    Left = 24
-                    Top = 105
-                    Width = 385
-                    Height = 25
-                    BorderStyle = bsNone
-                    TabOrder = 0
-                  end
-                  object MemoMensagem: TMemo
-                    Left = 23
-                    Top = 196
-                    Width = 517
-                    Height = 77
-                    BorderStyle = bsNone
-                    TabOrder = 1
-                  end
-                  object Panel11: TPanel
-                    Left = 434
-                    Top = 93
-                    Width = 118
-                    Height = 48
+                  object PnlEnviarFundo: TPanel
+                    Left = 1
+                    Top = 1
+                    Width = 902
+                    Height = 481
+                    Align = alClient
                     BevelOuter = bvNone
+                    ParentBackground = False
                     ShowCaption = False
-                    TabOrder = 2
+                    TabOrder = 0
+                    object Label11: TLabel
+                      Left = 24
+                      Top = 16
+                      Width = 117
+                      Height = 32
+                      AutoSize = False
+                      Caption = 'Enviar por e-mail'
+                      ShowAccelChar = False
+                      Layout = tlCenter
+                    end
+                    object Label15: TLabel
+                      Left = 24
+                      Top = 132
+                      Width = 26
+                      Height = 15
+                      Caption = 'Para'
+                      ShowAccelChar = False
+                    end
+                    object SkSvgErroPara: TSkSvg
+                      Left = 24
+                      Top = 188
+                      Width = 14
+                      Height = 14
+                      Visible = False
+                    end
+                    object LabelErroPara: TLabel
+                      Left = 42
+                      Top = 187
+                      Width = 300
+                      Height = 15
+                      AutoSize = False
+                      ShowAccelChar = False
+                      Visible = False
+                      WordWrap = True
+                    end
+                    object Label17: TLabel
+                      Left = 24
+                      Top = 199
+                      Width = 57
+                      Height = 15
+                      Caption = 'Mensagem'
+                      ShowAccelChar = False
+                    end
+                    object LabelRemetente: TLabel
+                      Left = 24
+                      Top = 306
+                      Width = 200
+                      Height = 15
+                      ShowAccelChar = False
+                    end
+                    object LabelEnviando: TLabel
+                      Left = 152
+                      Top = 342
+                      Width = 400
+                      Height = 32
+                      AutoSize = False
+                      ShowAccelChar = False
+                      Visible = False
+                      Layout = tlCenter
+                    end
+                    object PnlFaixaEnviar: TPanel
+                      Left = 24
+                      Top = 60
+                      Width = 854
+                      Height = 44
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                      Visible = False
+                      object PnlFaixaEnviarBarra: TPanel
+                        Left = 0
+                        Top = 0
+                        Width = 4
+                        Height = 44
+                        Align = alLeft
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                      end
+                      object SkSvgFaixaEnviar: TSkSvg
+                        AlignWithMargins = True
+                        Left = 20
+                        Top = 12
+                        Width = 20
+                        Height = 20
+                        Margins.Left = 16
+                        Margins.Top = 12
+                        Margins.Right = 0
+                        Margins.Bottom = 12
+                        Align = alLeft
+                      end
+                      object PbxFaixaEnviar: TPaintBox
+                        AlignWithMargins = True
+                        Left = 52
+                        Top = 12
+                        Width = 786
+                        Height = 20
+                        Margins.Left = 12
+                        Margins.Top = 12
+                        Margins.Right = 16
+                        Margins.Bottom = 12
+                        Align = alClient
+                      end
+                    end
+                    object PnlAnexo: TPanel
+                      Left = 24
+                      Top = 60
+                      Width = 854
+                      Height = 60
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 1
+                      object PnlAnexoFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 852
+                        Height = 58
+                        Align = alClient
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object SkSvgAnexo: TSkSvg
+                          Left = 16
+                          Top = 19
+                          Width = 20
+                          Height = 20
+                        end
+                        object LabelAnexoTitulo: TLabel
+                          Left = 48
+                          Top = 12
+                          Width = 300
+                          Height = 17
+                          AutoSize = False
+                          ShowAccelChar = False
+                        end
+                        object LabelAnexoDetalhe: TLabel
+                          Left = 48
+                          Top = 31
+                          Width = 500
+                          Height = 15
+                          AutoSize = False
+                          ShowAccelChar = False
+                          WordWrap = True
+                        end
+                      end
+                    end
+                    object PnlCampoPara: TPanel
+                      Left = 24
+                      Top = 151
+                      Width = 854
+                      Height = 32
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 2
+                      object PnlCampoParaFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 852
+                        Height = 30
+                        Align = alClient
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object SkSvgPara: TSkSvg
+                          AlignWithMargins = True
+                          Left = 8
+                          Top = 7
+                          Width = 16
+                          Height = 16
+                          Margins.Left = 8
+                          Margins.Top = 7
+                          Margins.Right = 0
+                          Margins.Bottom = 7
+                          Align = alLeft
+                        end
+                        object EditEmailEnviar: TEdit
+                          AlignWithMargins = True
+                          Left = 32
+                          Top = 6
+                          Width = 812
+                          Height = 18
+                          Margins.Left = 8
+                          Margins.Top = 6
+                          Margins.Right = 8
+                          Margins.Bottom = 6
+                          Align = alClient
+                          BevelInner = bvNone
+                          BevelOuter = bvNone
+                          BorderStyle = bsNone
+                          TabOrder = 0
+                          TextHint = 'nome@empresa.com.br'
+                        end
+                      end
+                    end
+                    object PnlCampoMensagem: TPanel
+                      Left = 24
+                      Top = 218
+                      Width = 854
+                      Height = 72
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 3
+                      object PnlCampoMensagemFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 852
+                        Height = 70
+                        Align = alClient
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object MemoMensagem: TMemo
+                          AlignWithMargins = True
+                          Left = 8
+                          Top = 8
+                          Width = 836
+                          Height = 54
+                          Margins.Left = 8
+                          Margins.Top = 8
+                          Margins.Right = 8
+                          Margins.Bottom = 8
+                          Align = alClient
+                          BevelInner = bvNone
+                          BevelOuter = bvNone
+                          BorderStyle = bsNone
+                          TabOrder = 0
+                        end
+                      end
+                    end
+                    object PnlAlterarConfig: TPanel
+                      Left = 224
+                      Top = 302
+                      Width = 140
+                      Height = 23
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 4
+                    end
+                    object Panel11: TPanel
+                      Left = 20
+                      Top = 338
+                      Width = 128
+                      Height = 40
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 5
+                    end
                   end
                 end
               end
@@ -1936,237 +2141,511 @@ object FormPrincipal: TFormPrincipal
                 object PanelCorpoConfig: TPanel
                   Left = 0
                   Top = 0
-                  Width = 616
-                  Height = 419
+                  Width = 904
+                  Height = 483
                   Align = alClient
                   BevelOuter = bvNone
-                  Font.Charset = DEFAULT_CHARSET
-                  Font.Color = clGray
-                  Font.Height = -13
-                  Font.Name = 'Segoe UI'
-                  Font.Style = []
-                  ParentFont = False
+                  Padding.Left = 1
+                  Padding.Top = 1
+                  Padding.Right = 1
+                  Padding.Bottom = 1
+                  ParentBackground = False
                   ShowCaption = False
                   TabOrder = 0
-                  object Label1: TLabel
-                    AlignWithMargins = True
-                    Left = 10
-                    Top = 3
-                    Width = 122
-                    Height = 25
-                    Margins.Left = 10
-                    Align = alTop
-                    Caption = 'Configura'#231#245'es'
-                    Font.Charset = DEFAULT_CHARSET
-                    Font.Color = clGray
-                    Font.Height = -19
-                    Font.Name = 'Segoe UI'
-                    Font.Style = []
-                    ParentFont = False
-                  end
-                  object Label2: TLabel
-                    AlignWithMargins = True
-                    Left = 10
-                    Top = 34
-                    Width = 164
-                    Height = 17
-                    Margins.Left = 10
-                    Align = alTop
-                    Caption = 'Dados para envio por email'
-                    Font.Charset = DEFAULT_CHARSET
-                    Font.Color = clGray
-                    Font.Height = -13
-                    Font.Name = 'Segoe UI'
-                    Font.Style = []
-                    ParentFont = False
-                  end
-                  object Shape2: TShape
-                    Left = 24
-                    Top = 89
-                    Width = 297
-                    Height = 40
-                    Pen.Color = clGray
-                  end
-                  object Shape3: TShape
-                    Left = 344
-                    Top = 89
-                    Width = 145
-                    Height = 40
-                    Pen.Color = clGray
-                  end
-                  object Shape10: TShape
-                    Left = 24
-                    Top = 177
-                    Width = 297
-                    Height = 40
-                    Pen.Color = clGray
-                  end
-                  object Shape11: TShape
-                    Left = 344
-                    Top = 177
-                    Width = 217
-                    Height = 40
-                    Pen.Color = clGray
-                  end
-                  object Shape12: TShape
-                    Left = 24
-                    Top = 260
-                    Width = 537
-                    Height = 101
-                    Pen.Color = clGray
-                  end
-                  object Label4: TLabel
-                    Left = 24
-                    Top = 66
-                    Width = 33
-                    Height = 17
-                    Caption = 'SMTP'
-                  end
-                  object Label7: TLabel
-                    Left = 344
-                    Top = 66
-                    Width = 31
-                    Height = 17
-                    Caption = 'Porta'
-                  end
-                  object Label8: TLabel
-                    Left = 24
-                    Top = 154
-                    Width = 31
-                    Height = 17
-                    Caption = 'Email'
-                  end
-                  object Label9: TLabel
-                    Left = 344
-                    Top = 154
-                    Width = 35
-                    Height = 17
-                    Caption = 'Senha'
-                  end
-                  object Label10: TLabel
-                    Left = 24
-                    Top = 237
-                    Width = 65
-                    Height = 17
-                    Caption = 'Mensagem'
-                  end
-                  object SkSvg5: TSkSvg
-                    Left = 530
-                    Top = 187
-                    Width = 25
-                    Height = 20
-                    Cursor = crHandPoint
-                    OnClick = SkSvg5Click
-                    Svg.OverrideColor = claSlategray
-                    Svg.Source = 
-                      '<?xml version="1.0" ?><svg fill="none" height="28" viewBox="0 0 ' +
-                      '28 28" width="28" xmlns="http://www.w3.org/2000/svg"><path clip-' +
-                      'rule="evenodd" d="M17.7469 15.4149C17.9855 14.8742 18.1188 14.27' +
-                      '24 18.1188 14.0016C18.1188 11.6544 16.2952 9.7513 14.046 9.7513C' +
-                      '11.7969 9.7513 9.97332 11.6544 9.97332 14.0016C9.97332 16.3487 1' +
-                      '2.0097 17.8886 14.046 17.8886C15.3486 17.8886 16.508 17.2515 17.' +
-                      '2517 16.2595C17.4466 16.0001 17.6137 15.7168 17.7469 15.4149ZM14' +
-                      '.046 15.7635C14.5551 15.7635 15.0205 15.5684 15.3784 15.2457C15.' +
-                      '81 14.8566 16 14.2807 16 14.0016C16 12.828 15.1716 11.8764 14.04' +
-                      '6 11.8764C12.9205 11.8764 12 12.8264 12 14C12 14.8104 12.9205 15' +
-                      '.7635 14.046 15.7635Z" fill="black" fill-rule="evenodd"/><path c' +
-                      'lip-rule="evenodd" d="M1.09212 14.2724C1.07621 14.2527 1.10803 1' +
-                      '4.2931 1.09212 14.2724C0.96764 14.1021 0.970773 13.8996 1.09268 ' +
-                      '13.7273C1.10161 13.7147 1.11071 13.7016 1.11993 13.6882C4.781 8.' +
-                      '34319 9.32105 5.5 14.0142 5.5C18.7025 5.5 23.2385 8.33554 26.895' +
-                      '6 13.6698C26.965 13.771 27 13.875 27 13.9995C27 14.1301 26.9593 ' +
-                      '14.2399 26.8863 14.3461C23.2302 19.6702 18.6982 22.5 14.0142 22.' +
-                      '5C9.30912 22.5 4.75717 19.6433 1.09212 14.2724ZM3.93909 13.3525C' +
-                      '3.6381 13.7267 3.6381 14.2722 3.93908 14.6465C7.07417 18.5443 10' +
-                      '.6042 20.3749 14.0142 20.3749C17.4243 20.3749 20.9543 18.5443 24' +
-                      '.0894 14.6465C24.3904 14.2722 24.3904 13.7267 24.0894 13.3525C20' +
-                      '.9543 9.45475 17.4243 7.62513 14.0142 7.62513C10.6042 7.62513 7.' +
-                      '07417 9.45475 3.93909 13.3525Z" fill="black" fill-rule="evenodd"' +
-                      '/></svg>'
-                  end
-                  object CheckBoxSSL: TCheckBox
-                    Left = 512
-                    Top = 89
-                    Width = 97
-                    Height = 17
-                    Caption = 'SSL'
-                    Color = clGray
-                    Font.Charset = DEFAULT_CHARSET
-                    Font.Color = clGray
-                    Font.Height = -16
-                    Font.Name = 'Segoe UI'
-                    Font.Style = []
-                    ParentColor = False
-                    ParentFont = False
-                    TabOrder = 5
-                  end
-                  object CheckBoxTSL: TCheckBox
-                    Left = 512
-                    Top = 112
-                    Width = 97
-                    Height = 17
-                    Caption = 'TSL'
-                    Color = clGray
-                    Font.Charset = DEFAULT_CHARSET
-                    Font.Color = clGray
-                    Font.Height = -16
-                    Font.Name = 'Segoe UI'
-                    Font.Style = []
-                    ParentColor = False
-                    ParentFont = False
-                    TabOrder = 6
-                  end
-                  object EditSMTP: TEdit
-                    Left = 32
-                    Top = 97
-                    Width = 281
-                    Height = 25
-                    BorderStyle = bsNone
-                    TabOrder = 0
-                    Text = 'smtp.gmail.com'
-                  end
-                  object EditPorta: TEdit
-                    Left = 352
-                    Top = 97
-                    Width = 129
-                    Height = 25
-                    BorderStyle = bsNone
-                    NumbersOnly = True
-                    TabOrder = 1
-                  end
-                  object EditEmail: TEdit
-                    Left = 32
-                    Top = 185
-                    Width = 281
-                    Height = 25
-                    BorderStyle = bsNone
-                    TabOrder = 2
-                  end
-                  object EditPass: TEdit
-                    Left = 352
-                    Top = 185
-                    Width = 169
-                    Height = 25
-                    BorderStyle = bsNone
-                    PasswordChar = '*'
-                    TabOrder = 3
-                  end
-                  object MemoMsg: TMemo
-                    Left = 31
-                    Top = 272
-                    Width = 521
-                    Height = 77
-                    BorderStyle = bsNone
-                    TabOrder = 4
-                  end
-                  object Panel9: TPanel
-                    Left = 423
-                    Top = 372
-                    Width = 142
-                    Height = 44
+                  object PnlConfigFundo: TPanel
+                    Left = 1
+                    Top = 1
+                    Width = 902
+                    Height = 481
+                    Align = alClient
                     BevelOuter = bvNone
+                    ParentBackground = False
                     ShowCaption = False
-                    TabOrder = 7
+                    TabOrder = 0
+                    object Label1: TLabel
+                      Left = 24
+                      Top = 16
+                      Width = 108
+                      Height = 32
+                      AutoSize = False
+                      Caption = 'Configura'#231#245'es'
+                      ShowAccelChar = False
+                      Layout = tlCenter
+                    end
+                    object Label2: TLabel
+                      Left = 140
+                      Top = 16
+                      Width = 125
+                      Height = 32
+                      AutoSize = False
+                      Caption = 'E-mail de envio (SMTP)'
+                      ShowAccelChar = False
+                      Layout = tlCenter
+                    end
+                    object Label4: TLabel
+                      Left = 24
+                      Top = 60
+                      Width = 76
+                      Height = 15
+                      Caption = 'Servidor SMTP'
+                      ShowAccelChar = False
+                    end
+                    object SkSvgErroSMTP: TSkSvg
+                      Left = 24
+                      Top = 116
+                      Width = 14
+                      Height = 14
+                      Visible = False
+                    end
+                    object LabelErroSMTP: TLabel
+                      Left = 42
+                      Top = 115
+                      Width = 300
+                      Height = 15
+                      AutoSize = False
+                      ShowAccelChar = False
+                      Visible = False
+                      WordWrap = True
+                    end
+                    object Label7: TLabel
+                      Left = 542
+                      Top = 60
+                      Width = 28
+                      Height = 15
+                      Caption = 'Porta'
+                      ShowAccelChar = False
+                    end
+                    object SkSvgErroPorta: TSkSvg
+                      Left = 542
+                      Top = 116
+                      Width = 14
+                      Height = 14
+                      Visible = False
+                    end
+                    object LabelErroPorta: TLabel
+                      Left = 560
+                      Top = 115
+                      Width = 102
+                      Height = 15
+                      AutoSize = False
+                      ShowAccelChar = False
+                      Visible = False
+                      WordWrap = True
+                    end
+                    object LabelSeguranca: TLabel
+                      Left = 678
+                      Top = 60
+                      Width = 52
+                      Height = 15
+                      Caption = 'Seguran'#231'a'
+                      ShowAccelChar = False
+                    end
+                    object LabelAjudaSeguranca: TLabel
+                      Left = 678
+                      Top = 115
+                      Width = 200
+                      Height = 15
+                      AutoSize = False
+                      Caption = 'Porta 587 usa TLS; porta 465 usa SSL.'
+                      ShowAccelChar = False
+                      WordWrap = True
+                    end
+                    object Label8: TLabel
+                      Left = 24
+                      Top = 142
+                      Width = 90
+                      Height = 15
+                      Caption = 'E-mail (usu'#225'rio)'
+                      ShowAccelChar = False
+                    end
+                    object SkSvgErroEmail: TSkSvg
+                      Left = 24
+                      Top = 198
+                      Width = 14
+                      Height = 14
+                      Visible = False
+                    end
+                    object LabelErroEmail: TLabel
+                      Left = 42
+                      Top = 197
+                      Width = 300
+                      Height = 15
+                      AutoSize = False
+                      ShowAccelChar = False
+                      Visible = False
+                      WordWrap = True
+                    end
+                    object Label9: TLabel
+                      Left = 459
+                      Top = 142
+                      Width = 32
+                      Height = 15
+                      Caption = 'Senha'
+                      ShowAccelChar = False
+                    end
+                    object LabelAjudaSenha: TLabel
+                      Left = 459
+                      Top = 197
+                      Width = 419
+                      Height = 15
+                      AutoSize = False
+                      Caption = 'No Gmail, use uma senha de app.'
+                      ShowAccelChar = False
+                      WordWrap = True
+                    end
+                    object Label10: TLabel
+                      Left = 24
+                      Top = 224
+                      Width = 143
+                      Height = 15
+                      Caption = 'Mensagem padr'#227'o do e-mail'
+                      ShowAccelChar = False
+                    end
+                    object LabelTestando: TLabel
+                      Left = 176
+                      Top = 323
+                      Width = 300
+                      Height = 32
+                      AutoSize = False
+                      ShowAccelChar = False
+                      Visible = False
+                      Layout = tlCenter
+                    end
+                    object SkSvgConfigSalva: TSkSvg
+                      Left = 620
+                      Top = 332
+                      Width = 14
+                      Height = 14
+                      Visible = False
+                    end
+                    object LabelConfigSalva: TLabel
+                      Left = 638
+                      Top = 323
+                      Width = 108
+                      Height = 32
+                      AutoSize = False
+                      Caption = 'Configura'#231#245'es salvas'
+                      ShowAccelChar = False
+                      Visible = False
+                      Layout = tlCenter
+                    end
+                    object PnlFaixaConfig: TPanel
+                      Left = 24
+                      Top = 60
+                      Width = 854
+                      Height = 44
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                      Visible = False
+                      object PnlFaixaConfigBarra: TPanel
+                        Left = 0
+                        Top = 0
+                        Width = 4
+                        Height = 44
+                        Align = alLeft
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                      end
+                      object SkSvgFaixaConfig: TSkSvg
+                        AlignWithMargins = True
+                        Left = 20
+                        Top = 12
+                        Width = 20
+                        Height = 20
+                        Margins.Left = 16
+                        Margins.Top = 12
+                        Margins.Right = 0
+                        Margins.Bottom = 12
+                        Align = alLeft
+                      end
+                      object PbxFaixaConfig: TPaintBox
+                        AlignWithMargins = True
+                        Left = 52
+                        Top = 12
+                        Width = 786
+                        Height = 20
+                        Margins.Left = 12
+                        Margins.Top = 12
+                        Margins.Right = 16
+                        Margins.Bottom = 12
+                        Align = alClient
+                      end
+                    end
+                    object PnlCampoSMTP: TPanel
+                      Left = 24
+                      Top = 79
+                      Width = 502
+                      Height = 32
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 1
+                      object PnlCampoSMTPFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 500
+                        Height = 30
+                        Align = alClient
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object EditSMTP: TEdit
+                          AlignWithMargins = True
+                          Left = 8
+                          Top = 6
+                          Width = 484
+                          Height = 18
+                          Margins.Left = 8
+                          Margins.Top = 6
+                          Margins.Right = 8
+                          Margins.Bottom = 6
+                          Align = alClient
+                          BevelInner = bvNone
+                          BevelOuter = bvNone
+                          BorderStyle = bsNone
+                          TabOrder = 0
+                          TextHint = 'Ex.: smtp.gmail.com'
+                        end
+                      end
+                    end
+                    object PnlCampoPorta: TPanel
+                      Left = 542
+                      Top = 79
+                      Width = 120
+                      Height = 32
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 2
+                      object PnlCampoPortaFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 118
+                        Height = 30
+                        Align = alClient
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object EditPorta: TEdit
+                          AlignWithMargins = True
+                          Left = 8
+                          Top = 6
+                          Width = 102
+                          Height = 18
+                          Margins.Left = 8
+                          Margins.Top = 6
+                          Margins.Right = 8
+                          Margins.Bottom = 6
+                          Align = alClient
+                          BevelInner = bvNone
+                          BevelOuter = bvNone
+                          BorderStyle = bsNone
+                          NumbersOnly = True
+                          TabOrder = 0
+                          TextHint = '587'
+                        end
+                      end
+                    end
+                    object CheckBoxSSL: TCheckBox
+                      Left = 678
+                      Top = 86
+                      Width = 48
+                      Height = 17
+                      Caption = 'SSL'
+                      TabOrder = 3
+                    end
+                    object CheckBoxTSL: TCheckBox
+                      Left = 750
+                      Top = 86
+                      Width = 48
+                      Height = 17
+                      Caption = 'TLS'
+                      TabOrder = 4
+                    end
+                    object PnlCampoEmail: TPanel
+                      Left = 24
+                      Top = 161
+                      Width = 419
+                      Height = 32
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 5
+                      object PnlCampoEmailFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 417
+                        Height = 30
+                        Align = alClient
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object SkSvgEmail: TSkSvg
+                          AlignWithMargins = True
+                          Left = 8
+                          Top = 7
+                          Width = 16
+                          Height = 16
+                          Margins.Left = 8
+                          Margins.Top = 7
+                          Margins.Right = 0
+                          Margins.Bottom = 7
+                          Align = alLeft
+                        end
+                        object EditEmail: TEdit
+                          AlignWithMargins = True
+                          Left = 32
+                          Top = 6
+                          Width = 377
+                          Height = 18
+                          Margins.Left = 8
+                          Margins.Top = 6
+                          Margins.Right = 8
+                          Margins.Bottom = 6
+                          Align = alClient
+                          BevelInner = bvNone
+                          BevelOuter = bvNone
+                          BorderStyle = bsNone
+                          TabOrder = 0
+                        end
+                      end
+                    end
+                    object PnlCampoSenha: TPanel
+                      Left = 459
+                      Top = 161
+                      Width = 419
+                      Height = 32
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 6
+                      object PnlCampoSenhaFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 417
+                        Height = 30
+                        Align = alClient
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object SkSvg5: TSkSvg
+                          AlignWithMargins = True
+                          Left = 393
+                          Top = 7
+                          Width = 16
+                          Height = 16
+                          Cursor = crHandPoint
+                          Margins.Left = 0
+                          Margins.Top = 7
+                          Margins.Right = 8
+                          Margins.Bottom = 7
+                          Align = alRight
+                          OnClick = SkSvg5Click
+                        end
+                        object EditPass: TEdit
+                          AlignWithMargins = True
+                          Left = 8
+                          Top = 6
+                          Width = 377
+                          Height = 18
+                          Margins.Left = 8
+                          Margins.Top = 6
+                          Margins.Right = 8
+                          Margins.Bottom = 6
+                          Align = alClient
+                          BevelInner = bvNone
+                          BevelOuter = bvNone
+                          BorderStyle = bsNone
+                          PasswordChar = '*'
+                          TabOrder = 0
+                        end
+                      end
+                    end
+                    object PnlCampoMsg: TPanel
+                      Left = 24
+                      Top = 243
+                      Width = 854
+                      Height = 56
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 7
+                      object PnlCampoMsgFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 852
+                        Height = 54
+                        Align = alClient
+                        BevelOuter = bvNone
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object MemoMsg: TMemo
+                          AlignWithMargins = True
+                          Left = 8
+                          Top = 8
+                          Width = 836
+                          Height = 38
+                          Margins.Left = 8
+                          Margins.Top = 8
+                          Margins.Right = 8
+                          Margins.Bottom = 8
+                          Align = alClient
+                          BevelInner = bvNone
+                          BevelOuter = bvNone
+                          BorderStyle = bsNone
+                          TabOrder = 0
+                        end
+                      end
+                    end
+                    object PnlTestarConexao: TPanel
+                      Left = 20
+                      Top = 319
+                      Width = 152
+                      Height = 40
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 8
+                    end
+                    object Panel9: TPanel
+                      Left = 750
+                      Top = 319
+                      Width = 128
+                      Height = 40
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 9
+                    end
                   end
                 end
               end
@@ -2582,6 +3061,130 @@ object FormPrincipal: TFormPrincipal
                   end
                 end
               end
+              object TelaSobre: TTabSheet
+                Caption = 'Sobre'
+                ImageIndex = 6
+                TabVisible = False
+                ExplicitLeft = 0
+                ExplicitTop = 0
+                ExplicitWidth = 0
+                ExplicitHeight = 0
+                object PnlTelaSobre: TPanel
+                  Left = 0
+                  Top = 0
+                  Width = 904
+                  Height = 483
+                  Align = alClient
+                  BevelOuter = bvNone
+                  Padding.Left = 1
+                  Padding.Top = 1
+                  Padding.Right = 1
+                  Padding.Bottom = 1
+                  ParentBackground = False
+                  ShowCaption = False
+                  TabOrder = 0
+                  object PnlTelaSobreFundo: TPanel
+                    Left = 1
+                    Top = 1
+                    Width = 902
+                    Height = 481
+                    Align = alClient
+                    BevelOuter = bvNone
+                    ParentBackground = False
+                    ShowCaption = False
+                    TabOrder = 0
+                    object LabelSobreVersao: TLabel
+                      Left = 0
+                      Top = 168
+                      Width = 902
+                      Height = 25
+                      Alignment = taCenter
+                      AutoSize = False
+                      ShowAccelChar = False
+                    end
+                    object LabelSobreDescricao: TLabel
+                      Left = 0
+                      Top = 201
+                      Width = 902
+                      Height = 17
+                      Alignment = taCenter
+                      AutoSize = False
+                      Caption = 'Totalizador de XMLs de NF-e (55) e NFC-e (65) com IBS/CBS, DANFE e relat'#243'rios.'
+                      ShowAccelChar = False
+                      WordWrap = True
+                    end
+                    object LabelSobreAutor: TLabel
+                      Left = 0
+                      Top = 234
+                      Width = 902
+                      Height = 17
+                      Alignment = taCenter
+                      AutoSize = False
+                      Caption = 'Desenvolvido por Caique Garcia'
+                      ShowAccelChar = False
+                    end
+                    object LabelSobreCreditos: TLabel
+                      Left = 0
+                      Top = 302
+                      Width = 902
+                      Height = 15
+                      Alignment = taCenter
+                      AutoSize = False
+                      Caption = #205'cones: Lucide (licen'#231'a ISC) '#183' Componentes: ACBr, Skia4Delphi'
+                      ShowAccelChar = False
+                      WordWrap = True
+                    end
+                    object SkSvgSobreLogo: TSkSvg
+                      Left = 343
+                      Top = 108
+                      Width = 216
+                      Height = 44
+                      Svg.Source = 
+                        '<svg xmlns="http://www.w3.org/2000/svg" width="157" height="32" ' +
+                        'viewBox="0 0 157 32">'#13#10'  <title>ProXML (para fundo claro)</title>'#13#10' ' +
+                        ' <!-- Logo ProXML vetorial (redesenhado a partir de src/img/Logo' +
+                        '/Logo1.png). Sem fontes, filtros nem scripts. -->'#13#10'  <g><circle cx' +
+                        '="13" cy="3" r="1.25" fill="#B4BACA"/><circle cx="18.5" cy="3" r' +
+                        '="1.25" fill="#B4BACA"/><circle cx="8.25" cy="7.75" r="1.55" fil' +
+                        'l="#8E97AE"/><circle cx="13" cy="7.75" r="1.8" fill="#55688F"/><' +
+                        'circle cx="18.5" cy="7.75" r="1.8" fill="#55688F"/><circle cx="2' +
+                        '3.25" cy="7.75" r="1.55" fill="#8E97AE"/><circle cx="3.5" cy="12' +
+                        '.75" r="1.25" fill="#B4BACA"/><circle cx="8.25" cy="12.75" r="1.' +
+                        '8" fill="#55688F"/><circle cx="13" cy="12.75" r="2.1" fill="#2F4' +
+                        'A66"/><circle cx="18.5" cy="12.75" r="2.1" fill="#2F4A66"/><circ' +
+                        'le cx="23.25" cy="12.75" r="1.8" fill="#55688F"/><circle cx="28"' +
+                        ' cy="12.75" r="1.25" fill="#B4BACA"/><circle cx="3.5" cy="18.25"' +
+                        ' r="1.25" fill="#B4BACA"/><circle cx="8.25" cy="18.25" r="1.8" f' +
+                        'ill="#55688F"/><circle cx="13" cy="18.25" r="2.1" fill="#2F4A66"' +
+                        '/><circle cx="18.5" cy="18.25" r="2.1" fill="#2F4A66"/><circle c' +
+                        'x="23.25" cy="18.25" r="1.8" fill="#55688F"/><circle cx="28" cy=' +
+                        '"18.25" r="1.25" fill="#B4BACA"/><circle cx="8.25" cy="23.25" r=' +
+                        '"1.55" fill="#8E97AE"/><circle cx="13" cy="23.25" r="1.8" fill="' +
+                        '#55688F"/><circle cx="18.5" cy="23.25" r="1.8" fill="#55688F"/><' +
+                        'circle cx="23.25" cy="23.25" r="1.55" fill="#8E97AE"/><circle cx' +
+                        '="13" cy="28" r="1.25" fill="#B4BACA"/><circle cx="18.5" cy="28"' +
+                        ' r="1.25" fill="#B4BACA"/></g>'#13#10'  <path d="M35 25V8.2A2.2 2.2 0 0 ' +
+                        '1 37.2 6H46A4 4 0 0 1 50 10V14A4 4 0 0 1 46 18H35M55 25V11.8M55 ' +
+                        '15.6C55.4 13.3 57.4 12.3 60 12.3H62.4M91 5.6L106.2 25M106.4 5.6L' +
+                        '91 25M112 25V11.2A5.75 5.75 0 0 1 123.5 11.2V25M123.5 11.2A5.75 ' +
+                        '5.75 0 0 1 135 11.2V25M140 5.6V22A3 3 0 0 0 143 25H153.2" fill="' +
+                        'none" stroke="#171A21" stroke-width="2.5" stroke-linecap="round"' +
+                        ' stroke-linejoin="round"/>'#13#10'  <ellipse cx="72" cy="18.6" rx="6.7" ' +
+                        'ry="6.4" fill="none" stroke="#171A21" stroke-width="2.5"/>'#13#10'</svg>'
+                    end
+                    object PnlSobreLink: TPanel
+                      Left = 299
+                      Top = 255
+                      Width = 304
+                      Height = 25
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 0
+                    end
+                  end
+                end
+              end
             end
           end
           object PanelMenus: TPanel
@@ -2787,6 +3390,18 @@ object FormPrincipal: TFormPrincipal
     Interval = 2000
     Left = 1040
     Top = 516
+  end
+  object TimerConfigSalva: TTimer
+    Enabled = False
+    Interval = 3000
+    Left = 1088
+    Top = 516
+  end
+  object TimerTesteConexao: TTimer
+    Enabled = False
+    Interval = 15000
+    Left = 1088
+    Top = 468
   end
   object ACBrNFe: TACBrNFe
     MAIL = ACBrMail1

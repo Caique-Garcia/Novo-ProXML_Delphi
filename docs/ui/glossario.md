@@ -112,6 +112,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 5.35 | `LerNotaXML` (chNFe) (novo) | I/L | — | a chave do protocolo de autorização (chNFe) é diferente da chave da nota | Vira o `{motivo}` de 5.20 (decisão D4). Aprovado pelo usuário em 21/10/2026 |
 | 5.36 | fechar durante o envio do e-mail (novo) | M | — | O e-mail ainda está sendo enviado. Aguarde terminar para fechar o ProXML. | Aviso com OK; o app não fecha. Aprovado pelo usuário em 21/10/2026 (4.6) |
 | 5.37 | cancelado no primeiro uso (novo) | F | — | As notas e os totais continuam como estavam antes de Processar. | Abaixo da faixa 5.10/5.11, sem botão. Texto do mockup, aprovado pelo usuário em 21/10/2026 (4.6) |
+| 5.38 | erro fora da leitura de um arquivo (novo) | M | {mensagem da exceção} | Não foi possível ler a pasta selecionada.<br>{pasta}<br><br>Motivo: {motivo}<br><br>As notas carregadas antes continuam na tela. | Erro (caixa) + LOG. Pasta apagada ou sem acesso durante o Processar. Aprovado pelo usuário em 26/10/2026 (4.7) |
 
 ## 6. Notas (grade, ações, busca, CSV)
 
@@ -254,10 +255,11 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 11.15 | `btnEnviarEmailClick` / `EnviaArquivo` | M | Sem arquivos para enviar! | Nenhuma nota para enviar. Processe uma pasta primeiro. | Duas ocorrências. Com o botão desabilitado, vira o texto 11.5/11.6 |
 | 11.16 | `EnviaArquivo` | M→F | Email enviado com sucesso!! | **E-mail enviado** para {destino} às {hh:mm}. | X2. Faixa de sucesso, sem caixa |
 | 11.17 | erro no envio (novo; hoje a exceção sobe sem tratamento) | F | — | **Não foi possível enviar o e-mail.**<br>O servidor respondeu: {motivo}. Confira os dados em Configurações e use Testar conexão. | Faixa de erro + LOG |
-| 11.18 | validação (novo) | F | — | Informe um e-mail válido. Exemplo: nome@empresa.com.br | E5 |
+| 11.18 | validação (novo) | F | — | Informe um e-mail válido. Exemplo: nome@empresa.com.br | E5. Um só destinatário (decisão de 26/10/2026) |
 | 11.19 | SMTP não configurado (novo) | F | — | Configure o e-mail de envio em Configurações antes de enviar. | Faixa informativa; Enviar desabilitado |
 | 11.20 | WinRAR ausente (novo) | F | — | **Não foi possível compactar os XMLs.** WinRAR não encontrado em {pasta do ProXML}. | Até o ZIP do Plano 2 |
-| 11.21 | assunto do e-mail | R | Projeto Pro XML - XMLs de Nota Fiscal | XMLs de Nota Fiscal · {período} · {n} notas | Ex.: "XMLs de Nota Fiscal · 01/10/2026 a 31/10/2026 · 128 notas" |
+| 11.20a | .rar não gerado (novo) | F | — | **Não foi possível compactar os XMLs.** O arquivo .rar não foi gerado. Tente de novo; se continuar, confira o espaço em disco e a pasta do ProXML. | Faixa de erro + LOG. WinRAR presente, mas sem o .rar. Aprovado pelo usuário em 26/10/2026 (4.7) |
+| 11.21 | assunto do e-mail | R | Projeto Pro XML - XMLs de Nota Fiscal | XMLs de Nota Fiscal · {período} · {n} notas | Ex.: "XMLs de Nota Fiscal · 01/10/2026 a 31/10/2026 · 128 notas". Todas as notas com a mesma data: "XMLs de Nota Fiscal · 15/10/2026 · 1 nota" (decisão de 26/10/2026) |
 | 11.22 | `ACBrMail1.FromName` | R | Projeto Pro XML | ProXML | Nome do remetente visto pelo destinatário |
 
 ## 12. Configurações
@@ -286,6 +288,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 12.20 | testando (novo) | B/F | — | Testando… · Conectando a {servidor}:{porta}… | |
 | 12.21 | conexão OK (novo) | F | — | **Conexão OK.** O servidor {servidor}:{porta} aceitou o usuário e a senha. Nenhum e-mail foi enviado. | |
 | 12.22 | conexão falhou (novo) | F | — | **Não foi possível conectar.**<br>O servidor respondeu: {motivo} | Sem resposta do servidor: "O servidor {servidor}:{porta} não respondeu. Confira o endereço, a porta e a conexão com a internet." |
+| 12.22a | servidor sem autenticação (novo) | F | — | **Não foi possível autenticar.** O servidor {servidor}:{porta} não pediu usuário e senha nesta conexão. Confira a porta e as opções SSL e TLS. | Faixa de erro. Ex.: Gmail com TLS desmarcado. Aprovado pelo usuário em 26/10/2026 (4.7) |
 | 12.23 | validação porta (novo) | F | — | Informe uma porta entre 1 e 65535. | |
 | 12.24 | validação e-mail (novo) | F | — | Informe um e-mail válido. | |
 | 12.25 | validação servidor (novo) | F | — | Informe o servidor SMTP. | |

@@ -276,7 +276,7 @@ begin
     try
         Query.ExecSQL;
     except on e: Exception do
-        raise Exception.Create('Erro na gravação de dados: '+ e.message);
+        raise Exception.Create('Erro ao gravar no banco de dados: ' + e.message);
     end;
 end;
 
@@ -348,7 +348,7 @@ end;
 procedure TDMConfig.SetFiltroModelo(const Value: Integer);
 begin
     if (Value <> FILTRO_MODELO_TODOS) and (Value <> FILTRO_MODELO_NFE) and (Value <> FILTRO_MODELO_NFCE) then
-        raise Exception.Create('Filtro de modelo inválido: ' + IntToStr(Value));
+        raise Exception.Create('Filtro de modelo inválido: ' + IntToStr(Value) + '.');
 
     FFiltroModelo := Value;
 end;
@@ -368,7 +368,7 @@ begin
     try
         Query.ExecSQL;
     except on e: Exception do
-        raise Exception.Create('Erro na gravação de dados: '+ e.message);
+        raise Exception.Create('Erro ao gravar no banco de dados: ' + e.message);
     end;
 end;
 
@@ -405,7 +405,7 @@ begin
     try
         Query.ExecSQL;
     except on e: Exception do
-        raise Exception.Create('Erro na gravação de dados: '+ e.message);
+        raise Exception.Create('Erro ao gravar no banco de dados: ' + e.message);
     end;
 end;
 
@@ -438,7 +438,7 @@ begin
                Exit;
            end;
         except on e:Exception do
-           raise Exception.Create('Erro na gravação de dados: '+ e.message);
+           raise Exception.Create('Erro ao gravar no banco de dados: ' + e.message);
         end;
 
     finally
@@ -459,7 +459,7 @@ begin
     try
         Query.ExecSQL;
     except on e: Exception do
-        raise Exception.Create('Erro na gravação de dados: '+ e.message);
+        raise Exception.Create('Erro ao gravar no banco de dados: ' + e.message);
     end;
 end;
 
@@ -487,7 +487,7 @@ begin
         end;
 
       except on e: Exception do
-        raise Exception.Create('Erro na gravação de dados: '+ e.message);
+        raise Exception.Create('Erro ao ler o banco de dados: ' + e.message);
       end;
 
     finally

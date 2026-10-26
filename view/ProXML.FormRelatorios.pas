@@ -86,7 +86,8 @@ begin
     if Not DMConfig.QryNotas.IsEmpty then
         QuickNotas.Preview
     else
-        raise Exception.Create('Sem registros no banco de dados!');
+        //Glossário 8.14: aparece como motivo da caixa 8.13
+        raise Exception.Create('Nenhuma nota para o relatório.');
 end;
 
 procedure TFormRelatorios.SetDescricaoFiltro(const Descricao: String);
