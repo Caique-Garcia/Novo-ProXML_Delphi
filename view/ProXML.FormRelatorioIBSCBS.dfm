@@ -6,24 +6,26 @@ object FormRelatorioIBSCBS: TFormRelatorioIBSCBS
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
   Font.Style = []
   OldCreateOrder = False
   Scaled = False
+  OnCreate = FormCreate
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object QuickIBSCBS: TQuickRep
     Left = 62
     Top = 21
     Width = 794
     Height = 1123
+    BeforePrint = QuickIBSCBSBeforePrint
     ShowingPreview = False
     DataSet = DMConfig.QryNotasIBSCBS
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
-    Font.Name = 'Arial'
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
     Font.Style = []
     Functions.Strings = (
       'PAGENUMBER'
@@ -33,7 +35,7 @@ object FormRelatorioIBSCBS: TFormRelatorioIBSCBS
       '0'
       '0'
       #39#39)
-    Options = [FirstPageHeader, LastPageFooter]
+    Options = [LastPageFooter]
     Page.Columns = 1
     Page.Orientation = poPortrait
     Page.PaperSize = A4
@@ -74,170 +76,536 @@ object FormRelatorioIBSCBS: TFormRelatorioIBSCBS
     PreviewDefaultSaveType = stPDF
     PreviewLeft = 0
     PreviewTop = 0
-    object QRBandCabecalho: TQRBand
+    object QRBandTitulo: TQRBand
       Left = 38
       Top = 38
       Width = 718
-      Height = 243
+      Height = 92
       AlignToBottom = False
       TransparentBand = False
       ForceNewColumn = False
       ForceNewPage = False
       Size.Values = (
-        642.937500000000000000
-        1899.708333333330000000)
+        243.416666666666657193
+        1899.708333333333257542)
       PreCaluculateBandHeight = False
       KeepOnOnePage = False
-      BandType = rbPageHeader
-      object QRShapeCabecalho: TQRShape
-        Left = 1
-        Top = 202
-        Width = 718
-        Height = 41
+      BandType = rbTitle
+      object QRLabelTitulo: TQRLabel
+        Left = 0
+        Top = 0
+        Width = 600
+        Height = 26
         Size.Values = (
-          108.479166666667000000
-          2.645833333333330000
-          534.458333333333000000
-          1899.708333333330000000)
+          68.791666666666671404
+          0.000000000000000000
+          0.000000000000000000
+          1587.500000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
-        Brush.Color = 12369084
-        Pen.Color = clGray
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = 'Relat'#243'rio IBS/CBS'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -21
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 16
+      end
+      object QRLabelRotuloPeriodo: TQRLabel
+        Left = 0
+        Top = 26
+        Width = 52
+        Height = 17
+        Size.Values = (
+          44.979166666666664298
+          0.000000000000000000
+          68.791666666666671404
+          137.583333333333342807)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = 'Per'#237'odo:'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRLabelPeriodo: TQRLabel
+        Left = 52
+        Top = 26
+        Width = 140
+        Height = 17
+        Size.Values = (
+          44.979166666666664298
+          137.583333333333342807
+          68.791666666666671404
+          370.416666666666685614)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = ' 01/10/2026 a 31/10/2026 '#183' '
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRLabelRotuloModelo: TQRLabel
+        Left = 192
+        Top = 26
+        Width = 48
+        Height = 17
+        Size.Values = (
+          44.979166666666664298
+          508.000000000000000000
+          68.791666666666671404
+          127.000000000000000000)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = 'Modelo:'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRLabelModeloFiltro: TQRLabel
+        Left = 240
+        Top = 26
+        Width = 170
+        Height = 17
+        Size.Values = (
+          44.979166666666664298
+          635.000000000000000000
+          68.791666666666671404
+          449.791666666666685614)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = ' Todos (NF-e 55 e NFC-e 65) '#183' '
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRLabelQuantidade: TQRLabel
+        Left = 410
+        Top = 26
+        Width = 30
+        Height = 17
+        Size.Values = (
+          44.979166666666664298
+          1084.791666666666742458
+          68.791666666666671404
+          79.375000000000000000)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = '0'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRLabelNotas: TQRLabel
+        Left = 440
+        Top = 26
+        Width = 160
+        Height = 17
+        Size.Values = (
+          44.979166666666664298
+          1164.166666666666742458
+          68.791666666666671404
+          423.333333333333314386)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = ' notas'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRLabelRotuloPasta: TQRLabel
+        Left = 0
+        Top = 43
+        Width = 36
+        Height = 17
+        Size.Values = (
+          44.979166666666664298
+          0.000000000000000000
+          113.770833333333328596
+          95.250000000000000000)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = 'Pasta:'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRLabelPasta: TQRLabel
+        Left = 36
+        Top = 43
+        Width = 568
+        Height = 17
+        Size.Values = (
+          44.979166666666664298
+          95.250000000000000000
+          113.770833333333328596
+          1502.833333333333257542)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = ' C:\'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRImageLogo: TQRImage
+        Left = 620
+        Top = 3
+        Width = 98
+        Height = 20
+        Size.Values = (
+          52.916666666666664298
+          1640.416666666666742458
+          7.937500000000000000
+          259.291666666666685614)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Stretch = True
+      end
+      object QRLabelMarca: TQRLabel
+        Left = 560
+        Top = 0
+        Width = 158
+        Height = 26
+        Enabled = False
+        Size.Values = (
+          68.791666666666671404
+          1481.666666666666742458
+          0.000000000000000000
+          418.041666666666685614)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taRightJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = 'ProXML'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -16
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 12
+      end
+      object QRShapeTitulo: TQRShape
+        Left = 0
+        Top = 82
+        Width = 718
+        Height = 2
+        Size.Values = (
+          5.291666666666666963
+          0.000000000000000000
+          216.958333333333342807
+          1899.708333333333257542)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Brush.Color = clBlack
         Pen.Style = psClear
         Shape = qrsRectangle
         VertAdjust = 0
       end
-      object QRLabelTitulo: TQRLabel
-        Left = 16
-        Top = 54
-        Width = 273
-        Height = 66
-        Size.Values = (
-          174.625000000000000000
-          42.333333333333300000
-          142.875000000000000000
-          722.312500000000000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taLeftJustify
-        AlignToBand = False
-        AutoSize = False
-        Caption = 'Pro XML'
-        Color = clWhite
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -48
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 36
-      end
-      object QRLabelSubtitulo: TQRLabel
-        Left = 56
-        Top = 173
-        Width = 657
-        Height = 17
-        Size.Values = (
-          44.979166666666700000
-          148.166666666667000000
-          457.729166666667000000
-          1738.312500000000000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taLeftJustify
-        AlignToBand = False
-        AutoSize = False
-        Caption = 'XMLs de Nota Fiscal com IBS/CBS processados pelo programa'
-        Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clGray
-        Font.Height = -13
-        Font.Name = 'Courier New'
-        Font.Style = []
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 10
-      end
-      object QRLabelModelo: TQRLabel
-        Left = 8
-        Top = 216
-        Width = 46
+    end
+    object QRBandContinuacao: TQRBand
+      Left = 38
+      Top = 130
+      Width = 718
+      Height = 24
+      AlignToBottom = False
+      TransparentBand = False
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        63.500000000000000000
+        1899.708333333333257542)
+      PreCaluculateBandHeight = False
+      KeepOnOnePage = False
+      BandType = rbPageHeader
+      object QRLabelContinuacao: TQRLabel
+        Left = 0
+        Top = 4
+        Width = 500
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          21.166666666666700000
-          571.500000000000000000
-          121.708333333333000000)
+          42.333333333333335702
+          0.000000000000000000
+          10.583333333333333925
+          1322.916666666666742458)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = 'Relat'#243'rio IBS/CBS '#183' Modelo: Todos '#183' continua'#231#227'o'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRLabelPeriodoContinuacao: TQRLabel
+        Left = 500
+        Top = 4
+        Width = 218
+        Height = 16
+        Size.Values = (
+          42.333333333333335702
+          1322.916666666666742458
+          10.583333333333333925
+          576.791666666666628771)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taRightJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = '01/10/2026 a 31/10/2026'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRShapeContinuacao: TQRShape
+        Left = 0
+        Top = 23
+        Width = 718
+        Height = 1
+        Size.Values = (
+          2.645833333333333481
+          0.000000000000000000
+          60.854166666666664298
+          1899.708333333333257542)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Brush.Color = clBlack
+        Pen.Style = psClear
+        Shape = qrsRectangle
+        VertAdjust = 0
+      end
+    end
+    object QRBandColunas: TQRBand
+      Left = 38
+      Top = 154
+      Width = 718
+      Height = 24
+      AlignToBottom = False
+      Color = clBtnFace
+      TransparentBand = False
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        63.500000000000000000
+        1899.708333333333257542)
+      PreCaluculateBandHeight = False
+      KeepOnOnePage = False
+      BandType = rbColumnHeader
+      object QRLabelNumero: TQRLabel
+        Left = 6
+        Top = 4
+        Width = 48
+        Height = 16
+        Size.Values = (
+          42.333333333333335702
+          15.875000000000000000
+          10.583333333333333925
+          127.000000000000000000)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taRightJustify
+        AlignToBand = False
+        AutoSize = False
+        Caption = 'N'#186
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRLabelModelo: TQRLabel
+        Left = 66
+        Top = 4
+        Width = 44
+        Height = 16
+        Size.Values = (
+          42.333333333333335702
+          174.625000000000000000
+          10.583333333333333925
+          116.416666666666671404)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taCenter
         AlignToBand = False
         AutoSize = False
         Caption = 'Modelo'
-        Color = 12369084
-        Font.Charset = ANSI_CHARSET
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 8
-      end
-      object QRLabelNumero: TQRLabel
-        Left = 56
-        Top = 216
-        Width = 56
-        Height = 16
-        Size.Values = (
-          42.333333333333300000
-          148.166666666667000000
-          571.500000000000000000
-          148.166666666667000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taLeftJustify
-        AlignToBand = False
-        AutoSize = False
-        Caption = 'N'#250'mero'
-        Color = 12369084
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRLabelData: TQRLabel
-        Left = 116
-        Top = 216
-        Width = 70
+        Left = 122
+        Top = 4
+        Width = 64
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          306.916666666667000000
-          571.500000000000000000
-          185.208333333333000000)
+          42.333333333333335702
+          322.791666666666685614
+          10.583333333333333925
+          169.333333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -245,291 +613,280 @@ object FormRelatorioIBSCBS: TFormRelatorioIBSCBS
         AlignToBand = False
         AutoSize = False
         Caption = 'Data'
-        Color = 12369084
-        Font.Charset = ANSI_CHARSET
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRLabelBaseIBSCBS: TQRLabel
-        Left = 196
-        Top = 216
-        Width = 100
+        Left = 198
+        Top = 4
+        Width = 142
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          518.583333333333000000
-          571.500000000000000000
-          264.583333333333000000)
+          42.333333333333335702
+          523.875000000000000000
+          10.583333333333333925
+          375.708333333333314386)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taRightJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'Base IBS/CBS'
-        Color = 12369084
-        Font.Charset = ANSI_CHARSET
+        Caption = 'Base IBS/CBS (R$)'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRLabelIBSUF: TQRLabel
-        Left = 300
-        Top = 216
-        Width = 100
+        Left = 352
+        Top = 4
+        Width = 84
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          793.750000000000000000
-          571.500000000000000000
-          264.583333333333000000)
+          42.333333333333335702
+          931.333333333333371229
+          10.583333333333333925
+          222.250000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taRightJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'IBS UF'
-        Color = 12369084
-        Font.Charset = ANSI_CHARSET
+        Caption = 'IBS UF (R$)'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRLabelIBSMun: TQRLabel
-        Left = 404
-        Top = 216
-        Width = 100
+        Left = 448
+        Top = 4
+        Width = 88
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          1068.916666666670000000
-          571.500000000000000000
-          264.583333333333000000)
+          42.333333333333335702
+          1185.333333333333257542
+          10.583333333333333925
+          232.833333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taRightJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'IBS Mun.'
-        Color = 12369084
-        Font.Charset = ANSI_CHARSET
+        Caption = 'IBS Mun. (R$)'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRLabelIBS: TQRLabel
-        Left = 508
-        Top = 216
-        Width = 100
+        Left = 548
+        Top = 4
+        Width = 76
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          1344.083333333330000000
-          571.500000000000000000
-          264.583333333333000000)
+          42.333333333333335702
+          1449.916666666666742458
+          10.583333333333333925
+          201.083333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taRightJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'IBS'
-        Color = 12369084
-        Font.Charset = ANSI_CHARSET
+        Caption = 'IBS (R$)'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRLabelCBS: TQRLabel
-        Left = 612
-        Top = 216
-        Width = 98
+        Left = 636
+        Top = 4
+        Width = 76
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          1619.250000000000000000
-          571.500000000000000000
-          259.291666666667000000)
+          42.333333333333335702
+          1682.750000000000000000
+          10.583333333333333925
+          201.083333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taRightJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'CBS'
-        Color = 12369084
-        Font.Charset = ANSI_CHARSET
+        Caption = 'CBS (R$)'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
-      object QRLabelQt: TQRLabel
-        Left = 8
-        Top = 173
-        Width = 42
-        Height = 17
+      object QRShapeColunas: TQRShape
+        Left = 0
+        Top = 23
+        Width = 718
+        Height = 1
         Size.Values = (
-          44.979166666666700000
-          21.166666666666700000
-          457.729166666667000000
-          111.125000000000000000)
+          2.645833333333333481
+          0.000000000000000000
+          60.854166666666664298
+          1899.708333333333257542)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Brush.Color = clBlack
+        Pen.Style = psClear
+        Shape = qrsRectangle
+        VertAdjust = 0
+      end
+    end
+    object QRBandDetalhe: TQRBand
+      Left = 38
+      Top = 178
+      Width = 718
+      Height = 20
+      BeforePrint = QRBandDetalheBeforePrint
+      AlignToBottom = False
+      TransparentBand = False
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        52.916666666666664298
+        1899.708333333333257542)
+      PreCaluculateBandHeight = False
+      KeepOnOnePage = False
+      BandType = rbDetail
+      object QRDBTextNumero: TQRDBText
+        Left = 6
+        Top = 2
+        Width = 48
+        Height = 16
+        Size.Values = (
+          42.333333333333335702
+          15.875000000000000000
+          5.291666666666666963
+          127.000000000000000000)
+        XLColumn = 0
+        XLNumFormat = nfGeneral
+        ActiveInPreview = False
+        Alignment = taRightJustify
+        AlignToBand = False
+        AutoSize = False
+        Color = clWhite
+        DataSet = DMConfig.QryNotasIBSCBS
+        DataField = 'NUMERO'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentFont = False
+        Transparent = True
+        ExportAs = exptText
+        WrapStyle = BreakOnSpaces
+        FullJustify = False
+        MaxBreakChars = 0
+        VerticalAlignment = tlTop
+        FontSize = 9
+      end
+      object QRDBTextModelo: TQRDBText
+        Left = 66
+        Top = 2
+        Width = 44
+        Height = 16
+        Size.Values = (
+          42.333333333333335702
+          174.625000000000000000
+          5.291666666666666963
+          116.416666666666671404)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taCenter
         AlignToBand = False
         AutoSize = False
-        Caption = '0'
-        Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clGray
-        Font.Height = -13
-        Font.Name = 'Courier New'
-        Font.Style = []
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 10
-      end
-    end
-    object QRBandDetalhe: TQRBand
-      Left = 38
-      Top = 281
-      Width = 718
-      Height = 27
-      AlignToBottom = False
-      TransparentBand = False
-      ForceNewColumn = False
-      ForceNewPage = False
-      Size.Values = (
-        71.437500000000000000
-        1899.708333333330000000)
-      PreCaluculateBandHeight = False
-      KeepOnOnePage = False
-      BandType = rbDetail
-      object QRDBTextModelo: TQRDBText
-        Left = 8
-        Top = 6
-        Width = 46
-        Height = 16
-        Size.Values = (
-          42.333333333333300000
-          21.166666666666700000
-          15.875000000000000000
-          121.708333333333000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taLeftJustify
-        AlignToBand = False
-        AutoSize = False
         Color = clWhite
         DataSet = DMConfig.QryNotasIBSCBS
         DataField = 'MODELO'
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         FullJustify = False
         MaxBreakChars = 0
         VerticalAlignment = tlTop
-        FontSize = 8
-      end
-      object QRDBTextNumero: TQRDBText
-        Left = 56
-        Top = 6
-        Width = 56
-        Height = 16
-        Size.Values = (
-          42.333333333333300000
-          148.166666666667000000
-          15.875000000000000000
-          148.166666666667000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taLeftJustify
-        AlignToBand = False
-        AutoSize = False
-        Color = clWhite
-        DataSet = DMConfig.QryNotasIBSCBS
-        DataField = 'NUMERO'
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Segoe UI'
-        Font.Style = []
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        FullJustify = False
-        MaxBreakChars = 0
-        VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRDBTextData: TQRDBText
-        Left = 116
-        Top = 6
-        Width = 70
+        Left = 122
+        Top = 2
+        Width = 64
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          306.916666666667000000
-          15.875000000000000000
-          185.208333333333000000)
+          42.333333333333335702
+          322.791666666666685614
+          5.291666666666666963
+          169.333333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -539,30 +896,30 @@ object FormRelatorioIBSCBS: TFormRelatorioIBSCBS
         Color = clWhite
         DataSet = DMConfig.QryNotasIBSCBS
         DataField = 'DATA'
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         FullJustify = False
         MaxBreakChars = 0
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRDBTextBaseIBSCBS: TQRDBText
-        Left = 196
-        Top = 6
-        Width = 100
+        Left = 198
+        Top = 2
+        Width = 142
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          518.583333333333000000
-          15.875000000000000000
-          264.583333333333000000)
+          42.333333333333335702
+          523.875000000000000000
+          5.291666666666666963
+          375.708333333333314386)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -572,30 +929,31 @@ object FormRelatorioIBSCBS: TFormRelatorioIBSCBS
         Color = clWhite
         DataSet = DMConfig.QryNotasIBSCBS
         DataField = 'VBCIBSCBS'
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
+        OnPrint = ValorPrint
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         FullJustify = False
         MaxBreakChars = 0
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRDBTextIBSUF: TQRDBText
-        Left = 300
-        Top = 6
-        Width = 100
+        Left = 352
+        Top = 2
+        Width = 84
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          793.750000000000000000
-          15.875000000000000000
-          264.583333333333000000)
+          42.333333333333335702
+          931.333333333333371229
+          5.291666666666666963
+          222.250000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -605,30 +963,31 @@ object FormRelatorioIBSCBS: TFormRelatorioIBSCBS
         Color = clWhite
         DataSet = DMConfig.QryNotasIBSCBS
         DataField = 'VIBSUF'
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
+        OnPrint = ValorPrint
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         FullJustify = False
         MaxBreakChars = 0
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRDBTextIBSMun: TQRDBText
-        Left = 404
-        Top = 6
-        Width = 100
+        Left = 448
+        Top = 2
+        Width = 88
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          1068.916666666670000000
-          15.875000000000000000
-          264.583333333333000000)
+          42.333333333333335702
+          1185.333333333333257542
+          5.291666666666666963
+          232.833333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -638,30 +997,31 @@ object FormRelatorioIBSCBS: TFormRelatorioIBSCBS
         Color = clWhite
         DataSet = DMConfig.QryNotasIBSCBS
         DataField = 'VIBSMUN'
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
+        OnPrint = ValorPrint
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         FullJustify = False
         MaxBreakChars = 0
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRDBTextIBS: TQRDBText
-        Left = 508
-        Top = 6
-        Width = 100
+        Left = 548
+        Top = 2
+        Width = 76
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          1344.083333333330000000
-          15.875000000000000000
-          264.583333333333000000)
+          42.333333333333335702
+          1449.916666666666742458
+          5.291666666666666963
+          201.083333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -671,30 +1031,31 @@ object FormRelatorioIBSCBS: TFormRelatorioIBSCBS
         Color = clWhite
         DataSet = DMConfig.QryNotasIBSCBS
         DataField = 'VIBS'
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
+        OnPrint = ValorPrint
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         FullJustify = False
         MaxBreakChars = 0
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
       object QRDBTextCBS: TQRDBText
-        Left = 612
-        Top = 6
-        Width = 98
+        Left = 636
+        Top = 2
+        Width = 76
         Height = 16
         Size.Values = (
-          42.333333333333300000
-          1619.250000000000000000
-          15.875000000000000000
-          259.291666666667000000)
+          42.333333333333335702
+          1682.750000000000000000
+          5.291666666666666963
+          201.083333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
@@ -704,515 +1065,325 @@ object FormRelatorioIBSCBS: TFormRelatorioIBSCBS
         Color = clWhite
         DataSet = DMConfig.QryNotasIBSCBS
         DataField = 'VCBS'
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
+        Font.Height = -12
         Font.Name = 'Segoe UI'
         Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
+        OnPrint = ValorPrint
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         FullJustify = False
         MaxBreakChars = 0
         VerticalAlignment = tlTop
-        FontSize = 8
+        FontSize = 9
       end
     end
     object QRBandTotais: TQRBand
       Left = 38
-      Top = 308
+      Top = 198
       Width = 718
-      Height = 260
+      Height = 44
       AlignToBottom = False
       TransparentBand = False
       ForceNewColumn = False
       ForceNewPage = False
       Size.Values = (
-        687.916666666667000000
-        1899.708333333330000000)
+        116.416666666666671404
+        1899.708333333333257542)
       PreCaluculateBandHeight = False
       KeepOnOnePage = False
       BandType = rbSummary
       object QRShapeTotais: TQRShape
-        Left = 5
-        Top = 12
-        Width = 708
-        Height = 1
+        Left = 0
+        Top = 0
+        Width = 718
+        Height = 2
         Size.Values = (
-          2.645833333333330000
-          13.229166666666700000
-          31.750000000000000000
-          1873.250000000000000000)
+          5.291666666666666963
+          0.000000000000000000
+          0.000000000000000000
+          1899.708333333333257542)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
-        Brush.Color = clGray
-        Pen.Color = clGray
+        Brush.Color = clBlack
+        Pen.Style = psClear
         Shape = qrsRectangle
         VertAdjust = 0
       end
-      object QRLabelTituloBaseIBSCBS: TQRLabel
-        Left = 150
-        Top = 30
-        Width = 324
-        Height = 38
+      object QRLabelTotal: TQRLabel
+        Left = 6
+        Top = 6
+        Width = 180
+        Height = 16
         Size.Values = (
-          100.541666666667000000
-          396.875000000000000000
-          79.375000000000000000
-          857.250000000000000000)
+          42.333333333333335702
+          15.875000000000000000
+          15.875000000000000000
+          476.250000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
-        Alignment = taRightJustify
+        Alignment = taLeftJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'BASE IBS/CBS'
+        Caption = 'Total '#183' 0 notas'
         Color = clWhite
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -19
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
+        Font.Height = -12
+        Font.Name = 'Segoe UI Semibold'
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 14
+        FontSize = 9
       end
       object QRLabelTotalBaseIBSCBS: TQRLabel
-        Left = 494
-        Top = 30
-        Width = 214
-        Height = 26
+        Left = 198
+        Top = 6
+        Width = 142
+        Height = 16
         Size.Values = (
-          68.791666666666700000
-          1307.041666666670000000
-          79.375000000000000000
-          566.208333333333000000)
+          42.333333333333335702
+          523.875000000000000000
+          15.875000000000000000
+          375.708333333333314386)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taRightJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'R$ 0,00'
+        Caption = '0,00'
         Color = clWhite
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -19
+        Font.Height = -12
         Font.Name = 'Segoe UI Semibold'
-        Font.Style = [fsBold]
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 14
-      end
-      object QRLabelTituloIBSUF: TQRLabel
-        Left = 150
-        Top = 66
-        Width = 324
-        Height = 38
-        Size.Values = (
-          100.541666666667000000
-          396.875000000000000000
-          174.625000000000000000
-          857.250000000000000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taRightJustify
-        AlignToBand = False
-        AutoSize = False
-        Caption = 'IBS UF'
-        Color = clWhite
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -19
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 14
+        FontSize = 9
       end
       object QRLabelTotalIBSUF: TQRLabel
-        Left = 494
-        Top = 66
-        Width = 214
-        Height = 26
+        Left = 352
+        Top = 6
+        Width = 84
+        Height = 16
         Size.Values = (
-          68.791666666666700000
-          1307.041666666670000000
-          174.625000000000000000
-          566.208333333333000000)
+          42.333333333333335702
+          931.333333333333371229
+          15.875000000000000000
+          222.250000000000000000)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taRightJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'R$ 0,00'
+        Caption = '0,00'
         Color = clWhite
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -19
+        Font.Height = -12
         Font.Name = 'Segoe UI Semibold'
-        Font.Style = [fsBold]
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 14
-      end
-      object QRLabelTituloIBSMun: TQRLabel
-        Left = 150
-        Top = 102
-        Width = 324
-        Height = 38
-        Size.Values = (
-          100.541666666667000000
-          396.875000000000000000
-          269.875000000000000000
-          857.250000000000000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taRightJustify
-        AlignToBand = False
-        AutoSize = False
-        Caption = 'IBS MUNIC'#205'PIO'
-        Color = clWhite
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -19
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 14
+        FontSize = 9
       end
       object QRLabelTotalIBSMun: TQRLabel
-        Left = 494
-        Top = 102
-        Width = 214
-        Height = 26
+        Left = 448
+        Top = 6
+        Width = 88
+        Height = 16
         Size.Values = (
-          68.791666666666700000
-          1307.041666666670000000
-          269.875000000000000000
-          566.208333333333000000)
+          42.333333333333335702
+          1185.333333333333257542
+          15.875000000000000000
+          232.833333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taRightJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'R$ 0,00'
+        Caption = '0,00'
         Color = clWhite
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -19
+        Font.Height = -12
         Font.Name = 'Segoe UI Semibold'
-        Font.Style = [fsBold]
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 14
-      end
-      object QRLabelTituloIBS: TQRLabel
-        Left = 150
-        Top = 138
-        Width = 324
-        Height = 38
-        Size.Values = (
-          100.541666666667000000
-          396.875000000000000000
-          365.125000000000000000
-          857.250000000000000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taRightJustify
-        AlignToBand = False
-        AutoSize = False
-        Caption = 'IBS'
-        Color = clWhite
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -19
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 14
+        FontSize = 9
       end
       object QRLabelTotalIBS: TQRLabel
-        Left = 494
-        Top = 138
-        Width = 214
-        Height = 26
+        Left = 548
+        Top = 6
+        Width = 76
+        Height = 16
         Size.Values = (
-          68.791666666666700000
-          1307.041666666670000000
-          365.125000000000000000
-          566.208333333333000000)
+          42.333333333333335702
+          1449.916666666666742458
+          15.875000000000000000
+          201.083333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taRightJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'R$ 0,00'
+        Caption = '0,00'
         Color = clWhite
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -19
+        Font.Height = -12
         Font.Name = 'Segoe UI Semibold'
-        Font.Style = [fsBold]
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 14
-      end
-      object QRLabelTituloCBS: TQRLabel
-        Left = 150
-        Top = 174
-        Width = 324
-        Height = 38
-        Size.Values = (
-          100.541666666667000000
-          396.875000000000000000
-          460.375000000000000000
-          857.250000000000000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taRightJustify
-        AlignToBand = False
-        AutoSize = False
-        Caption = 'CBS'
-        Color = clWhite
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -19
-        Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 14
+        FontSize = 9
       end
       object QRLabelTotalCBS: TQRLabel
-        Left = 494
-        Top = 174
-        Width = 214
-        Height = 26
+        Left = 636
+        Top = 6
+        Width = 76
+        Height = 16
         Size.Values = (
-          68.791666666666700000
-          1307.041666666670000000
-          460.375000000000000000
-          566.208333333333000000)
+          42.333333333333335702
+          1682.750000000000000000
+          15.875000000000000000
+          201.083333333333342807)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taRightJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'R$ 0,00'
+        Caption = '0,00'
         Color = clWhite
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -19
+        Font.Height = -12
         Font.Name = 'Segoe UI Semibold'
-        Font.Style = [fsBold]
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 14
+        FontSize = 9
       end
-      object QRLabelTituloQt: TQRLabel
-        Left = 150
-        Top = 210
-        Width = 324
-        Height = 38
+      object QRLabelLegenda: TQRLabel
+        Left = 6
+        Top = 28
+        Width = 706
+        Height = 14
         Size.Values = (
-          100.541666666667000000
-          396.875000000000000000
-          555.625000000000000000
-          857.250000000000000000)
+          37.041666666666664298
+          15.875000000000000000
+          74.083333333333328596
+          1867.958333333333257542)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
-        Alignment = taRightJustify
+        Alignment = taLeftJustify
         AlignToBand = False
         AutoSize = False
-        Caption = 'QUANTIDADE DE NOTAS'
+        Caption = ''
         Color = clWhite
-        Font.Charset = ANSI_CHARSET
+        Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -19
+        Font.Height = -11
         Font.Name = 'Segoe UI'
-        Font.Style = [fsBold]
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop
-        FontSize = 14
-      end
-      object QRLabelTotalQt: TQRLabel
-        Left = 494
-        Top = 210
-        Width = 214
-        Height = 26
-        Size.Values = (
-          68.791666666666700000
-          1307.041666666670000000
-          555.625000000000000000
-          566.208333333333000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taRightJustify
-        AlignToBand = False
-        AutoSize = False
-        Caption = '0'
-        Color = clWhite
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -19
-        Font.Name = 'Segoe UI Semibold'
-        Font.Style = [fsBold]
-        ParentFont = False
-        Transparent = False
-        ExportAs = exptText
-        WrapStyle = BreakOnSpaces
-        VerticalAlignment = tlTop
-        FontSize = 14
+        FontSize = 8
       end
     end
     object QRBandRodape: TQRBand
       Left = 38
-      Top = 568
+      Top = 242
       Width = 718
-      Height = 34
+      Height = 28
+      BeforePrint = QRBandRodapeBeforePrint
       AlignToBottom = False
       TransparentBand = False
       ForceNewColumn = False
       ForceNewPage = False
       Size.Values = (
-        89.958333333333300000
-        1899.708333333330000000)
+        74.083333333333328596
+        1899.708333333333257542)
       PreCaluculateBandHeight = False
       KeepOnOnePage = False
       BandType = rbPageFooter
-      object QRSysDataData: TQRSysData
-        Left = 5
+      object QRShapeRodape: TQRShape
+        Left = 0
         Top = 6
-        Width = 78
-        Height = 16
+        Width = 718
+        Height = 1
         Size.Values = (
-          42.333333333333300000
-          13.229166666666700000
+          2.645833333333333481
+          0.000000000000000000
           15.875000000000000000
-          206.375000000000000000)
+          1899.708333333333257542)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
-        Alignment = taLeftJustify
-        AlignToBand = False
-        Color = clWhite
-        Data = qrsDateTime
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Courier New'
-        Font.Style = [fsItalic]
-        ParentFont = False
-        Text = ''
-        Transparent = False
-        ExportAs = exptText
-        VerticalAlignment = tlTop
-        FontSize = 8
+        Brush.Color = clBlack
+        Pen.Style = psClear
+        Shape = qrsRectangle
+        VertAdjust = 0
       end
-      object QRSysDataPagina: TQRSysData
-        Left = 660
-        Top = 6
-        Width = 50
-        Height = 16
+      object QRLabelRodape: TQRLabel
+        Left = 0
+        Top = 12
+        Width = 718
+        Height = 14
         Size.Values = (
-          42.333333333333300000
-          1746.250000000000000000
-          15.875000000000000000
-          132.291666666667000000)
-        XLColumn = 0
-        XLNumFormat = nfGeneral
-        ActiveInPreview = False
-        Alignment = taLeftJustify
-        AlignToBand = False
-        Color = clWhite
-        Data = qrsPageNumber
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Courier New'
-        Font.Style = [fsItalic]
-        ParentFont = False
-        Text = ''
-        Transparent = False
-        ExportAs = exptText
-        VerticalAlignment = tlTop
-        FontSize = 8
-      end
-      object QRLabelDesenvolvido: TQRLabel
-        Left = 160
-        Top = 6
-        Width = 465
-        Height = 16
-        Size.Values = (
-          42.333333333333300000
-          423.333333333333000000
-          15.875000000000000000
-          1230.312500000000000000)
+          37.041666666666664298
+          0.000000000000000000
+          31.750000000000000000
+          1899.708333333333257542)
         XLColumn = 0
         XLNumFormat = nfGeneral
         ActiveInPreview = False
         Alignment = taCenter
         AlignToBand = False
         AutoSize = False
-        Caption = 
-          'Desenvolvido por Caique Garcia | Email caique.garciatst@gmail.co' +
-          'm'
+        Caption = 'Gerado pelo ProXML'
         Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
-        Font.Name = 'Courier New'
-        Font.Style = [fsItalic]
+        Font.Name = 'Segoe UI'
+        Font.Style = []
         ParentFont = False
-        Transparent = False
+        Transparent = True
         ExportAs = exptText
         WrapStyle = BreakOnSpaces
         VerticalAlignment = tlTop

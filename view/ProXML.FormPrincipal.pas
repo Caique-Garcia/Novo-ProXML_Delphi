@@ -553,6 +553,7 @@ type
     FTestando           : Boolean;        //Testar conexão em andamento
     FErroLeituraConfig  : string;         //12.18 no FormCreate: a caixa aparece depois que a janela abre
     FPastaLeitura       : string;         //pasta do último Processar (texto 5.38)
+    FPastaNotas         : string;         //pasta das notas carregadas na grade (linha "Pasta:" dos relatórios)
     function  CopiarTextoTolerante(const Texto: string): Boolean;
     procedure AjustarAlturaLinhasGrade;
     procedure PrepararTelaNotas;
@@ -599,7 +600,6 @@ type
     procedure GerarRelatorio(const Relatorio: TTipoRelatorio);
     procedure FinalizaRelatorio(const Relatorio: TTipoRelatorio);
     procedure AbrirRelatorioIBSCBS;
-    function  DescricaoFiltroModelo: string;
     procedure ConfigACBR;
     procedure GerarDanfe(const CaminhoArq, Numero: String);
     function  ConfigurarLayoutDanfe(out Mensagem: string): Boolean;
@@ -1475,15 +1475,6 @@ begin
     end;
 end;
 
-function TFormPrincipal.DescricaoFiltroModelo: string;
-begin
-    //Texto do seletor de modelo para o subtítulo dos relatórios; vazio em "Todos"
-    if ModeloSelecionado = FILTRO_MODELO_TODOS then
-        Result := ''
-    else
-        Result := SeletorModelo.Itens[SeletorModelo.ItemIndex];
-end;
-
 procedure TFormPrincipal.AjustarAlturaLinhasGrade;
 begin
     //Título de 32 px e linhas de 28 px (tokens.md 4.1 e 5.7), definidos uma vez aqui (FormCreate e
@@ -1607,11 +1598,10 @@ begin
 
    FormRelatorio := TFormRelatorios.Create(Nil);
    try
-        FormRelatorio.SetTotal(LabelValorTotal.Caption);
-        FormRelatorio.SetTotalBC(LabelbaseICMS.Caption);
-        FormRelatorio.SetTotalICMS(LabelValorICMS.Caption);
-        FormRelatorio.SetQtRegistros(IntToStr(NotasDoModelo.RecordCount));
-        FormRelatorio.SetDescricaoFiltro(DescricaoFiltroModelo);
+        //Totais da memória (cards), com o filtro de modelo; o modelo vem de DMConfig.FiltroModelo
+        FormRelatorio.SetTotais(FTotais);
+        FormRelatorio.SetPasta(FPastaNotas);
+        FormRelatorio.SetVersao(VersaoDoExecutavel);
         FormRelatorio.GerarRelatorio;
         //Visualização fechada: GravarNotasDB fecha a tela Carregando e volta para Relatórios
    finally
@@ -1628,13 +1618,10 @@ begin
     //Os totais do rodapé vêm de FTotais (calculados na grade filtrada), não de SUM no banco.
     FormIBSCBS := TFormRelatorioIBSCBS.Create(Nil);
     try
-        FormIBSCBS.SetTotalBaseIBSCBS(FormatarMoeda(FTotais.BaseIBSCBS));
-        FormIBSCBS.SetTotalIBSUF(FormatarMoeda(FTotais.IBSUF));
-        FormIBSCBS.SetTotalIBSMun(FormatarMoeda(FTotais.IBSMun));
-        FormIBSCBS.SetTotalIBS(FormatarMoeda(FTotais.IBS));
-        FormIBSCBS.SetTotalCBS(FormatarMoeda(FTotais.CBS));
-        FormIBSCBS.SetQtRegistros(IntToStr(FTotais.QuantidadeIBSCBS));
-        FormIBSCBS.SetDescricaoFiltro(DescricaoFiltroModelo);
+        //Totais da memória (cards), com o filtro de modelo; o modelo vem de DMConfig.FiltroModelo
+        FormIBSCBS.SetTotais(FTotais);
+        FormIBSCBS.SetPasta(FPastaNotas);
+        FormIBSCBS.SetVersao(VersaoDoExecutavel);
 
         if not FormIBSCBS.GerarRelatorio then
         begin
@@ -5902,6 +5889,8 @@ begin
     //aparecem todas)
     SeletorModelo.ItemIndex := 0;
     LimparBusca;
+    //Pasta destas notas: os relatórios mostram de onde elas vieram (cancelar ou falhar não chega aqui)
+    FPastaNotas := FPastaLeitura;
 
     FDMemTable1.DisableControls;
     try

@@ -274,6 +274,32 @@ const
     'path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V' +
     '8a2 2 0 0 1 2-2h6"/></svg>';
 
+  //Logo vetorial para fundo claro (docs/ui/logo/proxml-logo-claro.svg, sem o comentário e sem
+  //espaços entre as tags): cabeçalho dos relatórios impressos (etapa 4.8, decisão D7 revista).
+  //As cores são as do próprio logo aprovado, não do tema. Mudou o arquivo? Copiar de novo aqui
+  LogoClaro =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="157" height="32" viewBox="0 0 157 32"><titl' +
+    'e>ProXML (para fundo claro)</title><g><circle cx="13" cy="3" r="1.25" fill="#B4BACA"/><cir' +
+    'cle cx="18.5" cy="3" r="1.25" fill="#B4BACA"/><circle cx="8.25" cy="7.75" r="1.55" fill="#' +
+    '8E97AE"/><circle cx="13" cy="7.75" r="1.8" fill="#55688F"/><circle cx="18.5" cy="7.75" r="' +
+    '1.8" fill="#55688F"/><circle cx="23.25" cy="7.75" r="1.55" fill="#8E97AE"/><circle cx="3.5' +
+    '" cy="12.75" r="1.25" fill="#B4BACA"/><circle cx="8.25" cy="12.75" r="1.8" fill="#55688F"/' +
+    '><circle cx="13" cy="12.75" r="2.1" fill="#2F4A66"/><circle cx="18.5" cy="12.75" r="2.1" f' +
+    'ill="#2F4A66"/><circle cx="23.25" cy="12.75" r="1.8" fill="#55688F"/><circle cx="28" cy="1' +
+    '2.75" r="1.25" fill="#B4BACA"/><circle cx="3.5" cy="18.25" r="1.25" fill="#B4BACA"/><circl' +
+    'e cx="8.25" cy="18.25" r="1.8" fill="#55688F"/><circle cx="13" cy="18.25" r="2.1" fill="#2' +
+    'F4A66"/><circle cx="18.5" cy="18.25" r="2.1" fill="#2F4A66"/><circle cx="23.25" cy="18.25"' +
+    ' r="1.8" fill="#55688F"/><circle cx="28" cy="18.25" r="1.25" fill="#B4BACA"/><circle cx="8' +
+    '.25" cy="23.25" r="1.55" fill="#8E97AE"/><circle cx="13" cy="23.25" r="1.8" fill="#55688F"' +
+    '/><circle cx="18.5" cy="23.25" r="1.8" fill="#55688F"/><circle cx="23.25" cy="23.25" r="1.' +
+    '55" fill="#8E97AE"/><circle cx="13" cy="28" r="1.25" fill="#B4BACA"/><circle cx="18.5" cy=' +
+    '"28" r="1.25" fill="#B4BACA"/></g><path d="M35 25V8.2A2.2 2.2 0 0 1 37.2 6H46A4 4 0 0 1 50' +
+    ' 10V14A4 4 0 0 1 46 18H35M55 25V11.8M55 15.6C55.4 13.3 57.4 12.3 60 12.3H62.4M91 5.6L106.2' +
+    ' 25M106.4 5.6L91 25M112 25V11.2A5.75 5.75 0 0 1 123.5 11.2V25M123.5 11.2A5.75 5.75 0 0 1 1' +
+    '35 11.2V25M140 5.6V22A3 3 0 0 0 143 25H153.2" fill="none" stroke="#171A21" stroke-width="2' +
+    '.5" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="72" cy="18.6" rx="6.7" ry' +
+    '="6.4" fill="none" stroke="#171A21" stroke-width="2.5"/></svg>';
+
 implementation
 
 end.

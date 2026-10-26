@@ -215,6 +215,38 @@ const
   EspacoCreditosSobre     = 16;   //espaço extra acima dos créditos (margin-top 16)
   MarcaSobreAtivo         = 2;    //linha CorPrimaria embaixo do "Sobre" do cabeçalho com a tela aberta
 
+  //Relatórios A4 no QuickReport (tokens.md, seção 6; mockup relatorio-a4.html), etapa 4.8.
+  //Pixels a 96 dpi; o relatório converte para milímetros (não depende da escala da tela)
+  LarguraUtilRelatorio    = 718;  //A4 retrato com margens de 10 mm
+  AlturaTituloRelatorio   = 26;   //linha do título "Relatório de Notas" (16 pt Semibold)
+  AlturaLinhaInfoRelatorio = 17;  //linhas "Período · Modelo · quantidade" e "Pasta" (9 pt)
+  LinhaCabecalhoRelatorio = 2;    //linha CorMarinho embaixo do cabeçalho da 1ª página
+  LarguraLogoRelatorio    = 98;   //logo claro à direita do cabeçalho (mockup .wm img)
+  AlturaLogoRelatorio     = 20;
+  ResolucaoLogoRelatorio  = 600;  //dpi da imagem do logo desenhada pelo Skia (nítida no papel)
+  EspacoLogoRelatorio     = 16;   //texto do cabeçalho -> logo (a pasta é cortada antes disto)
+  TamanhoMarcaRelatorio   = 12;   //"ProXML" em texto, se o logo não puder ser desenhado (Semibold)
+  PaddingCelulaRelatorio  = 6;    //padding horizontal do texto nas colunas (mockup .rt td)
+  //Colunas do Relatório de Notas: Nº · Mod. · Data · Chave (o resto) · Valor · Base ICMS · ICMS
+  LarguraRelNumero        = 64;   //52 no tokens.md; 64 por decisão do usuário (nNF de até 9 dígitos), tirados da Chave
+  LarguraRelModelo        = 36;
+  LarguraRelData          = 68;
+  LarguraRelValor         = 92;
+  LarguraRelBaseICMS      = 96;
+  LarguraRelICMS          = 80;
+  //Colunas do Relatório IBS/CBS (decisão D9): Nº · Modelo · Data · Base IBS/CBS (o resto) · IBS UF ·
+  //IBS Mun. · IBS · CBS
+  LarguraRelIBSNumero     = 60;
+  LarguraRelIBSModelo     = 56;
+  LarguraRelIBSData       = 76;
+  LarguraRelIBSUF         = 96;
+  LarguraRelIBSMun        = 100;
+  LarguraRelIBS           = 88;
+  LarguraRelCBS           = 88;
+  //"Mod." e as datas são um pouco mais largos que a coluna menos o padding: nessas colunas o texto
+  //usa só este padding (título e dado continuam com o mesmo Left/Width)
+  PaddingCelulaEstreita   = 2;
+
   //Ícones
   TamanhoIconePequeno     = 16;   //botões, campos, cards
   TamanhoIconeDica        = 14;   //dicas visíveis, indicador do filtro e "Configurações salvas"
@@ -251,6 +283,10 @@ function FormatarMoeda(const Valor: Double): string;
 //Configuração pt-BR usada por FormatarMoeda (vírgula decimal, ponto de milhar)
 function FormatoPtBR: TFormatSettings;
 
+//Valor sem o "R$", no mesmo formato pt-BR: "1.234.567,89". Colunas e totais dos relatórios
+//impressos (decisão D11: o "(R$)" fica só no título da coluna)
+function FormatarValor(const Valor: Double): string;
+
 implementation
 
 uses
@@ -271,7 +307,7 @@ end;
 
 function FonteAntiga(const Nome: string): Boolean;
 begin
-    //Fontes que o tema substitui na tela. O Courier New dos relatórios fica para a etapa 4.8
+    //Fontes que o tema substitui na tela. Os relatórios definem as fontes deles (etapa 4.8)
     Result := SameText(Nome, 'Tahoma') or SameText(Nome, 'MS Sans Serif');
 end;
 
@@ -341,6 +377,11 @@ end;
 function FormatarMoeda(const Valor: Double): string;
 begin
     Result := FormatFloat('"R$ "#,##0.00', Valor, FFormatoPtBR);
+end;
+
+function FormatarValor(const Valor: Double): string;
+begin
+    Result := FormatFloat('#,##0.00', Valor, FFormatoPtBR);
 end;
 
 initialization
