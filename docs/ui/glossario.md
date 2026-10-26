@@ -207,7 +207,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 9.14 | `QRLabel610` / `QRLabelValorTotal` | P | TOTAL · R$ 11201,15 | Total · {n} notas · 1.234.567,89 (na coluna Valor) | Linha de total (D8) |
 | 9.15 | `QRLabel621` / `QRLabelTotalBC` | P | BASE DE CÁLCULO · R$ … | *(valor na coluna Base ICMS)* | |
 | 9.16 | `QRLabel613` / `QRLabelTotalICMS` | P | ICMS · R$ … | *(valor na coluna ICMS)* | |
-| 9.17 | legenda do total (novo) | P | — | NF-e 55: {a} notas · NFC-e 65: {b} notas · notas não autorizadas não entram no relatório | Só no filtro Todos mostra os dois modelos |
+| 9.17 | legenda do total (novo) | P | — | NF-e 55: {a} notas · NFC-e 65: {b} notas · notas não autorizadas não entram no relatório | Só no filtro Todos mostra os dois modelos. Singular: "NF-e 55: 1 nota" (aprovado em 26/10/2026, 4.8) |
 | 9.18 | continuação (novo) | P | — | Relatório de Notas · Modelo: {m} · continuação | Topo das páginas 2+ |
 | 9.19 | `QRSysData74` + `QRLabel609` + `QRSysData75` | P | 19/10/2026 13:24:10 · Desenvolvido por Caique Garcia \| Email caique.garciatst@gmail.com · 1 | Gerado pelo ProXML v{versão} · {dd/mm/aaaa hh:mm} · Página {x} de {y} | R8; sem e-mail |
 | 9.20 | `Label186` (no formulário) | R | 41 | *(remover)* | Rótulo de teste esquecido |
@@ -230,7 +230,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 10.12 | `QRLabelCBS` | P | CBS | CBS (R$) | |
 | 10.13 | `QRLabelQt` | P | 0 *(número solto)* | *(entra na linha 10.2)* | |
 | 10.14 | totais (`QRLabelTitulo…` + `QRLabelTotal…`) | P | BASE IBS/CBS · IBS UF · IBS MUNICÍPIO · IBS · CBS · QUANTIDADE DE NOTAS | Total · {n} notas (valores embaixo de cada coluna) | D8 |
-| 10.15 | legenda do total (novo) | P | — | {n} de {m} notas do filtro têm o grupo IBS/CBS | |
+| 10.15 | legenda do total (novo) | P | — | {n} de {m} notas do filtro têm o grupo IBS/CBS | Singular: "1 de {m} notas do filtro tem o grupo IBS/CBS"; no 10.2/10.3, "1 nota com IBS/CBS" (aprovado em 26/10/2026, 4.8) |
 | 10.16 | continuação (novo) | P | — | Relatório IBS/CBS · Modelo: {m} · continuação | |
 | 10.17 | `QRSysDataData` + `QRLabelDesenvolvido` + `QRSysDataPagina` | P | {data hora} · Desenvolvido por Caique Garcia \| Email caique.garciatst@gmail.com · {página} | Gerado pelo ProXML v{versão} · {dd/mm/aaaa hh:mm} · Página {x} de {y} | |
 
