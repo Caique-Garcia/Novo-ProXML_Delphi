@@ -45,7 +45,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 2.11 | Processar (novo) | H | — | Ler os XMLs da pasta (F5) | |
 | 2.12 | Processar desabilitado (novo) | H | — | Selecione uma pasta primeiro. | Sem pasta, Processar fica desabilitado |
 | 2.13 | `SpeedButton1Click` | M | Por favor selecione um repositório !! | Selecione uma pasta com XMLs. | Só por segurança: com o botão desabilitado ela não deve aparecer |
-| 2.14 | pasta salva que sumiu (novo) | M | — | A pasta não foi encontrada:<br>{pasta}<br><br>Selecione outra pasta. | Última pasta restaurada (4.2) que não existe mais |
+| 2.14 | pasta salva que sumiu (novo) | M | — | A pasta não foi encontrada:<br>{pasta}<br><br>Selecione outra pasta. | Última pasta restaurada (4.2) que não existe mais. Na faixa, "A pasta não foi encontrada:" em Semibold e o mesmo alinhamento das outras faixas (28/10/2026, 4.9) |
 | 2.15 | `ProcessarXMLs` | F | Não encontrado arquivos XMLs no diretótio selecionado! | Nenhum XML encontrado na pasta selecionada. | Faixa de aviso no Resumo |
 
 ## 3. Menu lateral
@@ -87,7 +87,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 5.10 | cancelado (novo) | F | — | **Processamento cancelado.** Nenhuma nota foi alterada. | Faixa de aviso (PD-3) |
 | 5.11 | cancelado (novo) | F | — | {x} de {n} arquivos tinham sido lidos. Clique em Processar para começar de novo. | |
 | 5.12 | contadores (novo) | R | — | Autorizadas · Ignoradas · Com erro | Ignoradas = não autorizadas + outro modelo; Com erro = não foi possível ler |
-| 5.13 | contadores (novo) | R | — | {t} s · {n} arquivos lidos | Ex.: "4,2 s · 132 arquivos lidos" |
+| 5.13 | contadores (novo) | R | — | {t} s · {n} arquivos lidos | Menos de 0,1 s: "< 0,1 s · {n} arquivos lidos" (aprovado em 28/10/2026, 4.9). Ex.: "4,2 s · 132 arquivos lidos" |
 | 5.14 | log (novo) | R | — | Detalhes da leitura | Título do quadro do log |
 | 5.15 | log (novo) | R | — | Processado em {dd/mm/aaaa hh:mm} | |
 | 5.16 | `uCalculadoraXML` (FalhaModelo) | L | XML {arquivo} - Falha ao recuperar modelo | {arquivo}: não foi possível identificar o modelo. | Conta como Com erro |
@@ -174,7 +174,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 8.3 | opção 1 (novo) | R | — | Relatório de Notas | |
 | 8.4 | opção 1 (novo) | F | — | Nº, modelo, data, chave, valor da nota, base de cálculo do ICMS e ICMS de cada nota, com os totais no fim. | |
 | 8.5 | opção 2 (novo) | R | — | Relatório IBS/CBS | |
-| 8.6 | opção 2 (novo) | F | — | Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS das notas que têm o grupo IBS/CBS. {x} de {n} notas têm IBS/CBS. | |
+| 8.6 | opção 2 (novo) | F | — | Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS das notas que têm o grupo IBS/CBS. {x} de {n} notas têm IBS/CBS. | Singular: "{x} de 1 nota tem IBS/CBS." (registrado em 28/10/2026, 4.9) |
 | 8.7 | botões (novo) | B/H | — | Gerar relatório · *hint:* Gravar as notas e abrir a visualização do relatório | |
 | 8.8 | sem notas (novo) | F | — | Processe uma pasta para gerar relatórios. | Dica visível ao lado dos botões desabilitados |
 | 8.8a | sem notas no modelo (novo) | F | — | Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima. | Há notas carregadas, mas nenhuma no filtro de modelo. Aprovado em 20/10/2026 (4.4). Também no painel da tela Notas (sem busca), aprovado em 21/10/2026 (4.5) |
@@ -254,7 +254,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 11.14 | enviando (novo) | F | — | Compactando e enviando {n} XMLs. Isso pode levar alguns segundos. | |
 | 11.15 | `btnEnviarEmailClick` / `EnviaArquivo` | M | Sem arquivos para enviar! | Nenhuma nota para enviar. Processe uma pasta primeiro. | Duas ocorrências. Com o botão desabilitado, vira o texto 11.5/11.6 |
 | 11.16 | `EnviaArquivo` | M→F | Email enviado com sucesso!! | **E-mail enviado** para {destino} às {hh:mm}. | X2. Faixa de sucesso, sem caixa |
-| 11.17 | erro no envio (novo; hoje a exceção sobe sem tratamento) | F | — | **Não foi possível enviar o e-mail.**<br>O servidor respondeu: {motivo}. Confira os dados em Configurações e use Testar conexão. | Faixa de erro + LOG |
+| 11.17 | erro no envio (novo; hoje a exceção sobe sem tratamento) | F | — | **Não foi possível enviar o e-mail.**<br>O servidor respondeu: {motivo}. Confira os dados em Configurações e use Testar conexão. | Faixa de erro + LOG. `{motivo}` = resposta do servidor a partir do código de 3 dígitos (sem o prefixo do ACBr, ex.: "SMTP Error: …"); sem código, a mensagem original; sem repetir o ponto final. O LOG guarda a mensagem completa (28/10/2026, 4.9) |
 | 11.18 | validação (novo) | F | — | Informe um e-mail válido. Exemplo: nome@empresa.com.br | E5. Um só destinatário (decisão de 26/10/2026) |
 | 11.19 | SMTP não configurado (novo) | F | — | Configure o e-mail de envio em Configurações antes de enviar. | Faixa informativa; Enviar desabilitado |
 | 11.20 | WinRAR ausente (novo) | F | — | **Não foi possível compactar os XMLs.** WinRAR não encontrado em {pasta do ProXML}. | Até o ZIP do Plano 2 |

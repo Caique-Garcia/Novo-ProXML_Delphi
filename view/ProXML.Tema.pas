@@ -169,7 +169,6 @@ const
 
   //Resumo (tokens.md, seções 5.8 a 5.10; mockup resumo.html), etapa 4.6
   EspacoBlocos            = 16;   //entre os blocos do Resumo (contadores, faixa, log)
-  PaddingFaixaCompacta    = 8;    //padding vertical da faixa de aviso entre os contadores e o log
   PaddingProgressoVertical   = 32;  //quadro "Lendo os XMLs…"
   PaddingProgressoHorizontal = 48;
   EspacoProgresso         = 12;   //título -> barra -> contagem -> Cancelar
