@@ -17,6 +17,7 @@ Só tema claro. Identidade mantida: marinho `#171A21` e azul `#2067CA`.
 |-------|-----|---------|----------------|-----|
 | `CorMarinho` | `#171A21` | `RGB(23, 26, 33)` | `$00211A17` | Cabeçalho, linha do cabeçalho do relatório, aviso flutuante |
 | `CorMarinhoTexto` | `#C9CED6` | `RGB(201, 206, 214)` | `$00D6CEC9` | Texto secundário sobre o marinho ("Sobre") |
+| `CorTextoSobreMarinho` | `#FFFFFF` | `RGB(255, 255, 255)` | `$00FFFFFF` | "Sobre" ativo e texto do aviso flutuante (17,41:1 sobre `CorMarinho`). Registrado na 4.9 (28/10/2026); já usado no app |
 | `CorPrimaria` | `#2067CA` | `RGB(32, 103, 202)` | `$00CA6720` | Botão primário, item ativo, foco, links, ícones de ação |
 | `CorPrimariaHover` | `#1A56AB` | `RGB(26, 86, 171)` | `$00AB561A` | Hover do primário, título da coluna ordenada |
 | `CorPrimariaPressionada` | `#164A93` | `RGB(22, 74, 147)` | `$00934A16` | Botão primário pressionado |

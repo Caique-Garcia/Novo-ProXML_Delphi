@@ -440,7 +440,7 @@ type
     PnlAvisoPasta: TPanel;
     PnlAvisoPastaBarra: TPanel;
     SkSvgAvisoPasta: TSkSvg;
-    LabelAvisoPasta: TLabel;
+    PbxAvisoPasta: TPaintBox;
     //Tela Carregando (etapa 4.4; tokens.md 5.14): animação do ProXML.FrameLoad, operação e legenda
     PnlCarregando: TPanel;
     PnlCarregandoFundo: TPanel;
@@ -501,7 +501,9 @@ type
     FRolagemConfig: TScrollBox;
     FMaximizarAoMostrar: Boolean;   //janela salva maximizada: maximiza no FormShow
     FPPIAtual : Integer;
-    FPastaNaoEncontrada: string;   //pasta do aviso 2.14 (o texto da faixa encurta o caminho)       //escala atual da tela (o PixelsPerInch do 10.2 fica com o valor do .dfm)
+    FPastaNaoEncontrada: string;   //pasta do aviso 2.14 (o texto da faixa encurta o caminho)
+    FTrechosAvisoPasta : TTrechosTexto;  //texto da faixa 2.14 (etapa 4.9: mesmo desenho das outras faixas)
+    FJanelaCampoPasta  : TWndMethod;     //WindowProc original do campo da pasta (etapa 4.9, A1)       //escala atual da tela (o PixelsPerInch do 10.2 fica com o valor do .dfm)
     //Etapa 4.4: tela Carregando e moldura do PageControl
     FCarregando         : Boolean;        //tela Carregando aberta (menu bloqueado)
     FFocoAntesCarregando: TWinControl;    //controle que tinha o foco ao abrir a tela Carregando
@@ -544,6 +546,7 @@ type
     FCampoMensagemConfig: TCampoFormulario;
     FAjustandoRolagem   : Boolean;        //evita reentrada no ajuste das telas com rolagem de reserva
     FTrechosFaixaEnviar : TTrechosTexto;  //texto da faixa da tela Enviar
+    FPastaFaixaEnviar   : string;         //pasta do WinRAR na faixa 11.20 (cortada no meio na largura da faixa)
     FResultadoEnvio     : Boolean;        //a faixa mostra o resultado do último envio (fica até sair da tela)
     FAnexoQuantidade    : Integer;        //XMLs do filtro de modelo (quadro do anexo, 11.3)
     FAnexoBytes         : Int64;          //soma do tamanho dos XMLs, sem compactar (11.4)
@@ -643,6 +646,10 @@ type
     procedure AtualizarBordaCampoPasta(const ComFoco: Boolean);
     procedure MostrarAvisoPastaNaoEncontrada(const Pasta: string);
     procedure PnlAvisoPastaResize(Sender: TObject);
+    procedure PbxAvisoPastaPaint(Sender: TObject);
+    procedure JanelaCampoPasta(var Message: TMessage);
+    function  LarguraTextoFaixa(const LarguraFaixa: Integer): Integer;
+    procedure MontarTrechosSemWinRAR;
     procedure AjustarLargurasBarraPasta;
     procedure WMDropFiles(var Message: TWMDropFiles); message WM_DROPFILES;
     procedure WMDpiChanged(var Message: TWMDpi); message WM_DPICHANGED;
@@ -1091,6 +1098,55 @@ begin
     Result := Trim(Result);
     while (Result <> '') and (Result[Length(Result)] = '.') do
         Delete(Result, Length(Result), 1);
+end;
+
+procedure AdicionarTrecho(var Trechos: TTrechosTexto; const Texto: string; const Estilo: TEstiloTrecho;
+  const NovaLinha: Boolean = False);
+begin
+    //Acrescenta um trecho ao texto de uma faixa de status
+    SetLength(Trechos, Length(Trechos) + 1);
+    Trechos[High(Trechos)].Texto     := Texto;
+    Trechos[High(Trechos)].Estilo    := Estilo;
+    Trechos[High(Trechos)].NovaLinha := NovaLinha;
+end;
+
+function PosicaoCodigoSMTP(const Linha: string): Integer;
+var
+    P: Integer;
+begin
+    //Posição do código de resposta SMTP (3 dígitos de 200 a 599, sozinho, seguido de espaço, "-" ou fim
+    //da linha) ou 0. "10061 - Connection refused" (erro de socket) não conta
+    Result := 0;
+    for P := 1 to Length(Linha) - 2 do
+        if CharInSet(Linha[P], ['2'..'5']) and CharInSet(Linha[P + 1], ['0'..'9']) and
+           CharInSet(Linha[P + 2], ['0'..'9']) and ((P = 1) or (Linha[P - 1] = ' ')) and
+           ((P + 3 > Length(Linha)) or CharInSet(Linha[P + 3], [' ', '-'])) then
+            Exit(P);
+end;
+
+function RespostaDoServidor(const Texto: string): string;
+var
+    Linhas : TStringList;
+    I, P   : Integer;
+    Linha  : string;
+begin
+    //Glossário 11.17 (revisão da 4.9): só a resposta do servidor, a partir do código de 3 dígitos (ex.:
+    //"530 5.7.0 ..."), sem o prefixo do ACBr ("SMTP Error: Unable to send MailFrom."). Vale a última linha
+    //com código; sem código (ex.: falha de conexão), a mensagem original. O LOG guarda o texto completo
+    Result := Texto;
+    Linhas := TStringList.Create;
+    try
+        Linhas.Text := Texto;
+        for I := Linhas.Count - 1 downto 0 do
+        begin
+            Linha := Trim(Linhas[I]);
+            P := PosicaoCodigoSMTP(Linha);
+            if P > 0 then
+                Exit(Copy(Linha, P, MaxInt));
+        end;
+    finally
+        Linhas.Free;
+    end;
 end;
 
 { TCampoFormulario }
@@ -1749,6 +1805,9 @@ begin
   //Devolve o WindowProc original do PageControl1 (trocado em PrepararTelaRelatorios)
   if Assigned(FJanelaPaginas) then
     PageControl1.WindowProc := FJanelaPaginas;
+  //... e o do campo da pasta (trocado na preparação da barra de pasta)
+  if Assigned(FJanelaCampoPasta) then
+    EditCaminho.WindowProc := FJanelaCampoPasta;
 end;
 
 procedure TFormPrincipal.ConfigACBR();
@@ -1799,6 +1858,11 @@ begin
 
    //Abre no Resumo, com o item do menu sincronizado
    MostrarTela(tlResumo);
+
+   //Etapa 4.9 (A1): o foco inicial fica em "Selecionar…" (primeiro passo do fluxo pelo teclado: Enter
+   //abre o seletor; depois F5 processa). Com o foco no campo da pasta o Windows esconde o TextHint 2.2
+   if (btnSelecionar <> nil) and btnSelecionar.CanFocus then
+       ActiveControl := btnSelecionar;
 
    //Pastas e caminhos do ACBr (DANFE). Falha aqui não impede o app de abrir: vai para o LOG e o erro
    //aparece ao gerar o DANFE
@@ -2745,53 +2809,74 @@ begin
 end;
 
 procedure TFormPrincipal.MostrarAvisoPastaNaoEncontrada(const Pasta: string);
-var
-    Medida: TBitmap;
 begin
-    //Faixa de aviso (tokens.md 5.8): fundo CorAvisoSuave, barra de 4 px e ícone triangle-alert
-    //em CorAviso, texto 10 pt CorTexto. Texto do glossário 2.14, sem a linha em branco
-    PnlAvisoPasta.Color      := CorAvisoSuave;
-    PnlAvisoPastaBarra.Color := CorAviso;
-    SkSvgAvisoPasta.Svg.Source        := IconeAviso;
-    SkSvgAvisoPasta.Svg.OverrideColor := CorAlpha(CorAviso);
-    AplicarFonte(LabelAvisoPasta.Font, FonteTexto, TamanhoCorpo, CorTexto);
-    FPastaNaoEncontrada := Pasta;
-    PnlAvisoPasta.Hint      := Pasta;
-    PnlAvisoPasta.ShowHint  := True;
-    PnlAvisoPasta.OnResize  := PnlAvisoPastaResize;
+    //Faixa de aviso (tokens.md 5.8), com o mesmo desenho das outras faixas (etapa 4.9, A3): barra de 4 px,
+    //ícone triangle-alert 16 px depois dela e texto 12 px depois do ícone. Glossário 2.14 sem a linha em
+    //branco, com "A pasta não foi encontrada:" em Semibold
+    PrepararFaixa(PnlAvisoPasta, PnlAvisoPastaBarra, SkSvgAvisoPasta, CorAvisoSuave, CorAviso, IconeAviso);
+    PbxAvisoPasta.OnPaint  := PbxAvisoPastaPaint;
+    FPastaNaoEncontrada    := Pasta;
+    PnlAvisoPasta.Hint     := Pasta;
+    PnlAvisoPasta.ShowHint := True;
+    PnlAvisoPasta.OnResize := PnlAvisoPastaResize;
+    PnlAvisoPasta.Visible  := True;
     PnlAvisoPastaResize(PnlAvisoPasta);
-
-    //Altura para as 3 linhas + padding da faixa em cima e embaixo
-    Medida := TBitmap.Create;
-    try
-        Medida.Canvas.Font.Assign(LabelAvisoPasta.Font);
-        PnlAvisoPasta.Height := 3 * Medida.Canvas.TextHeight('Ag') + 2 * Escalar(PaddingFaixaVertical);
-    finally
-        Medida.Free;
-    end;
-    SkSvgAvisoPasta.Margins.Bottom := PnlAvisoPasta.Height - Escalar(PaddingFaixaVertical) - Escalar(TamanhoIconeMenu);
-
-    PnlAvisoPasta.Visible := True;
 end;
 
 procedure TFormPrincipal.PnlAvisoPastaResize(Sender: TObject);
 var
-    Medida: TBitmap;
+    Fonte: TFont;
 begin
-    //Caminho longo sem espaços não quebra linha: encurta no meio ("C:\...\pasta") para caber
-    //na largura da faixa; o caminho completo fica na dica
-    if FPastaNaoEncontrada = '' then
+    //Caminho longo: cortado no meio com "…" na largura do texto da faixa, numa linha só; o caminho
+    //completo fica na dica
+    if (FPastaNaoEncontrada = '') or (not PnlAvisoPasta.Visible) then
         Exit;
 
-    Medida := TBitmap.Create;
+    Fonte := TFont.Create;
     try
-        Medida.Canvas.Font.Assign(LabelAvisoPasta.Font);
-        LabelAvisoPasta.Caption := 'A pasta não foi encontrada:' + sLineBreak +
-                                   MinimizeName(FPastaNaoEncontrada, Medida.Canvas, LabelAvisoPasta.Width) +
-                                   sLineBreak + 'Selecione outra pasta.';
+        FonteDoTrecho(Fonte, etrNormal);
+        FTrechosAvisoPasta := nil;
+        AdicionarTrecho(FTrechosAvisoPasta, 'A pasta não foi encontrada:', etrDestaque);
+        AdicionarTrecho(FTrechosAvisoPasta, EncurtarNoMeio(Fonte, FPastaNaoEncontrada,
+                        LarguraTextoFaixa(PnlAvisoPasta.ClientWidth)), etrNormal, True);
+        AdicionarTrecho(FTrechosAvisoPasta, 'Selecione outra pasta.', etrNormal, True);
     finally
-        Medida.Free;
+        Fonte.Free;
     end;
+    AjustarFaixa(PnlAvisoPasta, PnlAvisoPastaBarra, SkSvgAvisoPasta, PbxAvisoPasta, FTrechosAvisoPasta,
+                 PaddingFaixaVertical);
+    PbxAvisoPasta.Invalidate;
+end;
+
+procedure TFormPrincipal.PbxAvisoPastaPaint(Sender: TObject);
+begin
+    DesenharTrechos(PbxAvisoPasta.Canvas, FTrechosAvisoPasta, PbxAvisoPasta.ClientRect, True);
+end;
+
+function TFormPrincipal.LarguraTextoFaixa(const LarguraFaixa: Integer): Integer;
+begin
+    //Largura do texto de uma faixa de status (a mesma conta do AjustarFaixa): barra, padding de 16 px,
+    //ícone de 20 px, 12 px até o texto e 16 px antes da borda direita
+    Result := Max(1, LarguraFaixa - Escalar(BarraFaixa) - 2 * Escalar(PaddingFaixaHorizontal) -
+                     Escalar(TamanhoIconeMenu) - Escalar(EspacoIconeFaixa));
+end;
+
+procedure TFormPrincipal.JanelaCampoPasta(var Message: TMessage);
+begin
+    //Etapa 4.9 (A1): campo da pasta sem ReadOnly (para o Windows mostrar o TextHint 2.2), mas sem edição:
+    //a pasta só muda pelo seletor, pelo arrastar e soltar ou pelo código. Continuam o Ctrl+A (selecionar)
+    //e o Ctrl+C (copiar o caminho)
+    case Message.Msg of
+        WM_CHAR, WM_IME_CHAR:
+            if (Message.WParam <> 1) and (Message.WParam <> 3) then
+                Exit;
+        WM_KEYDOWN:
+            if (Message.WParam = VK_DELETE) or ((Message.WParam = VK_INSERT) and (GetKeyState(VK_SHIFT) < 0)) then
+                Exit;
+        WM_PASTE, WM_CUT, WM_CLEAR, WM_UNDO, EM_UNDO, EM_REPLACESEL, WM_CONTEXTMENU:
+            Exit;
+    end;
+    FJanelaCampoPasta(Message);
 end;
 
 procedure TFormPrincipal.EditCaminhoEnter(Sender: TObject);
@@ -2950,6 +3035,11 @@ begin
     EditCaminho.OnChange := EditCaminhoChange;
     EditCaminho.OnEnter  := EditCaminhoEnter;
     EditCaminho.OnExit   := EditCaminhoExit;
+    //Etapa 4.9 (A1): o Windows não mostra o TextHint de campo somente leitura. O campo deixa de ser
+    //ReadOnly e a edição pelo teclado fica bloqueada no WindowProc (JanelaCampoPasta)
+    EditCaminho.ReadOnly := False;
+    FJanelaCampoPasta    := EditCaminho.WindowProc;
+    EditCaminho.WindowProc := JanelaCampoPasta;
     PnlCampoPastaFundo.OnClick := SelecionarPastaClick;
     SkSvgPasta.OnClick         := SelecionarPastaClick;
     SkSvgPasta.Svg.Source        := IconePasta;
@@ -4799,16 +4889,6 @@ end;
 
 { Plano 4, etapa 4.6: leitura e envio em segundo plano, bloqueio da tela e Resumo }
 
-procedure AdicionarTrecho(var Trechos: TTrechosTexto; const Texto: string; const Estilo: TEstiloTrecho;
-  const NovaLinha: Boolean = False);
-begin
-    //Acrescenta um trecho ao texto de uma faixa de status
-    SetLength(Trechos, Length(Trechos) + 1);
-    Trechos[High(Trechos)].Texto     := Texto;
-    Trechos[High(Trechos)].Estilo    := Estilo;
-    Trechos[High(Trechos)].NovaLinha := NovaLinha;
-end;
-
 function TFormPrincipal.Bloqueado: Boolean;
 begin
     Result := FBloqueios <> [];
@@ -5039,7 +5119,7 @@ begin
                          FTrechosFaixaResumo, PaddingFaixaVertical);
         if PnlAvisoResumo.Visible then
             AjustarFaixa(PnlAvisoResumo, PnlAvisoResumoBarra, SkSvgAvisoResumo, PbxAvisoResumo,
-                         FTrechosAvisoResumo, PaddingFaixaCompacta);
+                         FTrechosAvisoResumo, PaddingFaixaVertical);
         AjustarLayoutResumoVazio;
         AjustarLayoutProgresso;
         AjustarContadores;
@@ -5326,7 +5406,7 @@ procedure TFormPrincipal.PnlAvisoResumoResize(Sender: TObject);
 begin
     if PnlAvisoResumo.Visible then
         AjustarFaixa(PnlAvisoResumo, PnlAvisoResumoBarra, SkSvgAvisoResumo, PbxAvisoResumo, FTrechosAvisoResumo,
-                     PaddingFaixaCompacta);
+                     PaddingFaixaVertical);
 end;
 
 procedure TFormPrincipal.FonteDoTrecho(Fonte: TFont; const Estilo: TEstiloTrecho);
@@ -5513,7 +5593,7 @@ begin
         //Entre os contadores e o log
         PnlAvisoResumo.Top := PnlContadores.Top + PnlContadores.Height + 1;
         AjustarFaixa(PnlAvisoResumo, PnlAvisoResumoBarra, SkSvgAvisoResumo, PbxAvisoResumo, FTrechosAvisoResumo,
-                     PaddingFaixaCompacta);
+                     PaddingFaixaVertical);
         PbxAvisoResumo.Invalidate;
     end;
 end;
@@ -5674,14 +5754,28 @@ end;
 
 procedure TFormPrincipal.ListBoxLogMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
-    Indice : Integer;
-    Texto  : string;
+    Indice  : Integer;
+    Texto   : string;
+    Medida  : TBitmap;
+    Largura : Integer;
 begin
-    //Dica com a linha inteira do log sob o mouse (a lista corta a linha longa com "…")
+    //Dica com a linha inteira do log sob o mouse, só quando a lista corta a linha com "…" (revisão da
+    //4.9, A6). A largura do texto é a mesma do ListBoxLogDrawItem
     Indice := ListBoxLog.ItemAtPos(Point(X, Y), True);
     Texto  := '';
     if Indice >= 0 then
-        Texto := ListBoxLog.Items[Indice];
+    begin
+        Medida := TBitmap.Create;
+        try
+            Medida.Canvas.Font.Assign(ListBoxLog.Font);
+            Largura := ListBoxLog.ClientWidth - 2 * Escalar(PaddingLinhaLog) -
+                       IconeLog(TTipoLinhaLog(NativeInt(ListBoxLog.Items.Objects[Indice]))).Width - Escalar(EspacoIconeLog);
+            if Medida.Canvas.TextWidth(ListBoxLog.Items[Indice]) > Largura then
+                Texto := ListBoxLog.Items[Indice];
+        finally
+            Medida.Free;
+        end;
+    end;
     if ListBoxLog.Hint <> Texto then
     begin
         ListBoxLog.Hint := Texto;
@@ -5972,7 +6066,11 @@ begin
     LabelNumeroAutorizadas.Caption := IntToStr(Resultado.Autorizadas);
     LabelNumeroIgnoradas.Caption   := IntToStr(Resultado.Ignoradas);
     LabelNumeroComErro.Caption     := IntToStr(Resultado.ComErro);
-    LabelNumeroTempo.Caption       := FormatFloat('0.0', Resultado.DuracaoMs / 1000, FormatoPtBR) + ' s';
+    //5.13 (revisão da 4.9): menos de 0,1 s aparece como "< 0,1 s"
+    if Resultado.DuracaoMs < 100 then
+        LabelNumeroTempo.Caption := '< 0,1 s'
+    else
+        LabelNumeroTempo.Caption := FormatFloat('0.0', Resultado.DuracaoMs / 1000, FormatoPtBR) + ' s';
     LabelRotuloTempo.Caption       := TextoArquivosLidos(Resultado.ArquivosLidos);
 
     //"Processado em dd/mm/aaaa hh:mm" (5.15)
@@ -6169,6 +6267,8 @@ begin
         //Resultado numa faixa da própria tela (etapa 4.7), sem caixa de diálogo. Fica até sair da tela ou
         //enviar de novo. Os erros também vão para o LOG
         Trechos := nil;
+        FPastaFaixaEnviar := '';
+        PnlFaixaEnviar.Hint := '';
         case Resultado of
             reEnviado:
             begin
@@ -6182,10 +6282,13 @@ begin
             begin
                 //11.20
                 GravarLog('Enviar e-mail', 'WinRAR não encontrado em ' + ExtractFilePath(ParamStr(0)));
-                AdicionarTrecho(Trechos, 'Não foi possível compactar os XMLs.', etrDestaque);
-                AdicionarTrecho(Trechos, ' WinRAR não encontrado em ' +
-                                         ExcludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + '.', etrNormal);
-                MostrarFaixaEnviar(tfErro, Trechos, True);
+                //Revisão da 4.9 (A5): a pasta é cortada no meio com "…" na largura da faixa (o ponto final
+                //continua) e o caminho completo fica na dica da faixa
+                FPastaFaixaEnviar := ExcludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
+                PnlFaixaEnviar.Hint     := FPastaFaixaEnviar;
+                PnlFaixaEnviar.ShowHint := True;
+                MontarTrechosSemWinRAR;
+                MostrarFaixaEnviar(tfErro, FTrechosFaixaEnviar, True);
             end;
             reSemAnexo:
             begin
@@ -6201,7 +6304,8 @@ begin
             //11.17
             GravarLog(ClasseErro, 'Enviar e-mail: ' + Erro);
             AdicionarTrecho(Trechos, 'Não foi possível enviar o e-mail.', etrDestaque);
-            AdicionarTrecho(Trechos, 'O servidor respondeu: ' + MotivoNumaLinha(Erro) + '. Confira os dados em ' +
+            AdicionarTrecho(Trechos, 'O servidor respondeu: ' + MotivoNumaLinha(RespostaDoServidor(Erro)) +
+                                     '. Confira os dados em ' +
                                      'Configurações e use Testar conexão.', etrNormal, True);
             MostrarFaixaEnviar(tfErro, Trechos, True);
         end;
@@ -6736,6 +6840,9 @@ begin
     if PnlFaixaEnviar.Visible then
     begin
         PnlFaixaEnviar.SetBounds(X, Y, W, PnlFaixaEnviar.Height);
+        //11.20: a pasta é cortada de novo na largura atual da faixa
+        if FPastaFaixaEnviar <> '' then
+            MontarTrechosSemWinRAR;
         AjustarFaixa(PnlFaixaEnviar, PnlFaixaEnviarBarra, SkSvgFaixaEnviar, PbxFaixaEnviar, FTrechosFaixaEnviar,
                      PaddingFaixaVertical);
         Inc(Y, PnlFaixaEnviar.Height + Espaco);
@@ -6810,6 +6917,24 @@ begin
     PbxFaixaEnviar.Invalidate;
 end;
 
+procedure TFormPrincipal.MontarTrechosSemWinRAR;
+var
+    Medida: TBitmap;
+begin
+    //11.20 com a pasta do ProXML cortada no meio para caber numa linha do texto da faixa (com o ponto final)
+    Medida := TBitmap.Create;
+    try
+        FonteDoTrecho(Medida.Canvas.Font, etrNormal);
+        FTrechosFaixaEnviar := nil;
+        AdicionarTrecho(FTrechosFaixaEnviar, 'Não foi possível compactar os XMLs.', etrDestaque);
+        AdicionarTrecho(FTrechosFaixaEnviar, ' WinRAR não encontrado em ' +
+                        EncurtarNoMeio(Medida.Canvas.Font, FPastaFaixaEnviar, LarguraTextoFaixa(PnlFaixaEnviar.ClientWidth) -
+                                       Medida.Canvas.TextWidth('.')) + '.', etrNormal);
+    finally
+        Medida.Free;
+    end;
+end;
+
 procedure TFormPrincipal.OcultarResultadoEnvio;
 begin
     //Saiu da tela Enviar ou enviou de novo: a faixa do último envio some (a 11.19 pode voltar)
@@ -6818,6 +6943,8 @@ begin
 
     FResultadoEnvio := False;
     FTrechosFaixaEnviar := nil;
+    FPastaFaixaEnviar := '';
+    PnlFaixaEnviar.Hint := '';
     PnlFaixaEnviar.Visible := False;
     AtualizarTelaEnviar;
 end;
@@ -7027,14 +7154,14 @@ begin
     Coluna := Escalar(EspacoColunasFormulario);
     Margem := btnSalvarConfig.MargemFoco;
 
-    //Título e subtítulo na mesma linha de 32 px, 8 px entre eles
+    //Título e subtítulo na mesma linha de 32 px, 16 px entre eles (mockup; revisão da 4.9, A7)
     Medida := TBitmap.Create;
     try
         Medida.Canvas.Font.Assign(Label1.Font);
         LarguraTexto := Medida.Canvas.TextWidth(Label1.Caption);
         Label1.SetBounds(X, Y, LarguraTexto, Escalar(AlturaTituloTela));
         Medida.Canvas.Font.Assign(Label2.Font);
-        Label2.SetBounds(X + LarguraTexto + Escalar(Espaco1), Y, Medida.Canvas.TextWidth(Label2.Caption),
+        Label2.SetBounds(X + LarguraTexto + Escalar(Espaco2), Y, Medida.Canvas.TextWidth(Label2.Caption),
                          Escalar(AlturaTituloTela));
         Medida.Canvas.Font.Assign(LabelSeguranca.Font);
         AlturaRotulo := Medida.Canvas.TextHeight('Ag');

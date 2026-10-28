@@ -289,7 +289,6 @@ object FormPrincipal: TFormPrincipal
             BevelInner = bvNone
             BevelOuter = bvNone
             BorderStyle = bsNone
-            ReadOnly = True
             TabOrder = 0
             TextHint = 'Selecione ou arraste uma pasta com XMLs de Nota Fiscal'
           end
@@ -760,34 +759,6 @@ object FormPrincipal: TFormPrincipal
                     ShowCaption = False
                     TabOrder = 0
                     Visible = False
-                    object SkSvgAvisoPasta: TSkSvg
-                      AlignWithMargins = True
-                      Left = 16
-                      Top = 12
-                      Width = 20
-                      Height = 20
-                      Margins.Left = 12
-                      Margins.Top = 12
-                      Margins.Right = 0
-                      Margins.Bottom = 44
-                      Align = alLeft
-                      ExplicitHeight = 52
-                    end
-                    object LabelAvisoPasta: TLabel
-                      AlignWithMargins = True
-                      Left = 48
-                      Top = 12
-                      Width = 832
-                      Height = 52
-                      Margins.Left = 12
-                      Margins.Top = 12
-                      Margins.Right = 16
-                      Margins.Bottom = 12
-                      Align = alClient
-                      AutoSize = False
-                      ShowAccelChar = False
-                      ExplicitWidth = 552
-                    end
                     object PnlAvisoPastaBarra: TPanel
                       Left = 0
                       Top = 0
@@ -798,6 +769,30 @@ object FormPrincipal: TFormPrincipal
                       ParentBackground = False
                       ShowCaption = False
                       TabOrder = 0
+                    end
+                    object SkSvgAvisoPasta: TSkSvg
+                      AlignWithMargins = True
+                      Left = 20
+                      Top = 12
+                      Width = 20
+                      Height = 20
+                      Margins.Left = 16
+                      Margins.Top = 12
+                      Margins.Right = 0
+                      Margins.Bottom = 44
+                      Align = alLeft
+                    end
+                    object PbxAvisoPasta: TPaintBox
+                      AlignWithMargins = True
+                      Left = 52
+                      Top = 12
+                      Width = 828
+                      Height = 52
+                      Margins.Left = 12
+                      Margins.Top = 12
+                      Margins.Right = 16
+                      Margins.Bottom = 12
+                      Align = alClient
                     end
                   end
                   object PnlFaixaResumo: TPanel
