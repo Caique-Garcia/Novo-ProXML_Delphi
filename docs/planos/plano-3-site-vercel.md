@@ -13,6 +13,9 @@ Site público que apresenta o ProXML, ensina a usar o app, leva ao download e ap
 | Imagens | Prints fornecidos pelo usuário |
 | SEO | Site com várias páginas, cada uma focada numa busca, e SEO técnico completo (ver 3.1) |
 | Monetização | **Sem anúncios.** Só o link de doação do Apoia.se: <https://apoia.se/proxmlferramenta> |
+| Reforma Tributária | Nova seção **"Reforma Tributária"** em destaque no menu, com página própria de dúvidas frequentes sobre o IVA dual (IBS e CBS), em linguagem simples, mostrando como o ProXML ajuda (ver "Seção Reforma Tributária" em 3.1) |
+
+> Atualizado em 29/10/2026: incluída a seção Reforma Tributária (IBS e CBS), com página de perguntas frequentes e foco de SEO nas buscas sobre a reforma.
 
 > Atualizado em 20/10/2026: sem anúncios, o site continua no plano Hobby (grátis) da Vercel. A política de uso justo da Vercel proíbe anúncios no Hobby, mas permite pedir doações.
 
@@ -28,7 +31,8 @@ O Google mostra uma página para poucos termos. Por isso, cada página cobre uma
 | `site/index.html` | `/` | Hero com download, Funcionalidades (NF-e 55 e NFC-e 65 com filtro por modelo, IBS/CBS e instalador), resumo do tutorial, seção "Apoie o projeto" | "leitor de XML NF-e grátis", "visualizador XML NFC-e" |
 | `site/tutorial.html` | `/tutorial` | Passo a passo completo, com **texto descritivo em cada passo** (não só prints) | "como abrir arquivo XML de nota fiscal", "somar valores XML NF-e" |
 | `site/gerar-danfe-xml.html` | `/gerar-danfe-xml` | Como gerar DANFE (55) e DANFCe (65) a partir do XML | "gerar DANFE a partir do XML grátis", "imprimir DANFCe pelo XML" |
-| `site/ibs-cbs.html` | `/ibs-cbs` | Guia de IBS/CBS no XML da NF-e e como o ProXML soma esses valores. Texto revisado pelo `nfe-fiscal` | "IBS CBS no XML da NF-e", "Reforma Tributária NT 2025.002" |
+| `site/reforma-tributaria.html` | `/reforma-tributaria` | **Página principal da seção Reforma Tributária**: o que é o IVA dual, IBS e CBS, cronograma, o que muda na nota fiscal, perguntas frequentes e como o ProXML ajuda (ver "Seção Reforma Tributária") | "reforma tributária IBS CBS", "o que é IBS e CBS", "IVA dual", "CBS 0,9% IBS 0,1% 2026", "cronograma reforma tributária" |
+| `site/ibs-cbs.html` | `/ibs-cbs` | Página técnica da seção: onde ficam IBS/CBS no XML da NF-e/NFC-e (grupos `IBSCBS` e `IBSCBSTot`) e como o ProXML soma esses valores. Linka para `/reforma-tributaria` e é linkada por ela. Texto revisado pelo `nfe-fiscal` | "IBS CBS no XML da NF-e", "IBSCBSTot", "NT 2025.002" |
 | `site/download.html` | `/download` | Setup recomendado + `.rar` portátil, aviso do SmartScreen com os prints 1–2 | "baixar ProXML" |
 | `site/perguntas-frequentes.html` | `/perguntas-frequentes` | Dúvidas comuns ("é seguro?", "funciona com NFC-e?", "precisa de internet?") | Buscas longas em formato de pergunta |
 | `site/404.html` | — | Página de erro com links para as principais | — |
@@ -55,6 +59,60 @@ Arquivos de apoio: `site/styles.css`, `site/img/`, `site/favicon.ico` (+ `favico
   - `cleanUrls: true` (URLs sem `.html`) e `trailingSlash: false`.
   - Cache longo para `img/`, `styles.css` e favicons.
 - CSS em um único arquivo, sem frameworks e sem fontes externas pesadas (usar fontes do sistema ou uma fonte só, com `font-display: swap`).
+
+#### Seção Reforma Tributária (IBS e CBS)
+Objetivo: ser a resposta clara para quem pesquisa a reforma no Google e mostrar que o ProXML já lê IBS e CBS das notas. As duas páginas (`/reforma-tributaria` e `/ibs-cbs`) formam um grupo de conteúdo: a primeira responde às dúvidas gerais e a segunda, às técnicas. Elas não repetem as mesmas perguntas, para não disputarem a mesma busca.
+
+**Destaque no site**
+- Item **"Reforma Tributária"** no menu de todas as páginas, com selo "Novo" (texto, não imagem) por 6 meses a partir da publicação. Depois disso, o selo é retirado.
+- Na página inicial, faixa logo abaixo do hero: "Reforma Tributária: o ProXML já soma IBS e CBS das suas notas", com link para `/reforma-tributaria` e para o download.
+- Links para `/reforma-tributaria` no rodapé, em `/perguntas-frequentes`, no `/tutorial` (passo dos cards) e em `/ibs-cbs`.
+
+**Estrutura de `/reforma-tributaria`** (nesta ordem)
+1. `<h1>`: "Reforma Tributária: IBS e CBS explicados de forma simples".
+2. Resposta curta logo abaixo (40–60 palavras) dizendo o que são IBS e CBS. É o formato que o Google costuma usar no trecho em destaque.
+3. "Atualizado em dd/mm/aaaa" visível, com o mesmo valor no JSON-LD e no `lastmod` do sitemap.
+4. Sumário com links âncora para cada bloco.
+5. **"Como o ProXML ajuda"**: caixa em destaque, com o print 7 (cards IBS e CBS), o print 14 (relatório IBS/CBS) e o botão de download. Pontos:
+   - Lê o grupo `IBSCBSTot` dos XMLs de NF-e (55) e NFC-e (65) e mostra os totais de IBS e CBS em cards.
+   - Soma Base IBS/CBS, IBS UF, IBS Município, IBS total e CBS de uma pasta inteira em segundos.
+   - Relatório IBS/CBS pronto para imprimir ou salvar em PDF, e exportação CSV com essas colunas.
+   - Filtro por modelo (Todos, NF-e 55, NFC-e 65).
+   - Grátis, roda no Windows e funciona sem internet: os XMLs não saem do computador.
+   - **Limite dito com clareza:** o ProXML soma os valores que estão no XML. Ele não calcula o imposto nem confere se a alíquota está certa.
+6. Linha do tempo 2026–2033 em `<table>` (ano e o que muda).
+7. Perguntas frequentes em blocos (ver abaixo).
+8. Glossário curto: IVA dual, IBS, CBS, Imposto Seletivo, split payment, cashback, `cClassTrib`, CST do IBS/CBS.
+9. Fontes oficiais com link (Receita Federal, LC 214/2025, Portal da NF-e com a NT 2025.002) e o aviso "Conteúdo informativo. Para decisões da sua empresa, consulte seu contador."
+10. Chamada final para baixar o ProXML.
+
+**Perguntas frequentes** (lista inicial; o `web-landing` escreve e o `nfe-fiscal` confere cada dado nas fontes oficiais antes de publicar)
+
+| Bloco | Perguntas |
+|-------|-----------|
+| O básico | O que é a reforma tributária do consumo? · O que é IVA dual? · O que é o IBS? · O que é a CBS? · Qual a diferença entre IBS e CBS? · Quais impostos vão acabar (PIS, Cofins, IPI, ICMS e ISS)? · O que é o Imposto Seletivo? |
+| Prazos | Quando a reforma começa? · O que muda em 2026 (ano de teste com CBS 0,9% e IBS 0,1%)? · Preciso pagar IBS e CBS em 2026? · Quando ICMS e ISS deixam de existir? |
+| Nota fiscal | O que muda na NF-e e na NFC-e? · O que é a NT 2025.002? · Onde aparecem IBS e CBS no XML? (resposta curta com link para `/ibs-cbs`) · O que é cClassTrib? (resposta curta com link para `/ibs-cbs`, onde fica o detalhe técnico) · Empresa do Simples Nacional precisa informar IBS e CBS na nota? · MEI precisa informar IBS e CBS na nota? |
+| Alíquotas e pagamento | Qual vai ser a alíquota do IBS e da CBS? · Quais produtos têm alíquota reduzida ou zero (ex.: cesta básica)? · O que é split payment? · O que é o cashback para famílias de baixa renda? · Os preços vão subir com a reforma? (só o que a lei prevê e estimativas oficiais, com data; sem opinião nem previsão própria) |
+| ProXML | Como conferir o total de IBS e CBS das minhas notas? · O ProXML calcula o IBS e a CBS? · Funciona com notas antigas, sem IBS/CBS? |
+
+Privacidade ("meus XMLs vão para a internet?") e preço ("quanto custa?") não viram perguntas aqui, porque já estão em `/perguntas-frequentes`. Aparecem como pontos na caixa "Como o ProXML ajuda", com link para lá.
+
+Regras de escrita:
+- Linguagem para quem não é contador: frases curtas, sem juridiquês, termos técnicos explicados na primeira vez e números com exemplo ("numa venda de R$ 100,00…").
+- Cada resposta começa pela resposta direta (sim, não, data ou valor) em 1–2 frases e depois detalha.
+- As perguntas usam as palavras que o usuário digita na busca.
+- Nenhum prazo, alíquota ou regra sem fonte oficial conferida. O que ainda depende de regulamentação aparece como "previsto" ou "estimado", com a data da informação.
+
+**HTML e SEO da seção**
+- Cada pergunta em `<details>`, com um `<h3>` dentro do `<summary>` e um `id` próprio (ex.: `#o-que-e-ibs`) para links diretos e compartilhamento. O conteúdo fechado continua no HTML, então o Google o indexa. A primeira pergunta de cada bloco fica aberta.
+- Cada bloco tem um `<h2>` com a palavra-chave (ex.: "Prazos da reforma tributária").
+- JSON-LD na página: `FAQPage` (só com perguntas e respostas **iguais** às visíveis), `Article` (`headline`, `datePublished`, `dateModified`, `author` Caique Garcia) e `BreadcrumbList` (Início › Reforma Tributária). Em `/ibs-cbs`, o breadcrumb fica Início › Reforma Tributária › IBS e CBS no XML.
+- O Google hoje só mostra o resultado em formato de FAQ para sites de governo e de saúde. A marcação `FAQPage` continua valendo para o Bing e para respostas de IA, mas o ganho no Google vem do texto claro, dos títulos e do trecho em destaque.
+- Cada pergunta é marcada com `FAQPage` em **uma só** página. `/perguntas-frequentes` fica com as dúvidas sobre o app e linka para a seção da reforma.
+- Imagem de prévia própria `og-reforma-tributaria.png` (1200×630, título "IBS e CBS: tire suas dúvidas" + print dos cards), para o compartilhamento no WhatsApp.
+- `title` sugerido: "Reforma Tributária: IBS e CBS, dúvidas frequentes | ProXML" (ajustar para ~60 caracteres). `description`: o que são IBS e CBS, o que muda em 2026 e como conferir nas suas notas.
+- **Manutenção:** o `nfe-fiscal` revisa a seção a cada nova Nota Técnica ou lei sobre IBS/CBS e, no mínimo, a cada 3 meses. A cada revisão, atualizar "Atualizado em", `dateModified` e `lastmod`.
 
 - **Aceite:** páginas aprovadas pelo usuário localmente (`python -m http.server` em `site/`) e checklist de SEO técnico completo em todas as páginas.
 
@@ -97,7 +155,9 @@ Cuidados:
 - JSON-LD validado no [Teste de pesquisa aprimorada](https://search.google.com/test/rich-results) do Google, sem erros.
 - `robots.txt`, `sitemap.xml` e `404.html` respondendo; URLs sem `.html` funcionando.
 - Prévia do link conferida (Open Graph) colando a URL no WhatsApp ou no [opengraph.xyz](https://www.opengraph.xyz).
-- Texto de `/ibs-cbs` revisado pelo `nfe-fiscal`.
+- Textos de `/ibs-cbs` e de `/reforma-tributaria` revisados pelo `nfe-fiscal`, com cada prazo, alíquota e regra conferidos em fonte oficial e datados.
+- `FAQPage` e `Article` de `/reforma-tributaria` validados no Teste de pesquisa aprimorada, com as perguntas da marcação iguais às da página e nenhuma pergunta marcada em duas páginas.
+- Item "Reforma Tributária" no menu de todas as páginas, faixa de destaque na página inicial e links âncora das perguntas funcionando.
 
 ### 3.4 Publicação — usuário + `release-manager`
 - O `release-manager` faz o commit/push da pasta `site/` (após aprovação).
@@ -109,5 +169,10 @@ Cuidados:
 - **P1.** Pasta onde você vai colocar os prints.
 
 ## Pendências resolvidas
+- **P4.** Perguntas da seção Reforma Tributária (decidido em 29/10/2026):
+  - Mantidos os blocos O básico (7), Prazos (4), Nota fiscal e Alíquotas e pagamento, sem cortes.
+  - Incluídas: "MEI precisa informar IBS e CBS?", "O que é cClassTrib?" e "Os preços vão subir com a reforma?".
+  - Bloco ProXML reduzido a 3 perguntas; privacidade e preço ficam em `/perguntas-frequentes`, com link.
+  - Item de menu "Reforma Tributária", com selo "Novo" por 6 meses.
 - **P2.** Endereço do site: **subdomínio da Vercel** (decidido em 20/10/2026), sem domínio próprio. O nome exato (ex.: `proxml.vercel.app`, se estiver livre) sai na criação do projeto na Vercel (3.4). Até lá, as URLs do `canonical`, do `sitemap.xml` e do Open Graph usam `https://proxml.vercel.app` e são corrigidas se o nome mudar.
 - **P3.** Plataforma de doação: **Apoia.se** (decidido em 20/10/2026), link <https://apoia.se/proxmlferramenta>. Entra no rodapé de todas as páginas, na seção "Apoie o projeto" da página inicial, no README e na tela Sobre do app.
