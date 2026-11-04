@@ -102,6 +102,7 @@ type
     procedure SetPasta(const Pasta: string);
     //Versão do executável para o rodapé (ex.: "1.1.0"); vazio = sem versão
     procedure SetVersao(const Versao: string);
+    procedure QRBandTituloBeforePrint(Sender: TQRCustomBand; var PrintBand: Boolean);
     procedure GerarRelatorio();
   end;
 
@@ -149,6 +150,13 @@ procedure PosicionarRelatorio(Controle: TQRPrintable; const Esquerda, Largura: D
 procedure PosicionarColunaRelatorio(const Controles: array of TQRPrintable; const Esquerda, Largura,
   Padding: Integer);
 
+//Fora de 100%: folga na caixa dos rótulos, para o QuickReport não apagar texto que coube (ver a implementação)
+procedure FolgaDeEscalaRelatorio(Relatorio: TComponent);
+
+//Fora de 100%, na visualização: refaz uma linha do cabeçalho pela largura que a fonte tem na escala (ver a
+//implementação). No PDF, as posições exatas de sempre. Chamada no BeforePrint da faixa do título
+procedure LinhaCabecalhoNaEscala(Relatorio: TCustomQuickRep; const Trechos: array of TQRLabel);
+
 //Trechos de uma linha do cabeçalho lado a lado (rótulos em Semibold, valores em cinza), a partir de
 //Esquerda. Trechos desabilitados ficam de fora. Devolve onde a linha termina
 function MontarLinhaRelatorio(const Trechos: array of TQRLabel; const Esquerda: Double): Double;
@@ -173,6 +181,7 @@ var
 implementation
 
 uses
+  System.Math,
   Skia,
   Skia.Vcl,
   ProXML.Tema,
@@ -388,6 +397,105 @@ var
 begin
     for I := Low(Controles) to High(Controles) do
         PosicionarRelatorio(Controles[I], Esquerda + Padding, Largura - 2 * Padding);
+end;
+
+procedure FolgaNoRotulo(Controle: TQRPrintable; const Alinhamento: TAlignment);
+var
+    Unidade  : TQRUnit;
+    Esquerda : Double;
+    Largura  : Double;
+    Limite   : Double;
+    Folga    : Double;
+begin
+    Unidade := Controle.Size.Units;
+    Controle.Size.Units := MM;
+    try
+        Esquerda := Controle.Size.Left;
+        Largura  := Controle.Size.Width;
+        Limite   := LarguraUtilRelatorio * 25.4 / 96;
+        Folga    := Largura * FolgaEscalaRelatorio / 100;
+        case Alinhamento of
+            taRightJustify:
+            begin
+                //A borda direita, de onde o texto é desenhado, fica no lugar
+                Folga := Max(0, Min(Folga, Esquerda));
+                Controle.Size.Left  := Esquerda - Folga;
+                Controle.Size.Width := Largura + Folga;
+            end;
+            taCenter:
+            begin
+                //O centro fica no lugar
+                Folga := Max(0, Min(Folga / 2, Min(Esquerda, Limite - Esquerda - Largura)));
+                Controle.Size.Left  := Esquerda - Folga;
+                Controle.Size.Width := Largura + 2 * Folga;
+            end;
+        else
+            //A borda esquerda, de onde o texto é desenhado, fica no lugar
+            Controle.Size.Width := Largura + Max(0, Min(Folga, Limite - Esquerda - Largura));
+        end;
+    finally
+        Controle.Size.Units := Unidade;
+    end;
+end;
+
+procedure FolgaDeEscalaRelatorio(Relatorio: TComponent);
+var
+    I: Integer;
+begin
+    //O relatório é físico (milímetros) e tem de sair igual em qualquer escala. Mas o QuickReport, para decidir
+    //se o texto cabe (TQRCustomLabel.FormatLines), compara a largura do texto em pixels inteiros da escala do
+    //sistema com a largura da caixa, e APAGA o que passar, sem aviso. A largura de cada caractere é arredondada
+    //para pixel, então o texto não cresce na mesma proporção da caixa: a chave de 44 dígitos (265 de 270 px a
+    //100%) media 353 de 338 px a 125% e saía com 42 dígitos. Pior caso medido: 18% a mais (112,5%).
+    //A caixa só serve para essa conta e para o recorte: os rótulos são transparentes e o texto é desenhado a
+    //partir da borda que fica no lugar. A 100% nada muda
+    if Screen.PixelsPerInch = 96 then
+        Exit;
+
+    for I := 0 to Relatorio.ComponentCount - 1 do
+        if Relatorio.Components[I] is TQRLabel then
+            FolgaNoRotulo(TQRLabel(Relatorio.Components[I]), TQRLabel(Relatorio.Components[I]).Alignment)
+        else if Relatorio.Components[I] is TQRDBText then
+            FolgaNoRotulo(TQRDBText(Relatorio.Components[I]), TQRDBText(Relatorio.Components[I]).Alignment);
+end;
+
+procedure LinhaCabecalhoNaEscala(Relatorio: TCustomQuickRep; const Trechos: array of TQRLabel);
+const
+    Folga = 4;   //a mesma do MontarLinhaRelatorio
+var
+    Medida  : TBitmap;
+    I       : Integer;
+    X       : Double;
+    Largura : Double;
+begin
+    //A visualização desenha com a fonte arredondada para pixel na escala do sistema, mais larga que a medida exata
+    //(até 11% a 150%): o trecho seguinte, posicionado pela medida exata, encostava no anterior ("Período:24/09").
+    //Nela, cada trecho avança pela maior das duas medidas. No PDF o texto usa a medida exata: nada muda
+    if Screen.PixelsPerInch = 96 then
+        Exit;
+
+    Medida := TBitmap.Create;
+    try
+        X := 0;
+        for I := Low(Trechos) to High(Trechos) do
+        begin
+            if not Trechos[I].Enabled then
+                Continue;
+            Largura := MedirTextoRelatorio(Trechos[I].Font, Trechos[I].Caption);
+            if not Relatorio.Exporting then
+            begin
+                Medida.Canvas.Font.Name   := Trechos[I].Font.Name;
+                Medida.Canvas.Font.Style  := Trechos[I].Font.Style;
+                Medida.Canvas.Font.Height := -MulDiv(Abs(Trechos[I].Font.Size), Screen.PixelsPerInch, 72);
+                Largura := Max(Largura, Medida.Canvas.TextWidth(Trechos[I].Caption) * 96 / Screen.PixelsPerInch);
+            end;
+            PosicionarRelatorio(Trechos[I], X, Largura + Folga);
+            FolgaNoRotulo(Trechos[I], Trechos[I].Alignment);
+            X := X + Largura;
+        end;
+    finally
+        Medida.Free;
+    end;
 end;
 
 function MontarLinhaRelatorio(const Trechos: array of TQRLabel; const Esquerda: Double): Double;
@@ -681,6 +789,8 @@ begin
     //Data e hora do rodapé: uma só para todas as páginas
     FGeradoEm := Now;
     MontarTextos;
+    FolgaDeEscalaRelatorio(Self);
+    QRBandTitulo.BeforePrint := QRBandTituloBeforePrint;
 
     //"Página X de Y": uma passada para contar as páginas e depois a visualização
     FTotalPaginas := 0;
@@ -692,6 +802,13 @@ procedure TFormRelatorios.QuickNotasBeforePrint(Sender: TCustomQuickRep; var Pri
 begin
     //Cada montagem (contagem, visualização, impressão ou exportação) recomeça a zebra
     FLinhaNaPagina := 0;
+end;
+
+procedure TFormRelatorios.QRBandTituloBeforePrint(Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+    LinhaCabecalhoNaEscala(QuickNotas, [QRLabelRotuloPeriodo, QRLabelPeriodo, QRLabelRotuloModelo, QRLabelModeloFiltro,
+                                        QRLabelQuantidade, QRLabelNotas]);
+    LinhaCabecalhoNaEscala(QuickNotas, [QRLabelRotuloPasta, QRLabelPasta]);
 end;
 
 procedure TFormRelatorios.QRBandDetalheBeforePrint(Sender: TQRCustomBand; var PrintBand: Boolean);

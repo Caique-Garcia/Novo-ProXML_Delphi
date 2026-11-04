@@ -499,6 +499,7 @@ type
     FJanelaNormal : TRect;     //posição e tamanho da janela no estado normal (salvos mesmo se maximizada)
     FRolagemEnviar: TScrollBox;
     FRolagemConfig: TScrollBox;
+    FRolagemRelatorios: TScrollBox;
     FMaximizarAoMostrar: Boolean;   //janela salva maximizada: maximiza no FormShow
     FPPIAtual : Integer;
     FPastaNaoEncontrada: string;   //pasta do aviso 2.14 (o texto da faixa encurta o caminho)
@@ -546,7 +547,8 @@ type
     FCampoMensagemConfig: TCampoFormulario;
     FAjustandoRolagem   : Boolean;        //evita reentrada no ajuste das telas com rolagem de reserva
     FTrechosFaixaEnviar : TTrechosTexto;  //texto da faixa da tela Enviar
-    FPastaFaixaEnviar   : string;         //pasta do WinRAR na faixa 11.20 (cortada no meio na largura da faixa)
+    FPastaFaixaEnviar   : string;         //caminho nas faixas 11.20 e 11.20b (cortado no meio na largura da faixa)
+    FXmlsAusentes       : Integer;        //> 0: a faixa com caminho é a 11.20b, com esta quantidade de XMLs
     FResultadoEnvio     : Boolean;        //a faixa mostra o resultado do último envio (fica até sair da tela)
     FAnexoQuantidade    : Integer;        //XMLs do filtro de modelo (quadro do anexo, 11.3)
     FAnexoBytes         : Int64;          //soma do tamanho dos XMLs, sem compactar (11.4)
@@ -613,6 +615,7 @@ type
     procedure CriarBotoes;
     procedure CriarAtalhos;
     function  CriarRolagem(Painel: TPanel): TScrollBox;
+    function  AlturaTelaRelatorios: Integer;
     procedure RolagemResize(Sender: TObject);
     procedure RestaurarPreferencias;
     procedure SalvarPreferencias;
@@ -649,7 +652,10 @@ type
     procedure PbxAvisoPastaPaint(Sender: TObject);
     procedure JanelaCampoPasta(var Message: TMessage);
     function  LarguraTextoFaixa(const LarguraFaixa: Integer): Integer;
-    procedure MontarTrechosSemWinRAR;
+    procedure MontarTrechosCaminhoEnviar;
+    procedure MostrarErroLeitura(const Classe, Erro: string);
+    procedure MostrarErroEnvio(const Classe, Erro: string);
+    procedure MostrarErroTeste(const Classe, Erro: string);
     procedure AjustarLargurasBarraPasta;
     procedure WMDropFiles(var Message: TWMDropFiles); message WM_DROPFILES;
     procedure WMDpiChanged(var Message: TWMDpi); message WM_DPICHANGED;
@@ -931,8 +937,9 @@ const
 
 type
   //Resultado do envio do e-mail, mostrado na thread principal. reSemWinRAR: o WinRAR.exe não está na
-  //pasta do ProXML (11.20); reSemAnexo: o WinRAR rodou, mas o .rar não foi gerado
-  TResultadoEnvio = (reEnviado, reSemWinRAR, reSemAnexo, reErro);
+  //pasta do ProXML (11.20); reSemAnexo: o WinRAR rodou, mas o .rar não foi gerado; reXmlAusente: algum XML
+  //não pôde ser copiado para o anexo (11.20b)
+  TResultadoEnvio = (reEnviado, reSemWinRAR, reSemAnexo, reXmlAusente, reErro);
 
   //Acesso às propriedades protegidas de TCustomEdit (Font, Color e eventos) para TEdit e TMemo
   TEditAcesso = class(TCustomEdit);
@@ -954,7 +961,8 @@ type
     FResultado  : TResultadoEnvio;
     FErro       : string;
     FClasseErro : string;
-    procedure Compactar;
+    FFaltando   : TStringList;   //XMLs que não puderam ser copiados para o anexo (caminho completo)
+    function  Compactar: Boolean;
   protected
     procedure Execute; override;
   public
@@ -968,6 +976,7 @@ type
     property Resultado: TResultadoEnvio read FResultado;
     property Erro: string read FErro;
     property ClasseErro: string read FClasseErro;
+    property Faltando: TStringList read FFaltando;
   end;
 
   { Testar conexão (Plano 4, etapa 4.7; PD-4 e glossário 12.19 a 12.22): só conecta e autentica no
@@ -1292,12 +1301,14 @@ begin
     FMensagem.Assign(Mensagem);
     FOrigens  := TStringList.Create;
     FNomes    := TStringList.Create;
+    FFaltando := TStringList.Create;
     FResultado := reErro;
 end;
 
 destructor TThreadEnvioEmail.Destroy;
 begin
     inherited;
+    FFaltando.Free;
     FNomes.Free;
     FOrigens.Free;
     FMensagem.Free;
@@ -1309,13 +1320,15 @@ begin
     FNomes.Add(Nome);
 end;
 
-procedure TThreadEnvioEmail.Compactar;
+function TThreadEnvioEmail.Compactar: Boolean;
 var
     Pasta : string;
     Anexo : string;
     I     : Integer;
 begin
-    //Mesma compactação de antes da 4.6 (pasta NFCe\ProXML e WinRAR), agora fora da thread principal
+    //Mesma compactação de antes da 4.6 (pasta NFCe\ProXML e WinRAR), agora fora da thread principal.
+    //False: algum XML não pôde ser copiado (11.20b); o anexo não é gerado e o e-mail não sai
+    Result := False;
     Pasta := FPastaApp + 'NFCe\ProXML';
     if TDirectory.Exists(Pasta) then
         TDirectory.Delete(Pasta, True);   //apaga a pasta e todo o seu conteúdo
@@ -1324,14 +1337,25 @@ begin
         SysUtils.ForceDirectories(FPastaApp + '\NFCe\ProXML');
 
     for I := 0 to FOrigens.Count - 1 do
-        CopyFile(PChar(FOrigens[I]), PChar(Pasta + '\' + FNomes[I]), False);
+        if not CopyFile(PChar(FOrigens[I]), PChar(Pasta + '\' + FNomes[I]), False) then
+        begin
+            //O motivo do Windows do primeiro XML vai só para o LOG
+            if FFaltando.Count = 0 then
+                FErro := SysErrorMessage(GetLastError);
+            FFaltando.Add(FOrigens[I]);
+        end;
+    if FFaltando.Count > 0 then
+        Exit;
 
     Anexo := FPastaApp + 'NFCe\NFCe_ProXML.rar';
     if FileExists(Anexo) then
         SysUtils.DeleteFile(Anexo);
 
-    ExecutarOculto('cmd.exe /c' + FPastaApp + 'WinRAR.exe a -ep ' + Anexo + ' ' +
-                   FPastaApp + 'NFCe\ProXML\*-nfe.xml');
+    //Caminhos entre aspas (pasta com espaço). O cmd.exe /c tira a primeira e a última aspa quando há mais
+    //de duas: por isso o comando inteiro vai dentro de mais um par
+    ExecutarOculto('cmd.exe /c ""' + FPastaApp + 'WinRAR.exe" a -ep "' + Anexo + '" "' +
+                   FPastaApp + 'NFCe\ProXML\*-nfe.xml""');
+    Result := True;
 end;
 
 procedure TThreadEnvioEmail.Execute;
@@ -1356,7 +1380,11 @@ begin
                 Exit;
             end;
 
-            Compactar;
+            if not Compactar then
+            begin
+                FResultado := reXmlAusente;
+                Exit;
+            end;
 
             //WinRAR com falha (o .rar não foi gerado): não envia
             Anexo := FPastaApp + 'NFCe\NFCe_ProXML.rar';
@@ -1728,6 +1756,11 @@ begin
    //Create do Form
    //Application.OnException := DMConfig.GravaLog;
 
+   //Etapa 4.10 (A4): cores do tema no lugar das antigas do .dfm. PnlContainer fica todo coberto pelos filhos;
+   //a cor de PnlInfoLocal só chega aos controles que herdam a fonte dele
+   PnlContainer.Color      := CorFundo;
+   PnlInfoLocal.Font.Color := CorTexto;
+
    //Tema (fonte base), botões e atalhos criados em runtime e rolagem de reserva nas telas
    //Enviar e Configurações (só aparece se o conteúdo não couber, ex.: 150% na janela mínima)
    AplicarTema(Self);
@@ -1752,6 +1785,7 @@ begin
    PrepararTelaSobre;
    FRolagemEnviar := CriarRolagem(Panel10);
    FRolagemConfig := CriarRolagem(PanelCorpoConfig);
+   FRolagemRelatorios := CriarRolagem(PnlRelatorios);
 
    //Configurações de e-mail do banco. Erro: LOG e a caixa 12.18 depois que a janela abre (fim do except
    //vazio, E1); a tela continua com os campos vazios
@@ -2038,7 +2072,7 @@ begin
         except
             on E: Exception do
             begin
-                DMConfig.CreateLog(E.ClassName, E.Message);
+                GravarLog(E.ClassName, E.Message);
                 EncerrarCarregando(tlNotas);
                 //Glossário 7.1 (o motivo pode ser o texto 7.2)
                 CaixaMensagem('Não foi possível abrir o XML da nota.' + sLineBreak + sLineBreak + 'Arquivo: ' +
@@ -2079,7 +2113,7 @@ begin
         except
             on E: Exception do
             begin
-                DMConfig.CreateLog(E.ClassName, E.Message);
+                GravarLog(E.ClassName, E.Message);
                 EncerrarCarregando(tlNotas);
                 //Glossário 7.5
                 CaixaMensagem('Não foi possível gerar o DANFE.' + sLineBreak + sLineBreak + 'Motivo: ' + E.Message,
@@ -2157,8 +2191,8 @@ begin
   if not FDMemTable1.Active then
     FDMemTable1.Open;
 
-  //Grava as notas lidas na ordem de leitura e conta só as do filtro de modelo: a busca e a ordenação
-  //da tela Notas não valem para os relatórios (decisão D5)
+  //Grava as notas lidas na ordem de leitura: a busca e a ordenação da tela Notas não valem para os
+  //relatórios (decisão D5). GravarNotas grava todas, sem o filtro de modelo, que fica nas queries
   Notas := NotasDoModelo;
 
   //Tela Carregando antes de começar a gravar (glossário 8.15 e 8.16). Fluxo: Carregando ->
@@ -2168,10 +2202,11 @@ begin
     Titulo := 'Gerando o Relatório IBS/CBS' + #$2026
   else
     Titulo := 'Gerando o Relatório de Notas' + #$2026;
-  if Notas.RecordCount = 1 then
+  //Glossário 8.16: {n} = total gravado (todas as carregadas, sem o filtro de modelo)
+  if FDMemTable1.Table.Rows.Count = 1 then
     Legenda := 'Gravando 1 nota e montando a visualização.'
   else
-    Legenda := 'Gravando ' + IntToStr(Notas.RecordCount) + ' notas e montando a visualização.';
+    Legenda := 'Gravando ' + IntToStr(FDMemTable1.Table.Rows.Count) + ' notas e montando a visualização.';
 
   IniciarCarregando(Titulo, Legenda);
   try
@@ -2182,7 +2217,9 @@ begin
       except
         on E: Exception do
         begin
-          //GravarNotas já desfez a transação: o banco continua como estava (glossário 8.12)
+          //GravarNotas já desfez a transação: o banco continua como estava (glossário 8.12). LOG protegido:
+          //com o banco indisponível a caixa aparece do mesmo jeito
+          GravarLog(E.ClassName, E.Message);
           Screen.Cursor := crDefault;
           EncerrarCarregando(tlRelatorios);
           CaixaMensagem('Não foi possível gravar as notas no banco de dados. O relatório não foi gerado.' +
@@ -2205,7 +2242,7 @@ begin
         EncerrarCarregando(tlRelatorios);
         CaixaMensagem('Não foi possível gerar o relatório.' + sLineBreak + sLineBreak + 'Motivo: ' + E.Message,
                       mtError);
-        DMConfig.CreateLog(E.ClassName, E.Message);
+        GravarLog(E.ClassName, E.Message);
       end;
     end;
   finally
@@ -2445,6 +2482,22 @@ begin
     Result.OnResize := RolagemResize;
 end;
 
+function TFormPrincipal.AlturaTelaRelatorios: Integer;
+var
+    I: Integer;
+begin
+    //Altura de que a tela Relatórios precisa: as linhas alTop (título, quadros e rodapé) com as margens
+    AjustarLayoutRelatorios;
+    Result := PnlRelatorios.Padding.Top + PnlRelatorios.Padding.Bottom;
+    for I := 0 to PnlRelatorios.ControlCount - 1 do
+        if PnlRelatorios.Controls[I].Visible and (PnlRelatorios.Controls[I].Align = alTop) then
+        begin
+            Inc(Result, PnlRelatorios.Controls[I].Height);
+            if PnlRelatorios.Controls[I].AlignWithMargins then
+                Inc(Result, PnlRelatorios.Controls[I].Margins.Top + PnlRelatorios.Controls[I].Margins.Bottom);
+        end;
+end;
+
 procedure TFormPrincipal.RolagemResize(Sender: TObject);
 begin
     AjustarRolagem(Sender as TScrollBox);
@@ -2454,6 +2507,7 @@ procedure TFormPrincipal.AjustarRolagem(Caixa: TScrollBox);
 var
     Painel : TControl;
     Largura: Integer;
+    Minima : Integer;
     Altura : Integer;
     Passo  : Integer;
 begin
@@ -2465,16 +2519,23 @@ begin
     FAjustandoRolagem := True;
     try
         Painel := Caixa.Controls[0];
+        //Relatórios não tem largura mínima: os quadros acompanham a caixa e só a altura pode precisar de rolagem
+        if Painel = PnlRelatorios then
+            Minima := 0
+        else
+            Minima := Escalar(LarguraMinimaFormulario);
         for Passo := 1 to 2 do
         begin
-            Largura := Max(Caixa.ClientWidth, Escalar(LarguraMinimaFormulario));
+            Largura := Max(Caixa.ClientWidth, Minima);
             Painel.SetBounds(Painel.Left, Painel.Top, Largura, Max(Painel.Height, Caixa.ClientHeight));
             if Painel = Panel10 then
                 Altura := AjustarLayoutEnviar
+            else if Painel = PanelCorpoConfig then
+                Altura := AjustarLayoutConfig
             else
-                Altura := AjustarLayoutConfig;
+                Altura := AlturaTelaRelatorios;
             Painel.SetBounds(Painel.Left, Painel.Top, Largura, Max(Caixa.ClientHeight, Altura));
-            if Max(Caixa.ClientWidth, Escalar(LarguraMinimaFormulario)) = Largura then
+            if Max(Caixa.ClientWidth, Minima) = Largura then
                 Break;
         end;
     finally
@@ -2517,17 +2578,18 @@ begin
     if Monitor = nil then
     begin
         Area    := Screen.PrimaryMonitor.WorkareaRect;
-        Largura := Min(Janela.Width, Area.Width);
-        Altura  := Min(Janela.Height, Area.Height);
+        Largura := Min(Max(Janela.Width, MulDiv(JanelaLarguraMinima, Screen.PrimaryMonitor.PixelsPerInch, 96)), Area.Width);
+        Altura  := Min(Max(Janela.Height, MulDiv(JanelaAlturaMinima, Screen.PrimaryMonitor.PixelsPerInch, 96)), Area.Height);
         Result  := Bounds(Area.Left + (Area.Width - Largura) div 2,
                           Area.Top + (Area.Height - Altura) div 2, Largura, Altura);
         Exit;
     end;
 
-    //O monitor existe: a janela inteira fica dentro da área de trabalho dele
+    //O monitor existe: a janela inteira fica dentro da área de trabalho dele, nunca menor que o mínimo da escala
+    //dele (janela salva menor, ex.: salva antes de mudar a escala do Windows)
     Area    := Monitor.WorkareaRect;
-    Largura := Min(Janela.Width, Area.Width);
-    Altura  := Min(Janela.Height, Area.Height);
+    Largura := Min(Max(Janela.Width, MulDiv(JanelaLarguraMinima, Monitor.PixelsPerInch, 96)), Area.Width);
+    Altura  := Min(Max(Janela.Height, MulDiv(JanelaAlturaMinima, Monitor.PixelsPerInch, 96)), Area.Height);
     Result  := Bounds(EnsureRange(Janela.Left, Area.Left, Area.Right - Largura),
                       EnsureRange(Janela.Top, Area.Top, Area.Bottom - Altura), Largura, Altura);
 end;
@@ -2567,6 +2629,12 @@ begin
         //Maximizada no monitor da posição normal (no principal, se aquele não existe mais).
         //A maximização fica para o FormShow (ver lá o motivo)
         FMaximizarAoMostrar := Pref.JanelaMaximizada;
+    end
+    else
+    begin
+        //Primeira abertura: o tamanho do .dfm escalado pode passar da área útil (150% em 1920x1080)
+        Janela := AjustarAreaVisivel(BoundsRect);
+        SetBounds(Left, Top, Janela.Width, Janela.Height);
     end;
 end;
 
@@ -2651,12 +2719,32 @@ begin
 end;
 
 procedure TFormPrincipal.FixarTamanhoMinimo;
+var
+    Monitor : TMonitor;
+    Area    : TRect;
+    Janela  : TRect;
+    Largura : Integer;
+    Altura  : Integer;
 begin
-    //Decisão de 20/10/2026: o mínimo é sempre 1024x640 pixels reais da tela, em qualquer escala
-    //do Windows. A VCL multiplica as Constraints pelo DPI ao carregar o .dfm e ao trocar de
-    //monitor (ChangeScale); aqui elas voltam para o valor do tema, sem escala
-    Constraints.MinWidth  := JanelaLarguraMinima;
-    Constraints.MinHeight := JanelaAlturaMinima;
+    //Decisão de 04/11/2026: o mínimo cresce com a escala (1024x640 lógicos: 1280x800 a 125%, 1536x960 a 150%),
+    //limitado à área útil do monitor; em tela menor que isso vale a rolagem de reserva. Vale ao abrir e ao
+    //trocar de monitor: a janela menor que o novo mínimo cresce e continua dentro da área visível
+    if HandleAllocated then
+        Monitor := Screen.MonitorFromWindow(Handle)
+    else
+        Monitor := Screen.MonitorFromRect(BoundsRect);
+    Area   := Monitor.WorkareaRect;
+    Largura := Min(Escalar(JanelaLarguraMinima), Area.Width);
+    Altura  := Min(Escalar(JanelaAlturaMinima), Area.Height);
+    Constraints.MinWidth  := Largura;
+    Constraints.MinHeight := Altura;
+
+    if HandleAllocated and (not (csLoading in ComponentState)) and (WindowState = wsNormal) then
+    begin
+        Janela := AjustarAreaVisivel(Bounds(Left, Top, Max(Width, Largura), Max(Height, Altura)));
+        if not EqualRect(Janela, BoundsRect) then
+            BoundsRect := Janela;
+    end;
 end;
 
 procedure TFormPrincipal.ScaleForPPI(NewPPI: Integer);
@@ -2709,6 +2797,7 @@ begin
             AtualizarCampo(FCampos[I]);
         AjustarRolagem(FRolagemEnviar);
         AjustarRolagem(FRolagemConfig);
+        AjustarRolagem(FRolagemRelatorios);
         AjustarLayoutSobre;
     end;
 end;
@@ -3242,8 +3331,9 @@ var
     I       : Integer;
     Tamanho : Integer;
 begin
-    //Valor maior que o card (ex.: R$ 10.000.000,00 em 1024 px): a fonte diminui 1 pt por vez,
-    //até TamanhoValorCardMinimo, para o número nunca ser cortado (tokens.md 5.5)
+    //Valor maior que o card (ex.: R$ 10.000.000,00 em 1024 px): a fonte diminui 1 pt por vez até o texto caber,
+    //sem piso: o número nunca é cortado, em nenhum tamanho de janela (tokens.md 5.5; o título do card pode
+    //encurtar com "…")
     Valores[0] := LabelValorTotal;
     Valores[1] := LabelbaseICMS;
     Valores[2] := LabelValorICMS;
@@ -3257,8 +3347,8 @@ begin
             Tamanho := TamanhoValorCard;
             FonteNaEscala(Valores[I].Font, Tamanho);
             Medida.Canvas.Font.Assign(Valores[I].Font);
-            while (Medida.Canvas.TextWidth(Valores[I].Caption) > Valores[I].Width) and
-                  (Tamanho > TamanhoValorCardMinimo) do
+            while (Valores[I].Width > 0) and (Medida.Canvas.TextWidth(Valores[I].Caption) > Valores[I].Width) and
+                  (Tamanho > 1) do
             begin
                 Dec(Tamanho);
                 FonteNaEscala(Valores[I].Font, Tamanho);
@@ -3543,6 +3633,9 @@ begin
     LabelRelatoriosRodape.AlignWithMargins := True;
     LabelRelatoriosRodape.Margins.SetBounds(0, Escalar(Espaco2), 0, 0);
     LabelRelatoriosRodape.WordWrap := True;
+    //Altura pelo texto em AjustarLayoutRelatorios: com AutoSize, o rótulo guardava a altura de quando estava
+    //estreito (antes do alinhamento) e passava do painel
+    LabelRelatoriosRodape.AutoSize := False;
     LabelRelatoriosRodape.Caption  := 'Os relatórios usam as notas do modelo selecionado na barra de cima. ' +
                                       'A busca da tela Notas não é aplicada.';
 end;
@@ -3782,11 +3875,14 @@ begin
                   AlturaRodape + PnlOpcaoNotasFundo.Padding.Bottom;
 
         PnlOpcoes.Height := Altura;
+        LabelRelatoriosRodape.Height := AlturaTextoQuebrado(LabelRelatoriosRodape, PnlOpcoes.ClientWidth);
         PnlOpcaoNotas.SetBounds(0, 0, Largura, Altura);
         PnlOpcaoIBSCBS.SetBounds(Largura + Espaco, 0, PnlOpcoes.ClientWidth - Largura - Espaco, Altura);
     finally
         FAjustandoRelatorios := False;
     end;
+    //A altura pode ter mudado (dica em duas linhas): a rolagem de reserva acompanha
+    AjustarRolagem(FRolagemRelatorios);
 end;
 
 procedure TFormPrincipal.PnlOpcoesResize(Sender: TObject);
@@ -4119,9 +4215,16 @@ procedure TFormPrincipal.AjustarLinhaTituloNotas;
 var
     Margem : Integer;
     Livre  : Integer;
+    Botoes : Integer;
+    Minimo : Integer;
+    Titulo : Boolean;
+    Contar : Boolean;
+    Abaixo : Boolean;
 begin
     //Linha de título: "Notas" e o contador à esquerda; Copiar chave, Gerar DANFE, Exportar CSV e o
-    //campo Buscar à direita, com 8 px entre eles (mockup .trow)
+    //campo Buscar à direita, com 8 px entre eles (mockup .trow). Se não couber (escala alta na janela mínima;
+    //decisão da fase D da 4.10), os botões nunca são cortados: sai o contador, depois o título, o campo Buscar
+    //encolhe e, por fim, vai para uma linha própria
     if (btnCopiarChave = nil) or FAjustandoTituloNotas then
         Exit;
 
@@ -4140,10 +4243,40 @@ begin
 
         //Campo Buscar com 248 px; se a linha não couber (janela mínima, contador longo), ele encolhe
         //até LarguraMinimaCampoBusca
-        Livre := PnlNotasTitulo.ClientWidth - LabelNotasTitulo.Width - LabelNotasContador.Margins.Left -
-                 LabelNotasContador.Width - Escalar(Espaco1) - PnlCopiarChave.Width - PnlGerarDanfe.Width -
-                 PnlExportarCSV.Width - PnlCampoBusca.Margins.Left;
-        PnlCampoBusca.Width := Max(Escalar(LarguraMinimaCampoBusca), Min(Escalar(LarguraCampoBusca), Livre));
+        Botoes := PnlCopiarChave.Width + PnlGerarDanfe.Width + PnlExportarCSV.Width + PnlCampoBusca.Margins.Left;
+        Minimo := Escalar(LarguraMinimaCampoBusca);
+        Titulo := True;
+        Contar := True;
+        Livre  := PnlNotasTitulo.ClientWidth - LabelNotasTitulo.Width - LabelNotasContador.Margins.Left -
+                  LabelNotasContador.Width - Escalar(Espaco1) - Botoes;
+        if Livre < Minimo then
+        begin
+            Contar := False;
+            Livre  := PnlNotasTitulo.ClientWidth - LabelNotasTitulo.Width - Escalar(Espaco1) - Botoes;
+        end;
+        if Livre < Minimo then
+        begin
+            Titulo := False;
+            Livre  := PnlNotasTitulo.ClientWidth - Botoes;
+            Minimo := Escalar(LarguraCampoBuscaReduzida);
+        end;
+        Abaixo := Livre < Minimo;
+
+        LabelNotasTitulo.Visible   := Titulo;
+        LabelNotasContador.Visible := Contar;
+        if Abaixo then
+        begin
+            //Duas linhas: os alBottom são alinhados antes dos alRight, que ficam com o resto (a primeira linha)
+            PnlNotasTitulo.Height := 2 * (Escalar(AlturaTituloTela) + 2 * Margem);
+            PnlCampoBusca.Align   := alBottom;
+            PnlCampoBusca.Margins.SetBounds(Margem, Margem, Margem, Margem);
+            PnlCampoBusca.Height  := Escalar(AlturaTituloTela);
+        end
+        else
+        begin
+            PnlCampoBusca.Align := alRight;
+            PnlCampoBusca.Width := Min(Escalar(LarguraCampoBusca), Livre);
+        end;
 
         //A VCL ordena os alRight pela borda direita: da direita para a esquerda ficam Buscar,
         //Exportar CSV, Gerar DANFE e Copiar chave. Os alLeft vão pela borda esquerda menos a margem:
@@ -4235,7 +4368,9 @@ begin
             if (Coluna <> Chave) and Coluna.Visible then
                 Dec(Resto, Coluna.Width);
         end;
-        Chave.Width := Max(Escalar(LarguraColunaChaveMin), Resto);
+        //Sem largura para o mínimo da Chave (tela pequena, em qualquer escala): ela encolhe, com "…", e o Valor
+        //continua à vista
+        Chave.Width := Max(Escalar(LarguraColunaChaveReduzida), Resto);
     finally
         DBGrid1.Columns.EndUpdate;
         FAjustandoColunas := False;
@@ -5276,6 +5411,9 @@ var
     Esquerda   : Integer;
     Topo       : Integer;
     X, W, I    : Integer;
+    Maior      : Integer;
+    Interno    : Integer;
+    ComIcone   : Boolean;
 begin
     //4 contadores com a mesma largura e 8 px entre eles (mockup .cnts); padding 8 x 12, ícone de 24 px
     //e, 12 px à direita, o número com o rótulo embaixo, centralizados na altura
@@ -5300,11 +5438,22 @@ begin
         end;
         Medida.Canvas.Font.Assign(LabelRotuloAutorizadas.Font);
         AlturaRot := Medida.Canvas.TextHeight('Ag');
+
+        //Largura de que o maior rótulo precisa. Em escala alta na janela mínima (fase D da 4.10): primeiro sai o
+        //ícone dos 4 contadores; se ainda não couber, o rótulo quebra em duas linhas
+        Maior := 0;
+        for I := Low(Rotulos) to High(Rotulos) do
+            Maior := Max(Maior, Medida.Canvas.TextWidth(Rotulos[I].Caption));
     finally
         Medida.Free;
     end;
 
     Icone    := Escalar(TamanhoIconeContador);
+    Interno  := (PnlContadores.ClientWidth - 3 * Escalar(EspacoContadores)) div 4 - 2 * Escalar(BordaQuadro) -
+                2 * Escalar(PaddingContadorHorizontal);
+    ComIcone := Interno - Icone - Escalar(EspacoIconeContador) >= Maior;
+    if (not ComIcone) and (Interno < Maior) then
+        AlturaRot := 2 * AlturaRot;
     Conteudo := Max(Icone, AlturaNum[0] + AlturaRot);
     AlturaFundo := Conteudo + 2 * Escalar(PaddingContadorVertical);
     Altura   := Escalar(BordaSuperiorContador) + AlturaFundo + Escalar(BordaQuadro);
@@ -5326,7 +5475,10 @@ begin
 
         Esquerda := Escalar(PaddingContadorHorizontal);
         Icones[I].SetBounds(Esquerda, (AlturaFundo - Icone) div 2, Icone, Icone);
-        Inc(Esquerda, Icone + Escalar(EspacoIconeContador));
+        Icones[I].Visible := ComIcone;
+        Rotulos[I].WordWrap := (not ComIcone) and (Interno < Maior);
+        if ComIcone then
+            Inc(Esquerda, Icone + Escalar(EspacoIconeContador));
         Topo := (AlturaFundo - (AlturaNum[I] + AlturaRot)) div 2;
         Numeros[I].SetBounds(Esquerda, Topo, Max(0, W - 2 * Escalar(BordaQuadro) - Esquerda -
                              Escalar(PaddingContadorHorizontal)), AlturaNum[I]);
@@ -5609,8 +5761,12 @@ begin
     Trechos := nil;
     AdicionarTrecho(Trechos, 'Processamento cancelado.', etrDestaque);
     AdicionarTrecho(Trechos, ' Nenhuma nota foi alterada.', etrNormal);
-    AdicionarTrecho(Trechos, IntToStr(Lidos) + ' de ' + IntToStr(Total) + ' arquivos tinham sido lidos. ' +
-                             'Clique em Processar para começar de novo.', etrLegenda, True);
+    if Total = 1 then
+        AdicionarTrecho(Trechos, IntToStr(Lidos) + ' de 1 arquivo tinha sido lido. ' +
+                                 'Clique em Processar para começar de novo.', etrLegenda, True)
+    else
+        AdicionarTrecho(Trechos, IntToStr(Lidos) + ' de ' + IntToStr(Total) + ' arquivos tinham sido lidos. ' +
+                                 'Clique em Processar para começar de novo.', etrLegenda, True);
     MostrarFaixaResumo(Trechos);
 end;
 
@@ -5865,8 +6021,11 @@ end;
 
 procedure TFormPrincipal.AtualizarProgresso;
 begin
-    //Glossário 5.6: "{x} de {n} arquivos" (vazio até a thread contar os arquivos da pasta)
-    if FProgressoTotal > 0 then
+    //Glossário 5.6: "{x} de {n} arquivos", singular "{x} de 1 arquivo" (vazio até a thread contar os
+    //arquivos da pasta)
+    if FProgressoTotal = 1 then
+        LabelProgressoContagem.Caption := IntToStr(FProgressoLidos) + ' de 1 arquivo'
+    else if FProgressoTotal > 0 then
         LabelProgressoContagem.Caption := IntToStr(FProgressoLidos) + ' de ' + IntToStr(FProgressoTotal) + ' arquivos'
     else
         LabelProgressoContagem.Caption := '';
@@ -5942,12 +6101,8 @@ begin
 
         if Erro <> '' then
         begin
-            //Erro fora da leitura de um arquivo (pasta apagada ou sem acesso durante o Processar): caixa de
-            //erro 5.38 com a pasta e o motivo, e LOG. As notas carregadas antes continuam na tela
-            GravarLog(ClasseErro, 'Processar: ' + FPastaLeitura + ': ' + Erro);
-            CaixaMensagem('Não foi possível ler a pasta selecionada.' + sLineBreak + FPastaLeitura + sLineBreak +
-                          sLineBreak + 'Motivo: ' + Erro + sLineBreak + sLineBreak +
-                          'As notas carregadas antes continuam na tela.', mtError);
+            //Erro fora da leitura de um arquivo (pasta apagada ou sem acesso durante o Processar)
+            MostrarErroLeitura(ClasseErro, Erro);
         end
         else if Concluida and ListBoxLog.CanFocus then
             //O app continua no Resumo, com o foco no log
@@ -5956,8 +6111,18 @@ begin
             btnProcessar.SetFocus;
     except
         on E: Exception do
-            CaixaMensagem(E.Message, mtError);
+            MostrarErroLeitura(E.ClassName, E.Message);
     end;
+end;
+
+procedure TFormPrincipal.MostrarErroLeitura(const Classe, Erro: string);
+begin
+    //Caixa de erro 5.38 com a pasta e o motivo, e LOG. As notas carregadas antes continuam na tela. Também
+    //para erro inesperado no fim da thread (etapa 4.10, A3)
+    GravarLog(Classe, 'Processar: ' + FPastaLeitura + ': ' + Erro);
+    CaixaMensagem('Não foi possível ler a pasta selecionada.' + sLineBreak + FPastaLeitura + sLineBreak +
+                  sLineBreak + 'Motivo: ' + Erro + sLineBreak + sLineBreak +
+                  'As notas carregadas antes continuam na tela.', mtError);
 end;
 
 procedure TFormPrincipal.EncerrarLeituraParaFechar;
@@ -6268,6 +6433,7 @@ begin
         //enviar de novo. Os erros também vão para o LOG
         Trechos := nil;
         FPastaFaixaEnviar := '';
+        FXmlsAusentes     := 0;
         PnlFaixaEnviar.Hint := '';
         case Resultado of
             reEnviado:
@@ -6287,7 +6453,22 @@ begin
                 FPastaFaixaEnviar := ExcludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
                 PnlFaixaEnviar.Hint     := FPastaFaixaEnviar;
                 PnlFaixaEnviar.ShowHint := True;
-                MontarTrechosSemWinRAR;
+                MontarTrechosCaminhoEnviar;
+                MostrarFaixaEnviar(tfErro, FTrechosFaixaEnviar, True);
+            end;
+            reXmlAusente:
+            begin
+                //11.20b: XML apagado ou sem acesso entre a leitura e o Enviar: não envia. LOG com todos os
+                //arquivos e o motivo do Windows; na faixa, o primeiro (cortado no meio), inteiro na dica
+                FXmlsAusentes     := Envio.Faltando.Count;
+                FPastaFaixaEnviar := Envio.Faltando[0];
+                GravarLog('Enviar e-mail', 'Não foi possível preparar o anexo. ' + IntToStr(FXmlsAusentes) +
+                                           ' XML(s) não encontrado(s): ' +
+                                           StringReplace(Envio.Faltando.Text, sLineBreak, '; ', [rfReplaceAll]) +
+                                           ' Motivo: ' + Erro);
+                PnlFaixaEnviar.Hint     := FPastaFaixaEnviar;
+                PnlFaixaEnviar.ShowHint := True;
+                MontarTrechosCaminhoEnviar;
                 MostrarFaixaEnviar(tfErro, FTrechosFaixaEnviar, True);
             end;
             reSemAnexo:
@@ -6301,20 +6482,35 @@ begin
                 MostrarFaixaEnviar(tfErro, Trechos, True);
             end;
         else
-            //11.17
-            GravarLog(ClasseErro, 'Enviar e-mail: ' + Erro);
-            AdicionarTrecho(Trechos, 'Não foi possível enviar o e-mail.', etrDestaque);
-            AdicionarTrecho(Trechos, 'O servidor respondeu: ' + MotivoNumaLinha(RespostaDoServidor(Erro)) +
-                                     '. Confira os dados em ' +
-                                     'Configurações e use Testar conexão.', etrNormal, True);
-            MostrarFaixaEnviar(tfErro, Trechos, True);
+            MostrarErroEnvio(ClasseErro, Erro);
         end;
 
         if btnEnviarEmail.CanFocus then
             btnEnviarEmail.SetFocus;
     except
         on E: Exception do
-            CaixaMensagem(E.Message, mtError);
+            MostrarErroEnvio(E.ClassName, E.Message);
+    end;
+end;
+
+procedure TFormPrincipal.MostrarErroEnvio(const Classe, Erro: string);
+var
+    Trechos: TTrechosTexto;
+    Motivo : string;
+begin
+    //11.17: faixa de erro + LOG (com a mensagem completa). Também para erro inesperado no fim da thread
+    //(etapa 4.10, A3); se a própria faixa falhar, o mesmo texto vai numa caixa
+    GravarLog(Classe, 'Enviar e-mail: ' + Erro);
+    Motivo  := MotivoNumaLinha(RespostaDoServidor(Erro));
+    Trechos := nil;
+    AdicionarTrecho(Trechos, 'Não foi possível enviar o e-mail.', etrDestaque);
+    AdicionarTrecho(Trechos, 'O servidor respondeu: ' + Motivo + '. Confira os dados em ' +
+                             'Configurações e use Testar conexão.', etrNormal, True);
+    try
+        MostrarFaixaEnviar(tfErro, Trechos, True);
+    except
+        CaixaMensagem('Não foi possível enviar o e-mail.' + sLineBreak + 'O servidor respondeu: ' + Motivo +
+                      '. Confira os dados em Configurações e use Testar conexão.', mtError);
     end;
 end;
 
@@ -6840,9 +7036,9 @@ begin
     if PnlFaixaEnviar.Visible then
     begin
         PnlFaixaEnviar.SetBounds(X, Y, W, PnlFaixaEnviar.Height);
-        //11.20: a pasta é cortada de novo na largura atual da faixa
+        //11.20 e 11.20b: o caminho é cortado de novo na largura atual da faixa
         if FPastaFaixaEnviar <> '' then
-            MontarTrechosSemWinRAR;
+            MontarTrechosCaminhoEnviar;
         AjustarFaixa(PnlFaixaEnviar, PnlFaixaEnviarBarra, SkSvgFaixaEnviar, PbxFaixaEnviar, FTrechosFaixaEnviar,
                      PaddingFaixaVertical);
         Inc(Y, PnlFaixaEnviar.Height + Espaco);
@@ -6917,19 +7113,36 @@ begin
     PbxFaixaEnviar.Invalidate;
 end;
 
-procedure TFormPrincipal.MontarTrechosSemWinRAR;
+procedure TFormPrincipal.MontarTrechosCaminhoEnviar;
 var
-    Medida: TBitmap;
+    Medida  : TBitmap;
+    Caminho : string;
 begin
-    //11.20 com a pasta do ProXML cortada no meio para caber numa linha do texto da faixa (com o ponto final)
+    //11.20 (pasta do ProXML) e 11.20b (primeiro XML ausente): o caminho é cortado no meio para caber numa
+    //linha do texto da faixa, com o ponto final
     Medida := TBitmap.Create;
     try
         FonteDoTrecho(Medida.Canvas.Font, etrNormal);
+        Caminho := EncurtarNoMeio(Medida.Canvas.Font, FPastaFaixaEnviar, LarguraTextoFaixa(PnlFaixaEnviar.ClientWidth) -
+                                  Medida.Canvas.TextWidth('.'));
         FTrechosFaixaEnviar := nil;
-        AdicionarTrecho(FTrechosFaixaEnviar, 'Não foi possível compactar os XMLs.', etrDestaque);
-        AdicionarTrecho(FTrechosFaixaEnviar, ' WinRAR não encontrado em ' +
-                        EncurtarNoMeio(Medida.Canvas.Font, FPastaFaixaEnviar, LarguraTextoFaixa(PnlFaixaEnviar.ClientWidth) -
-                                       Medida.Canvas.TextWidth('.')) + '.', etrNormal);
+        if FXmlsAusentes = 1 then
+        begin
+            AdicionarTrecho(FTrechosFaixaEnviar, 'Não foi possível preparar o anexo.', etrDestaque);
+            AdicionarTrecho(FTrechosFaixaEnviar, ' 1 XML não foi encontrado: ' + Caminho +
+                                                 '. Processe a pasta de novo.', etrNormal);
+        end
+        else if FXmlsAusentes > 1 then
+        begin
+            AdicionarTrecho(FTrechosFaixaEnviar, 'Não foi possível preparar o anexo.', etrDestaque);
+            AdicionarTrecho(FTrechosFaixaEnviar, ' ' + IntToStr(FXmlsAusentes) + ' XMLs não foram encontrados: ' + Caminho +
+                                                 '. Processe a pasta de novo.', etrNormal);
+        end
+        else
+        begin
+            AdicionarTrecho(FTrechosFaixaEnviar, 'Não foi possível compactar os XMLs.', etrDestaque);
+            AdicionarTrecho(FTrechosFaixaEnviar, ' WinRAR não encontrado em ' + Caminho + '.', etrNormal);
+        end;
     finally
         Medida.Free;
     end;
@@ -6944,6 +7157,7 @@ begin
     FResultadoEnvio := False;
     FTrechosFaixaEnviar := nil;
     FPastaFaixaEnviar := '';
+    FXmlsAusentes := 0;
     PnlFaixaEnviar.Hint := '';
     PnlFaixaEnviar.Visible := False;
     AtualizarTelaEnviar;
@@ -7047,6 +7261,7 @@ begin
     //"Conectando a {servidor}:{porta}…" ao lado do Testar conexão (12.20)
     AplicarFonte(LabelTestando.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
     LabelTestando.Layout  := tlCenter;
+    LabelTestando.EllipsisPosition := epEndEllipsis;
     LabelTestando.Visible := False;
 
     //"Configurações salvas" (12.16; tokens.md 5.11): check 14 px + 9 pt Semibold CorSucesso, 3 s
@@ -7139,6 +7354,7 @@ var
     Altura         : Integer;
     LarguraTexto   : Integer;
     Caixa          : Integer;
+    DireitaTestando: Integer;
 begin
     //Formulário em grade (mockup configuracoes.html): colunas com 16 px entre elas e linhas com 12 px.
     //Devolve a altura do quadro (com a borda)
@@ -7233,8 +7449,13 @@ begin
     SkSvgConfigSalva.SetBounds(LabelConfigSalva.Left - Escalar(EspacoMeio) - Escalar(TamanhoIconeDica),
                                Y + (Escalar(AlturaBotao) - Escalar(TamanhoIconeDica)) div 2,
                                Escalar(TamanhoIconeDica), Escalar(TamanhoIconeDica));
+    //O espaço de "Configurações salvas" só é descontado com ela visível (ver TestarConexaoClick)
+    if SkSvgConfigSalva.Visible then
+        DireitaTestando := SkSvgConfigSalva.Left
+    else
+        DireitaTestando := Panel9.Left + Margem;
     LabelTestando.SetBounds(PnlTestarConexao.Left + PnlTestarConexao.Width - Margem + Escalar(Espaco1), Y,
-                            Max(0, SkSvgConfigSalva.Left - Escalar(Espaco1) -
+                            Max(0, DireitaTestando - Escalar(Espaco1) -
                                    (PnlTestarConexao.Left + PnlTestarConexao.Width - Margem + Escalar(Espaco1))),
                             Escalar(AlturaBotao));
     Inc(Y, Escalar(AlturaBotao) + Escalar(PaddingPainelVertical));
@@ -7334,6 +7555,10 @@ begin
     btnTestarConexao.Caption  := 'Testando' + #$2026;
     btnTestarConexao.IconeSvg := IconeOcupado;
     LabelTestando.Caption     := 'Conectando a ' + Servidor + ':' + Porta + #$2026;
+    //O resultado do Salvar anterior não fica ao lado da legenda do teste
+    TimerConfigSalva.Enabled := False;
+    SkSvgConfigSalva.Visible := False;
+    LabelConfigSalva.Visible := False;
     DefinirBloqueio(blTeste, True);
     TimerTesteConexao.Enabled := False;
     TimerTesteConexao.Enabled := True;
@@ -7409,7 +7634,26 @@ begin
             btnTestarConexao.SetFocus;
     except
         on E: Exception do
-            CaixaMensagem(E.Message, mtError);
+            MostrarErroTeste(E.ClassName, E.Message);
+    end;
+end;
+
+procedure TFormPrincipal.MostrarErroTeste(const Classe, Erro: string);
+var
+    Trechos: TTrechosTexto;
+    Motivo : string;
+begin
+    //Erro inesperado no fim da thread do Testar conexão (etapa 4.10, A3): faixa 12.22, como no fluxo normal,
+    //e LOG; se a própria faixa falhar, o mesmo texto vai numa caixa
+    GravarLog(Classe, 'Testar conexão: ' + Erro);
+    Motivo  := MotivoNumaLinha(Erro);
+    Trechos := nil;
+    AdicionarTrecho(Trechos, 'Não foi possível conectar.', etrDestaque);
+    AdicionarTrecho(Trechos, 'O servidor respondeu: ' + Motivo, etrNormal, True);
+    try
+        MostrarFaixaConfig(tfErro, Trechos);
+    except
+        CaixaMensagem('Não foi possível conectar.' + sLineBreak + 'O servidor respondeu: ' + Motivo, mtError);
     end;
 end;
 

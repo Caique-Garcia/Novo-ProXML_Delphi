@@ -113,7 +113,6 @@ const
   PaddingCardHorizontal   = 12;
   AlturaRotuloCard        = 16;   //linha 1: ícone + rótulo
   AlturaValorCard         = 22;   //linha 2: valor
-  TamanhoValorCardMinimo  = 9;    //o valor diminui até aqui para nunca ser cortado
 
   //Faixa de status (tokens.md, seção 5.8)
   PaddingFaixaVertical    = 12;
@@ -145,6 +144,7 @@ const
 
   //Tela Notas (tokens.md, seções 4.1 e 5.7; mockup notas.html)
   LarguraCampoBusca       = 248;  //campo Buscar na linha de título
+  LarguraCampoBuscaReduzida = 120; //abaixo disto (tela pequena) o campo vai para uma linha própria
   LarguraMinimaCampoBusca = 160;  //o campo encolhe até aqui quando a linha de título não cabe
   PaddingCelulaGrade      = 8;    //padding horizontal do texto nas células e nos títulos
   MarcaSelecaoGrade       = 3;    //marca CorPrimaria na borda esquerda da 1ª célula da linha selecionada
@@ -152,6 +152,7 @@ const
   LarguraColunaNumero     = 72;   //Nº
   LarguraColunaModelo     = 64;
   LarguraColunaData       = 88;
+  LarguraColunaChaveReduzida = 120; //sem largura para o mínimo (tela pequena) a Chave encolhe até aqui, com "…", para o Valor aparecer
   LarguraColunaChaveMin   = 330;  //Chave: o resto da largura, no mínimo isto
   LarguraColunaValor      = 120;
   LarguraColunaBaseICMS   = 120;
@@ -222,6 +223,7 @@ const
   LinhaCabecalhoRelatorio = 2;    //linha CorMarinho embaixo do cabeçalho da 1ª página
   LarguraLogoRelatorio    = 98;   //logo claro à direita do cabeçalho (mockup .wm img)
   AlturaLogoRelatorio     = 20;
+  FolgaEscalaRelatorio    = 20;   //% a mais na caixa dos rótulos fora de 100% (ver FolgaDeEscalaRelatorio)
   ResolucaoLogoRelatorio  = 600;  //dpi da imagem do logo desenhada pelo Skia (nítida no papel)
   EspacoLogoRelatorio     = 16;   //texto do cabeçalho -> logo (a pasta é cortada antes disto)
   TamanhoMarcaRelatorio   = 12;   //"ProXML" em texto, se o logo não puder ser desenhado (Semibold)

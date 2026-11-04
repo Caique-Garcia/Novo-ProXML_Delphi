@@ -43,6 +43,7 @@ type
     FMostrarFoco     : Boolean;   //contorno de foco visível (foco veio do teclado)
     FIcone           : TSkSvgBrush;
     FIconeSvg        : string;
+    FTamanhoFonte    : Integer;   //tamanho da fonte em pontos (ver FonteNaBase96)
     procedure SetEstilo(const Value: TEstiloBotao);
     procedure SetIconeSvg(const Value: string);
     function  Escalar(const Valor: Integer): Integer;
@@ -60,6 +61,7 @@ type
     procedure CMDialogChar(var Message: TCMDialogChar); message CM_DIALOGCHAR;
     procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
   protected
+    procedure ChangeScale(M, D: Integer; isDpiChange: Boolean); override;
     procedure Paint; override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
@@ -127,6 +129,7 @@ type
     procedure WMGetDlgCode(var Message: TWMGetDlgCode); message WM_GETDLGCODE;
     procedure WMEraseBkgnd(var Message: TWMEraseBkgnd); message WM_ERASEBKGND;
   protected
+    procedure ChangeScale(M, D: Integer; isDpiChange: Boolean); override;
     procedure Paint; override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
@@ -199,7 +202,25 @@ type
   //Acesso à cor do controle pai (protegida em TControl)
   TControleAcesso = class(TControl);
 
+procedure FonteNaBase96(Fonte: TFont; const Nome: string; const Tamanho: Integer; const Cor: TColor);
+begin
+    //Controle criado em runtime: ainda está "a 96 dpi" (TControl.FCurrentPPI). Ao receber o pai, a VCL o escala
+    //da base 96 para o DPI do pai (TControl.SetParent -> ScaleForPPI), inclusive a fonte. O Font.Size já usa
+    //o DPI do sistema (TFont.PixelsPerInch): com ele a fonte seria escalada duas vezes (etapa 4.10, fase D)
+    AplicarFonte(Fonte, Nome, Tamanho, Cor);
+    Fonte.Height := -MulDiv(Tamanho, 96, 72);
+end;
+
 { TProBotao }
+
+procedure TProBotao.ChangeScale(M, D: Integer; isDpiChange: Boolean);
+begin
+    inherited;
+    //Pela conta em pontos (a mesma do Font.Size): proporcional, -13 viraria -16 a 125%, e não -17 como os rótulos,
+    //e o arredondamento se acumularia a cada troca de monitor
+    if isDpiChange and (M <> D) then
+        Font.Height := -MulDiv(FTamanhoFonte, M, 72);
+end;
 
 constructor TProBotao.Create(AOwner: TComponent);
 begin
@@ -211,7 +232,8 @@ begin
     Cursor  := crHandPoint;
     DoubleBuffered := True;
     ParentFont := False;
-    AplicarFonte(Font, FonteDestaque, TamanhoBotao, CorTextoSobrePrimaria);
+    FTamanhoFonte := TamanhoBotao;
+    FonteNaBase96(Font, FonteDestaque, TamanhoBotao, CorTextoSobrePrimaria);
     Width  := LarguraMinimaBotao + 2 * (AfastamentoFoco + EspessuraFoco);
     Height := AlturaBotao + 2 * (AfastamentoFoco + EspessuraFoco);
 end;
@@ -515,7 +537,9 @@ begin
     if TextoBotao <> '' then
     begin
         AreaTexto := Rect(X, Face.Top, Face.Right - Escalar(PaddingBotao), Face.Bottom);
-        if AreaTexto.Right < AreaTexto.Left + LarguraTexto then
+        //O DrawText pode medir 1 px a mais que o TextWidth (ex.: "Exportar CSV"): sem esta folga, o botão na
+        //largura ideal mostraria "…". A folga sai do padding da direita; o texto não muda de lugar
+        if AreaTexto.Right < AreaTexto.Left + LarguraTexto + 2 then
             AreaTexto.Right := Face.Right;
         DrawText(Canvas.Handle, PChar(TextoBotao), Length(TextoBotao), AreaTexto,
                  DT_LEFT or DT_VCENTER or DT_SINGLELINE or DT_END_ELLIPSIS);
@@ -753,7 +777,7 @@ begin
     DoubleBuffered := True;
     ShowHint := True;
     ParentFont := False;
-    AplicarFonte(Font, FonteTexto, TamanhoBotao, CorTexto);
+    FonteNaBase96(Font, FonteTexto, TamanhoBotao, CorTexto);
     Height := AlturaBotao + 2 * (AfastamentoFoco + EspessuraFoco);
 end;
 
@@ -762,6 +786,14 @@ begin
     FItens.Free;
     FDicas.Free;
     inherited;
+end;
+
+procedure TProSegmentado.ChangeScale(M, D: Integer; isDpiChange: Boolean);
+begin
+    inherited;
+    //Mesma regra do TProBotao
+    if isDpiChange and (M <> D) then
+        Font.Height := -MulDiv(TamanhoBotao, M, 72);
 end;
 
 function TProSegmentado.Escalar(const Valor: Integer): Integer;
@@ -1133,7 +1165,8 @@ constructor TProItemMenu.Create(AOwner: TComponent);
 begin
     inherited Create(AOwner);
     //Texto 10 pt Regular (o item ativo passa a Semibold na pintura)
-    AplicarFonte(Font, FonteTexto, TamanhoCorpo, CorTexto);
+    FTamanhoFonte := TamanhoCorpo;
+    FonteNaBase96(Font, FonteTexto, TamanhoCorpo, CorTexto);
     Height := AlturaItemMenu;
 end;
 

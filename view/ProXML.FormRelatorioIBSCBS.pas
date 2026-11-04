@@ -103,6 +103,7 @@ type
     procedure SetVersao(const Versao: string);
     //Abre a visualização do relatório. Retorna False, sem abrir nada, quando
     //nenhuma nota do filtro de modelo atual tem IBS/CBS
+    procedure QRBandTituloBeforePrint(Sender: TQRCustomBand; var PrintBand: Boolean);
     function  GerarRelatorio(): Boolean;
   end;
 
@@ -304,6 +305,8 @@ begin
     //Data e hora do rodapé: uma só para todas as páginas
     FGeradoEm := Now;
     MontarTextos;
+    FolgaDeEscalaRelatorio(Self);
+    QRBandTitulo.BeforePrint := QRBandTituloBeforePrint;
 
     //"Página X de Y": uma passada para contar as páginas e depois a visualização
     FTotalPaginas := 0;
@@ -315,6 +318,13 @@ procedure TFormRelatorioIBSCBS.QuickIBSCBSBeforePrint(Sender: TCustomQuickRep; v
 begin
     //Cada montagem (contagem, visualização, impressão ou exportação) recomeça a zebra
     FLinhaNaPagina := 0;
+end;
+
+procedure TFormRelatorioIBSCBS.QRBandTituloBeforePrint(Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+    LinhaCabecalhoNaEscala(QuickIBSCBS, [QRLabelRotuloPeriodo, QRLabelPeriodo, QRLabelRotuloModelo, QRLabelModeloFiltro,
+                                         QRLabelQuantidade, QRLabelNotas]);
+    LinhaCabecalhoNaEscala(QuickIBSCBS, [QRLabelRotuloPasta, QRLabelPasta]);
 end;
 
 procedure TFormRelatorioIBSCBS.QRBandDetalheBeforePrint(Sender: TQRCustomBand; var PrintBand: Boolean);

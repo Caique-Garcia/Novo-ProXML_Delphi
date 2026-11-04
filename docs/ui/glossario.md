@@ -1,6 +1,6 @@
 # ProXML · Glossário de textos da interface (v1.1.0)
 
-> **Etapa:** 4.1 do Plano 4 · **Status:** proposta, **aguardando aprovação do usuário**
+> **Etapa:** 4.1 do Plano 4 · **Status:** aprovado pelo usuário em 19/10/2026, com os acréscimos registrados em cada item
 > **Levantamento:** `view/*.pas`, `view/*.dfm`, `lib/uCalculadoraXML.pas`, `datamodule/DM.pas` no commit `6be6cd8` (`.pas` lidos como Windows-1252; `#nnn` dos `.dfm` decodificados).
 > Depois de aprovado, o `delphi-dev` aplica estes textos na 4.7 e o `qa-reviewer` confere com `grep` (4.10): **nenhum texto visível fora desta lista**.
 
@@ -34,7 +34,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 |---|--------------|------|-------|--------|------------|
 | 2.1 | `EditCaminho.Text` (`.dfm`) | R | Selecione uma pasta contendo XMLs de Nota Fiscal | *(vazio)* | O texto de instrução sai do `Text` (P3) |
 | 2.2 | `EditCaminho.TextHint` | H | Selecione uma pasta contendo XMLs de Nota Fiscal | Selecione ou arraste uma pasta com XMLs de Nota Fiscal | |
-| 2.3 | `EditCaminho` (novo hint) | H | — | Clique para escolher a pasta (Ctrl+O) | Hint do campo com caminho |
+| 2.3 | `EditCaminho` (novo hint) | H | — | Clique para escolher a pasta (Ctrl+O) | Hint do campo com caminho: caminho completo + este texto (decisão da 4.3) |
 | 2.4 | `SkSvg1` (ícone de pasta) | B | *(só ícone, sem texto)* | Selecionar… | Vira `TProBotao` secundário |
 | 2.5 | botão Selecionar (novo) | H | — | Escolher a pasta dos XMLs (Ctrl+O) | |
 | 2.6 | `FileOpenDialog1.Title` | R | Selecione uma pasta | Selecione a pasta com os XMLs | |
@@ -80,14 +80,14 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 5.3 | estado vazio (novo) | B | — | Selecionar pasta… | |
 | 5.4 | estado vazio (novo) | F | — | Atalhos: Ctrl+O seleciona a pasta · F5 processa | Legenda |
 | 5.5 | processando (novo) | F | — | Lendo os XMLs… | |
-| 5.6 | `Gauge1` (sem texto) | F | — | {x} de {n} arquivos | P5 |
+| 5.6 | `Gauge1` (sem texto) | F | — | {x} de {n} arquivos | P5. Singular: "{x} de 1 arquivo" (03/11/2026, 4.10) |
 | 5.7 | processando (novo) | B | — | Cancelar | |
 | 5.8 | Cancelar (novo) | H | — | Parar a leitura (Esc) | |
 | 5.9 | processando (novo) | F | — | Esc também cancela. As notas só aparecem quando a leitura termina. | Legenda |
 | 5.10 | cancelado (novo) | F | — | **Processamento cancelado.** Nenhuma nota foi alterada. | Faixa de aviso (PD-3) |
-| 5.11 | cancelado (novo) | F | — | {x} de {n} arquivos tinham sido lidos. Clique em Processar para começar de novo. | |
+| 5.11 | cancelado (novo) | F | — | {x} de {n} arquivos tinham sido lidos. Clique em Processar para começar de novo. | Singular: "{x} de 1 arquivo tinha sido lido." (03/11/2026, 4.10) |
 | 5.12 | contadores (novo) | R | — | Autorizadas · Ignoradas · Com erro | Ignoradas = não autorizadas + outro modelo; Com erro = não foi possível ler |
-| 5.13 | contadores (novo) | R | — | {t} s · {n} arquivos lidos | Menos de 0,1 s: "< 0,1 s · {n} arquivos lidos" (aprovado em 28/10/2026, 4.9). Ex.: "4,2 s · 132 arquivos lidos" |
+| 5.13 | contadores (novo) | R | — | {t} s · {n} arquivos lidos | Singular: "1 arquivo lido" (registrado em 03/11/2026, 4.10). Menos de 0,1 s: "< 0,1 s · {n} arquivos lidos" (aprovado em 28/10/2026, 4.9). Ex.: "4,2 s · 132 arquivos lidos" |
 | 5.14 | log (novo) | R | — | Detalhes da leitura | Título do quadro do log |
 | 5.15 | log (novo) | R | — | Processado em {dd/mm/aaaa hh:mm} | |
 | 5.16 | `uCalculadoraXML` (FalhaModelo) | L | XML {arquivo} - Falha ao recuperar modelo | {arquivo}: não foi possível identificar o modelo. | Conta como Com erro |
@@ -105,7 +105,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 5.28 | fechar durante a leitura (novo) | M | — | A leitura dos XMLs ainda está em andamento.<br>Deseja cancelar e fechar o ProXML? | Botões Sim / Não |
 | 5.29 | aviso no Resumo: só homologação (novo) | F | — | **Os totais incluem {h} notas de homologação** (ambiente de testes, sem valor fiscal). Confira se a pasta é a certa. | **Aprovado pelo usuário em 20/10/2026.** Faixa de aviso (`CorAvisoSuave` + `CorAviso`) entre os contadores e o log. Singular: "**Os totais incluem 1 nota de homologação** (…)" |
 | 5.30 | aviso no Resumo: só entrada (novo) | F | — | **Os totais incluem {e} NF-e de entrada**, somadas às de saída. Confira se a pasta é a certa. | **Aprovado pelo usuário em 20/10/2026.** Entrada = NF-e 55 com tpNF 0. Singular: "**Os totais incluem 1 NF-e de entrada**, somada às de saída." |
-| 5.31 | aviso no Resumo: os dois (novo) | F | — | **Os totais incluem {h} notas de homologação** (ambiente de testes, sem valor fiscal) **e {e} NF-e de entrada.** Confira se a pasta é a certa. | **Aprovado pelo usuário em 20/10/2026.** Exemplo no mockup `resumo.html`, estado "Concluído" |
+| 5.31 | aviso no Resumo: os dois (novo) | F | — | **Os totais incluem {h} notas de homologação** (ambiente de testes, sem valor fiscal) **e {e} NF-e de entrada.** Confira se a pasta é a certa. | **Aprovado pelo usuário em 20/10/2026.** Exemplo no mockup `resumo.html`, estado "Concluído". Singular: "**Os totais incluem 1 nota de homologação** (ambiente de testes, sem valor fiscal) **e 1 NF-e de entrada.** Confira se a pasta é a certa." (registrado em 03/11/2026, 4.10) |
 | 5.32 | log: nota de homologação (novo) | L | — | Nota Fiscal {n}: homologação (tpAmb 2), somada aos totais. | **Aprovado pelo usuário em 20/10/2026.** Uma linha por nota, ícone de aviso; não muda os contadores |
 | 5.33 | log: NF-e de entrada (novo) | L | — | Nota Fiscal {n}: NF-e de entrada (tpNF 0), somada aos totais. | **Aprovado pelo usuário em 20/10/2026.** Idem |
 | 5.34 | `LerNotaXML` (Id) (novo) | I/L | — | a chave de acesso da nota (atributo Id de infNFe) não tem 44 dígitos | Vira o `{motivo}` de 5.20 (decisão D4). Aprovado pelo usuário em 21/10/2026 |
@@ -177,15 +177,15 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 8.6 | opção 2 (novo) | F | — | Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS das notas que têm o grupo IBS/CBS. {x} de {n} notas têm IBS/CBS. | Singular: "{x} de 1 nota tem IBS/CBS." (registrado em 28/10/2026, 4.9) |
 | 8.7 | botões (novo) | B/H | — | Gerar relatório · *hint:* Gravar as notas e abrir a visualização do relatório | |
 | 8.8 | sem notas (novo) | F | — | Processe uma pasta para gerar relatórios. | Dica visível ao lado dos botões desabilitados |
-| 8.8a | sem notas no modelo (novo) | F | — | Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima. | Há notas carregadas, mas nenhuma no filtro de modelo. Aprovado em 20/10/2026 (4.4). Também no painel da tela Notas (sem busca), aprovado em 21/10/2026 (4.5) |
+| 8.8a | sem notas no modelo (novo) | F | — | Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima. | Há notas carregadas, mas nenhuma no filtro de modelo. Aprovado em 20/10/2026 (4.4). Também no painel da tela Notas (sem busca), aprovado em 21/10/2026 (4.5), e no quadro do anexo da tela Enviar (decisão da 4.7) |
 | 8.9 | `GerarRelatorio` | M | Sem dados para gerar relatório !! | *(substituída pela 8.8)* | Botões desabilitados; se ainda for preciso: "Nenhuma nota para o relatório. Processe uma pasta primeiro." |
 | 8.10 | `AbrirRelatorioIBSCBS` | M | Nenhuma nota com IBS/CBS | Nenhuma nota do modelo selecionado tem IBS/CBS. | Vira dica visível com o botão IBS/CBS desabilitado; a caixa só se o botão for acionado mesmo assim |
 | 8.11 | rodapé da tela (novo) | F | — | Os relatórios usam as notas do modelo selecionado na barra de cima. A busca da tela Notas não é aplicada. | Depende da decisão D5 |
-| 8.12 | `GravarNotasDB` | M | Erro ao gravar as notas no banco de dados. O relatório não foi gerado.<br>{erro} | Não foi possível gravar as notas no banco de dados. O relatório não foi gerado.<br><br>Motivo: {motivo} | Erro |
+| 8.12 | `GravarNotasDB` | M | Erro ao gravar as notas no banco de dados. O relatório não foi gerado.<br>{erro} | Não foi possível gravar as notas no banco de dados. O relatório não foi gerado.<br><br>Motivo: {motivo} | Erro + LOG (decisão de 03/11/2026, 4.10) |
 | 8.13 | `GravarNotasDB` (FinalizaRelatorio) | M | Erro ao gerar o relatório:<br><br>{erro} | Não foi possível gerar o relatório.<br><br>Motivo: {motivo} | Erro |
 | 8.14 | `TFormRelatorios` (exceção) | I | Sem registros no banco de dados! | Nenhuma nota para o relatório. | Aparece como `{motivo}` de 8.13 |
 | 8.15 | Carregando (novo) | F | *(aba vazia)* | Gerando o Relatório de Notas… · Gerando o Relatório IBS/CBS… | |
-| 8.16 | Carregando (novo) | F | — | Gravando {n} notas e montando a visualização. | |
+| 8.16 | Carregando (novo) | F | — | Gravando {n} notas e montando a visualização. | `{n}` = total de notas gravadas (todas as carregadas, sem o filtro de modelo; 03/11/2026, 4.10). Singular: "Gravando 1 nota e montando a visualização." |
 
 ## 9. Relatório de Notas (QuickReport, `FormRelatorios`)
 
@@ -251,7 +251,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 11.11 | `btnEnviarEmail` | B | Enviar | Enviar | `TProBotao` primário |
 | 11.12 | Enviar (novo) | H | — | Compactar os XMLs e enviar por e-mail | |
 | 11.13 | enviando (novo) | B | — | Enviando… | |
-| 11.14 | enviando (novo) | F | — | Compactando e enviando {n} XMLs. Isso pode levar alguns segundos. | |
+| 11.14 | enviando (novo) | F | — | Compactando e enviando {n} XMLs. Isso pode levar alguns segundos. | Singular: "Compactando e enviando 1 XML. Isso pode levar alguns segundos." (registrado em 03/11/2026, 4.10) |
 | 11.15 | `btnEnviarEmailClick` / `EnviaArquivo` | M | Sem arquivos para enviar! | Nenhuma nota para enviar. Processe uma pasta primeiro. | Duas ocorrências. Com o botão desabilitado, vira o texto 11.5/11.6 |
 | 11.16 | `EnviaArquivo` | M→F | Email enviado com sucesso!! | **E-mail enviado** para {destino} às {hh:mm}. | X2. Faixa de sucesso, sem caixa |
 | 11.17 | erro no envio (novo; hoje a exceção sobe sem tratamento) | F | — | **Não foi possível enviar o e-mail.**<br>O servidor respondeu: {motivo}. Confira os dados em Configurações e use Testar conexão. | Faixa de erro + LOG. `{motivo}` = resposta do servidor a partir do código de 3 dígitos (sem o prefixo do ACBr, ex.: "SMTP Error: …"); sem código, a mensagem original; sem repetir o ponto final. O LOG guarda a mensagem completa (28/10/2026, 4.9) |
@@ -259,6 +259,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 11.19 | SMTP não configurado (novo) | F | — | Configure o e-mail de envio em Configurações antes de enviar. | Faixa informativa; Enviar desabilitado |
 | 11.20 | WinRAR ausente (novo) | F | — | **Não foi possível compactar os XMLs.** WinRAR não encontrado em {pasta do ProXML}. | Até o ZIP do Plano 2 |
 | 11.20a | .rar não gerado (novo) | F | — | **Não foi possível compactar os XMLs.** O arquivo .rar não foi gerado. Tente de novo; se continuar, confira o espaço em disco e a pasta do ProXML. | Faixa de erro + LOG. WinRAR presente, mas sem o .rar. Aprovado pelo usuário em 26/10/2026 (4.7) |
+| 11.20b | XML ausente ao preparar o anexo (novo) | F | — | **Não foi possível preparar o anexo.** {n} XML não foi encontrado: {arquivo}. Processe a pasta de novo. | Faixa de erro + LOG; o e-mail não é enviado. Plural: "{n} XMLs não foram encontrados: {primeiro arquivo}." Aprovado pelo usuário em 03/11/2026 (4.10) |
 | 11.21 | assunto do e-mail | R | Projeto Pro XML - XMLs de Nota Fiscal | XMLs de Nota Fiscal · {período} · {n} notas | Ex.: "XMLs de Nota Fiscal · 01/10/2026 a 31/10/2026 · 128 notas". Todas as notas com a mesma data: "XMLs de Nota Fiscal · 15/10/2026 · 1 nota" (decisão de 26/10/2026) |
 | 11.22 | `ACBrMail1.FromName` | R | Projeto Pro XML | ProXML | Nome do remetente visto pelo destinatário |
 
@@ -297,7 +298,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 
 | # | Onde | Tipo | Antes | Depois | Observação |
 |---|------|------|-------|--------|------------|
-| 13.1 | tela nova | R | — | ProXML v{versão} | Versão do VersionInfo (ex.: 1.1.0) |
+| 13.1 | tela nova | R | — | ProXML v{versão} | Versão do VersionInfo (ex.: 1.1.0). Sem VersionInfo: "ProXML" (registrado em 03/11/2026, 4.10) |
 | 13.2 | tela nova | F | — | Totalizador de XMLs de NF-e (55) e NFC-e (65) com IBS/CBS, DANFE e relatórios. | Mesma frase da descrição do repositório (aprovada) |
 | 13.3 | tela nova (e saindo do relatório) | F | Desenvolvido por Caique Garcia \| Email … (no relatório) | Desenvolvido por Caique Garcia | Sem e-mail |
 | 13.4 | tela nova | B | — | github.com/Caique-Garcia/Novo-ProXML_Delphi | Link; abre `https://github.com/Caique-Garcia/Novo-ProXML_Delphi` |
@@ -312,6 +313,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 14.2 | `DM.pas` (leituras: `GetConfig`, consulta de config) | I | Erro na gravação de dados: {erro} | Erro ao ler o banco de dados: {erro} | Hoje a leitura diz "gravação" |
 | 14.3 | `DM.pas` (`SetFiltroModelo`) | I | Filtro de modelo inválido: {n} | Filtro de modelo inválido: {n}. | Erro de programação |
 | 14.4 | `ErroLog.txt` | I | {data}: {mensagem} | sem mudança | Arquivo de log |
+| 14.4a | prefixos só do LOG | I | — | Salvar configurações: · Ler configurações de e-mail: · Configurar o ACBr: · Preferências da tela: · Processar: · Enviar e-mail: · Testar conexão: · Exportar CSV: · O WinRAR não gerou o arquivo · Não foi possível preparar o anexo. {n} XML(s) não encontrado(s) | Não aparecem na tela (registrado em 03/11/2026, 4.10) |
 | 14.5 | `TabSheet1`, `TabSheet2`, `Loading`, `Enviar`, `Config` (`Caption` das abas) | I | TabSheet1 · TabSheet2 · Loading · Enviar · Config | sem mudança (abas ocultas) | Opcional renomear os componentes |
 
 ## 15. Caixas de mensagem

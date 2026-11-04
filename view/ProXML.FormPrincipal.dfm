@@ -28,7 +28,6 @@ object FormPrincipal: TFormPrincipal
     Height = 699
     Align = alClient
     BevelOuter = bvNone
-    Color = 15460841
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -321,7 +320,7 @@ object FormPrincipal: TFormPrincipal
           Align = alClient
           BevelOuter = bvNone
           Font.Charset = DEFAULT_CHARSET
-          Font.Color = 2169367
+          Font.Color = clWindowText
           Font.Height = -13
           Font.Name = 'Segoe UI'
           Font.Style = []
@@ -3264,7 +3263,7 @@ object FormPrincipal: TFormPrincipal
       item
         Name = 'xml'
         DataType = ftString
-        Size = 200
+        Size = 1024
       end
       item
         Name = 'modelo'
@@ -3336,7 +3335,7 @@ object FormPrincipal: TFormPrincipal
     end
     object FDMemTable1xml: TStringField
       FieldName = 'xml'
-      Size = 200
+      Size = 1024
     end
     object FDMemTable1modelo: TIntegerField
       FieldName = 'modelo'

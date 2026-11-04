@@ -112,6 +112,8 @@ uses
 
 procedure TDMConfig.ConexaoAfterConnect(Sender: TObject);
 begin
+     //XML TEXT (200): o SQLite não aplica o tamanho declarado, então caminho maior grava inteiro, sem migração.
+     //O FireDAC usa esse tamanho na leitura: as consultas dos relatórios não trazem esta coluna
      Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS nf ( ' +
                                 'NUMERO           TEXT (20), '  +
                                 'CHAVE            TEXT (50), '  +
@@ -429,16 +431,18 @@ begin
         QryAux.Connection := Conexao;
         QryAux.SQL.Clear;
         QryAux.SQL.Add('SELECT SMTP, EMAIL, SENHA, PORTA, SSL, TSL, MSG FROM CONFIG ');
+        //Consulta: erro de leitura (glossário 14.2). O GravarConfig fica fora deste try: ele já levanta
+        //o erro de gravação com o prefixo dele (14.1), sem repetir
         try
            QryAux.Active := True;
-
-           if QryAux.IsEmpty then
-           begin
-               GravarConfig(Config);
-               Exit;
-           end;
         except on e:Exception do
-           raise Exception.Create('Erro ao gravar no banco de dados: ' + e.message);
+           raise Exception.Create('Erro ao ler o banco de dados: ' + e.message);
+        end;
+
+        if QryAux.IsEmpty then
+        begin
+            GravarConfig(Config);
+            Exit;
         end;
 
     finally

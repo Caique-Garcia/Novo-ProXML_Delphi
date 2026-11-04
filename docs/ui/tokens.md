@@ -157,7 +157,7 @@ Grade de **8 px** (8 / 16 / 24 / 32). **4 px** só como meio passo (rótulo → 
 
 | Elemento | Medida | Observação |
 |----------|--------|------------|
-| Janela mínima | 1024×640 (`Constraints`) | Área cliente útil ≈ 1008×600 no Windows 10 a 100%. Os mockups usam essa área |
+| Janela mínima | 1024×640 × escala (`Constraints`), limitada à área útil do monitor | Ex.: 1280×800 a 125% e 1536×960 a 150% (decisão de 04/11/2026). Área cliente útil ≈ 1008×600 lógicos no Windows 10. Os mockups usam essa área |
 | Cabeçalho | 48 px | Antes 113 px (G2) |
 | Barra de pasta | 56 px | Itens com 32 px, centralizados; espaço 8 entre itens |
 | Menu lateral | 200 px fixo | Itens de 40 px, primeiro item 8 px abaixo do topo |
@@ -360,5 +360,5 @@ Animação `TSkAnimatedImage` do `ProXML.FrameLoad` (160×134) centralizada, tex
 ## 8. DPI
 
 - Todas as medidas acima são a 100% (96 dpi). Em 125%/150% a VCL escala fontes e controles; os SVGs (Skia) continuam nítidos.
-- Com `PerMonitorV2` no Delphi 10.2, conferir na 4.10 se `Constraints` (1024×640) e as alturas fixas (48/56/40/64/32/28) acompanham a escala; senão, multiplicar por `CurrentPPI / 96` no código.
+- O executável declara `dpiAware True/PM` (`AppEnableHighDPI`; `AppDPIAwarenessMode` só existe a partir do Delphi 10.3). O mínimo da janela (1024×640 × escala, limitado à área útil) e as alturas fixas (48/56/40/64/32/28) são multiplicados por `CurrentPPI / 96` no código.
 - O logo PNG (152×28) não escala bem: em 150% vira 228×42 borrado.
