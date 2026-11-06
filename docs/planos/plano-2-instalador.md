@@ -12,6 +12,11 @@ Distribuir o ProXML com um instalador Windows e eliminar a dependência do `WinR
 | Distribuição | Release com `ProXML-Setup.exe` (nome fixo, para os links `latest/download`) **e** `ProXML.rar` |
 | Setup antigo | Remover `install/setupProXML.rar` do repositório |
 | Assinatura | Sem assinatura, aceitando o aviso do SmartScreen |
+| **Revisão depois do Plano 4 (06/11/2026)** | O plano foi escrito antes do Plano 4. Decisões novas: **textos do ZIP** propostos pelo `ux-designer` no glossário (11.12, 11.14, 11.20, 11.20a, anexo da tela Enviar, linhas do LOG) e aprovados pelo usuário **antes** da 2.1. **Banco pela pasta do programa:** na 2.1, o `DM.pas` (e o `ErroLog.txt`) deixam o `GetCurrentDir` e passam a usar a pasta do `ProXML.exe`; o atalho continua com `WorkingDir: {app}`. **VersionInfo:** Release **1.2.0** e a configuração Debug alinhada (sai o 2023.1), na 2.1, com o ProXML fechado na IDE. **Limpeza:** `git rm` de `install/setupProXML.rar` **e de `dlls/`** (arquivos de sistema do Windows sem uso no código). **Inno Setup 6:** instalação pelo `winget install JRSoftware.InnoSetup` autorizada para a 2.3. **Setup antigo** (`setupProXML.exe`, outro AppId): só orientar no README e nas notas (desinstalar a versão antiga e, para manter as configurações, copiar o `db\notas.db` para `%LocalAppData%\ProXML\db`) |
+| **Distribuição (06/11/2026)** | ~~`ProXML.rar`~~ → o pacote portátil passa a ser **`ProXML.zip`** (abre no Explorer sem WinRAR). Release v1.2.0 com `ProXML-Setup.exe` e `ProXML.zip`, cada um com SHA-256. O pacote e o instalador levam também o `LICENSE-lucide.txt` (exigência da licença dos ícones) e `NFCe\` com `danfePDF\` e `EnvioResposta\` vazias, como na v1.1.0 |
+| **Textos do ZIP (06/11/2026)** | Aprovada a proposta do `ux-designer`: sai a **11.20** (WinRAR ausente) e as linhas do LOG do WinRAR; **11.20a** nova e **genérica** para qualquer falha ao criar o `.zip` (motivo técnico só no LOG, sem faixas específicas); **11.3** "Anexo: {n} XMLs (.zip)"; **14.4a** revisada e **14.4b** nova. O anexo continua **`NFCe_ProXML.zip`**. Falha ao criar a pasta temporária `NFCe\ProXML` mostra a **11.20a** (e não a 11.20b). O `NFCe_ProXML.rar` que sobra de quem atualiza da v1.1.0 **fica onde está** |
+| **Decisões da 2.1 (06/11/2026)** | Aceitas as escolhas do `delphi-dev`: falha ao apagar a pasta temporária `NFCe\ProXML` anterior também mostra a **11.20a** + LOG 14.4b (antes caía na 11.17); a cópia dos XMLs para `NFCe\ProXML` antes do `.zip` é **mantida** (continua detectando a 11.20b); chave repetida no filtro entra **uma vez só** no `.zip`. O tamanho mostrado na tela Enviar continua sendo a soma dos XMLs (11.4). Bateria reduzida da 2.1 autorizada pelo usuário |
+| **Pendências P1/P2 (06/11/2026)** | **P1:** atalho na Área de Trabalho **opcional e já marcado**. **P2:** "Executar ProXML agora" **marcado** na última tela do instalador |
 
 ## Etapas
 
@@ -40,8 +45,8 @@ Distribuir o ProXML com um instalador Windows e eliminar a dependência do `WinR
 - Publicar a Release v1.2.0 com os dois arquivos e os SHA-256, e validar o download anônimo.
 
 ## Pendências (decidir com o usuário)
-- **P1.** Atalho na Área de Trabalho: criado por padrão, opcional (caixa desmarcada) ou não criar?
-- **P2.** Ao final da instalação, oferecer "Executar ProXML agora"?
+- ~~**P1.** Atalho na Área de Trabalho~~ → opcional e marcado (06/11/2026).
+- ~~**P2.** "Executar ProXML agora"~~ → sim, marcado (06/11/2026).
 
 ## Riscos
 - O app localiza o `db\` por `GetCurrentDir`. Se for aberto sem o atalho (ex.: por outro programa), o diretório de trabalho pode ser outro. O atalho com `WorkingDir` resolve o caso comum; a correção definitiva seria uma alteração de código e fica fora do escopo decidido.

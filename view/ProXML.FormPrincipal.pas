@@ -547,7 +547,7 @@ type
     FCampoMensagemConfig: TCampoFormulario;
     FAjustandoRolagem   : Boolean;        //evita reentrada no ajuste das telas com rolagem de reserva
     FTrechosFaixaEnviar : TTrechosTexto;  //texto da faixa da tela Enviar
-    FPastaFaixaEnviar   : string;         //caminho nas faixas 11.20 e 11.20b (cortado no meio na largura da faixa)
+    FPastaFaixaEnviar   : string;         //caminho na faixa 11.20b (cortado no meio na largura da faixa)
     FXmlsAusentes       : Integer;        //> 0: a faixa com caminho é a 11.20b, com esta quantidade de XMLs
     FResultadoEnvio     : Boolean;        //a faixa mostra o resultado do último envio (fica até sair da tela)
     FAnexoQuantidade    : Integer;        //XMLs do filtro de modelo (quadro do anexo, 11.3)
@@ -899,6 +899,7 @@ uses
     Vcl.FileCtrl,
   {$ENDIF}
   System.IOUtils,
+  System.Zip,
   System.Math,
   System.Types,
   Winapi.CommCtrl,
@@ -936,16 +937,20 @@ const
   URL_GITHUB   = 'https://github.com/Caique-Garcia/Novo-ProXML_Delphi';
   TEXTO_GITHUB = 'github.com/Caique-Garcia/Novo-ProXML_Delphi';
 
+  //Anexo do e-mail (Plano 2: ZIP nativo no lugar do WinRAR), relativo à pasta do ProXML. O nome continua
+  //NFCe_ProXML; o NFCe_ProXML.rar da v1.1.0 que sobrar na pasta NFCe fica onde está
+  ARQUIVO_ANEXO = 'NFCe\NFCe_ProXML.zip';
+
 type
-  //Resultado do envio do e-mail, mostrado na thread principal. reSemWinRAR: o WinRAR.exe não está na
-  //pasta do ProXML (11.20); reSemAnexo: o WinRAR rodou, mas o .rar não foi gerado; reXmlAusente: algum XML
-  //não pôde ser copiado para o anexo (11.20b)
-  TResultadoEnvio = (reEnviado, reSemWinRAR, reSemAnexo, reXmlAusente, reErro);
+  //Resultado do envio do e-mail, mostrado na thread principal. reSemAnexo: o .zip não pôde ser criado
+  //(pasta temporária, gravação do .zip, .zip ausente ou vazio; 11.20a); reXmlAusente: algum XML não pôde
+  //ser copiado para o anexo (11.20b)
+  TResultadoEnvio = (reEnviado, reSemAnexo, reXmlAusente, reErro);
 
   //Acesso às propriedades protegidas de TCustomEdit (Font, Color e eventos) para TEdit e TMemo
   TEditAcesso = class(TCustomEdit);
 
-  { Compactação (WinRAR) e envio do e-mail numa thread própria (Plano 4, etapa 4.6).
+  { Compactação (ZIP nativo, System.Zip; Plano 2) e envio do e-mail numa thread própria (Plano 4, etapa 4.6).
     TThread própria em vez de ACBrMail.UseThread: a compactação também precisa sair da thread principal
     e o resultado (enviado, sem anexo ou erro) volta num ponto só, o OnTerminate, já na thread principal.
     Os dados da tela (XMLs do filtro, destino, assunto e mensagem) são copiados na thread principal antes
@@ -963,7 +968,9 @@ type
     FErro       : string;
     FClasseErro : string;
     FFaltando   : TStringList;   //XMLs que não puderam ser copiados para o anexo (caminho completo)
+    FAnexo      : string;        //NFCe\NFCe_ProXML.zip na pasta do ProXML (caminho completo)
     function  Compactar: Boolean;
+    procedure FalharAnexo(const Motivo, Classe: string);
   protected
     procedure Execute; override;
   public
@@ -1256,38 +1263,6 @@ begin
     end;
 end;
 
-function ExecutarOculto(const Comando: string): Boolean;
-var
-  SUInfo: TStartupInfo;
-  ProcInfo: TProcessInformation;
-begin
-  //Executa o comando sem janela e espera terminar (WinRAR). Não acessa a tela
-  FillChar(SUInfo, SizeOf(SUInfo), #0);
-  SUInfo.cb      := SizeOf(SUInfo);
-  SUInfo.dwFlags := STARTF_USESHOWWINDOW;
-  SUInfo.wShowWindow := SW_HIDE;
-
-  Result := CreateProcess(nil,
-                          PChar(Comando),
-                          nil,
-                          nil,
-                          false,
-                          CREATE_NEW_CONSOLE or
-                          NORMAL_PRIORITY_CLASS,
-                          nil,
-                          nil,
-                          SUInfo,
-                          ProcInfo);
-
-  if (Result) then
-  begin
-    WaitForSingleObject(ProcInfo.hProcess, INFINITE);
-
-    CloseHandle(ProcInfo.hProcess);
-    CloseHandle(ProcInfo.hThread);
-  end;
-end;
-
 { TThreadEnvioEmail }
 
 constructor TThreadEnvioEmail.Create(ACBrNFe: TACBrNFe; const PastaApp, Para, Assunto: string; Mensagem: TStrings);
@@ -1321,21 +1296,40 @@ begin
     FNomes.Add(Nome);
 end;
 
+procedure TThreadEnvioEmail.FalharAnexo(const Motivo, Classe: string);
+begin
+    //11.20a: o .zip não pôde ser criado. O motivo técnico vai só para o LOG (14.4b), montado na thread principal
+    FResultado  := reSemAnexo;
+    FErro       := Motivo;
+    FClasseErro := Classe;
+end;
+
 function TThreadEnvioEmail.Compactar: Boolean;
 var
     Pasta : string;
-    Anexo : string;
+    Zip   : TZipFile;
     I     : Integer;
 begin
-    //Mesma compactação de antes da 4.6 (pasta NFCe\ProXML e WinRAR), agora fora da thread principal.
-    //False: algum XML não pôde ser copiado (11.20b); o anexo não é gerado e o e-mail não sai
+    //Cópia dos XMLs para a pasta NFCe\ProXML (com o nome <chave>-nfe.xml) e o .zip (System.Zip) com essas
+    //cópias, fora da thread principal. False: o anexo não foi gerado e o e-mail não sai; FResultado diz
+    //o motivo (reXmlAusente, 11.20b, ou reSemAnexo, 11.20a)
     Result := False;
-    Pasta := FPastaApp + 'NFCe\ProXML';
-    if TDirectory.Exists(Pasta) then
-        TDirectory.Delete(Pasta, True);   //apaga a pasta e todo o seu conteúdo
+    Pasta  := FPastaApp + 'NFCe\ProXML';
+    FAnexo := FPastaApp + ARQUIVO_ANEXO;
 
-    if not SysUtils.DirectoryExists(Pasta) then
-        SysUtils.ForceDirectories(FPastaApp + '\NFCe\ProXML');
+    //Pasta temporária: a falha ao recriá-la é falha de compactar (11.20a), não XML ausente (11.20b)
+    try
+        if TDirectory.Exists(Pasta) then
+            TDirectory.Delete(Pasta, True);   //apaga a pasta e todo o seu conteúdo
+        if not SysUtils.ForceDirectories(Pasta) then
+            RaiseLastOSError;
+    except
+        on E: Exception do
+        begin
+            FalharAnexo(E.Message, E.ClassName);
+            Exit;
+        end;
+    end;
 
     for I := 0 to FOrigens.Count - 1 do
         if not CopyFile(PChar(FOrigens[I]), PChar(Pasta + '\' + FNomes[I]), False) then
@@ -1346,23 +1340,56 @@ begin
             FFaltando.Add(FOrigens[I]);
         end;
     if FFaltando.Count > 0 then
+    begin
+        FResultado := reXmlAusente;
         Exit;
+    end;
 
-    Anexo := FPastaApp + 'NFCe\NFCe_ProXML.rar';
-    if FileExists(Anexo) then
-        SysUtils.DeleteFile(Anexo);
+    //O .zip anterior é apagado antes de criar o novo (arquivo em uso, sem permissão: 11.20a). Só entram as
+    //cópias desta vez, pela lista, e não tudo o que estiver na pasta
+    try
+        if FileExists(FAnexo) and not SysUtils.DeleteFile(FAnexo) then
+            RaiseLastOSError;
 
-    //Caminhos entre aspas (pasta com espaço). O cmd.exe /c tira a primeira e a última aspa quando há mais
-    //de duas: por isso o comando inteiro vai dentro de mais um par
-    ExecutarOculto('cmd.exe /c ""' + FPastaApp + 'WinRAR.exe" a -ep "' + Anexo + '" "' +
-                   FPastaApp + 'NFCe\ProXML\*-nfe.xml""');
+        Zip := TZipFile.Create;
+        try
+            Zip.Open(FAnexo, zmWrite);
+            //A mesma chave duas vezes no filtro entra uma vez só, como na pasta NFCe\ProXML
+            for I := 0 to FNomes.Count - 1 do
+                if Zip.IndexOf(FNomes[I]) < 0 then
+                    Zip.Add(Pasta + '\' + FNomes[I], FNomes[I]);
+            Zip.Close;
+        finally
+            Zip.Free;
+        end;
+    except
+        on E: Exception do
+        begin
+            //Disco cheio, sem permissão, cópia presa pelo antivírus: o .zip incompleto não fica na pasta
+            FalharAnexo(E.Message, E.ClassName);
+            SysUtils.DeleteFile(FAnexo);
+            Exit;
+        end;
+    end;
+
+    //Conferência depois de compactar: o .zip tem que existir e ter conteúdo (14.4b sem exceção)
+    if not FileExists(FAnexo) then
+    begin
+        FalharAnexo('o arquivo não existe depois da compactação', '');
+        Exit;
+    end;
+    if TamanhoArquivo(FAnexo) = 0 then
+    begin
+        FalharAnexo('o arquivo ficou vazio', '');
+        Exit;
+    end;
+
     Result := True;
 end;
 
 procedure TThreadEnvioEmail.Execute;
 var
     Anexos       : TStringList;
-    Anexo        : string;
     ResultadoCOM : HResult;
 begin
     NameThreadForDebugging('ProXML.EnvioEmail');
@@ -1374,30 +1401,13 @@ begin
     ResultadoCOM := CoInitialize(nil);
     try
         try
-            //WinRAR fora da pasta do ProXML: não compacta nem envia (glossário 11.20)
-            if not FileExists(FPastaApp + 'WinRAR.exe') then
-            begin
-                FResultado := reSemWinRAR;
-                Exit;
-            end;
-
+            //XML ausente (11.20b) ou .zip não criado (11.20a): não envia; o motivo já está em FResultado
             if not Compactar then
-            begin
-                FResultado := reXmlAusente;
                 Exit;
-            end;
-
-            //WinRAR com falha (o .rar não foi gerado): não envia
-            Anexo := FPastaApp + 'NFCe\NFCe_ProXML.rar';
-            if not FileExists(Anexo) then
-            begin
-                FResultado := reSemAnexo;
-                Exit;
-            end;
 
             Anexos := TStringList.Create;
             try
-                Anexos.Add(Anexo);
+                Anexos.Add(FAnexo);
                 FACBrNFe.EnviarEmail(FPara, FAssunto, FMensagem, nil, Anexos, nil, '', nil);
             finally
                 Anexos.Free;
@@ -6493,18 +6503,6 @@ begin
                                          FormatDateTime('hh":"nn', Now, FormatoPtBR) + '.', etrNormal);
                 MostrarFaixaEnviar(tfSucesso, Trechos, True);
             end;
-            reSemWinRAR:
-            begin
-                //11.20
-                GravarLog('Enviar e-mail', 'WinRAR não encontrado em ' + ExtractFilePath(ParamStr(0)));
-                //Revisão da 4.9 (A5): a pasta é cortada no meio com "…" na largura da faixa (o ponto final
-                //continua) e o caminho completo fica na dica da faixa
-                FPastaFaixaEnviar := ExcludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
-                PnlFaixaEnviar.Hint     := FPastaFaixaEnviar;
-                PnlFaixaEnviar.ShowHint := True;
-                MontarTrechosCaminhoEnviar;
-                MostrarFaixaEnviar(tfErro, FTrechosFaixaEnviar, True);
-            end;
             reXmlAusente:
             begin
                 //11.20b: XML apagado ou sem acesso entre a leitura e o Enviar: não envia. LOG com todos os
@@ -6522,12 +6520,15 @@ begin
             end;
             reSemAnexo:
             begin
-                //11.20a: o WinRAR rodou, mas o .rar não foi gerado
-                GravarLog('Enviar e-mail', 'O WinRAR não gerou o arquivo ' + ExtractFilePath(ParamStr(0)) +
-                                           'NFCe\NFCe_ProXML.rar');
+                //11.20a (genérica para toda falha ao criar o .zip ou a pasta NFCe\ProXML) e o LOG 14.4b com o
+                //motivo técnico: mensagem e classe da exceção, ou a conferência do arquivo (sem classe)
+                if ClasseErro <> '' then
+                    Erro := Erro + ' (' + ClasseErro + ')';
+                GravarLog('Enviar e-mail', 'Não foi possível criar o arquivo ' + ExtractFilePath(ParamStr(0)) +
+                                           ARQUIVO_ANEXO + '. Motivo: ' + Erro);
                 AdicionarTrecho(Trechos, 'Não foi possível compactar os XMLs.', etrDestaque);
-                AdicionarTrecho(Trechos, ' O arquivo .rar não foi gerado. Tente de novo; se continuar, confira o ' +
-                                         'espaço em disco e a pasta do ProXML.', etrNormal);
+                AdicionarTrecho(Trechos, ' O arquivo .zip não foi criado. Feche programas que estejam usando a ' +
+                                         'pasta NFCe do ProXML, confira o espaço em disco e tente de novo.', etrNormal);
                 MostrarFaixaEnviar(tfErro, Trechos, True);
             end;
         else
@@ -6895,7 +6896,7 @@ begin
     Label11.Layout  := tlCenter;
     Label11.Caption := 'Enviar por e-mail';
 
-    //Faixa de resultado e de e-mail de envio não configurado (11.16, 11.17, 11.19 e 11.20)
+    //Faixa de resultado e de e-mail de envio não configurado (11.16, 11.17, 11.19, 11.20a e 11.20b)
     DefinirTipoFaixa(PnlFaixaEnviar, PnlFaixaEnviarBarra, SkSvgFaixaEnviar, tfInformacao);
     PbxFaixaEnviar.OnPaint := PbxFaixaEnviarPaint;
     PnlFaixaEnviar.Visible := False;
@@ -6952,7 +6953,7 @@ var
     Marcador : TBookmark;
 begin
     //Quadro do anexo (11.3 e 11.4): quantidade de XMLs do filtro de modelo e a soma do tamanho dos XMLs,
-    //sem compactar (o .rar só é gerado no clique em Enviar). XML apagado depois da leitura conta 0 byte
+    //sem compactar (o .zip só é gerado no clique em Enviar). XML apagado depois da leitura conta 0 byte
     FAnexoQuantidade := 0;
     FAnexoBytes      := 0;
     if not TemNotaNoModelo then
@@ -6998,9 +6999,9 @@ begin
     if TemNotas then
     begin
         if FAnexoQuantidade = 1 then
-            LabelAnexoTitulo.Caption := 'Anexo: 1 XML (.rar)'
+            LabelAnexoTitulo.Caption := 'Anexo: 1 XML (.zip)'
         else
-            LabelAnexoTitulo.Caption := 'Anexo: ' + IntToStr(FAnexoQuantidade) + ' XMLs (.rar)';
+            LabelAnexoTitulo.Caption := 'Anexo: ' + IntToStr(FAnexoQuantidade) + ' XMLs (.zip)';
         LabelAnexoDetalhe.Caption := 'Modelo: ' + SeletorModelo.Itens[SeletorModelo.ItemIndex] + ' ' + #$00B7 +
                                      ' os XMLs somam ' + FormatarTamanho(FAnexoBytes) + ' ' + #$00B7 +
                                      ' compactado só ao clicar em Enviar';
@@ -7085,7 +7086,7 @@ begin
     if PnlFaixaEnviar.Visible then
     begin
         PnlFaixaEnviar.SetBounds(X, Y, W, PnlFaixaEnviar.Height);
-        //11.20 e 11.20b: o caminho é cortado de novo na largura atual da faixa
+        //11.20b: o caminho é cortado de novo na largura atual da faixa
         if FPastaFaixaEnviar <> '' then
             MontarTrechosCaminhoEnviar;
         AjustarFaixa(PnlFaixaEnviar, PnlFaixaEnviarBarra, SkSvgFaixaEnviar, PbxFaixaEnviar, FTrechosFaixaEnviar,
@@ -7167,8 +7168,8 @@ var
     Medida  : TBitmap;
     Caminho : string;
 begin
-    //11.20 (pasta do ProXML) e 11.20b (primeiro XML ausente): o caminho é cortado no meio para caber numa
-    //linha do texto da faixa, com o ponto final
+    //11.20b (primeiro XML ausente): o caminho é cortado no meio para caber numa linha do texto da faixa,
+    //com o ponto final. Revisão da 4.9 (A5): o corte usa "…" e o caminho completo fica na dica da faixa
     Medida := TBitmap.Create;
     try
         FonteDoTrecho(Medida.Canvas.Font, etrNormal);
@@ -7186,11 +7187,6 @@ begin
             AdicionarTrecho(FTrechosFaixaEnviar, 'Não foi possível preparar o anexo.', etrDestaque);
             AdicionarTrecho(FTrechosFaixaEnviar, ' ' + IntToStr(FXmlsAusentes) + ' XMLs não foram encontrados: ' + Caminho +
                                                  '. Processe a pasta de novo.', etrNormal);
-        end
-        else
-        begin
-            AdicionarTrecho(FTrechosFaixaEnviar, 'Não foi possível compactar os XMLs.', etrDestaque);
-            AdicionarTrecho(FTrechosFaixaEnviar, ' WinRAR não encontrado em ' + Caminho + '.', etrNormal);
         end;
     finally
         Medida.Free;

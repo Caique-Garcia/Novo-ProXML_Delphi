@@ -216,7 +216,9 @@ begin
    Conexao.DriverName := 'SQLite';
 
   {$IFDEF MSWINDOWS}
-   Conexao.Params.Values['Database'] := System.SysUtils.GetCurrentDir + '\db\notas.db';
+   //Banco na pasta do ProXML.exe (Plano 2), e não no diretório de trabalho: o app aberto sem o atalho
+   //(por outro programa ou de outra pasta) continua usando o mesmo db\notas.db
+   Conexao.Params.Values['Database'] := ExtractFilePath(ParamStr(0)) + 'db\notas.db';
   {$ELSE}
    Conxao.Params.Values['Database'] := TPath.Combine( TPath.GetDocumentsPath, '\notas.db');
   {$ENDIF}
@@ -233,7 +235,8 @@ begin
 
     FFiltroModelo := FILTRO_MODELO_TODOS;
 
-    Diretorio := System.SysUtils.GetCurrentDir + '\db';
+    //Pasta db\ ao lado do ProXML.exe (a mesma do ConexaoBeforeConnect)
+    Diretorio := ExtractFilePath(ParamStr(0)) + 'db';
 
     if not DirectoryExists(Diretorio) then
         CreateDir(Diretorio);
@@ -378,7 +381,7 @@ procedure TDMConfig.GravaLog(Sender: TObject; E: Exception);
 begin
     // Grava no log o erro com detalhes
     //DMConfig.CreateLog(E.ClassName, E.Message);
-    TFile.AppendAllText(System.SysUtils.GetCurrentDir +'\ErroLog.txt', Format('%s: %s%s', [DateTimeToStr(Now), E.Message, sLineBreak]));
+    TFile.AppendAllText(ExtractFilePath(ParamStr(0)) + 'ErroLog.txt', Format('%s: %s%s', [DateTimeToStr(Now), E.Message, sLineBreak]));
 end;
 
 procedure TDMConfig.GravarConfig(const Config: TConfig);

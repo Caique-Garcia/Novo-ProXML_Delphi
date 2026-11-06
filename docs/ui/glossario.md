@@ -1,6 +1,6 @@
 # ProXML · Glossário de textos da interface (v1.1.0)
 
-> **Etapa:** 4.1 do Plano 4 · **Status:** aprovado pelo usuário em 19/10/2026, com os acréscimos registrados em cada item
+> **Etapa:** 4.1 do Plano 4 · **Status:** aprovado pelo usuário em 19/10/2026, com os acréscimos registrados em cada item. **Revisão do Plano 2 (v1.2.0, 06/11/2026):** textos do ZIP nativo, sem WinRAR (11.3, 11.20, 11.20a, 14.4a e 14.4b)
 > **Levantamento:** `view/*.pas`, `view/*.dfm`, `lib/uCalculadoraXML.pas`, `datamodule/DM.pas` no commit `6be6cd8` (`.pas` lidos como Windows-1252; `#nnn` dos `.dfm` decodificados).
 > Depois de aprovado, o `delphi-dev` aplica estes textos na 4.7 e o `qa-reviewer` confere com `grep` (4.10): **nenhum texto visível fora desta lista**.
 
@@ -240,7 +240,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 |---|--------------|------|-------|--------|------------|
 | 11.1 | `Label11` | R | `Enviar ` (com espaço) | Enviar por e-mail | Título da tela |
 | 11.2 | `Label12` | R | Enviar arquivos por email | *(removido)* | O quadro do anexo explica o envio |
-| 11.3 | anexo (novo) | F | — | Anexo: {n} XMLs (.rar) | E3. Singular: "Anexo: 1 XML (.rar)" |
+| 11.3 | anexo (novo) | F | — | Anexo: {n} XMLs (.zip) | E3. Singular: "Anexo: 1 XML (.zip)". Era "(.rar)" até a v1.1.0; aprovado pelo usuário em 06/11/2026 (Plano 2) |
 | 11.4 | anexo (novo) | F | — | Modelo: {m} · os XMLs somam {tamanho} · compactado só ao clicar em Enviar | Tamanho em KB/MB com vírgula ("3,4 MB") |
 | 11.5 | anexo sem notas (novo) | F | — | Nenhuma nota para enviar | |
 | 11.6 | anexo sem notas (novo) | F | — | Processe uma pasta para gerar o anexo. | |
@@ -257,8 +257,8 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 11.17 | erro no envio (novo; hoje a exceção sobe sem tratamento) | F | — | **Não foi possível enviar o e-mail.**<br>O servidor respondeu: {motivo}. Confira os dados em Configurações e use Testar conexão. | Faixa de erro + LOG. `{motivo}` = resposta do servidor a partir do código de 3 dígitos (sem o prefixo do ACBr, ex.: "SMTP Error: …"); sem código, a mensagem original; sem repetir o ponto final. O LOG guarda a mensagem completa (28/10/2026, 4.9) |
 | 11.18 | validação (novo) | F | — | Informe um e-mail válido. Exemplo: nome@empresa.com.br | E5. Um só destinatário (decisão de 26/10/2026) |
 | 11.19 | SMTP não configurado (novo) | F | — | Configure o e-mail de envio em Configurações antes de enviar. | Faixa informativa; Enviar desabilitado |
-| 11.20 | WinRAR ausente (novo) | F | — | **Não foi possível compactar os XMLs.** WinRAR não encontrado em {pasta do ProXML}. | Até o ZIP do Plano 2 |
-| 11.20a | .rar não gerado (novo) | F | — | **Não foi possível compactar os XMLs.** O arquivo .rar não foi gerado. Tente de novo; se continuar, confira o espaço em disco e a pasta do ProXML. | Faixa de erro + LOG. WinRAR presente, mas sem o .rar. Aprovado pelo usuário em 26/10/2026 (4.7) |
+| 11.20 | WinRAR ausente | F | ~~**Não foi possível compactar os XMLs.** WinRAR não encontrado em {pasta do ProXML}.~~ | *(removida)* | Sem WinRAR, o erro não existe (ZIP nativo). Valeu até a v1.1.0; remoção aprovada pelo usuário em 06/11/2026 (Plano 2) |
+| 11.20a | .zip não criado | F | **Não foi possível compactar os XMLs.** O arquivo .rar não foi gerado. Tente de novo; se continuar, confira o espaço em disco e a pasta do ProXML. | **Não foi possível compactar os XMLs.** O arquivo .zip não foi criado. Feche programas que estejam usando a pasta NFCe do ProXML, confira o espaço em disco e tente de novo. | Faixa de erro + LOG (14.4b); o e-mail não é enviado. Genérica para toda falha ao criar o `.zip` (arquivo em uso, disco cheio, sem permissão, `.zip` ausente ou vazio) **e** para a falha ao criar a pasta `NFCe\ProXML` (que não mostra a 11.20b). O motivo técnico vai só para o LOG. Texto do .rar aprovado em 26/10/2026 (4.7); texto do .zip aprovado pelo usuário em 06/11/2026 (Plano 2) |
 | 11.20b | XML ausente ao preparar o anexo (novo) | F | — | **Não foi possível preparar o anexo.** {n} XML não foi encontrado: {arquivo}. Processe a pasta de novo. | Faixa de erro + LOG; o e-mail não é enviado. Plural: "{n} XMLs não foram encontrados: {primeiro arquivo}." Aprovado pelo usuário em 03/11/2026 (4.10) |
 | 11.21 | assunto do e-mail | R | Projeto Pro XML - XMLs de Nota Fiscal | XMLs de Nota Fiscal · {período} · {n} notas | Ex.: "XMLs de Nota Fiscal · 01/10/2026 a 31/10/2026 · 128 notas". Todas as notas com a mesma data: "XMLs de Nota Fiscal · 15/10/2026 · 1 nota" (decisão de 26/10/2026) |
 | 11.22 | `ACBrMail1.FromName` | R | Projeto Pro XML | ProXML | Nome do remetente visto pelo destinatário |
@@ -313,7 +313,8 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 14.2 | `DM.pas` (leituras: `GetConfig`, consulta de config) | I | Erro na gravação de dados: {erro} | Erro ao ler o banco de dados: {erro} | Hoje a leitura diz "gravação" |
 | 14.3 | `DM.pas` (`SetFiltroModelo`) | I | Filtro de modelo inválido: {n} | Filtro de modelo inválido: {n}. | Erro de programação |
 | 14.4 | `ErroLog.txt` | I | {data}: {mensagem} | sem mudança | Arquivo de log |
-| 14.4a | prefixos só do LOG | I | — | Salvar configurações: · Ler configurações de e-mail: · Configurar o ACBr: · Preferências da tela: · Processar: · Enviar e-mail: · Testar conexão: · Exportar CSV: · O WinRAR não gerou o arquivo · Não foi possível preparar o anexo. {n} XML(s) não encontrado(s) | Não aparecem na tela (registrado em 03/11/2026, 4.10) |
+| 14.4a | prefixos só do LOG | I | — | Salvar configurações: · Ler configurações de e-mail: · Configurar o ACBr: · Preferências da tela: · Processar: · Enviar e-mail: · Testar conexão: · Exportar CSV: · Não foi possível criar o arquivo · Não foi possível preparar o anexo. {n} XML(s) não encontrado(s) | Não aparecem na tela (registrado em 03/11/2026, 4.10). Saem "O WinRAR não gerou o arquivo" e "WinRAR não encontrado em {pasta}"; entra "Não foi possível criar o arquivo" (14.4b). Aprovado pelo usuário em 06/11/2026 (Plano 2) |
+| 14.4b | falha ao criar o `.zip` (novo) | I | — | Enviar e-mail: Não foi possível criar o arquivo {pasta do ProXML}NFCe\NFCe_ProXML.zip. Motivo: {mensagem da exceção} ({classe da exceção}) | Acompanha a 11.20a. Sem exceção, mas com o `.zip` ausente ou de 0 byte: "Motivo: o arquivo não existe depois da compactação" / "Motivo: o arquivo ficou vazio". Aprovado pelo usuário em 06/11/2026 (Plano 2) |
 | 14.5 | `TabSheet1`, `TabSheet2`, `Loading`, `Enviar`, `Config` (`Caption` das abas) | I | TabSheet1 · TabSheet2 · Loading · Enviar · Config | sem mudança (abas ocultas) | Opcional renomear os componentes |
 
 ## 15. Caixas de mensagem
