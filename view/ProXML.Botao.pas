@@ -1186,7 +1186,9 @@ begin
     Result.Caption  := Texto;
     Result.IconeSvg := Icone;
     Result.OnClick  := AoClicar;
-    Result.SetBounds(0, Fundo, Menu.ClientWidth, EscalarPara(Menu, AlturaItemMenu));
+    //Altura em 96 dpi: ao entrar no painel (Parent), a VCL escala o item para o dpi do painel. Escalar
+    //aqui também faria a altura sair escalada duas vezes ao abrir em escala (60 * 1,5 = 90 a 150%)
+    Result.SetBounds(0, Fundo, Menu.ClientWidth, AlturaItemMenu);
     Result.Align    := alTop;
     Result.Parent   := Menu;
 end;

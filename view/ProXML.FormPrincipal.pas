@@ -665,6 +665,7 @@ type
     procedure AposMudarEscala;
     //Plano 4, etapa 4.4: menu, navegação, tela Relatórios e tela Carregando
     procedure CriarMenu;
+    procedure OrdenarMenu;
     procedure ItemMenuClick(Sender: TObject);
     function  AbaDaTela(const Tela: TTela): TTabSheet;
     function  TelaDaAba(const Aba: TTabSheet): TTela;
@@ -2777,7 +2778,11 @@ begin
         AjustarLargurasBarraPasta;
         AtualizarBordaCampoPasta(EditCaminho.Focused);
         AjustarFonteValoresCards;
-        //Etapa 4.5: tela Notas (alturas da grade, colunas, linha de título e campo Buscar)
+        OrdenarMenu;
+        //Etapa 4.5: tela Notas (fontes e alturas da grade, colunas, linha de título e campo Buscar). As
+        //fontes da grade são refeitas antes das alturas: a VCL não escala a fonte dos títulos
+        FonteNaEscala(DBGrid1.Font, TamanhoCorpo);
+        FonteNaEscala(DBGrid1.TitleFont, TamanhoBotao);
         AjustarAlturaLinhasGrade;
         AtualizarBordaCampo(PnlCampoBusca, SkSvgBusca, EditBusca, 0, EditBusca.Focused);
         AjustarLinhaTituloNotas;
@@ -3388,11 +3393,40 @@ begin
         ItensMenu[Tela].Name := NOMES[Tela];
         ItensMenu[Tela].Tag  := Ord(Tela);
     end;
-    TProItemMenu.AjustarParadaTab(PnlMenuItens);
+    OrdenarMenu;
 
     //Ordem do Tab: barra de pasta -> menu (uma parada) -> conteúdo da tela. O PageControl1 não
     //recebe foco pelo Tab: as abas ficam escondidas e o foco nele não aparece na tela
     PageControl1.TabStop := False;
+end;
+
+procedure TFormPrincipal.OrdenarMenu;
+var
+    Tela  : TTelaMenu;
+    Topo  : Integer;
+    Altura: Integer;
+begin
+    //Itens do menu na ordem fixa (Resumo, Notas, Relatórios, Enviar, Configurações), com 40 px na escala
+    //atual. Na troca de dpi a VCL escala os itens um a um com o alinhamento do painel ligado, e os alTop
+    //podem trocar de lugar pela posição intermediária; por isso a posição e a ordem do Tab são refeitas
+    if ItensMenu[Low(TTelaMenu)] = nil then
+        Exit;
+
+    Altura := Escalar(AlturaItemMenu);
+    PnlMenuItens.DisableAlign;
+    try
+        PnlMenuItens.Padding.Top := Escalar(TopoMenu);
+        Topo := PnlMenuItens.Padding.Top;
+        for Tela := Low(TTelaMenu) to High(TTelaMenu) do
+        begin
+            ItensMenu[Tela].SetBounds(0, Topo, PnlMenuItens.ClientWidth, Altura);
+            ItensMenu[Tela].TabOrder := Ord(Tela);
+            Inc(Topo, Altura);
+        end;
+    finally
+        PnlMenuItens.EnableAlign;
+    end;
+    TProItemMenu.AjustarParadaTab(PnlMenuItens);
 end;
 
 procedure TFormPrincipal.ItemMenuClick(Sender: TObject);
@@ -4320,6 +4354,15 @@ var
                 Exit(DBGrid1.Columns[J]);
     end;
 
+    procedure DefinirLargura(const Campo: string; const Largura: Integer);
+    var
+        Fixa: TColumn;
+    begin
+        Fixa := ColunaDoCampo(Campo);
+        if Fixa <> nil then
+            Fixa.Width := Escalar(Largura);
+    end;
+
 begin
     //Decisão D3: Nº, Modelo, Data, Chave e Valor sempre. As colunas extras entram em pares, cada par
     //só quando couber inteiro sem a Chave ficar abaixo do mínimo: primeiro Base ICMS + ICMS, depois
@@ -4343,6 +4386,12 @@ begin
     FAjustandoColunas := True;
     DBGrid1.Columns.BeginUpdate;
     try
+        //Colunas fixas na escala atual: na troca de dpi a VCL reescala as larguras com arredondamento e
+        //a grade não volta ao tamanho de quem abre direto na escala
+        DefinirLargura('numero', LarguraColunaNumero);
+        DefinirLargura('modelo', LarguraColunaModelo);
+        DefinirLargura('data', LarguraColunaData);
+        DefinirLargura('vtotal', LarguraColunaValor);
         Disponivel := DBGrid1.Width - MulDiv(GetSystemMetrics(SM_CXVSCROLL), PPIAtual, Screen.PixelsPerInch);
         Ocupado := Escalar(LarguraColunaNumero) + Escalar(LarguraColunaModelo) + Escalar(LarguraColunaData) +
                    Escalar(LarguraColunaChaveMin) + Escalar(LarguraColunaValor);
