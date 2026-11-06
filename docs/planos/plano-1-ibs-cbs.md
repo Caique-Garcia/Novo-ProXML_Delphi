@@ -125,6 +125,7 @@
 - Empacotar o `ProXML.rar`, publicar a Release v1.1.0 e validar o download.
 - ⏳ 19/10/2026: preparada (VersionInfo 1.1.0, README, rascunho das notas e `ProXML.rar`; commit local `b593076`, sem push, tag ou Release).
 - ⏸️ **Publicação adiada por decisão do usuário:** o Plano 4 (redesign) é executado antes e a v1.1.0 sai com os Planos 1 e 4 juntos, na etapa 4.12. O README, as notas e o pacote serão refeitos lá.
+- ✅ **Publicada em 06/11/2026** junto com o Plano 4 (etapa 4.12): Release v1.1.0, tag em `dca63ff`.
 
 ## Pendências (decidir com o usuário)
 - **P2.** Detalhes visuais dos layouts do ACBr (achados na 1.5): "Folha 1/0" no cabeçalho do `DANFePaisagem.fr3` e uma linha cortando "Emissão … Via Consumidor" no `DANFeNFCeA4.fr3`. Corrigir numa etapa própria, levar ao Plano 4 ou manter?

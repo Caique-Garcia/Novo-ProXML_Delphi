@@ -1,6 +1,6 @@
 # Plano 4 — Redesign de UI/UX (v1.1.0, junto com o Plano 1)
 
-> **Status:** ▶️ Em execução: 4.1 a 4.10 concluídas (no GitHub, sem tag nem Release); próxima etapa **4.12** (Release v1.1.0, só com OK explícito do usuário)
+> **Status:** ✅ Concluído: **v1.1.0 publicada em 06/11/2026** (Planos 1 + 4), tag `v1.1.0` em `dca63ff`
 > **Análise feita em:** 19/10/2026, sobre o commit `5ae82ac` (antes da etapa 1.2 do Plano 1)
 > **Atualizado em:** 19/10/2026, sobre o commit `b593076` (Plano 1 concluído e aprovado pelo QA; v1.1.0 preparada, **não publicada**). Ver a seção [2.10](#210-o-que-o-plano-1-já-mudou)
 > **Escopo:** tela principal (todas as abas), relatório de notas e relatório IBS/CBS (QuickReport), layouts do DANFE (`.fr3`) e textos da interface
@@ -553,6 +553,7 @@ Movida para o **Plano 3**: como o site vem depois do redesign, os prints já sã
 - VersionInfo **1.1.0** já está no `.dproj` (commit `b593076`, confirmado pelo usuário).
 - Pacote `.rar` (sem instalador; ele vem no Plano 2, v1.2.0), tag `v1.1.0`, Release com SHA-256 e nova descrição do repositório ("Totalizador de XMLs de NF-e (55) e NFC-e (65) com IBS/CBS, DANFE e relatórios - Delphi VCL", aprovada pelo usuário).
 - Publicação **só com o OK do usuário** depois de revisar README, notas e pacote.
+- ✅ **Publicada em 06/11/2026** com o OK do usuário: tag `v1.1.0` em `dca63ff`, Release "ProXML v1.1.0" (https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/tag/v1.1.0) com um só anexo, `ProXML.rar` (SHA-256 `fa292bfc0d023fa5b360f453144f4dc862ccd6d5f697bb6f29bdb9815a60e16a`; `ProXML.exe` `40baa6d8313beecf08d159a44f1ee202d4834f15ebebb9f11ec5e49494fba1c9`), e descrição do repositório atualizada. Download anônimo pelo link `latest` e pelo da tag conferido com o hash. O `bin\ProXML.rar` e o `bin\ProXML.exe` locais são os do pacote publicado.
 
 ---
 

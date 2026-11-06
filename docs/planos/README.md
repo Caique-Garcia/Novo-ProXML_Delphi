@@ -2,9 +2,9 @@
 
 | Ordem | Plano | Versão | Status |
 |-------|-------|--------|--------|
-| 1 | [Modelos 55 e 65 + IBS/CBS](plano-1-ibs-cbs.md) | v1.1.0 | ✅ Concluído e aprovado pelo QA — publicação junto com o Plano 4 |
-| 4 | [Redesign de UI/UX](plano-4-ui-ux.md) | v1.1.0 | ▶️ Próximo a executar |
-| 2 | [Instalador (Inno Setup) + ZIP nativo](plano-2-instalador.md) | v1.2.0 | Aguardando Plano 4 |
+| 1 | [Modelos 55 e 65 + IBS/CBS](plano-1-ibs-cbs.md) | v1.1.0 | ✅ Publicado na v1.1.0 (06/11/2026) |
+| 4 | [Redesign de UI/UX](plano-4-ui-ux.md) | v1.1.0 | ✅ Publicado na v1.1.0 (06/11/2026) |
+| 2 | [Instalador (Inno Setup) + ZIP nativo](plano-2-instalador.md) | v1.2.0 | ▶️ Próximo a executar |
 | 3 | [Página de apresentação na Vercel](plano-3-site-vercel.md) | — | Aguardando Plano 2 |
 
 Ordem definida (atualizada em 19/10/2026): **1 → 4 → 2 → 3**. Os Planos 1 e 4 saem juntos na **v1.1.0**. O instalador sai na v1.2.0 e o site já nasce com o visual novo, apontando para o instalador.
