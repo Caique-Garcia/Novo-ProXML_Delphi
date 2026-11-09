@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerar DANFE a partir do XML grátis (NF-e e NFC-e) | ProXML</title>
+<meta name="description" content="Gere o DANFE da NF-e e o DANFCe da NFC-e em PDF a partir do arquivo XML, grátis no Windows, e imprima pelo leitor de PDF. Veja o passo a passo.">
+<link rel="canonical" href="https://proxml.vercel.app/gerar-danfe-xml">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171A21" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/styles.css?v=20261109">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="ProXML">
+<meta property="og:title" content="Gerar DANFE a partir do XML grátis (NF-e e NFC-e) | ProXML">
+<meta property="og:description" content="Gere o DANFE da NF-e e o DANFCe da NFC-e em PDF a partir do arquivo XML, grátis no Windows, e imprima pelo leitor de PDF. Veja o passo a passo.">
+<meta property="og:url" content="https://proxml.vercel.app/gerar-danfe-xml">
+<meta property="og:image" content="https://proxml.vercel.app/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Logo do ProXML com a frase: leitor de XML de NF-e e NFC-e grátis para Windows.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gerar DANFE a partir do XML grátis (NF-e e NFC-e) | ProXML">
+<meta name="twitter:description" content="Gere o DANFE da NF-e e o DANFCe da NFC-e em PDF a partir do arquivo XML, grátis no Windows, e imprima pelo leitor de PDF. Veja o passo a passo.">
+<meta name="twitter:image" content="https://proxml.vercel.app/og-image.png">
+<meta name="twitter:image:alt" content="Logo do ProXML com a frase: leitor de XML de NF-e e NFC-e grátis para Windows.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Início",
+      "item": "https://proxml.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Gerar DANFE pelo XML",
+      "item": "https://proxml.vercel.app/gerar-danfe-xml"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo">
+  <div class="container topo-int">
+    <a class="marca" href="/">
+      <picture>
+        <source srcset="/img/proxml-logo-escuro.svg" media="(prefers-color-scheme: dark)">
+        <img src="/img/proxml-logo-claro.svg" width="157" height="32" alt="ProXML, página inicial">
+      </picture>
+    </a>
+    <nav aria-label="Principal">
+      <ul class="menu">
+        <li><a href="/tutorial">Tutorial</a></li>
+        <li><a href="/gerar-danfe-xml" aria-current="page">Gerar DANFE</a></li>
+        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span></a></li>
+        <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
+        <li><a class="botao botao-primario" href="/download">Baixar</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="conteudo">
+<div class="container">
+  <nav class="trilha" aria-label="Trilha de navegação">
+    <ol>
+      <li><a href="/">Início</a></li>
+      <li aria-current="page">Gerar DANFE pelo XML</li>
+    </ol>
+  </nav>
+  <div class="cabeca-pagina">
+    <h1>Como gerar o DANFE e o DANFCe a partir do XML</h1>
+    <p class="lead">Com o ProXML, você gera o PDF do DANFE de uma NF-e (modelo 55) ou do DANFCe de uma NFC-e (modelo 65) direto do arquivo XML, de graça e sem internet. Depois é só abrir o PDF e imprimir.</p>
+  </div>
+
+  <section class="secao" id="o-que-e" aria-labelledby="titulo-o-que-e">
+    <div class="prosa">
+      <h2 id="titulo-o-que-e">O que são o DANFE e o DANFCe</h2>
+      <p>O <strong>DANFE</strong> (Documento Auxiliar da Nota Fiscal Eletrônica) é a versão impressa da NF-e. O <strong>DANFCe</strong> é a versão impressa da NFC-e, a nota do consumidor. Os dois são montados a partir do XML da nota, que é o documento fiscal de verdade.</p>
+      <p>Quando você tem só o XML (por exemplo, recebido por e-mail ou baixado do sistema), o ProXML gera o PDF do DANFE ou do DANFCe para você conferir, imprimir ou mandar para alguém.</p>
+    </div>
+  </section>
+
+  <section class="secao" id="passo-a-passo" aria-labelledby="titulo-passo">
+    <h2 id="titulo-passo">Passo a passo para gerar o DANFE pelo XML</h2>
+    <ol class="prosa">
+      <li><a href="/download">Baixe e instale o ProXML</a> (Windows 10 ou 11).</li>
+      <li>Clique em <strong>Selecionar…</strong>, escolha a pasta com os XMLs e clique em <strong>Processar</strong>. O <a href="/tutorial#selecionar-pasta">tutorial mostra esses passos em detalhe</a>.</li>
+      <li>Abra a tela <strong>Notas</strong> e selecione a nota na grade. Para achar mais rápido, busque pelo número ou pela chave (<kbd>Ctrl</kbd>+<kbd>F</kbd>).</li>
+      <li>Clique em <strong>Gerar DANFE</strong>. Também funciona com duplo clique na linha, com <kbd>Ctrl</kbd>+<kbd>D</kbd> ou pelo botão direito do mouse.</li>
+      <li>O PDF abre sozinho quando fica pronto (até 15 segundos). Ele fica salvo na pasta <code>NFCe\danfePDF</code> do ProXML. Quem usou o instalador encontra essa pasta em <code>%LocalAppData%\ProXML\NFCe\danfePDF</code>.</li>
+    </ol>
+    <figure class="print">
+      <!-- ESPACO-RESERVADO print 08 (etapa 3.2): trocar o div abaixo por <img src="/img/08-notas.webp" width="1024" height="640" alt="Tela Notas do ProXML com a grade de notas (Nº, Modelo, Data, Chave e valores), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-app" data-print="08" data-src="/img/08-notas.webp" data-width="1024" data-height="640" data-alt="Tela Notas do ProXML com a grade de notas (Nº, Modelo, Data, Chave e valores), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV.">
+        <p><strong>Print 08 — 08-notas.png</strong>: tela Notas com a grade, uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV</p>
+      </div>
+    </figure>
+  </section>
+
+  <section class="secao" id="layouts" aria-labelledby="titulo-layouts">
+    <h2 id="titulo-layouts">Qual layout de DANFE o ProXML gera</h2>
+    <p class="prosa">O ProXML escolhe o layout pelo XML de cada nota. Na NF-e, ele usa o campo <code>tpImp</code>, que indica o formato de impressão do DANFE escolhido na emissão.</p>
+    <div class="tabela-rolagem">
+      <table>
+        <thead><tr><th scope="col">Nota</th><th scope="col">PDF gerado</th></tr></thead>
+        <tbody>
+          <tr><td>NFC-e (65)</td><td>DANFCe em A4</td></tr>
+          <tr><td>NF-e (55) com <code>tpImp</code> 1</td><td>DANFE retrato</td></tr>
+          <tr><td>NF-e (55) com <code>tpImp</code> 2</td><td>DANFE paisagem</td></tr>
+          <tr><td>Outros layouts (ex.: DANFE simplificado)</td><td>Não é gerado: o ProXML mostra um aviso</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="par-prints">
+      <figure class="print">
+      <!-- ESPACO-RESERVADO print 12 (etapa 3.2): trocar o div abaixo por <img src="/img/12-danfe-nfe.webp" width="1024" height="768" alt="DANFE retrato em PDF de uma NF-e (modelo 55) de exemplo, gerado pelo ProXML." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-pdf" data-print="12" data-src="/img/12-danfe-nfe.webp" data-width="1024" data-height="768" data-alt="DANFE retrato em PDF de uma NF-e (modelo 55) de exemplo, gerado pelo ProXML.">
+        <p><strong>Print 12 — 12-danfe-nfe.png</strong>: PDF do DANFE retrato (modelo 55) aberto</p>
+      </div>
+    </figure>
+      <figure class="print">
+      <!-- ESPACO-RESERVADO print 11 (etapa 3.2): trocar o div abaixo por <img src="/img/11-danfe-nfce.webp" width="1024" height="768" alt="DANFCe em PDF, no formato A4, de uma NFC-e (modelo 65) de exemplo, gerado pelo ProXML." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-pdf" data-print="11" data-src="/img/11-danfe-nfce.webp" data-width="1024" data-height="768" data-alt="DANFCe em PDF, no formato A4, de uma NFC-e (modelo 65) de exemplo, gerado pelo ProXML.">
+        <p><strong>Print 11 — 11-danfe-nfce.png</strong>: PDF do DANFCe A4 (modelo 65) aberto</p>
+      </div>
+    </figure>
+    </div>
+  </section>
+
+  <section class="secao" id="imprimir-danfce" aria-labelledby="titulo-imprimir">
+    <div class="prosa">
+      <h2 id="titulo-imprimir">Como imprimir o DANFCe pelo XML</h2>
+      <p>Gere o PDF do DANFCe como no passo a passo acima. Com o PDF aberto, imprima pelo próprio leitor de PDF (normalmente <kbd>Ctrl</kbd>+<kbd>P</kbd>).</p>
+      <p>O ProXML gera o DANFCe em A4, a folha comum de impressora. Para a NF-e, o DANFE sai em retrato ou paisagem, conforme o <code>tpImp</code> da nota.</p>
+    </div>
+  </section>
+
+  <section class="secao" id="problemas" aria-labelledby="titulo-problemas">
+    <div class="prosa">
+      <h2 id="titulo-problemas">Se o PDF do DANFE não sair</h2>
+      <ul>
+        <li><strong>A nota não aparece na grade:</strong> o ProXML só carrega notas autorizadas (<code>cStat</code> 100 ou 150). Veja o motivo nos Detalhes da leitura, na tela Resumo.</li>
+        <li><strong>Aviso de layout:</strong> a NF-e usa um layout que o ProXML não gera (por exemplo, o DANFE simplificado).</li>
+        <li><strong>“O PDF do DANFE não ficou pronto em 15 segundos”:</strong> confira a pasta indicada na mensagem e tente de novo.</li>
+        <li><strong>Nada acontece e o programa volta para a tela Notas:</strong> um layout da pasta <code>Report\</code> pode estar corrompido. Execute o instalador de novo ou, na versão portátil, copie a pasta <code>Report\</code> do <code>ProXML.zip</code>.</li>
+      </ul>
+      <p>Veja também as <a href="/tutorial#limitacoes">limitações conhecidas do ProXML</a>.</p>
+    </div>
+  </section>
+
+  <section class="secao" aria-labelledby="titulo-baixar">
+    <h2 id="titulo-baixar">Gere o DANFE dos seus XMLs com o ProXML</h2>
+    <p>Grátis, para Windows 10 e 11, sem anúncios.</p>
+    <div class="botoes">
+      <a class="botao botao-primario" href="/download">Baixar o ProXML</a>
+    </div>
+  </section>
+</div>
+</main>
+<footer class="rodape">
+  <div class="container">
+    <div class="rodape-grade">
+      <div>
+        <h2>ProXML</h2>
+        <p>Leitor e totalizador de XMLs de NF-e (55) e NFC-e (65) com IBS/CBS, DANFE e relatórios. Grátis, para Windows, sem anúncios.</p>
+      </div>
+      <nav aria-label="Páginas do site">
+        <h2>Páginas</h2>
+        <ul>
+          <li><a href="/">Início</a></li>
+          <li><a href="/tutorial">Tutorial</a></li>
+          <li><a href="/gerar-danfe-xml">Gerar DANFE pelo XML</a></li>
+          <li><a href="/reforma-tributaria">Reforma Tributária: IBS e CBS</a></li>
+          <li><a href="/ibs-cbs">IBS e CBS no XML</a></li>
+          <li><a href="/download">Download</a></li>
+          <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2>Projeto</h2>
+        <ul>
+          <li><a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi">Repositório no GitHub</a></li>
+          <li><a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases">Todas as versões (Releases)</a></li>
+          <li><a href="https://apoia.se/proxmlferramenta">Apoie o projeto no Apoia.se</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="rodape-fim">
+      <p>Desenvolvido por Caique Garcia.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

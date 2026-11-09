@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IBS e CBS no XML da NF-e: grupo IBSCBSTot | ProXML</title>
+<meta name="description" content="Onde ficam o IBS e a CBS no XML da NF-e e da NFC-e (grupo IBSCBSTot, NT 2025.002), o caminho de cada tag e como o ProXML soma os valores.">
+<link rel="canonical" href="https://proxml.vercel.app/ibs-cbs">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171A21" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/styles.css?v=20261109">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="ProXML">
+<meta property="og:title" content="IBS e CBS no XML da NF-e: grupo IBSCBSTot | ProXML">
+<meta property="og:description" content="Onde ficam o IBS e a CBS no XML da NF-e e da NFC-e (grupo IBSCBSTot, NT 2025.002), o caminho de cada tag e como o ProXML soma os valores.">
+<meta property="og:url" content="https://proxml.vercel.app/ibs-cbs">
+<meta property="og:image" content="https://proxml.vercel.app/og-reforma-tributaria.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Logo do ProXML com o título: IBS e CBS: tire suas dúvidas.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="IBS e CBS no XML da NF-e: grupo IBSCBSTot | ProXML">
+<meta name="twitter:description" content="Onde ficam o IBS e a CBS no XML da NF-e e da NFC-e (grupo IBSCBSTot, NT 2025.002), o caminho de cada tag e como o ProXML soma os valores.">
+<meta name="twitter:image" content="https://proxml.vercel.app/og-reforma-tributaria.png">
+<meta name="twitter:image:alt" content="Logo do ProXML com o título: IBS e CBS: tire suas dúvidas.">
+<meta property="article:published_time" content="2026-11-09">
+<meta property="article:modified_time" content="2026-11-09">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Início",
+      "item": "https://proxml.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Reforma Tributária",
+      "item": "https://proxml.vercel.app/reforma-tributaria"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "IBS e CBS no XML",
+      "item": "https://proxml.vercel.app/ibs-cbs"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo">
+  <div class="container topo-int">
+    <a class="marca" href="/">
+      <picture>
+        <source srcset="/img/proxml-logo-escuro.svg" media="(prefers-color-scheme: dark)">
+        <img src="/img/proxml-logo-claro.svg" width="157" height="32" alt="ProXML, página inicial">
+      </picture>
+    </a>
+    <nav aria-label="Principal">
+      <ul class="menu">
+        <li><a href="/tutorial">Tutorial</a></li>
+        <li><a href="/gerar-danfe-xml">Gerar DANFE</a></li>
+        <li><a href="/reforma-tributaria" aria-current="true">Reforma Tributária <span class="selo">Novo</span></a></li>
+        <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
+        <li><a class="botao botao-primario" href="/download">Baixar</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="conteudo">
+<div class="container">
+  <nav class="trilha" aria-label="Trilha de navegação">
+    <ol>
+      <li><a href="/">Início</a></li>
+      <li><a href="/reforma-tributaria">Reforma Tributária</a></li>
+      <li aria-current="page">IBS e CBS no XML</li>
+    </ol>
+  </nav>
+  <div class="cabeca-pagina">
+    <h1>IBS e CBS no XML da NF-e e da NFC-e</h1>
+    <p class="lead">Onde ficam o IBS e a CBS no XML da NF-e (55) e da NFC-e (65), segundo a NT 2025.002, quais tags o ProXML lê e como ele soma esses valores. Para as dúvidas gerais, veja <a href="/reforma-tributaria">Reforma Tributária: IBS e CBS explicados de forma simples</a>.</p>
+    <p class="atualizado">Atualizado em <time datetime="2026-11-09">09/11/2026</time></p>
+  </div>
+
+  <section class="secao" id="onde-ficam" aria-labelledby="titulo-onde-ficam">
+    <div class="prosa">
+      <h2 id="titulo-onde-ficam">Onde ficam o IBS e a CBS no XML</h2>
+      <p>A NT 2025.002 colocou o IBS e a CBS em dois níveis do XML:</p>
+      <ul>
+        <li><strong>Em cada item</strong>, no grupo <code>IBSCBS</code>, dentro de <code>det/imposto</code>: CST, cClassTrib, base de cálculo, alíquotas e valores do item.</li>
+        <li><strong>Nos totais da nota</strong>, no grupo <code>IBSCBSTot</code>, dentro de <code>total</code>, ao lado do <code>ICMSTot</code>.</li>
+      </ul>
+      <p>O ProXML lê só os totais (<code>IBSCBSTot</code>). Ele não lê os grupos dos itens.</p>
+    </div>
+  </section>
+
+  <section class="secao" id="exemplo" aria-labelledby="titulo-exemplo">
+    <div class="prosa">
+      <h2 id="titulo-exemplo">Exemplo do grupo IBSCBSTot</h2>
+      <p>Trecho de um XML autorizado, com as tags que o ProXML lê. Os valores são fictícios, só para mostrar a estrutura (base de R$ 100,00 com as alíquotas de teste de 2026, sem ICMS, PIS e Cofins na operação, para simplificar). As reticências marcam tags que foram omitidas.</p>
+    </div>
+<pre><code>&lt;nfeProc&gt;
+  &lt;NFe&gt;
+    &lt;infNFe Id="NFe0000…0000"&gt;
+      &lt;ide&gt; … &lt;mod&gt;55&lt;/mod&gt; … &lt;/ide&gt;
+      …
+      &lt;total&gt;
+        &lt;ICMSTot&gt;
+          &lt;vBC&gt;0.00&lt;/vBC&gt;
+          &lt;vICMS&gt;0.00&lt;/vICMS&gt;
+          …
+          &lt;vNF&gt;100.00&lt;/vNF&gt;
+        &lt;/ICMSTot&gt;
+        &lt;IBSCBSTot&gt;
+          &lt;vBCIBSCBS&gt;100.00&lt;/vBCIBSCBS&gt;
+          &lt;gIBS&gt;
+            &lt;gIBSUF&gt;
+              …
+              &lt;vIBSUF&gt;0.10&lt;/vIBSUF&gt;
+            &lt;/gIBSUF&gt;
+            &lt;gIBSMun&gt;
+              …
+              &lt;vIBSMun&gt;0.00&lt;/vIBSMun&gt;
+            &lt;/gIBSMun&gt;
+            &lt;vIBS&gt;0.10&lt;/vIBS&gt;
+            …
+          &lt;/gIBS&gt;
+          &lt;gCBS&gt;
+            …
+            &lt;vCBS&gt;0.90&lt;/vCBS&gt;
+            …
+          &lt;/gCBS&gt;
+          …
+        &lt;/IBSCBSTot&gt;
+      &lt;/total&gt;
+    &lt;/infNFe&gt;
+  &lt;/NFe&gt;
+  &lt;protNFe&gt;
+    &lt;infProt&gt; … &lt;cStat&gt;100&lt;/cStat&gt; … &lt;/infProt&gt;
+  &lt;/protNFe&gt;
+&lt;/nfeProc&gt;</code></pre>
+  </section>
+
+  <section class="secao" id="tags-lidas" aria-labelledby="titulo-tags">
+    <h2 id="titulo-tags">Tags que o ProXML lê</h2>
+    <p class="prosa">Caminhos a partir de <code>nfeProc/NFe/infNFe</code>. As colunas são as mesmas dos cards, da grade, do CSV e do Relatório IBS/CBS.</p>
+    <div class="tabela-rolagem">
+      <table>
+        <thead><tr><th scope="col">No ProXML</th><th scope="col">Caminho no XML</th></tr></thead>
+        <tbody>
+          <tr><td>Valor Total</td><td><code>total/ICMSTot/vNF</code></td></tr>
+          <tr><td>Base ICMS</td><td><code>total/ICMSTot/vBC</code></td></tr>
+          <tr><td>ICMS</td><td><code>total/ICMSTot/vICMS</code></td></tr>
+          <tr><td>Base IBS/CBS</td><td><code>total/IBSCBSTot/vBCIBSCBS</code></td></tr>
+          <tr><td>IBS UF</td><td><code>total/IBSCBSTot/gIBS/gIBSUF/vIBSUF</code></td></tr>
+          <tr><td>IBS Mun.</td><td><code>total/IBSCBSTot/gIBS/gIBSMun/vIBSMun</code></td></tr>
+          <tr><td>IBS</td><td><code>total/IBSCBSTot/gIBS/vIBS</code></td></tr>
+          <tr><td>CBS</td><td><code>total/IBSCBSTot/gCBS/vCBS</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="caixa caixa-aviso prosa">
+      <p><strong>Atenção:</strong> a partir de 2027, as notas do Simples Nacional que não optarem pelo regime regular trazem o IBS e a CBS num grupo próprio do Simples (<code>IBSCBSTot/gTribSN</code>, com <code>vIBSSN</code> e <code>vCBSSN</code>), que o ProXML ainda não soma. Nessas notas, os cards de IBS e CBS aparecem zerados.</p>
+    </div>
+  </section>
+
+  <section class="secao" id="como-soma" aria-labelledby="titulo-como-soma">
+    <div class="prosa">
+      <h2 id="titulo-como-soma">Como o ProXML soma o IBS e a CBS</h2>
+      <ul>
+        <li><strong>Só notas autorizadas:</strong> entram as notas com <code>cStat</code> 100 ou 150 em <code>protNFe/infProt/cStat</code>.</li>
+        <li><strong>Nota sem o grupo <code>IBSCBSTot</code>:</strong> entra no Valor Total e nos totais de ICMS, conta como zero no IBS e na CBS e fica fora do Relatório IBS/CBS.</li>
+        <li><strong>Subgrupo ausente:</strong> se o XML não tiver <code>gIBS</code>, <code>gIBSUF</code>, <code>gIBSMun</code> ou <code>gCBS</code>, o valor correspondente conta como zero.</li>
+        <li><strong>IBS total:</strong> é lido da tag <code>vIBS</code>. O ProXML não soma o IBS UF com o IBS Mun. para chegar a ele.</li>
+        <li><strong>Filtro de modelo:</strong> Todos, NF-e 55 ou NFC-e 65 valem para os cards, a grade, o CSV e o relatório.</li>
+        <li><strong>O que fica de fora:</strong> os grupos dos itens, os valores do Imposto Seletivo e as outras tags do <code>IBSCBSTot</code> que não estão na tabela acima.</li>
+        <li><strong>Sem cálculo e sem validação:</strong> o ProXML soma o que está no XML. Ele não calcula o IBS e a CBS nem confere alíquota, CST ou cClassTrib.</li>
+      </ul>
+      <p>Como nos outros totais, notas canceladas continuam somadas e, nas NF-e, as notas de entrada e de saída são somadas juntas. <a href="/tutorial#totais">Veja os cuidados ao conferir os totais</a>.</p>
+    </div>
+    <figure class="print">
+      <!-- ESPACO-RESERVADO print 14 (etapa 3.2): trocar o div abaixo por <img src="/img/14-relatorio-ibscbs.webp" width="1024" height="768" alt="Pré-visualização do Relatório IBS/CBS do ProXML, com as colunas Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS e a linha de total." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-pdf" data-print="14" data-src="/img/14-relatorio-ibscbs.webp" data-width="1024" data-height="768" data-alt="Pré-visualização do Relatório IBS/CBS do ProXML, com as colunas Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS e a linha de total.">
+        <p><strong>Print 14 — 14-relatorio-ibscbs.png</strong>: pré-visualização do Relatório IBS/CBS</p>
+      </div>
+    </figure>
+  </section>
+
+  <section class="secao" id="cst-cclasstrib" aria-labelledby="titulo-cst">
+    <div class="prosa">
+      <h2 id="titulo-cst">CST e cClassTrib do IBS e da CBS</h2>
+      <p>Em cada item, o grupo <code>IBSCBS</code> traz dois códigos que dizem como o item é tributado:</p>
+      <ul>
+        <li><strong>CST do IBS/CBS</strong> (tag <code>CST</code>): o código de situação tributária, com 3 dígitos.</li>
+        <li><strong>cClassTrib</strong> (tag <code>cClassTrib</code>): o código de classificação tributária, com 6 dígitos, que detalha a regra do CST (por exemplo, tributação normal, redução de alíquota ou alíquota zero).</li>
+      </ul>
+      <p>A tabela com os códigos válidos é publicada no Portal da NF-e. O ProXML não lê nem valida esses códigos: quem confere a classificação de cada item é o sistema emissor e o seu contador.</p>
+    </div>
+  </section>
+
+  <section class="secao" id="nt-2025-002" aria-labelledby="titulo-nt">
+    <div class="prosa">
+      <h2 id="titulo-nt">NT 2025.002: versão em vigor</h2>
+      <p>A NT 2025.002-RTC é atualizada com frequência. Em 09/11/2026, a versão mais recente era a 1.53, publicada em 30/10/2026. As empresas do Simples Nacional têm regras extras na NT 2026.005. Confira sempre a versão em vigor no <a href="https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=">Portal da Nota Fiscal Eletrônica</a>.</p><p>Pela regra oficial, o preenchimento dos grupos de IBS e CBS na NF-e e na NFC-e é obrigatório desde 3 de agosto de 2026 para as empresas do regime normal e a partir de 1º de janeiro de 2027 para o Simples Nacional.</p>
+      <p>Para o que muda na nota fiscal, os prazos e as alíquotas, veja <a href="/reforma-tributaria#nota-fiscal">o que muda na NF-e e na NFC-e com a reforma tributária</a>.</p>
+      <div class="caixa caixa-aviso">
+        <p>Conteúdo informativo. Para decisões da sua empresa, consulte seu contador.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="secao" aria-labelledby="titulo-baixar">
+    <h2 id="titulo-baixar">Some o IBS e a CBS dos seus XMLs</h2>
+    <p>O ProXML é grátis, roda no Windows 10 e 11 e lê NF-e (55) e NFC-e (65) da mesma pasta.</p>
+    <div class="botoes">
+      <a class="botao botao-primario" href="/download">Baixar o ProXML</a>
+      <a class="botao botao-secundario" href="/tutorial">Ver o tutorial</a>
+    </div>
+  </section>
+</div>
+</main>
+<footer class="rodape">
+  <div class="container">
+    <div class="rodape-grade">
+      <div>
+        <h2>ProXML</h2>
+        <p>Leitor e totalizador de XMLs de NF-e (55) e NFC-e (65) com IBS/CBS, DANFE e relatórios. Grátis, para Windows, sem anúncios.</p>
+      </div>
+      <nav aria-label="Páginas do site">
+        <h2>Páginas</h2>
+        <ul>
+          <li><a href="/">Início</a></li>
+          <li><a href="/tutorial">Tutorial</a></li>
+          <li><a href="/gerar-danfe-xml">Gerar DANFE pelo XML</a></li>
+          <li><a href="/reforma-tributaria">Reforma Tributária: IBS e CBS</a></li>
+          <li><a href="/ibs-cbs">IBS e CBS no XML</a></li>
+          <li><a href="/download">Download</a></li>
+          <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2>Projeto</h2>
+        <ul>
+          <li><a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi">Repositório no GitHub</a></li>
+          <li><a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases">Todas as versões (Releases)</a></li>
+          <li><a href="https://apoia.se/proxmlferramenta">Apoie o projeto no Apoia.se</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="rodape-fim">
+      <p>Desenvolvido por Caique Garcia.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

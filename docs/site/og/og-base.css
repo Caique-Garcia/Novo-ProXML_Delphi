@@ -1,0 +1,16 @@
+/* Modelo das imagens de prévia (Open Graph), 1200x630. Cores = tokens do app (docs/ui/tokens.md). */
+html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+body {
+  background: #171A21; /* CorMarinho */
+  color: #FFFFFF;
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 96px;
+  box-sizing: border-box;
+  border-bottom: 16px solid #2067CA; /* CorPrimaria */
+}
+.logo { width: 471px; height: 96px; margin-bottom: 48px; }
+h1 { font-size: 64px; line-height: 1.15; font-weight: 600; margin: 0 0 24px; max-width: 1000px; }
+p { font-size: 32px; line-height: 1.35; color: #C9CED6; /* CorMarinhoTexto */ margin: 0; max-width: 1000px; }

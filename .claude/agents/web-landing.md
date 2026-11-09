@@ -23,3 +23,4 @@ Você desenvolve a página de apresentação do **ProXML**.
 - `site/vercel.json` só se for necessário (ex.: headers de cache).
 - Nenhum script de terceiros ou rastreamento sem pedir ao usuário.
 - Antes de entregar, teste localmente (`npx serve site` ou `python -m http.server`) e confira se os links de download respondem 200/302.
+- Manutenção do site: a cada mudança no `styles.css`, troque o `?v=AAAAMMDD` do link do CSS em todas as páginas; a cada mudança nas perguntas (`/reforma-tributaria` ou `/perguntas-frequentes`), regenere o FAQPage com `python -I docs/site/gerar_faq.py site/reforma-tributaria.html site/perguntas-frequentes.html`; revise localmente com `python -I docs/site/servidor.py site 8765` (URLs sem `.html`, 404 e cabeçalhos como na Vercel).

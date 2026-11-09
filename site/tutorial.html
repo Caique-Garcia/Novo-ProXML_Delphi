@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Como abrir e somar XML de nota fiscal: tutorial | ProXML</title>
+<meta name="description" content="Passo a passo para abrir XMLs de NF-e e NFC-e, somar valor, ICMS, IBS e CBS, gerar DANFE e relatórios e enviar os XMLs por e-mail.">
+<link rel="canonical" href="https://proxml.vercel.app/tutorial">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#171A21" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/styles.css?v=20261109">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="ProXML">
+<meta property="og:title" content="Como abrir e somar XML de nota fiscal: tutorial | ProXML">
+<meta property="og:description" content="Passo a passo para abrir XMLs de NF-e e NFC-e, somar valor, ICMS, IBS e CBS, gerar DANFE e relatórios e enviar os XMLs por e-mail.">
+<meta property="og:url" content="https://proxml.vercel.app/tutorial">
+<meta property="og:image" content="https://proxml.vercel.app/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Logo do ProXML com a frase: leitor de XML de NF-e e NFC-e grátis para Windows.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Como abrir e somar XML de nota fiscal: tutorial | ProXML">
+<meta name="twitter:description" content="Passo a passo para abrir XMLs de NF-e e NFC-e, somar valor, ICMS, IBS e CBS, gerar DANFE e relatórios e enviar os XMLs por e-mail.">
+<meta name="twitter:image" content="https://proxml.vercel.app/og-image.png">
+<meta name="twitter:image:alt" content="Logo do ProXML com a frase: leitor de XML de NF-e e NFC-e grátis para Windows.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Início",
+      "item": "https://proxml.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Tutorial",
+      "item": "https://proxml.vercel.app/tutorial"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+<header class="topo">
+  <div class="container topo-int">
+    <a class="marca" href="/">
+      <picture>
+        <source srcset="/img/proxml-logo-escuro.svg" media="(prefers-color-scheme: dark)">
+        <img src="/img/proxml-logo-claro.svg" width="157" height="32" alt="ProXML, página inicial">
+      </picture>
+    </a>
+    <nav aria-label="Principal">
+      <ul class="menu">
+        <li><a href="/tutorial" aria-current="page">Tutorial</a></li>
+        <li><a href="/gerar-danfe-xml">Gerar DANFE</a></li>
+        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span></a></li>
+        <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
+        <li><a class="botao botao-primario" href="/download">Baixar</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<main id="conteudo">
+<div class="container">
+  <nav class="trilha" aria-label="Trilha de navegação">
+    <ol>
+      <li><a href="/">Início</a></li>
+      <li aria-current="page">Tutorial</li>
+    </ol>
+  </nav>
+  <div class="cabeca-pagina">
+    <h1>Como abrir arquivos XML de nota fiscal e somar os valores</h1>
+    <p class="lead">O XML é o arquivo oficial da NF-e e da NFC-e, mas não foi feito para ser lido a olho. Com o ProXML, você abre uma pasta inteira de XMLs e vê o valor total, o ICMS, o IBS e a CBS somados, nota por nota. Este tutorial mostra cada passo.</p>
+  </div>
+
+  <nav class="sumario prosa" aria-labelledby="titulo-sumario">
+    <h2 id="titulo-sumario">Neste tutorial</h2>
+    <ol>
+      <li><a href="#instalar">Baixar e instalar o ProXML</a></li>
+      <li><a href="#abrir">Abrir o ProXML</a></li>
+      <li><a href="#selecionar-pasta">Selecionar a pasta com os XMLs</a></li>
+      <li><a href="#processar">Processar os XMLs</a></li>
+      <li><a href="#totais">Conferir os totais e o Resumo</a></li>
+      <li><a href="#filtro-modelo">Filtrar por modelo (NF-e ou NFC-e)</a></li>
+      <li><a href="#notas">Ver as notas, copiar a chave e exportar CSV</a></li>
+      <li><a href="#relatorios">Gerar os relatórios</a></li>
+      <li><a href="#configurar-email">Configurar o e-mail</a></li>
+      <li><a href="#enviar">Enviar os XMLs por e-mail</a></li>
+    </ol>
+    <p>Depois: <a href="#atalhos">atalhos de teclado</a> e <a href="#limitacoes">limitações conhecidas</a>.</p>
+  </nav>
+
+  <ol class="passos">
+    <li class="passo" id="instalar">
+      <h2>Baixe e instale o ProXML</h2>
+      <div class="prosa">
+        <p>Baixe o instalador na <a href="/download">página de download do ProXML</a>. Execute o <code>ProXML-Setup.exe</code> e siga as telas. O ProXML é instalado só para o seu usuário, sem pedir senha de administrador.</p>
+        <p>No fim, abra o ProXML pelo atalho no Menu Iniciar ou na Área de Trabalho. O atalho da Área de Trabalho é opcional e já vem marcado no instalador.</p>
+        <p>Se o Windows mostrar “O Windows protegeu o computador”, clique em <strong>Mais informações</strong> e depois em <strong>Executar assim mesmo</strong>. <a href="/download#smartscreen">Entenda por que esse aviso aparece</a>. Prefere não instalar nada? Use a <a href="/download#portatil">versão portátil (.zip)</a>.</p>
+      </div>
+      <div class="par-prints">
+        <figure class="print">
+      <!-- ESPACO-RESERVADO print 03 (etapa 3.2): trocar o div abaixo por <img src="/img/03-instalador.webp" width="640" height="480" alt="Primeira tela do instalador do ProXML, em português." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-dialogo" data-print="03" data-src="/img/03-instalador.webp" data-width="640" data-height="480" data-alt="Primeira tela do instalador do ProXML, em português.">
+        <p><strong>Print 03 — 03-instalador.png</strong>: tela de boas-vindas do instalador, em português</p>
+      </div>
+    </figure>
+        <figure class="print">
+      <!-- ESPACO-RESERVADO print 04 (etapa 3.2): trocar o div abaixo por <img src="/img/04-instalador-atalhos.webp" width="640" height="480" alt="Tela de tarefas do instalador do ProXML com a opção de criar um atalho na Área de Trabalho marcada." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-dialogo" data-print="04" data-src="/img/04-instalador-atalhos.webp" data-width="640" data-height="480" data-alt="Tela de tarefas do instalador do ProXML com a opção de criar um atalho na Área de Trabalho marcada.">
+        <p><strong>Print 04 — 04-instalador-atalhos.png</strong>: tela de tarefas do instalador, com o atalho na Área de Trabalho</p>
+      </div>
+    </figure>
+      </div>
+    </li>
+
+    <li class="passo" id="abrir">
+      <h2>Abra o ProXML</h2>
+      <div class="prosa">
+        <p>Na primeira vez, a tela mostra “Nenhuma pasta processada”. À esquerda fica o menu com as telas <strong>Resumo</strong>, <strong>Notas</strong>, <strong>Relatórios</strong>, <strong>Enviar</strong> e <strong>Configurações</strong>. O link <strong>Sobre</strong>, no canto do cabeçalho, mostra a versão e os créditos.</p>
+        <p>A janela pode ser redimensionada e maximizada. O ProXML lembra o tamanho e a posição da janela para a próxima vez.</p>
+      </div>
+      <figure class="print">
+      <!-- ESPACO-RESERVADO print 05 (etapa 3.2): trocar o div abaixo por <img src="/img/05-tela-inicial.webp" width="1024" height="640" alt="Janela do ProXML recém-aberta, sem pasta selecionada: menu lateral com Resumo, Notas, Relatórios, Enviar e Configurações e a mensagem “Nenhuma pasta processada”." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-app" data-print="05" data-src="/img/05-tela-inicial.webp" data-width="1024" data-height="640" data-alt="Janela do ProXML recém-aberta, sem pasta selecionada: menu lateral com Resumo, Notas, Relatórios, Enviar e Configurações e a mensagem “Nenhuma pasta processada”.">
+        <p><strong>Print 05 — 05-tela-inicial.png</strong>: ProXML recém-aberto, sem pasta selecionada</p>
+      </div>
+    </figure>
+    </li>
+
+    <li class="passo" id="selecionar-pasta">
+      <h2>Selecione a pasta com os XMLs</h2>
+      <div class="prosa">
+        <p>Clique em <strong>Selecionar…</strong> (ou no campo da pasta, ou aperte <kbd>Ctrl</kbd>+<kbd>O</kbd>) e escolha a pasta onde estão os XMLs das notas. Você também pode arrastar a pasta do Explorador de Arquivos para a janela do ProXML.</p>
+        <p>O ProXML lembra a última pasta usada. Dica: prefira uma pasta com caminho curto, como <code>C:\XMLs</code>. XMLs em caminhos com mais de 259 caracteres (pasta + nome do arquivo) não são lidos.</p>
+      </div>
+      <figure class="print">
+      <!-- ESPACO-RESERVADO print 06 (etapa 3.2): trocar o div abaixo por <img src="/img/06-selecionar-pasta.webp" width="1024" height="640" alt="Janela do Windows para escolher a pasta com os XMLs, aberta pelo botão Selecionar… do ProXML." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-app" data-print="06" data-src="/img/06-selecionar-pasta.webp" data-width="1024" data-height="640" data-alt="Janela do Windows para escolher a pasta com os XMLs, aberta pelo botão Selecionar… do ProXML.">
+        <p><strong>Print 06 — 06-selecionar-pasta.png</strong>: janela de seleção da pasta de XMLs</p>
+      </div>
+    </figure>
+    </li>
+
+    <li class="passo" id="processar">
+      <h2>Clique em Processar</h2>
+      <div class="prosa">
+        <p>Clique em <strong>Processar</strong> (ou aperte <kbd>F5</kbd>). A leitura acontece em segundo plano: a janela continua respondendo e mostra o progresso em “X de N arquivos”. Para parar, clique em <strong>Cancelar</strong> ou aperte <kbd>Esc</kbd>.</p>
+        <p>Só as notas autorizadas entram nos totais: as que têm <code>cStat</code> 100 (autorizado o uso) ou 150 (autorizado fora de prazo) no protocolo de autorização. Notas não autorizadas (por exemplo, denegadas), XMLs de outros modelos e arquivos que não são Nota Fiscal ficam de fora e aparecem nos Detalhes da leitura com o motivo.</p>
+      </div>
+    </li>
+
+    <li class="passo" id="totais">
+      <h2>Confira os totais e o Resumo</h2>
+      <div class="prosa">
+        <p>No alto ficam os cinco cards de totais: <strong>Valor Total</strong>, <strong>Base ICMS</strong>, <strong>ICMS</strong>, <strong>IBS</strong> e <strong>CBS</strong>. Na tela Resumo aparecem os contadores (Autorizadas, Ignoradas e Com erro), o tempo da leitura e os <strong>Detalhes da leitura</strong>, arquivo por arquivo.</p>
+        <p>Os cards IBS e CBS mostram os tributos novos da Reforma Tributária, lidos do XML de cada nota. <a href="/reforma-tributaria">Entenda o que são o IBS e a CBS</a>.</p>
+        <p>Se os totais incluírem notas de homologação (ambiente de testes, sem valor fiscal) ou NF-e de entrada, o Resumo mostra um aviso para você conferir se a pasta é a certa.</p>
+      </div>
+      <figure class="print">
+      <!-- ESPACO-RESERVADO print 07 (etapa 3.2): trocar o div abaixo por <img src="/img/07-resumo.webp" width="1024" height="640" alt="Tela Resumo do ProXML depois de processar uma pasta: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, contadores de notas autorizadas, ignoradas e com erro e os Detalhes da leitura, com o filtro em Todos." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-app" data-print="07" data-src="/img/07-resumo.webp" data-width="1024" data-height="640" data-alt="Tela Resumo do ProXML depois de processar uma pasta: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, contadores de notas autorizadas, ignoradas e com erro e os Detalhes da leitura, com o filtro em Todos.">
+        <p><strong>Print 07 — 07-resumo.png</strong>: tela Resumo após Processar, com os 5 cards preenchidos, os contadores e os Detalhes da leitura, filtro em Todos</p>
+      </div>
+    </figure>
+      <div class="caixa caixa-aviso prosa">
+        <p class="caixa-titulo">Atenção ao conferir os totais</p>
+        <ul>
+          <li>Nas NF-e (55), as notas de <strong>entrada</strong> e de <strong>saída</strong> são somadas juntas, sem distinção. Para conferir só as vendas, processe uma pasta que tenha apenas as notas de saída.</li>
+          <li><strong>Nota cancelada continua somada.</strong> O cancelamento é um evento separado e o XML da nota continua autorizado. Retire da pasta os XMLs das notas canceladas antes de processar.</li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="passo" id="filtro-modelo">
+      <h2>Filtre por modelo: NF-e ou NFC-e</h2>
+      <div class="prosa">
+        <p>Na barra de cima, escolha <strong>Todos</strong>, <strong>NF-e 55</strong> ou <strong>NFC-e 65</strong>. Os cards, a grade de notas, o CSV, os relatórios e o e-mail mudam na hora, sem processar de novo.</p>
+      </div>
+      <figure class="print">
+      <!-- ESPACO-RESERVADO print 09 (etapa 3.2): trocar o div abaixo por <img src="/img/09-filtro-modelo.webp" width="1024" height="640" alt="Seletor de modelo do ProXML em NF-e 55, com os cards de totais recalculados só para as NF-e." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-app" data-print="09" data-src="/img/09-filtro-modelo.webp" data-width="1024" data-height="640" data-alt="Seletor de modelo do ProXML em NF-e 55, com os cards de totais recalculados só para as NF-e.">
+        <p><strong>Print 09 — 09-filtro-modelo.png</strong>: seletor Todos / NF-e 55 / NFC-e 65 em NF-e 55, com os cards recalculados</p>
+      </div>
+    </figure>
+    </li>
+
+    <li class="passo" id="notas">
+      <h2>Veja as notas, copie a chave e exporte o CSV</h2>
+      <div class="prosa">
+        <p>A tela <strong>Notas</strong> mostra uma grade com Nº, Modelo, Data, Chave (44 dígitos) e valores. As colunas Base ICMS, ICMS, IBS e CBS aparecem conforme a largura da janela.</p>
+        <ul>
+          <li><strong>Buscar:</strong> digite o número ou a chave no campo de busca (<kbd>Ctrl</kbd>+<kbd>F</kbd>). <kbd>Esc</kbd> limpa a busca.</li>
+          <li><strong>Ordenar:</strong> clique no título da coluna.</li>
+          <li><strong>Copiar chave:</strong> copia a chave de acesso inteira da nota selecionada (<kbd>Ctrl</kbd>+<kbd>C</kbd> na grade).</li>
+          <li><strong>Gerar DANFE:</strong> gera o PDF da nota selecionada (<kbd>Ctrl</kbd>+<kbd>D</kbd> ou duplo clique). <a href="/gerar-danfe-xml">Veja como gerar o DANFE e o DANFCe</a>.</li>
+          <li><strong>Exportar CSV:</strong> salva as notas visíveis na lista (com o filtro e a busca) num arquivo que abre no Excel em português: separado por ponto e vírgula, com vírgula decimal e acentos corretos.</li>
+        </ul>
+        <p>O botão direito do mouse na grade também tem Copiar chave e Gerar DANFE.</p>
+      </div>
+      <figure class="print">
+      <!-- ESPACO-RESERVADO print 08 (etapa 3.2): trocar o div abaixo por <img src="/img/08-notas.webp" width="1024" height="640" alt="Tela Notas do ProXML com a grade de notas (Nº, Modelo, Data, Chave e valores), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-app" data-print="08" data-src="/img/08-notas.webp" data-width="1024" data-height="640" data-alt="Tela Notas do ProXML com a grade de notas (Nº, Modelo, Data, Chave e valores), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV.">
+        <p><strong>Print 08 — 08-notas.png</strong>: tela Notas com a grade, uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV</p>
+      </div>
+    </figure>
+    </li>
+
+    <li class="passo" id="relatorios">
+      <h2>Gere os relatórios</h2>
+      <div class="prosa">
+        <p>A tela <strong>Relatórios</strong> tem duas opções, cada uma com o botão <strong>Gerar relatório</strong>, que grava as notas e abre a visualização:</p>
+        <ul>
+          <li><strong>Relatório de Notas:</strong> Nº, modelo, data, chave, valor, base de cálculo do ICMS e ICMS de cada nota, com os totais no fim.</li>
+          <li><strong>Relatório IBS/CBS:</strong> Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS das notas que têm o grupo IBS/CBS.</li>
+        </ul>
+        <p>Os relatórios saem em A4, com o período das notas, o modelo do filtro, a pasta de origem, a linha de total e o rodapé com a data e a página. Eles usam as notas do modelo selecionado na barra de cima; a busca da tela Notas não é aplicada.</p>
+      </div>
+      <figure class="print">
+      <!-- ESPACO-RESERVADO print 10 (etapa 3.2): trocar o div abaixo por <img src="/img/10-relatorios.webp" width="1024" height="640" alt="Tela Relatórios do ProXML com as opções Relatório de Notas e Relatório IBS/CBS, cada uma com o botão Gerar relatório." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-app" data-print="10" data-src="/img/10-relatorios.webp" data-width="1024" data-height="640" data-alt="Tela Relatórios do ProXML com as opções Relatório de Notas e Relatório IBS/CBS, cada uma com o botão Gerar relatório.">
+        <p><strong>Print 10 — 10-relatorios.png</strong>: tela Relatórios com o Relatório de Notas e o Relatório IBS/CBS</p>
+      </div>
+    </figure>
+      <div class="par-prints">
+        <figure class="print">
+      <!-- ESPACO-RESERVADO print 13 (etapa 3.2): trocar o div abaixo por <img src="/img/13-relatorio-notas.webp" width="1024" height="768" alt="Pré-visualização do Relatório de Notas do ProXML, com período, modelo, colunas de valores e a linha de total." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-pdf" data-print="13" data-src="/img/13-relatorio-notas.webp" data-width="1024" data-height="768" data-alt="Pré-visualização do Relatório de Notas do ProXML, com período, modelo, colunas de valores e a linha de total.">
+        <p><strong>Print 13 — 13-relatorio-notas.png</strong>: pré-visualização do Relatório de Notas</p>
+      </div>
+    </figure>
+        <figure class="print">
+      <!-- ESPACO-RESERVADO print 14 (etapa 3.2): trocar o div abaixo por <img src="/img/14-relatorio-ibscbs.webp" width="1024" height="768" alt="Pré-visualização do Relatório IBS/CBS do ProXML, com as colunas Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS e a linha de total." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-pdf" data-print="14" data-src="/img/14-relatorio-ibscbs.webp" data-width="1024" data-height="768" data-alt="Pré-visualização do Relatório IBS/CBS do ProXML, com as colunas Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS e a linha de total.">
+        <p><strong>Print 14 — 14-relatorio-ibscbs.png</strong>: pré-visualização do Relatório IBS/CBS</p>
+      </div>
+    </figure>
+      </div>
+    </li>
+
+    <li class="passo" id="configurar-email">
+      <h2>Configure o e-mail de envio</h2>
+      <div class="prosa">
+        <p>Em <strong>Configurações</strong>, informe o <strong>Servidor SMTP</strong>, a <strong>Porta</strong>, marque <strong>SSL</strong> e/ou <strong>TLS</strong> conforme o seu provedor e preencha <strong>E-mail (usuário)</strong>, <strong>Senha</strong> e a <strong>Mensagem padrão do e-mail</strong>.</p>
+        <p>Clique em <strong>Testar conexão</strong>: o ProXML conecta e autentica no servidor sem enviar e-mail. Se der certo, clique em <strong>Salvar</strong>.</p>
+        <p>Exemplo para o Gmail: servidor <code>smtp.gmail.com</code>, porta 465 com SSL ou 587 com TLS, usando uma senha de app.</p>
+      </div>
+      <div class="caixa caixa-aviso prosa">
+        <p>A senha fica gravada sem criptografia no arquivo <code>db\notas.db</code>, na pasta do ProXML. Não compartilhe esse arquivo depois de configurado.</p>
+      </div>
+      <figure class="print">
+      <!-- ESPACO-RESERVADO print 15 (etapa 3.2): trocar o div abaixo por <img src="/img/15-configuracoes.webp" width="1024" height="640" alt="Tela Configurações do ProXML com o servidor SMTP smtp.exemplo.com.br, a porta, as opções SSL e TLS, o e-mail, a senha oculta e o botão Testar conexão." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-app" data-print="15" data-src="/img/15-configuracoes.webp" data-width="1024" data-height="640" data-alt="Tela Configurações do ProXML com o servidor SMTP smtp.exemplo.com.br, a porta, as opções SSL e TLS, o e-mail, a senha oculta e o botão Testar conexão.">
+        <p><strong>Print 15 — 15-configuracoes.png</strong>: tela Configurações com dados SMTP de exemplo e a senha oculta</p>
+      </div>
+    </figure>
+    </li>
+
+    <li class="passo" id="enviar">
+      <h2>Envie os XMLs por e-mail</h2>
+      <div class="prosa">
+        <p>A tela <strong>Enviar</strong> mostra o anexo antes do envio: a quantidade de XMLs e o tamanho. Preencha o e-mail do destinatário em <strong>Para</strong>, ajuste a <strong>Mensagem</strong> e clique em <strong>Enviar</strong>.</p>
+        <p>Os XMLs só são compactados quando você clica em Enviar, num arquivo <code>NFCe_ProXML.zip</code> criado pelo próprio ProXML (não precisa do WinRAR). O envio acontece em segundo plano. Se não for possível montar o anexo (por exemplo, arquivo em uso ou disco cheio), aparece uma mensagem e o e-mail não é enviado.</p>
+      </div>
+      <figure class="print">
+      <!-- ESPACO-RESERVADO print 16 (etapa 3.2): trocar o div abaixo por <img src="/img/16-enviar.webp" width="1024" height="640" alt="Tela Enviar do ProXML com o destinatário contato@exemplo.com.br, uma mensagem de exemplo e o anexo .zip com os XMLs." loading="lazy"> e ajustar width/height ao tamanho real do WebP. -->
+      <div class="print-reservado proporcao-app" data-print="16" data-src="/img/16-enviar.webp" data-width="1024" data-height="640" data-alt="Tela Enviar do ProXML com o destinatário contato@exemplo.com.br, uma mensagem de exemplo e o anexo .zip com os XMLs.">
+        <p><strong>Print 16 — 16-enviar.png</strong>: tela Enviar com destinatário, mensagem de exemplo e o anexo .zip</p>
+      </div>
+    </figure>
+    </li>
+  </ol>
+
+  <section class="secao" id="atalhos" aria-labelledby="titulo-atalhos">
+    <h2 id="titulo-atalhos">Atalhos de teclado do ProXML</h2>
+    <p>Dá para usar o ProXML inteiro pelo teclado, com <kbd>Tab</kbd>, <kbd>Enter</kbd>, <kbd>Espaço</kbd> e os atalhos abaixo.</p>
+    <div class="tabela-rolagem">
+      <table>
+        <thead><tr><th scope="col">Atalho</th><th scope="col">Ação</th></tr></thead>
+        <tbody>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Selecionar a pasta</td></tr>
+          <tr><td><kbd>F5</kbd></td><td>Processar</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>Cancelar a leitura (durante o processamento)</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td><td>Ir para a busca da tela Notas</td></tr>
+          <tr><td><kbd>Esc</kbd> (no campo de busca)</td><td>Limpar a busca</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd> (na grade)</td><td>Copiar a chave da nota selecionada</td></tr>
+          <tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd> ou duplo clique</td><td>Gerar o DANFE da nota selecionada</td></tr>
+          <tr><td><kbd>Tab</kbd>, <kbd>Enter</kbd>, <kbd>Espaço</kbd></td><td>Navegar entre os controles e acionar botões</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="secao" id="limitacoes" aria-labelledby="titulo-limitacoes">
+    <h2 id="titulo-limitacoes">Limitações conhecidas</h2>
+    <div class="tabela-rolagem">
+      <table>
+        <thead><tr><th scope="col">O que acontece</th><th scope="col">O que fazer</th></tr></thead>
+        <tbody>
+          <tr><td>XMLs em caminhos com mais de 259 caracteres (pasta + nome do arquivo) não são lidos.</td><td>Use uma pasta com caminho mais curto (ex.: <code>C:\XMLs</code>).</td></tr>
+          <tr><td>Caracteres fora do padrão do Windows em português no nome da pasta (ex.: emoji, alguns idiomas) se perdem, e a pasta não é encontrada.</td><td>Renomeie a pasta usando só letras, números e acentos comuns.</td></tr>
+          <tr><td>Se um layout do DANFE (pasta <code>Report\</code>) estiver corrompido, o PDF não sai e o programa só volta para a tela Notas, sem mensagem de erro.</td><td>Execute o instalador de novo ou, na versão portátil, copie a pasta <code>Report\</code> do <code>ProXML.zip</code>.</td></tr>
+          <tr><td>Ao arrastar a janela para um monitor com escala maior, as caixas de SSL e TLS ficam pequenas.</td><td>Continuam funcionando. Para o tamanho certo, feche e abra o ProXML nesse monitor.</td></tr>
+          <tr><td>Na tela Enviar, a faixa de erro pode fazer aparecer uma barra de rolagem.</td><td>Role a tela: todos os campos e botões continuam acessíveis.</td></tr>
+          <tr><td>O tamanho mínimo da janela cresce com a escala do Windows (1024×640 vezes a escala: 1280×800 em 125%, 1536×960 em 150%), limitado ao tamanho da tela.</td><td>Nada: é o espaço que o conteúdo precisa nessa escala.</td></tr>
+          <tr><td><strong>Nota cancelada continua somada.</strong> O cancelamento é um evento separado e o XML da nota continua autorizado.</td><td>Retire da pasta os XMLs das notas canceladas antes de processar.</td></tr>
+          <tr><td>Com a janela no tamanho mínimo, a Chave pode aparecer cortada com “…” na grade.</td><td><strong>Copiar chave</strong> copia a chave inteira. Para vê-la na grade, aumente a janela.</td></tr>
+          <tr><td>Fora da escala de 100%, a visualização do relatório na tela pode ficar um pouco diferente do PDF.</td><td>O PDF não depende da escala: use o PDF como referência.</td></tr>
+          <tr><td>A senha do e-mail fica sem criptografia no <code>db\notas.db</code>.</td><td>Não compartilhe o arquivo <code>db\notas.db</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="secao" aria-labelledby="titulo-baixar">
+    <h2 id="titulo-baixar">Baixe o ProXML e comece agora</h2>
+    <p>Grátis, para Windows 10 e 11. Ainda tem dúvidas? Veja as <a href="/perguntas-frequentes">perguntas frequentes sobre o ProXML</a>.</p>
+    <div class="botoes">
+      <a class="botao botao-primario" href="/download">Ir para a página de download</a>
+    </div>
+  </section>
+</div>
+</main>
+<footer class="rodape">
+  <div class="container">
+    <div class="rodape-grade">
+      <div>
+        <h2>ProXML</h2>
+        <p>Leitor e totalizador de XMLs de NF-e (55) e NFC-e (65) com IBS/CBS, DANFE e relatórios. Grátis, para Windows, sem anúncios.</p>
+      </div>
+      <nav aria-label="Páginas do site">
+        <h2>Páginas</h2>
+        <ul>
+          <li><a href="/">Início</a></li>
+          <li><a href="/tutorial">Tutorial</a></li>
+          <li><a href="/gerar-danfe-xml">Gerar DANFE pelo XML</a></li>
+          <li><a href="/reforma-tributaria">Reforma Tributária: IBS e CBS</a></li>
+          <li><a href="/ibs-cbs">IBS e CBS no XML</a></li>
+          <li><a href="/download">Download</a></li>
+          <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h2>Projeto</h2>
+        <ul>
+          <li><a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi">Repositório no GitHub</a></li>
+          <li><a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases">Todas as versões (Releases)</a></li>
+          <li><a href="https://apoia.se/proxmlferramenta">Apoie o projeto no Apoia.se</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="rodape-fim">
+      <p>Desenvolvido por Caique Garcia.</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
