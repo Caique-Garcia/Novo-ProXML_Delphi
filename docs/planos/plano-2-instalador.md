@@ -42,6 +42,7 @@ Distribuir o ProXML com um instalador Windows e eliminar a dependência do `WinR
 - Instalação silenciosa numa pasta de teste, conferindo arquivos, atalhos e se o app abre e cria/usa o `db\`.
 - Reinstalar por cima (atualização) mantendo o `notas.db` e as configurações.
 - Desinstalar: os arquivos do app saem e o `db\` fica.
+- ✅ **09/11/2026:** roteiro automático executado com autorização (35 s, 0 falhas): instalação silenciosa com os 1925 arquivos + desinstalador, atalhos com "Iniciar em" na pasta do programa, app aberto de outra pasta usando o `db\` instalado, reinstalação por cima lembrando a pasta e mantendo o `notas.db` (mesmo hash), desinstalação mantendo só o `db\`, sem sobras de atalho ou registro. Não testados: desinstalar com arquivos em `NFCe\` (o Inno não apaga o que não instalou) e atualizar com o app aberto.
 
 ### 2.5 Release v1.2.0 — `release-manager`
 - README: seção de instalação com o setup como opção recomendada e o `ProXML.zip` como portátil; remover a nota sobre o WinRAR e orientar quem usou o `setupProXML.exe` antigo.
