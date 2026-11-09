@@ -4,7 +4,7 @@ Totalizador de XMLs de NF-e (55) e NFC-e (65) com IBS/CBS, DANFE e relatórios -
 
 Aplicativo desktop para Windows que lê uma pasta de XMLs de **NF-e (modelo 55)** e **NFC-e (modelo 65)**, soma os valores das notas autorizadas (incluindo **IBS/CBS** da Reforma Tributária) e facilita a conferência, a impressão e o envio desses arquivos.
 
-> ⬇️ **[Baixar a versão mais recente (ProXML.rar)](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML.rar)** — ou veja todas as versões na página de [Releases](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases).
+> ⬇️ **[Baixar o instalador (ProXML-Setup.exe)](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML-Setup.exe)** (recomendado) — ou a versão portátil **[ProXML.zip](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML.zip)**. Todas as versões estão na página de [Releases](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases).
 
 ---
 
@@ -37,11 +37,12 @@ Aplicativo desktop para Windows que lê uma pasta de XMLs de **NF-e (modelo 55)*
 ### Relatórios
 
 - Tela **Relatórios** com o **Relatório de Notas** e o **Relatório IBS/CBS** (este só com as notas que têm o grupo IBS/CBS).
-- Layout novo em A4: período das notas, modelo do filtro, pasta de origem, colunas alinhadas, valores em `R$`, linha de total e rodapé "Gerado pelo ProXML v1.1.0 · data e hora · Página X de Y".
+- Layout novo em A4: período das notas, modelo do filtro, pasta de origem, colunas alinhadas, valores em `R$`, linha de total e rodapé "Gerado pelo ProXML v1.2.0 · data e hora · Página X de Y".
 
 ### E-mail
 
 - Tela **Enviar** mostra o anexo antes de enviar (quantidade de XMLs e tamanho). Os XMLs só são compactados quando você clica em **Enviar**, e o envio acontece em segundo plano.
+- **Anexo `NFCe_ProXML.zip`**, criado pelo próprio ProXML: não precisa do WinRAR. Se não for possível montar o anexo (ex.: arquivo em uso ou disco cheio), aparece uma mensagem e o e-mail não é enviado.
 - **Configurações** com validação dos campos e **Testar conexão**, que conecta e autentica no servidor **sem enviar e-mail**.
 
 ### Interface
@@ -54,13 +55,28 @@ Aplicativo desktop para Windows que lê uma pasta de XMLs de **NF-e (modelo 55)*
 
 ## Instalação
 
-1. Baixe o **[ProXML.rar](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML.rar)**.
-2. Extraia o conteúdo para uma pasta (ex.: `C:\ProXML`).
+Há duas formas de instalar, com o mesmo programa: o **instalador** (recomendado) e a versão **portátil** (`.zip`).
+
+### Com o instalador (recomendado)
+
+1. Baixe o **[ProXML-Setup.exe](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML-Setup.exe)**.
+2. Execute o setup e siga as telas. O ProXML é instalado **só para o seu usuário**, em `%LocalAppData%\ProXML`, **sem pedir administrador**.
+3. Abra o ProXML pelo atalho no **Menu Iniciar** ou na **Área de Trabalho** (atalho opcional, já marcado no setup).
+
+> **Aviso do Windows (SmartScreen):** o instalador não tem assinatura digital, então o Windows pode mostrar "O Windows protegeu o computador". Clique em **Mais informações** e depois em **Executar assim mesmo**.
+
+- **Atualizar:** baixe e execute o setup da versão nova. Ele substitui o programa e **mantém a pasta `db\`**, com as suas configurações.
+- **Desinstalar:** pelo Windows, em **Configurações → Aplicativos**. A pasta `db\` (configurações) e o que estiver em `NFCe\` (PDFs e arquivos do envio) **ficam** em `%LocalAppData%\ProXML`; apague essa pasta se não quiser mais esses arquivos.
+
+### Versão portátil (ProXML.zip)
+
+1. Baixe o **[ProXML.zip](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML.zip)**.
+2. Extraia o conteúdo para uma pasta (ex.: `C:\ProXML`). O próprio Windows abre o `.zip`: clique com o botão direito e escolha **Extrair tudo**.
 3. Execute o **`ProXML.exe`**.
 
-O pacote traz tudo o que o programa precisa:
+O instalador e o `.zip` trazem tudo o que o programa precisa:
 
-```
+```text
 ProXML\
 ├── ProXML.exe          # programa
 ├── sk4d.dll            # Skia4Delphi (ícones e animação)
@@ -68,19 +84,31 @@ ProXML\
 ├── db\notas.db         # banco local, vazio
 ├── Report\             # layouts do DANFE e do DANFCe (FastReport)
 ├── Schemas\            # schemas XSD usados pelo ACBr
-└── NFCe\               # saída: PDFs do DANFE e arquivos do envio
+└── NFCe\               # saída do programa
+    ├── danfePDF\       # PDFs do DANFE
+    └── EnvioResposta\  # arquivos do envio
 ```
 
-### Atualizando de uma versão anterior
+### Atualizando a versão portátil
 
 > **Importante: não substitua a pasta `db\`.** O pacote traz um `notas.db` **vazio**. Se você copiar a pasta `db\` do pacote por cima da sua, **as configurações de e-mail são apagadas**.
 
 Copie os outros arquivos e pastas do pacote por cima da instalação antiga e mantenha a sua pasta `db\`. O banco da versão anterior é atualizado sozinho na primeira execução, sem perder dados.
 
+Para trocar a versão portátil pelo instalador: instale com o `ProXML-Setup.exe` e, com o ProXML fechado, copie o `db\notas.db` da pasta portátil para `%LocalAppData%\ProXML\db`, substituindo o arquivo que está lá.
+
+### Quem usou o instalador antigo (setupProXML.exe)
+
+O instalador novo não substitui o antigo `setupProXML.exe`. Para trocar:
+
+1. Se quiser manter as configurações, copie antes o `db\notas.db` da pasta onde o ProXML antigo está instalado para um lugar seguro.
+2. Desinstale a versão antiga pelo Windows, em **Configurações → Aplicativos**.
+3. Instale com o **`ProXML-Setup.exe`**.
+4. Com o ProXML fechado, copie o `notas.db` guardado para `%LocalAppData%\ProXML\db`, substituindo o arquivo que está lá. O banco antigo é atualizado sozinho na primeira execução.
+
 ### Requisitos
 
 - **Windows 10 ou 11** (32 ou 64 bits).
-- Para enviar por e-mail: o **`WinRAR.exe`** na mesma pasta do `ProXML.exe` (ele compacta os XMLs). A compactação ZIP sem WinRAR está prevista para a v1.2.0.
 
 ## Como usar
 
@@ -125,11 +153,10 @@ Em **Configurações**, informe o **Servidor SMTP**, a **Porta**, marque **SSL**
 |----------------|-------------|
 | XMLs em caminhos com **mais de 259 caracteres** (pasta + nome do arquivo) não são lidos. | Use uma pasta com caminho mais curto (ex.: `C:\XMLs`). |
 | Caracteres fora do padrão do Windows em português no nome da pasta (ex.: emoji, alguns idiomas) se perdem, e a pasta não é encontrada. | Renomeie a pasta usando só letras, números e acentos comuns. |
-| Se um layout do DANFE (`Report\`) estiver corrompido, o PDF não sai e o programa só volta para a tela Notas, sem mensagem de erro. | Reinstale a pasta `Report\` a partir do pacote. |
+| Se um layout do DANFE (`Report\`) estiver corrompido, o PDF não sai e o programa só volta para a tela Notas, sem mensagem de erro. | Execute o instalador de novo ou, na versão portátil, copie a pasta `Report\` do `ProXML.zip`. |
 | Ao arrastar a janela para um monitor com escala maior, as caixas de SSL e TLS ficam pequenas. | Continuam funcionando. Para o tamanho certo, feche e abra o ProXML nesse monitor. |
 | Na tela **Enviar**, a faixa de erro pode fazer aparecer uma barra de rolagem. | Role a tela: todos os campos e botões continuam acessíveis. |
 | O tamanho mínimo da janela cresce com a escala do Windows (1024×640 vezes a escala: 1280×800 em 125%, 1536×960 em 150%), limitado ao tamanho da tela. | Nada: é o espaço que o conteúdo precisa nessa escala. |
-| O envio por e-mail depende do `WinRAR.exe` na pasta do ProXML. | Copie o `WinRAR.exe` para a pasta do programa (até a v1.2.0, com ZIP nativo). |
 | **Nota cancelada continua somada.** O cancelamento é um evento separado e o XML da nota continua autorizado. | Retire da pasta os XMLs das notas canceladas antes de processar. |
 | Com a janela no tamanho mínimo, a Chave pode aparecer cortada com "…" na grade. | **Copiar chave** copia a chave inteira. Para vê-la na grade, aumente a janela. |
 | Fora da escala de 100%, a visualização do relatório na tela pode ficar um pouco diferente do PDF. | O PDF não depende da escala: use o PDF como referência. |
@@ -146,18 +173,32 @@ Em **Configurações**, informe o **Servidor SMTP**, a **Porta**, marque **SSL**
   - [QuickReport](https://www.quickreport.co.uk/) — Relatório de Notas e Relatório IBS/CBS
   - [Skia4Delphi](https://github.com/skia4delphi/skia4delphi) — ícones SVG, logo e animação
 - FireDAC com driver **SQLite** (nativo do Delphi)
+- [Inno Setup 6](https://jrsoftware.org/isinfo.php) — instalador (`winget install JRSoftware.InnoSetup`)
 
 ### Compilando
 
 1. Instale os componentes acima na IDE.
-2. Abra o `ProXML.dproj` e compile na configuração **Release / Win32** (é ela que tem a VersionInfo 1.1.0 e o suporte à escala do Windows). Pela linha de comando:
+2. Abra o `ProXML.dproj` e compile na configuração **Release / Win32** (é ela que tem a VersionInfo 1.2.0 e o suporte à escala do Windows). Pela linha de comando:
 
    ```bat
    call "C:\Program Files (x86)\Embarcadero\Studio\19.0\bin\rsvars.bat"
    msbuild ProXML.dproj /t:Build /p:Config=Release /p:Platform=Win32 /p:DCC_ExeOutput=bin /p:DCC_DcuOutput=<pasta temporária>
    ```
 
-3. Em `bin\` já estão `Report\`, `Schemas\` e `db\`. Copie para lá o `sk4d.dll` (e, para o e-mail, o `WinRAR.exe`).
+3. Em `bin\` já estão `Report\`, `Schemas\` e `db\`. Copie para lá o `sk4d.dll`.
+
+### Gerando o instalador
+
+O script fica em `installer/`: `ProXML.iss` (Inno Setup 6) e `build.ps1`, que monta a pasta de staging e chama o compilador do Inno (`ISCC.exe`).
+
+1. Compile o exe **Release** numa pasta fora de `bin\` (o `build.ps1` recusa o `bin\ProXML.exe`), com a VersionInfo da versão que vai ser gerada.
+2. Rode:
+
+   ```bat
+   powershell -NoProfile -ExecutionPolicy Bypass -File installer\build.ps1 -Version 1.2.0 -ExePath <pasta do build>\ProXML.exe
+   ```
+
+O `build.ps1` confere se a FileVersion do exe é a mesma de `-Version`, pega `Report\`, `Schemas\`, o `db\notas.db` vazio e o `LICENSE-lucide.txt` do `HEAD` do git (só o que está versionado), junta o exe e o `bin\sk4d.dll` e recusa `ErroLog.txt`, `WinRAR.exe`, conteúdo em `NFCe\` e nomes de arquivo com 14 ou mais dígitos seguidos. O setup sai em `installer\Output\ProXML-Setup.exe` (fora do git), com o tamanho e o SHA-256 no fim da execução. O `AppId` do `ProXML.iss` é fixo: não o altere, senão a atualização deixa de substituir a versão instalada.
 
 ### Estrutura do código
 
@@ -180,6 +221,9 @@ classes/
   ProXML.Classes.pas               # TConfig (configurações de e-mail)
 src/                               # imagens, ícones e animações
 bin/                               # Report/, Schemas/ e db/ (saída da compilação)
+installer/
+  ProXML.iss                       # script do instalador (Inno Setup 6)
+  build.ps1                        # gera installer\Output\ProXML-Setup.exe
 docs/
   planos/                          # planos de cada versão e decisões
   ui/                              # tokens visuais, glossário de textos, ícones, logo e mockups
@@ -188,7 +232,7 @@ tests/gabarito/                    # gabarito dos totais usado nos testes
 
 ### Banco de dados
 
-SQLite em `bin\db\notas.db`, criado na primeira execução se não existir:
+SQLite em `db\notas.db`, na pasta do `ProXML.exe` (não depende da pasta de trabalho do atalho), criado na primeira execução se não existir. No repositório fica em `bin\db\notas.db`; no instalador, em `%LocalAppData%\ProXML\db\notas.db`. Tabelas:
 
 | Tabela   | Conteúdo                                                                                        |
 |----------|-------------------------------------------------------------------------------------------------|

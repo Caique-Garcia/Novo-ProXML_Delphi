@@ -9,13 +9,13 @@ Você cuida do instalador do **ProXML** usando **Inno Setup 6**.
 ## Decisões já tomadas pelo usuário (não altere)
 - Instalação **por usuário**, em `{localappdata}\ProXML` (`PrivilegesRequired=lowest`), sem pedir administrador.
 - **Sem assinatura digital** por enquanto.
-- O setup é distribuído na Release do GitHub **junto com** o `ProXML.rar` portátil.
+- O setup é distribuído na Release do GitHub **junto com** o `ProXML.zip` portátil (até a v1.1.0 era `ProXML.rar`).
 
 ## Requisitos técnicos
 - O script fica versionado em `installer/ProXML.iss`, e um `installer/build.ps1` compila o setup com `ISCC.exe`.
 - Arquivos instalados: `ProXML.exe`, `sk4d.dll`, `Report\`, `Schemas\` e `db\` (este só se ainda não existir: `onlyifdoesntexist uninsneveruninstall`, para não apagar dados do usuário).
 - Não incluir `ErroLog.txt`, `NFCe\` com conteúdo, `notas.db` com dados reais nem `WinRAR.exe`.
-- Atalhos no Menu Iniciar e (opcional) na Área de Trabalho, **com `WorkingDir: {app}`**. O app usa `GetCurrentDir` para localizar `db\`.
+- Atalhos no Menu Iniciar e (opcional) na Área de Trabalho, **com `WorkingDir: {app}`**. Desde a v1.2.0 o app localiza o `db\` pela pasta do `ProXML.exe`; o `WorkingDir` continua por segurança.
 - `AppId` fixo (GUID) para que atualizações substituam a versão anterior. A versão vem de um parâmetro (`/DAppVersion=1.2.0`).
 - Idioma: Português (Brasil).
 - Saída: `installer\Output\ProXML-Setup.exe` — **nome fixo** (decisão do usuário), para os links `releases/latest/download/ProXML-Setup.exe`. A versão fica em `AppVersion`/`VersionInfoVersion` (fora do git).

@@ -33,13 +33,13 @@ O Google mostra uma página para poucos termos. Por isso, cada página cobre uma
 | `site/gerar-danfe-xml.html` | `/gerar-danfe-xml` | Como gerar DANFE (55) e DANFCe (65) a partir do XML | "gerar DANFE a partir do XML grátis", "imprimir DANFCe pelo XML" |
 | `site/reforma-tributaria.html` | `/reforma-tributaria` | **Página principal da seção Reforma Tributária**: o que é o IVA dual, IBS e CBS, cronograma, o que muda na nota fiscal, perguntas frequentes e como o ProXML ajuda (ver "Seção Reforma Tributária") | "reforma tributária IBS CBS", "o que é IBS e CBS", "IVA dual", "CBS 0,9% IBS 0,1% 2026", "cronograma reforma tributária" |
 | `site/ibs-cbs.html` | `/ibs-cbs` | Página técnica da seção: onde ficam IBS/CBS no XML da NF-e/NFC-e (grupos `IBSCBS` e `IBSCBSTot`) e como o ProXML soma esses valores. Linka para `/reforma-tributaria` e é linkada por ela. Texto revisado pelo `nfe-fiscal` | "IBS CBS no XML da NF-e", "IBSCBSTot", "NT 2025.002" |
-| `site/download.html` | `/download` | Setup recomendado + `.rar` portátil, aviso do SmartScreen com os prints 1–2 | "baixar ProXML" |
+| `site/download.html` | `/download` | Setup recomendado + `.zip` portátil, aviso do SmartScreen com os prints 1–2 | "baixar ProXML" |
 | `site/perguntas-frequentes.html` | `/perguntas-frequentes` | Dúvidas comuns ("é seguro?", "funciona com NFC-e?", "precisa de internet?") | Buscas longas em formato de pergunta |
 | `site/404.html` | — | Página de erro com links para as principais | — |
 
 Arquivos de apoio: `site/styles.css`, `site/img/`, `site/favicon.ico` (+ `favicon.svg` e `apple-touch-icon.png`), `site/og-image.png`.
 
-- Links de download: `releases/latest/download/ProXML-Setup.exe` e `releases/latest/download/ProXML.rar`.
+- Links de download: `releases/latest/download/ProXML-Setup.exe` e `releases/latest/download/ProXML.zip` (o portátil passou de `.rar` para `.zip` na v1.2.0).
 - Rodapé em todas as páginas: GitHub, link de doação e links internos para as outras páginas.
 - Espaços reservados marcados onde entram os prints.
 

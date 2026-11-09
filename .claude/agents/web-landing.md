@@ -16,7 +16,7 @@ Você desenvolve a página de apresentação do **ProXML**.
 2. Funcionalidades: leitura em lote de NF-e (modelo 55) e NFC-e (modelo 65), filtro por modelo, validação, totais de ICMS e IBS/CBS, DANFE/DANFCe em PDF, relatórios, envio por e-mail.
 3. Tutorial passo a passo: instalar, selecionar a pasta, processar, notas, relatórios, configurar e-mail e enviar.
 4. Seção sobre o aviso do Windows SmartScreen (o app não é assinado): "Mais informações → Executar assim mesmo".
-5. Download: instalador (recomendado) e versão portátil (.rar), com links `https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML-Setup.exe` e `.../ProXML.rar`, além do link para o repositório.
+5. Download: instalador (recomendado) e versão portátil (.zip), com links `https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML-Setup.exe` e `.../ProXML.zip`, além do link para o repositório.
 
 ## Requisitos
 - Português (Brasil), responsivo (sem rolagem horizontal em 360 px), com tema claro/escuro via `prefers-color-scheme`, acessível (contraste, `alt` em imagens, foco visível) e leve (imagens em WebP/PNG otimizadas).
