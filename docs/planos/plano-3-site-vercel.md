@@ -10,10 +10,18 @@ Site público que apresenta o ProXML, ensina a usar o app, leva ao download e ap
 | Código | Pasta `site/` neste repositório |
 | Deploy | Integração GitHub da Vercel (Root Directory = `site`); cada push na `main` publica |
 | Endereço | Subdomínio grátis da Vercel (ex.: `proxml.vercel.app`), sem domínio próprio |
-| Imagens | Prints fornecidos pelo usuário |
+| Imagens | ~~Prints fornecidos pelo usuário~~ → **misto** (ver "Prints (09/11/2026)") |
 | SEO | Site com várias páginas, cada uma focada numa busca, e SEO técnico completo (ver 3.1) |
 | Monetização | **Sem anúncios.** Só o link de doação do Apoia.se: <https://apoia.se/proxmlferramenta> |
 | Reforma Tributária | Nova seção **"Reforma Tributária"** em destaque no menu, com página própria de dúvidas frequentes sobre o IVA dual (IBS e CBS), em linguagem simples, mostrando como o ProXML ajuda (ver "Seção Reforma Tributária" em 3.1) |
+| **Revisão depois dos Planos 1, 4 e 2 (09/11/2026)** | O plano foi escrito antes do redesign e do instalador. Partida: v1.2.0 publicada (`f9107b0`), links `releases/latest/download/ProXML-Setup.exe` (recomendado) e `ProXML.zip` (portátil); o `.rar` não existe mais |
+| **Prints (09/11/2026)** | **Numeração mantida** (1–9 e 11–16), com o conteúdo ajustado à interface atual e o antigo 10 ("menu de contexto") trocado pela **tela Relatórios** (ver a lista em 3.2). A tela Sobre fica de fora até a v1.2.1 (3.5). **Captura mista:** o usuário tira os prints 1–4 (SmartScreen e instalador); a bateria do `delphi-dev` captura os prints 5–16 (só a janela, escala 100% confirmada antes, tamanho fixo), **só com autorização do usuário** e estimativa de tempo. **P1:** originais em PNG **fora do repositório**, em `D:\PROJETOS\ProXML-prints\`; no git, só os WebP otimizados em `site/img/` |
+| **Dados dos prints (09/11/2026)** | **Lote novo do zero**, gerado pelo `nfe-fiscal` sem partir de cópias dos XMLs reais (~20 XMLs, NF-e 55 e NFC-e 65): emitente "EMPRESA EXEMPLO LTDA", CNPJ fictício (zeros + DV), NFC-e sem CPF, IBS/CBS com as alíquotas de teste de 2026 e `tpAmb=1` (sem a faixa de homologação no print principal). Fica fora do git (`exemple/`, já ignorado). Antes da captura, um script confere que nenhum CNPJ, CPF ou chave dos XMLs reais aparece no lote; depois, cada print é revisado à mão antes de entrar no site |
+| **Identidade visual (09/11/2026)** | Tema **claro + escuro** (`prefers-color-scheme`). Claro = tokens do app (`docs/ui/tokens.md`); escuro com fundo marinho, `proxml-logo-escuro.svg` e contrastes calculados (≥ 4,5:1 em texto). Fonte do sistema (`"Segoe UI", system-ui, …`), sem fonte externa. Favicon a partir do `ProXML_Icon.ico` + `favicon.svg` com o símbolo do logo |
+| **og-image (09/11/2026)** | `og-image.png` e `og-reforma-tributaria.png` (1200×630) gerados de um **modelo HTML com os tokens e o logo, renderizado pelo Edge headless**. Na 3.1 sai uma versão provisória (logo + frase); na 3.2 entra o print 7. Modelos em `docs/site/og/`, fora do site publicado |
+| **softwareVersion (09/11/2026)** | **Fixa** no JSON-LD (`"1.2.0"`) e igual ao texto "Versão 1.2.0" visível na página inicial e em `/download`. O `release-manager` atualiza essas ocorrências e o `lastmod` do `sitemap.xml` **a cada release**, no mesmo commit (passo no `release-manager.md`) |
+| **Revisão fiscal (09/11/2026)** | Na **3.1, antes de o usuário ver** as páginas: o `web-landing` escreve o rascunho de `/reforma-tributaria` e `/ibs-cbs` e o `nfe-fiscal` confere cada prazo, alíquota e regra em fonte oficial (Planalto: EC 132/2023, LC 214/2025 e leis posteriores; Receita Federal; Portal da NF-e: NT 2025.002 na versão vigente e informes do `cClassTrib`; Comitê Gestor do IBS), com a data da consulta. Tabela de fontes em `docs/site/fontes-reforma.md` (versionada); o que depender de regulamentação aparece como "previsto" |
+| **Tela Sobre do app (09/11/2026)** | Links do site e do Apoia.se na tela Sobre numa **v1.2.1**, na etapa nova **3.5**, **depois da 3.4** (URL confirmada na Vercel). O site não depende dela |
 
 > Atualizado em 29/10/2026: incluída a seção Reforma Tributária (IBS e CBS), com página de perguntas frequentes e foco de SEO nas buscas sobre a reforma.
 
@@ -128,25 +136,27 @@ Regras de escrita:
 |---|---------|----------------|
 | 1 | `01-smartscreen.png` | Aviso "O Windows protegeu o computador" ao abrir o `ProXML-Setup.exe` |
 | 2 | `02-smartscreen-executar.png` | O mesmo aviso depois de clicar em "Mais informações", com o botão "Executar assim mesmo" |
-| 3 | `03-instalador.png` | Tela de boas-vindas do instalador |
+| 3 | `03-instalador.png` | Tela de boas-vindas do instalador (em português) |
 | 4 | `04-instalador-atalhos.png` | Tela de tarefas do instalador (atalho na Área de Trabalho) |
 | 5 | `05-tela-inicial.png` | App recém-aberto, sem pasta selecionada |
 | 6 | `06-selecionar-pasta.png` | Janela de seleção da pasta de XMLs |
-| 7 | `07-resumo.png` | **Imagem principal do site**: após Processar, com os cards (Valor Total, BC ICMS, ICMS, IBS, CBS) preenchidos e o log na aba Resumo. Também serve de base para o `og-image.png` |
-| 8 | `08-notas.png` | Aba Notas com a grade e a coluna Modelo, filtro em "Todos" |
-| 9 | `09-filtro-modelo.png` | Seletor de modelo aberto (ou filtrado em "NF-e 55", com os cards recalculados) |
-| 10 | `10-menu-contexto.png` | Botão direito na grade mostrando "Copiar Chave" e "Gerar DANFe" |
-| 11 | `11-danfe-nfce.png` | PDF do DANFCe (modelo 65) aberto |
+| 7 | `07-resumo.png` | **Imagem principal do site**: após Processar, com os 5 cards (Valor Total, Base ICMS, ICMS, IBS, CBS) preenchidos, os contadores e os Detalhes da leitura na tela Resumo, filtro em "Todos". Também serve de base para o `og-image.png` |
+| 8 | `08-notas.png` | Tela Notas com a grade (coluna Modelo), uma nota selecionada e a barra de ações **Copiar chave**, **Gerar DANFE** e **Exportar CSV**, filtro em "Todos" |
+| 9 | `09-filtro-modelo.png` | Seletor segmentado **Todos / NF-e 55 / NFC-e 65** em "NF-e 55", com os cards recalculados |
+| 10 | `10-relatorios.png` | Tela Relatórios com as duas opções (Relatório de Notas e Relatório IBS/CBS). Substitui o antigo "menu de contexto" (09/11/2026) |
+| 11 | `11-danfe-nfce.png` | PDF do DANFCe A4 (modelo 65) aberto |
 | 12 | `12-danfe-nfe.png` | PDF do DANFE retrato (modelo 55) aberto |
 | 13 | `13-relatorio-notas.png` | Pré-visualização do relatório de notas |
 | 14 | `14-relatorio-ibscbs.png` | Pré-visualização do relatório IBS/CBS |
-| 15 | `15-configuracoes.png` | Tela Configurações com dados SMTP de exemplo e a senha oculta |
-| 16 | `16-enviar.png` | Tela Enviar com destinatário e mensagem de exemplo |
+| 15 | `15-configuracoes.png` | Tela Configurações com dados SMTP de exemplo (ex.: `smtp.exemplo.com.br`) e a senha oculta |
+| 16 | `16-enviar.png` | Tela Enviar com destinatário (`contato@exemplo.com.br`), mensagem de exemplo e o anexo `.zip` |
 
-Cuidados:
-- **Dados fictícios:** a chave de acesso contém o CNPJ do emitente, e o DANFE mostra CNPJ, nome, endereço e CPF do consumidor. Use XMLs de homologação ou borre esses dados antes de enviar. No e-mail, use algo como `contato@exemplo.com.br`.
-- Capture **só a janela** (`Alt+PrtSc` ou `Win+Shift+S`), em PNG, com o Windows em escala 100% e a janela do app sempre do mesmo tamanho.
-- Os prints 1–4 dependem do Plano 2, e os prints 7, 8, 9, 12 e 14 dependem do Plano 1. Os demais (5, 6, 10, 11, 13, 15 e 16) já podem ser tirados, mas é melhor tirar tudo junto no final para o visual ficar uniforme.
+Cuidados (revistos em 09/11/2026):
+- **Quem captura:** o usuário tira os prints 1–4 (o SmartScreen só aparece num arquivo baixado da internet); a bateria do `delphi-dev` captura os prints 5–16, **só com autorização do usuário** e estimativa de tempo.
+- **Dados fictícios:** a chave de acesso contém o CNPJ do emitente, e o DANFE mostra CNPJ, nome, endereço e CPF do consumidor. Por isso os prints 5–16 usam só o **lote sintético** gerado do zero pelo `nfe-fiscal` (ver "Dados dos prints"), nunca os XMLs de `exemple\`. Pasta de exemplo com nome fictício (ex.: `C:\XMLs\Empresa Exemplo6-11`) e e-mail `contato@exemplo.com.br`.
+- Capture **só a janela**, em PNG, com o Windows em escala 100% (confirmada antes) e a janela do app sempre do mesmo tamanho.
+- **Pasta (P1):** originais em `D:\PROJETOS\ProXML-prints\`, fora do repositório. No git entram só os WebP otimizados em `site/img/` (a conversão tira os metadados).
+- Cada print é revisado à mão antes de entrar no site.
 
 ### 3.3 Revisão — `qa-reviewer`
 - Responsividade (360 px, 768 px, desktop), tema claro/escuro, links de download respondendo, `alt` nas imagens e nenhum dado real nos prints.
@@ -165,10 +175,17 @@ Cuidados:
 - **Usuário:** no [Google Search Console](https://search.google.com/search-console), adicionar a propriedade do tipo **Prefixo do URL** (o tipo "Domínio" exige acesso ao DNS, que não existe no subdomínio da Vercel), verificar a posse pela meta tag ou pelo arquivo HTML que o Google fornece (o `web-landing` coloca em `site/`) e enviar o `sitemap.xml`. Repetir no [Bing Webmaster Tools](https://www.bing.com/webmasters) (dá para importar direto do Search Console).
 - O `release-manager` adiciona a URL do site ao README, à descrição e aos tópicos do repositório e às notas das próximas Releases. Esses links apontando para o site são o sinal de SEO que mais pesa no começo.
 
+### 3.5 Links na tela Sobre do app (v1.2.1) — `ux-designer` + `delphi-dev` + `release-manager`
+Só depois da 3.4, com a URL do site confirmada na Vercel.
+- `ux-designer`: textos novos no glossário (13.7, link do site, e 13.8, "Apoie o projeto" com o Apoia.se), para aprovação do usuário.
+- `delphi-dev`: links na tela Sobre, com o ProXML **fechado** na IDE, build fora do repositório e `git checkout -- ProXML.res` depois; bateria reduzida só da tela Sobre (~1–2 min), **com autorização**.
+- `release-manager`: VersionInfo 1.2.1 (com confirmação), setup + `ProXML.zip`, Release v1.2.1 e `softwareVersion` do site atualizado.
+
 ## Pendências (decidir com o usuário)
-- **P1.** Pasta onde você vai colocar os prints.
+- Nenhuma em aberto.
 
 ## Pendências resolvidas
+- **P1.** Pasta dos prints (decidido em 09/11/2026): originais em `D:\PROJETOS\ProXML-prints\`, fora do repositório; no git só os WebP otimizados em `site/img/`.
 - **P4.** Perguntas da seção Reforma Tributária (decidido em 29/10/2026):
   - Mantidos os blocos O básico (7), Prazos (4), Nota fiscal e Alíquotas e pagamento, sem cortes.
   - Incluídas: "MEI precisa informar IBS e CBS?", "O que é cClassTrib?" e "Os preços vão subir com a reforma?".

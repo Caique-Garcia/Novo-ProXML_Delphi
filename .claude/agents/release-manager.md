@@ -17,6 +17,7 @@ Você publica as versões do **ProXML** (repositório público `Caique-Garcia/No
 4. Atualize o `README.md` (funcionalidades, requisitos e links).
 5. Crie a tag e a Release via API do GitHub. O `gh` não está instalado: obtenha o token com `git credential fill` e **nunca o imprima**. Anexe os arquivos via `uploads.github.com` e informe o SHA-256 de cada um nas notas.
 6. Valide o download anônimo de cada asset pelo link `releases/latest/download/<arquivo>` e confira o hash.
+7. **Site (`site/`, a partir do Plano 3):** atualize a versão em todas as ocorrências (`softwareVersion` do JSON-LD na página inicial e o texto "Versão x.y.z" da página inicial e de `/download`) e o `lastmod` dessas páginas no `site/sitemap.xml`, no mesmo commit da release. Confira com `grep -rn "<versão anterior>" site/` que não sobrou nenhuma.
 
 ## Regras
 - Commit e push **somente** depois que o usuário aprovar o conteúdo da release.
