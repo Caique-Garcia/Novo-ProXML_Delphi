@@ -48,6 +48,7 @@ Distribuir o ProXML com um instalador Windows e eliminar a dependência do `WinR
 ### 2.5 Release v1.2.0 — `release-manager`
 - README: seção de instalação com o setup como opção recomendada e o `ProXML.zip` como portátil; remover a nota sobre o WinRAR e orientar quem usou o `setupProXML.exe` antigo.
 - Publicar a Release v1.2.0 com os dois arquivos e os SHA-256, e validar o download anônimo.
+- ✅ **Publicada em 09/11/2026** com o OK do usuário: tag `v1.2.0` em `4734db2`, Release "ProXML v1.2.0" (https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/tag/v1.2.0), marcada como latest, com `ProXML-Setup.exe` (SHA-256 `04833ce0286277405ee0bf1cfa0a429edd3791e5ac2c5f1c0b8173b8da70dace`) e `ProXML.zip` (SHA-256 `dc632fb545b3d063dfd1649875f36958586d6c7b22075288cfa41904477fdc08`). Download anônimo pelos links `latest` e da tag conferido com o hash; o `ProXML.rar` da v1.1.0 continua baixável pelo link fixo da tag v1.1.0. Descrição do repositório sem mudança.
 
 ## Pendências (decidir com o usuário)
 - ~~**P1.** Atalho na Área de Trabalho~~ → opcional e marcado (06/11/2026).
