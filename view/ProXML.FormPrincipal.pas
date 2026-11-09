@@ -1305,10 +1305,22 @@ begin
 end;
 
 function TThreadEnvioEmail.Compactar: Boolean;
+const
+    //Limite de arquivos de um .zip sem Zip64 (o System.Zip do 10.2 não grava Zip64)
+    LIMITE_ARQUIVOS_ZIP = 65535;
+    //Limite de bytes de um .zip sem Zip64 (tamanhos e posições gravados em 32 bits)
+    LIMITE_BYTES_ZIP = $FFFFFFFF;
 var
-    Pasta : string;
-    Zip   : TZipFile;
-    I     : Integer;
+    Pasta     : string;
+    Arquivo   : string;
+    Codigo    : Cardinal;
+    Atributos : Cardinal;
+    Zip       : TZipFile;
+    Vistos    : TStringList;
+    Unicos    : TStringList;
+    I         : Integer;
+    Posicao   : Integer;
+    Soma      : Int64;
 begin
     //Cópia dos XMLs para a pasta NFCe\ProXML (com o nome <chave>-nfe.xml) e o .zip (System.Zip) com essas
     //cópias, fora da thread principal. False: o anexo não foi gerado e o e-mail não sai; FResultado diz
@@ -1317,59 +1329,116 @@ begin
     Pasta  := FPastaApp + 'NFCe\ProXML';
     FAnexo := FPastaApp + ARQUIVO_ANEXO;
 
-    //Pasta temporária: a falha ao recriá-la é falha de compactar (11.20a), não XML ausente (11.20b)
+    Vistos := TStringList.Create;
+    Unicos := TStringList.Create;
     try
-        if TDirectory.Exists(Pasta) then
-            TDirectory.Delete(Pasta, True);   //apaga a pasta e todo o seu conteúdo
-        if not SysUtils.ForceDirectories(Pasta) then
-            RaiseLastOSError;
-    except
-        on E: Exception do
+        //A mesma chave duas vezes no filtro entra uma vez só no .zip, na ordem da primeira vez. A lista
+        //ordenada só serve para achar as repetidas sem percorrer o .zip a cada arquivo
+        Vistos.CaseSensitive := False;
+        Vistos.Sorted        := True;
+        Vistos.Duplicates    := dupIgnore;
+        //Cada nome único guarda o índice da origem cuja cópia fica na pasta (a última, que sobrescreve as
+        //anteriores no CopyFile); Vistos guarda a posição do nome em Unicos
+        for I := 0 to FNomes.Count - 1 do
+            if Vistos.Find(FNomes[I], Posicao) then
+                Unicos.Objects[Integer(Vistos.Objects[Posicao])] := TObject(I)
+            else
+            begin
+                Vistos.AddObject(FNomes[I], TObject(Unicos.Count));
+                Unicos.AddObject(FNomes[I], TObject(I));
+            end;
+
+        //Acima do limite o .zip sairia corrompido: 11.20a, com o motivo só no LOG (14.4b)
+        if Unicos.Count > LIMITE_ARQUIVOS_ZIP then
         begin
-            FalharAnexo(E.Message, E.ClassName);
+            FalharAnexo('mais de ' + IntToStr(LIMITE_ARQUIVOS_ZIP) + ' arquivos, limite do formato ZIP', '');
             Exit;
         end;
-    end;
 
-    for I := 0 to FOrigens.Count - 1 do
-        if not CopyFile(PChar(FOrigens[I]), PChar(Pasta + '\' + FNomes[I]), False) then
+        //Acima de 4 GB somados o .zip também sairia corrompido: 11.20a, com o motivo só no LOG (14.4b). Usa o
+        //tamanho de origem, antes de copiar; um XML que não existe agora soma 0 e cai na 11.20b na cópia
+        Soma := 0;
+        for I := 0 to Unicos.Count - 1 do
+            Inc(Soma, TamanhoArquivo(FOrigens[Integer(Unicos.Objects[I])]));
+        if Soma > LIMITE_BYTES_ZIP then
         begin
-            //O motivo do Windows do primeiro XML vai só para o LOG
-            if FFaltando.Count = 0 then
-                FErro := SysErrorMessage(GetLastError);
-            FFaltando.Add(FOrigens[I]);
+            FalharAnexo('os XMLs somam mais de 4 GB, limite do formato ZIP', '');
+            Exit;
         end;
-    if FFaltando.Count > 0 then
-    begin
-        FResultado := reXmlAusente;
-        Exit;
-    end;
 
-    //O .zip anterior é apagado antes de criar o novo (arquivo em uso, sem permissão: 11.20a). Só entram as
-    //cópias desta vez, pela lista, e não tudo o que estiver na pasta
-    try
-        if FileExists(FAnexo) and not SysUtils.DeleteFile(FAnexo) then
-            RaiseLastOSError;
-
-        Zip := TZipFile.Create;
+        //Pasta temporária: a falha ao apagar a anterior ou ao recriá-la é falha de compactar (11.20a), não XML
+        //ausente (11.20b). O TDirectory.Delete do 10.2 não acusa falha: cada arquivo é apagado antes, com o
+        //motivo do Windows, e a pasta é conferida depois
         try
-            Zip.Open(FAnexo, zmWrite);
-            //A mesma chave duas vezes no filtro entra uma vez só, como na pasta NFCe\ProXML
-            for I := 0 to FNomes.Count - 1 do
-                if Zip.IndexOf(FNomes[I]) < 0 then
-                    Zip.Add(Pasta + '\' + FNomes[I], FNomes[I]);
-            Zip.Close;
-        finally
-            Zip.Free;
+            if TDirectory.Exists(Pasta) then
+            begin
+                for Arquivo in TDirectory.GetFiles(Pasta, '*', TSearchOption.soAllDirectories) do
+                begin
+                    //Cópia de um XML somente leitura: o atributo vem junto no CopyFile
+                    Atributos := GetFileAttributes(PChar(Arquivo));
+                    if (Atributos <> INVALID_FILE_ATTRIBUTES) and ((Atributos and FILE_ATTRIBUTE_READONLY) <> 0) then
+                        SetFileAttributes(PChar(Arquivo), Atributos and not FILE_ATTRIBUTE_READONLY);
+                    if not SysUtils.DeleteFile(Arquivo) then
+                    begin
+                        Codigo := GetLastError;
+                        raise EOSError.Create(Arquivo + ': ' + SysErrorMessage(Codigo));
+                    end;
+                end;
+                TDirectory.Delete(Pasta, True);   //apaga as subpastas e a própria pasta
+                if TDirectory.Exists(Pasta) then
+                    raise EInOutError.Create('a pasta ' + Pasta + ' não pôde ser apagada');
+            end;
+            if not SysUtils.ForceDirectories(Pasta) then
+                RaiseLastOSError;
+        except
+            on E: Exception do
+            begin
+                FalharAnexo(E.Message, E.ClassName);
+                Exit;
+            end;
         end;
-    except
-        on E: Exception do
+
+        for I := 0 to FOrigens.Count - 1 do
+            if not CopyFile(PChar(FOrigens[I]), PChar(Pasta + '\' + FNomes[I]), False) then
+            begin
+                //O motivo do Windows do primeiro XML vai só para o LOG
+                if FFaltando.Count = 0 then
+                    FErro := SysErrorMessage(GetLastError);
+                FFaltando.Add(FOrigens[I]);
+            end;
+        if FFaltando.Count > 0 then
         begin
-            //Disco cheio, sem permissão, cópia presa pelo antivírus: o .zip incompleto não fica na pasta
-            FalharAnexo(E.Message, E.ClassName);
-            SysUtils.DeleteFile(FAnexo);
+            FResultado := reXmlAusente;
             Exit;
         end;
+
+        //O .zip anterior é apagado antes de criar o novo (arquivo em uso, sem permissão: 11.20a). Só entram as
+        //cópias desta vez, pela lista sem repetidas, e não tudo o que estiver na pasta
+        try
+            if FileExists(FAnexo) and not SysUtils.DeleteFile(FAnexo) then
+                RaiseLastOSError;
+
+            Zip := TZipFile.Create;
+            try
+                Zip.Open(FAnexo, zmWrite);
+                for I := 0 to Unicos.Count - 1 do
+                    Zip.Add(Pasta + '\' + Unicos[I], Unicos[I]);
+                Zip.Close;
+            finally
+                Zip.Free;
+            end;
+        except
+            on E: Exception do
+            begin
+                //Disco cheio, sem permissão, cópia presa pelo antivírus: o .zip incompleto não fica na pasta
+                FalharAnexo(E.Message, E.ClassName);
+                SysUtils.DeleteFile(FAnexo);
+                Exit;
+            end;
+        end;
+    finally
+        Unicos.Free;
+        Vistos.Free;
     end;
 
     //Conferência depois de compactar: o .zip tem que existir e ter conteúdo (14.4b sem exceção)
@@ -6522,6 +6591,9 @@ begin
             begin
                 //11.20a (genérica para toda falha ao criar o .zip ou a pasta NFCe\ProXML) e o LOG 14.4b com o
                 //motivo técnico: mensagem e classe da exceção, ou a conferência do arquivo (sem classe)
+                //Motivo numa linha só, como o LOG da 11.20b (mensagens do Windows podem trazer quebras)
+                Erro := Trim(StringReplace(StringReplace(StringReplace(Erro, sLineBreak, ' ', [rfReplaceAll]),
+                                                         #13, ' ', [rfReplaceAll]), #10, ' ', [rfReplaceAll]));
                 if ClasseErro <> '' then
                     Erro := Erro + ' (' + ClasseErro + ')';
                 GravarLog('Enviar e-mail', 'Não foi possível criar o arquivo ' + ExtractFilePath(ParamStr(0)) +
