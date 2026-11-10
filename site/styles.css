@@ -33,11 +33,11 @@
   --link: var(--CorPrimaria);
   --link-hover: var(--CorPrimariaHover);
   --borda: var(--CorBorda);
-  --borda-reservado: var(--CorBordaCampo);
   --destaque: var(--CorPrimariaSuave);
   --aviso-fundo: var(--CorAvisoSuave);
   --aviso-barra: var(--CorAviso);
   --foco: var(--CorPrimaria);
+  --botao-atual-borda: var(--CorPrimariaPressionada);
   --rodape-fundo: var(--CorMarinho);
   --rodape-texto: #FFFFFF;
   --rodape-sec: var(--CorMarinhoTexto);
@@ -59,11 +59,11 @@
     --link: #8AB4F8;
     --link-hover: #B3CEFA;
     --borda: #363B50;
-    --borda-reservado: #7A8296;
     --destaque: #1C2B44;
     --aviso-fundo: #33270F;
     --aviso-barra: #E0A43A;
     --foco: #8AB4F8;
+    --botao-atual-borda: #8AB4F8;
     --rodape-fundo: #11141A;
     --rodape-texto: #FFFFFF;
     --rodape-sec: #C9CED6;
@@ -167,9 +167,11 @@ pre code { background: none; padding: 0; overflow-wrap: normal; }
 .menu li + li { margin-top: 0; }
 .menu a { color: var(--texto); text-decoration: none; font-weight: 500; padding: 0.35rem 0; display: inline-block; }
 .menu a:hover { color: var(--link); text-decoration: underline; }
-.menu a[aria-current="page"] { color: var(--link); text-decoration: underline; text-decoration-thickness: 2px; }
+.menu a:not(.botao)[aria-current="page"] { color: var(--link); text-decoration: underline; text-decoration-thickness: 2px; }
 .menu .botao { padding: 0.4rem 1rem; color: #FFFFFF; text-decoration: none; }
 .menu .botao:hover { color: #FFFFFF; text-decoration: none; }
+/* Botão "Baixar" na própria /download: tom pressionado como indicador visual; aria-current continua no HTML */
+.menu .botao[aria-current="page"] { background: var(--CorPrimariaPressionada); border-color: var(--botao-atual-borda); color: #FFFFFF; }
 .selo {
   display: inline-block;
   background: var(--CorPrimaria);
@@ -331,7 +333,7 @@ td code, th code { white-space: normal; }
 .sumario h2 { font-size: 1.1rem; }
 .sumario ol { margin-bottom: 0; }
 
-/* Espaço reservado para print (troca por <img> WebP na etapa 3.2) */
+/* Prints do app (WebP em img/) */
 .print { margin: 0 0 1.5rem; }
 .print img {
   display: block;
@@ -341,24 +343,6 @@ td code, th code { white-space: normal; }
   border-radius: var(--raio);
   background: #FFFFFF;
 }
-.print-reservado {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  border: 2px dashed var(--borda-reservado);
-  border-radius: var(--raio);
-  background: var(--superficie);
-  color: var(--texto-sec);
-  padding: 1rem;
-  text-align: center;
-  font-size: 0.95rem;
-}
-.print-reservado p { margin: 0; max-width: 34rem; }
-.print-reservado strong { color: var(--texto); }
-.proporcao-app { aspect-ratio: 1024 / 640; }
-.proporcao-dialogo { aspect-ratio: 640 / 480; max-width: 640px; }
-.proporcao-pdf { aspect-ratio: 1024 / 768; }
 figcaption { font-size: 0.9rem; color: var(--texto-sec); margin-top: 0.5rem; }
 .par-prints { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
 
