@@ -333,6 +333,14 @@ td code, th code { white-space: normal; }
 
 /* Espaço reservado para print (troca por <img> WebP na etapa 3.2) */
 .print { margin: 0 0 1.5rem; }
+.print img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+  background: #FFFFFF;
+}
 .print-reservado {
   display: flex;
   align-items: center;

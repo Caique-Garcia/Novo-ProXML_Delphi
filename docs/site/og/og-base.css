@@ -1,16 +1,32 @@
-/* Modelo das imagens de prévia (Open Graph), 1200x630. Cores = tokens do app (docs/ui/tokens.md). */
+/* Modelo das imagens de prévia (Open Graph), 1200x630. Cores = tokens do app (docs/ui/tokens.md).
+   O print 7 vem de site/img/07-resumo.webp (1352x761). */
 html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
 body {
+  position: relative;
   background: #171A21; /* CorMarinho */
   color: #FFFFFF;
   font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 96px;
   box-sizing: border-box;
   border-bottom: 16px solid #2067CA; /* CorPrimaria */
 }
-.logo { width: 471px; height: 96px; margin-bottom: 48px; }
-h1 { font-size: 64px; line-height: 1.15; font-weight: 600; margin: 0 0 24px; max-width: 1000px; }
-p { font-size: 32px; line-height: 1.35; color: #C9CED6; /* CorMarinhoTexto */ margin: 0; max-width: 1000px; }
+.texto { position: absolute; left: 72px; top: 64px; width: 470px; }
+.logo { width: 314px; height: 64px; margin-bottom: 40px; display: block; }
+h1 { font-size: 50px; line-height: 1.15; font-weight: 600; margin: 0 0 20px; }
+p { font-size: 26px; line-height: 1.35; color: #C9CED6; /* CorMarinhoTexto */ margin: 0; }
+/* og-image: print 7 inteiro, saindo pela direita e por baixo */
+.print {
+  position: absolute; left: 590px; top: 72px;
+  width: 811px; height: 456px; /* 1352x761 em 60% */
+  border: 1px solid #363B50; border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+/* og da reforma: só os cards IBS e CBS do print 7 (x 885-1343, y 145-222), ampliados 2x */
+.reforma .texto { width: 1056px; }
+.reforma h1 { font-size: 64px; }
+.cards {
+  position: absolute; left: 72px; top: 386px;
+  width: 916px; height: 154px; /* (1343-885)x2 por (222-145)x2 */
+  background: url("../../../site/img/07-resumo.webp") -1770px -290px / 2704px 1522px no-repeat;
+  border-radius: 8px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  image-rendering: auto;
+}
