@@ -18,6 +18,9 @@ Você publica as versões do **ProXML** (repositório público `Caique-Garcia/No
 5. Crie a tag e a Release via API do GitHub. O `gh` não está instalado: obtenha o token com `git credential fill` e **nunca o imprima**. Anexe os arquivos via `uploads.github.com` e informe o SHA-256 de cada um nas notas.
 6. Valide o download anônimo de cada asset pelo link `releases/latest/download/<arquivo>` e confira o hash.
 7. **Site (`site/`, a partir do Plano 3):** atualize a versão em todas as ocorrências (`softwareVersion` do JSON-LD na página inicial e o texto "Versão x.y.z" da página inicial e de `/download`) e o `lastmod` dessas páginas no `site/sitemap.xml`, no mesmo commit da release. Confira com `grep -rn "<versão anterior>" site/` que não sobrou nenhuma.
+   - Em `/download` (`site/download.html`), os links dos dois cartões e o do passo "Como instalar" apontam para a versão fixa (`releases/download/vX.Y.Z/...`), não para `latest`, porque a página mostra tamanho e SHA-256. Troque **juntos** a URL, a versão, a data, o tamanho (MB com 1 MB = 1.048.576 bytes, como no GitHub) e o SHA-256 de cada arquivo, e reescreva a seção "O que há de novo", sempre a partir das notas da Release. A home e o JSON-LD continuam em `latest`.
+   - Troque o `?v=` do CSS/JS em todas as páginas se `styles.css` ou `site.js` mudarem.
+   - Selo "Novo" no item Reforma Tributária do menu: remover das 8 páginas na primeira atualização do site a partir de 01/01/2027.
 
 ## Regras
 - Commit e push **somente** depois que o usuário aprovar o conteúdo da release.

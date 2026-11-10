@@ -12,7 +12,8 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/styles.css?v=20261110b">
+<link rel="stylesheet" href="/styles.css?v=20261110g">
+<script src="/site.js?v=20261110g" defer></script>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="ProXML">
@@ -66,13 +67,15 @@
         <img src="/img/proxml-logo-claro.svg" width="157" height="32" alt="ProXML, página inicial">
       </picture>
     </a>
-    <nav aria-label="Principal">
-      <ul class="menu">
+    <nav class="nav-principal" aria-label="Principal">
+      <a class="botao botao-primario baixar-movel" href="/download">Baixar</a>
+      <button type="button" class="menu-botao" popovertarget="menu-principal">Menu</button>
+      <ul class="menu" id="menu-principal" popover>
         <li><a href="/tutorial">Tutorial</a></li>
         <li><a href="/gerar-danfe-xml">Gerar DANFE</a></li>
-        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span></a></li>
+        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span><!-- Selo "Novo": remover a partir de 01/01/2027 --></a></li>
         <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
-        <li><a class="botao botao-primario" href="/download">Baixar</a></li>
+        <li class="menu-baixar"><a class="botao botao-primario" href="/download">Baixar</a></li>
       </ul>
     </nav>
   </div>
@@ -84,14 +87,14 @@
       <h1>Leitor de XML de NF-e e NFC-e grátis para Windows</h1>
       <p class="lead">O ProXML lê uma pasta inteira de XMLs de NF-e (modelo 55) e NFC-e (modelo 65), soma os valores das notas autorizadas, incluindo o IBS e a CBS da Reforma Tributária, e gera DANFE em PDF, relatórios e CSV.</p>
       <div class="botoes">
-        <a class="botao botao-primario" href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML-Setup.exe">Baixar o ProXML <small>Instalador para Windows (recomendado)</small></a>
+        <a class="botao botao-primario" href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML-Setup.exe" data-so-windows>Baixar o ProXML <small>Instalador para Windows (recomendado)</small></a>
         <a class="botao botao-secundario" href="/download">Outras opções de download</a>
       </div>
       <p class="versao">Versão 1.2.0 · Windows 10 ou 11 · Grátis e sem anúncios</p>
       <p class="pequeno texto-sec">O Windows pode mostrar um aviso ao abrir o instalador. <a href="/download#smartscreen">Veja como passar pelo aviso do SmartScreen</a>.</p>
     </div>
     <figure class="print">
-      <img src="/img/07-resumo.webp" width="1352" height="761" alt="Tela Resumo do ProXML depois de processar a pasta de exemplo: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, 20 notas autorizadas, 0 ignoradas, 0 com erro e os Detalhes da leitura, com o filtro em Todos." fetchpriority="high" decoding="async">
+      <a class="print-link" href="/img/07-resumo.webp"><img src="/img/07-resumo.webp" width="1352" height="761" alt="Tela Resumo do ProXML depois de processar a pasta de exemplo: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, 20 notas autorizadas, 0 ignoradas, 0 com erro e os Detalhes da leitura, com o filtro em Todos." fetchpriority="high" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
   </div>
 </section>
@@ -101,7 +104,6 @@
     <p>Reforma Tributária: o ProXML já soma IBS e CBS das suas notas</p>
     <div class="links">
       <a href="/reforma-tributaria">Entenda o IBS e a CBS</a>
-      <a href="/download">Baixar o ProXML</a>
     </div>
   </div>
 </section>
@@ -110,40 +112,50 @@
   <div class="container">
     <h2 id="titulo-funcionalidades">O que o ProXML faz com os seus XMLs</h2>
     <p class="lead">Você escolhe uma pasta, clica em Processar e vê os totais de todas as notas em segundos.</p>
+    <!-- Ícones: Lucide (lucide.dev), licença ISC, os mesmos do app (docs/ui/icones) -->
     <div class="grade">
       <div class="cartao">
+        <svg class="icone" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" /></svg>
         <h3>NF-e e NFC-e na mesma pasta</h3>
         <p>Lê XMLs de NF-e (55) e de NFC-e (65) juntos. Arquivos de outros modelos são ignorados e aparecem nos Detalhes da leitura.</p>
       </div>
       <div class="cartao">
+        <svg class="icone" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" /> <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" /> <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg>
         <h3>Filtro por modelo</h3>
         <p>Escolha <strong>Todos</strong>, <strong>NF-e 55</strong> ou <strong>NFC-e 65</strong>. O filtro vale para os cards, a grade, o CSV, os dois relatórios e o e-mail.</p>
       </div>
       <div class="cartao">
+        <svg class="icone" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" /> <path d="m16 9-5.5 5.5L8 12" /></svg>
         <h3>Só notas autorizadas nos totais</h3>
         <p>Entram nos totais as notas com <code>cStat</code> 100 (autorizado o uso) ou 150 (autorizado fora de prazo). Notas não autorizadas e arquivos que não são Nota Fiscal ficam de fora e são listados com o motivo.</p>
       </div>
       <div class="cartao">
+        <svg class="icone" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="19" x2="5" y1="5" y2="19" /> <circle cx="6.5" cy="6.5" r="2.5" /> <circle cx="17.5" cy="17.5" r="2.5" /></svg>
         <h3>Totais de ICMS, IBS e CBS</h3>
         <p>Cinco cards: Valor Total, Base ICMS, ICMS, IBS e CBS, no formato R$ 1.234,56. Quando o XML tem o grupo <code>IBSCBSTot</code>, o ProXML lê Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS. <a href="/ibs-cbs">Veja onde ficam o IBS e a CBS no XML</a>.</p>
       </div>
       <div class="cartao">
+        <svg class="icone" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /></svg>
         <h3>DANFE e DANFCe em PDF</h3>
         <p>Gere o PDF do DANFE da NF-e (retrato ou paisagem) e do DANFCe A4 da NFC-e direto do XML. <a href="/gerar-danfe-xml">Veja como gerar o DANFE a partir do XML</a>.</p>
       </div>
       <div class="cartao">
+        <svg class="icone" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <line x1="3" x2="21" y1="9" y2="9" /> <line x1="3" x2="21" y1="15" y2="15" /> <line x1="9" x2="9" y1="9" y2="21" /> <line x1="15" x2="15" y1="9" y2="21" /></svg>
         <h3>Relatórios e CSV para o Excel</h3>
         <p>Relatório de Notas e Relatório IBS/CBS em A4, com total e período. O CSV abre no Excel em português: separado por ponto e vírgula, com vírgula decimal e acentos corretos.</p>
       </div>
       <div class="cartao">
+        <svg class="icone" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /></svg>
         <h3>Envio dos XMLs por e-mail</h3>
         <p>Envie os XMLs por e-mail num arquivo .zip criado pelo próprio ProXML, sem precisar do WinRAR. Antes, use <strong>Testar conexão</strong> para conferir o servidor de e-mail.</p>
       </div>
       <div class="cartao">
+        <svg class="icone" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <path d="M12 18v-6" /> <path d="m9 15 3 3 3-3" /></svg>
         <h3>Instala sem administrador</h3>
         <p>O instalador coloca o ProXML só no seu usuário, sem pedir senha de administrador. Se preferir, use a versão portátil (.zip): é só extrair e abrir.</p>
       </div>
       <div class="cartao">
+        <svg class="icone" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 16h.01" /> <path d="M2.212 11.577a2 2 0 0 0-.212.896V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5.527a2 2 0 0 0-.212-.896L18.55 5.11A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /> <path d="M21.946 12.013H2.054" /> <path d="M6 16h.01" /></svg>
         <h3>Seus XMLs ficam no seu computador</h3>
         <p>A leitura, os totais, o DANFE e os relatórios funcionam sem internet. Só o envio por e-mail usa a conexão, e só quando você clica em <strong>Enviar</strong>.</p>
       </div>
@@ -153,14 +165,23 @@
 
 <section class="secao secao-alt" aria-labelledby="titulo-telas">
   <div class="container">
-    <h2 id="titulo-telas">Notas e filtro por modelo</h2>
+    <h2 id="titulo-telas">Notas, DANFE e relatórios</h2>
     <p class="prosa">Na tela Notas, você busca por número ou chave, ordena pelas colunas e usa os botões <strong>Copiar chave</strong>, <strong>Gerar DANFE</strong> e <strong>Exportar CSV</strong>. O seletor de modelo recalcula os cards na hora.</p>
     <div class="par-prints">
       <figure class="print">
-      <img src="/img/08-notas.webp" width="1352" height="761" alt="Tela Notas do ProXML com 20 notas na grade (Nº, Modelo, Data, Chave, Valor, Base ICMS, ICMS, IBS e CBS), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/08-notas.webp"><img src="/img/08-notas.webp" width="1352" height="761" alt="Tela Notas do ProXML com 20 notas na grade (Nº, Modelo, Data, Chave, Valor, Base ICMS, ICMS, IBS e CBS), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       <figure class="print">
-      <img src="/img/09-filtro-modelo.webp" width="1352" height="761" alt="Tela Notas do ProXML com o filtro de modelo em NF-e 55: a grade mostra só as 12 NF-e e os cards de totais ficam recalculados para elas." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/09-filtro-modelo.webp"><img src="/img/09-filtro-modelo.webp" width="1352" height="761" alt="Tela Notas do ProXML com o filtro de modelo em NF-e 55: a grade mostra só as 12 NF-e e os cards de totais ficam recalculados para elas." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
+    </figure>
+    </div>
+    <p class="prosa">Da nota selecionada, o ProXML gera o DANFE da NF-e ou o DANFCe A4 da NFC-e em PDF. Na tela Relatórios, o Relatório de Notas e o Relatório IBS/CBS saem em A4, com o período e a linha de total. <a href="/gerar-danfe-xml">Veja como gerar o DANFE a partir do XML</a>.</p>
+    <div class="par-prints">
+      <figure class="print print-cortado">
+      <a class="print-link" href="/img/12-danfe-nfe.webp"><img src="/img/12-danfe-nfe.webp" width="1240" height="1754" alt="Parte de cima do DANFE retrato em PDF de uma NF-e de exemplo gerado pelo ProXML, com emitente, chave de acesso e destinatário fictícios." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
+    </figure>
+      <figure class="print">
+      <a class="print-link" href="/img/13-relatorio-notas.webp"><img src="/img/13-relatorio-notas.webp" width="1040" height="663" alt="Relatório de Notas do ProXML na pré-visualização, com o período, o modelo Todos, a pasta de origem e as colunas Nº, Mod., Data, Chave, Valor, Base ICMS e ICMS." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
     </div>
   </div>
@@ -176,13 +197,7 @@
       <li>Confira os totais nos cards e use as telas Notas, Relatórios e Enviar.</li>
     </ol>
     <p><a href="/tutorial">Veja o tutorial completo, passo a passo</a>.</p>
-    <div class="caixa caixa-aviso prosa">
-      <p class="caixa-titulo">Antes de conferir os totais</p>
-      <ul>
-        <li>Nas NF-e (55), as notas de entrada e de saída são somadas juntas. Para conferir só as vendas, processe uma pasta só com as notas de saída.</li>
-        <li>Nota cancelada continua somada, porque o cancelamento é um evento separado e o XML da nota continua autorizado. Retire da pasta os XMLs das notas canceladas antes de processar.</li>
-      </ul>
-    </div>
+    <p class="prosa">Antes de conferir os totais, veja <a href="/tutorial#totais">como o ProXML soma as notas</a>.</p>
   </div>
 </section>
 
@@ -225,7 +240,7 @@
       </div>
     </div>
     <div class="rodape-fim">
-      <p>Desenvolvido por Caique Garcia.</p>
+      <p>© 2026 ProXML · Desenvolvido por Caique Garcia.</p>
     </div>
   </div>
 </footer>

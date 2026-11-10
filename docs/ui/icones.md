@@ -87,3 +87,19 @@
 | `procurar.svg`, `Fechar.svg`, `linkedin.svg` | não conferido (os SVGs do `.dfm` estão embutidos no `Svg.Source`) | não entram no visual novo; o olho da senha (`SkSvg5`) passa a ser `eye`/`eye-off` |
 
 A origem e a licença dos SVGs atuais não estão documentadas no repositório (o formato sugere bancos de ícones que exigem atribuição). Usar só Lucide resolve essa pendência. O logo (`src/img/Logo`) não muda.
+
+## Site (`site/`)
+
+Os cards de funcionalidades da página inicial (`site/index.html`) usam os mesmos ícones Lucide (`lucide-static` v1.59.0, licença ISC), colocados como SVG inline com `stroke="currentColor"`, 24 px, cor `--link` e `aria-hidden="true"`. Não há arquivo SVG separado para o site.
+
+| Card | Ícone Lucide |
+|------|--------------|
+| NF-e e NFC-e na mesma pasta | `folder-open` |
+| Filtro por modelo | `layers` |
+| Só notas autorizadas nos totais | `circle-check` |
+| Totais de ICMS, IBS e CBS | `percent` |
+| DANFE e DANFCe em PDF | `file-text` |
+| Relatórios e CSV para o Excel | `sheet` |
+| Envio dos XMLs por e-mail | `mail` |
+| Instala sem administrador | `file-down` |
+| Seus XMLs ficam no seu computador | `hard-drive` (não existe em `docs/ui/icones`, só no site) |

@@ -11,7 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/styles.css?v=20261110b">
+<link rel="stylesheet" href="/styles.css?v=20261110g">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="ProXML">
@@ -59,13 +59,15 @@
         <img src="/img/proxml-logo-claro.svg" width="157" height="32" alt="ProXML, página inicial">
       </picture>
     </a>
-    <nav aria-label="Principal">
-      <ul class="menu">
+    <nav class="nav-principal" aria-label="Principal">
+      <a class="botao botao-primario baixar-movel" href="/download">Baixar</a>
+      <button type="button" class="menu-botao" popovertarget="menu-principal">Menu</button>
+      <ul class="menu" id="menu-principal" popover>
         <li><a href="/tutorial" aria-current="page">Tutorial</a></li>
         <li><a href="/gerar-danfe-xml">Gerar DANFE</a></li>
-        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span></a></li>
+        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span><!-- Selo "Novo": remover a partir de 01/01/2027 --></a></li>
         <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
-        <li><a class="botao botao-primario" href="/download">Baixar</a></li>
+        <li class="menu-baixar"><a class="botao botao-primario" href="/download">Baixar</a></li>
       </ul>
     </nav>
   </div>
@@ -110,12 +112,13 @@
       </div>
       <div class="par-prints">
         <figure class="print">
-      <img src="/img/03-instalador.webp" width="595" height="462" alt="Tela “Selecione o Local de Destino” do instalador do ProXML, com a pasta C:\Users\Usuario\AppData\Local\ProXML e os botões Procurar…, Avançar e Cancelar." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/03-instalador.webp"><img src="/img/03-instalador.webp" width="595" height="462" alt="Tela “Selecione o Local de Destino” do instalador do ProXML, com a pasta C:\Users\Usuario\AppData\Local\ProXML e os botões Procurar…, Avançar e Cancelar." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
         <figure class="print">
-      <img src="/img/04-instalador-atalhos.webp" width="594" height="460" alt="Tela “Selecionar Tarefas Adicionais” do instalador do ProXML, com a opção “Criar um atalho na área de trabalho” marcada e os botões Voltar, Avançar e Cancelar." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/04-instalador-atalhos.webp"><img src="/img/04-instalador-atalhos.webp" width="594" height="460" alt="Tela “Selecionar Tarefas Adicionais” do instalador do ProXML, com a opção “Criar um atalho na área de trabalho” marcada e os botões Voltar, Avançar e Cancelar." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       </div>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
 
     <li class="passo" id="abrir">
@@ -125,8 +128,9 @@
         <p>A janela pode ser redimensionada e maximizada. O ProXML lembra o tamanho e a posição da janela para a próxima vez.</p>
       </div>
       <figure class="print">
-      <img src="/img/05-tela-inicial.webp" width="1352" height="761" alt="Janela do ProXML recém-aberta, sem pasta selecionada: menu lateral com Resumo, Notas, Relatórios, Enviar e Configurações, cards zerados e a mensagem “Nenhuma pasta processada” com o botão Selecionar pasta…." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/05-tela-inicial.webp"><img src="/img/05-tela-inicial.webp" width="1352" height="761" alt="Janela do ProXML recém-aberta, sem pasta selecionada: menu lateral com Resumo, Notas, Relatórios, Enviar e Configurações, cards zerados e a mensagem “Nenhuma pasta processada” com o botão Selecionar pasta…." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
 
     <li class="passo" id="selecionar-pasta">
@@ -136,8 +140,9 @@
         <p>O ProXML lembra a última pasta usada. Dica: prefira uma pasta com caminho curto, como <code>C:\XMLs</code>. XMLs em caminhos com mais de 259 caracteres (pasta + nome do arquivo) não são lidos.</p>
       </div>
       <figure class="print">
-      <img src="/img/06-selecionar-pasta.webp" width="1352" height="761" alt="Diálogo do Windows “Selecione a pasta com os XMLs”, em tema escuro, aberto sobre o ProXML na pasta C:\XMLs\Empresa Exemplo, com a subpasta 2026-11 e o botão Selecionar pasta." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/06-selecionar-pasta.webp"><img src="/img/06-selecionar-pasta.webp" width="1352" height="761" alt="Diálogo do Windows “Selecione a pasta com os XMLs”, em tema escuro, aberto sobre o ProXML na pasta C:\XMLs\Empresa Exemplo, com a subpasta 2026-11 e o botão Selecionar pasta." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
 
     <li class="passo" id="processar">
@@ -146,6 +151,7 @@
         <p>Clique em <strong>Processar</strong> (ou aperte <kbd>F5</kbd>). A leitura acontece em segundo plano: a janela continua respondendo e mostra o progresso em “X de N arquivos”. Para parar, clique em <strong>Cancelar</strong> ou aperte <kbd>Esc</kbd>.</p>
         <p>Só as notas autorizadas entram nos totais: as que têm <code>cStat</code> 100 (autorizado o uso) ou 150 (autorizado fora de prazo) no protocolo de autorização. Notas não autorizadas (por exemplo, denegadas), XMLs de outros modelos e arquivos que não são Nota Fiscal ficam de fora e aparecem nos Detalhes da leitura com o motivo.</p>
       </div>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
 
     <li class="passo" id="totais">
@@ -156,7 +162,7 @@
         <p>Se os totais incluírem notas de homologação (ambiente de testes, sem valor fiscal) ou NF-e de entrada, o Resumo mostra um aviso para você conferir se a pasta é a certa.</p>
       </div>
       <figure class="print">
-      <img src="/img/07-resumo.webp" width="1352" height="761" alt="Tela Resumo do ProXML depois de processar a pasta de exemplo: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, 20 notas autorizadas, 0 ignoradas, 0 com erro e os Detalhes da leitura, com o filtro em Todos." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/07-resumo.webp"><img src="/img/07-resumo.webp" width="1352" height="761" alt="Tela Resumo do ProXML depois de processar a pasta de exemplo: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, 20 notas autorizadas, 0 ignoradas, 0 com erro e os Detalhes da leitura, com o filtro em Todos." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       <div class="caixa caixa-aviso prosa">
         <p class="caixa-titulo">Atenção ao conferir os totais</p>
@@ -165,6 +171,7 @@
           <li><strong>Nota cancelada continua somada.</strong> O cancelamento é um evento separado e o XML da nota continua autorizado. Retire da pasta os XMLs das notas canceladas antes de processar.</li>
         </ul>
       </div>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
 
     <li class="passo" id="filtro-modelo">
@@ -173,8 +180,9 @@
         <p>Na barra de cima, escolha <strong>Todos</strong>, <strong>NF-e 55</strong> ou <strong>NFC-e 65</strong>. Os cards, a grade de notas, o CSV, os relatórios e o e-mail mudam na hora, sem processar de novo.</p>
       </div>
       <figure class="print">
-      <img src="/img/09-filtro-modelo.webp" width="1352" height="761" alt="Tela Notas do ProXML com o filtro de modelo em NF-e 55: a grade mostra só as 12 NF-e e os cards de totais ficam recalculados para elas." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/09-filtro-modelo.webp"><img src="/img/09-filtro-modelo.webp" width="1352" height="761" alt="Tela Notas do ProXML com o filtro de modelo em NF-e 55: a grade mostra só as 12 NF-e e os cards de totais ficam recalculados para elas." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
 
     <li class="passo" id="notas">
@@ -191,8 +199,9 @@
         <p>O botão direito do mouse na grade também tem Copiar chave e Gerar DANFE.</p>
       </div>
       <figure class="print">
-      <img src="/img/08-notas.webp" width="1352" height="761" alt="Tela Notas do ProXML com 20 notas na grade (Nº, Modelo, Data, Chave, Valor, Base ICMS, ICMS, IBS e CBS), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/08-notas.webp"><img src="/img/08-notas.webp" width="1352" height="761" alt="Tela Notas do ProXML com 20 notas na grade (Nº, Modelo, Data, Chave, Valor, Base ICMS, ICMS, IBS e CBS), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
 
     <li class="passo" id="relatorios">
@@ -206,16 +215,17 @@
         <p>Os relatórios saem em A4, com o período das notas, o modelo do filtro, a pasta de origem, a linha de total e o rodapé com a data e a página. Eles usam as notas do modelo selecionado na barra de cima; a busca da tela Notas não é aplicada.</p>
       </div>
       <figure class="print">
-      <img src="/img/10-relatorios.webp" width="1352" height="761" alt="Tela Relatórios do ProXML com as opções Relatório de Notas e Relatório IBS/CBS, cada uma com o botão Gerar relatório, e o indicador Modelo: Todos · 20 notas." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/10-relatorios.webp"><img src="/img/10-relatorios.webp" width="1352" height="761" alt="Tela Relatórios do ProXML com as opções Relatório de Notas e Relatório IBS/CBS, cada uma com o botão Gerar relatório, e o indicador Modelo: Todos · 20 notas." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       <div class="par-prints">
         <figure class="print">
-      <img src="/img/13-relatorio-notas.webp" width="1040" height="663" alt="Relatório de Notas do ProXML na pré-visualização, com o período, o modelo Todos, a pasta de origem e as colunas Nº, Mod., Data, Chave, Valor, Base ICMS e ICMS." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/13-relatorio-notas.webp"><img src="/img/13-relatorio-notas.webp" width="1040" height="663" alt="Relatório de Notas do ProXML na pré-visualização, com o período, o modelo Todos, a pasta de origem e as colunas Nº, Mod., Data, Chave, Valor, Base ICMS e ICMS." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
         <figure class="print">
-      <img src="/img/14-relatorio-ibscbs.webp" width="1040" height="663" alt="Relatório IBS/CBS do ProXML na pré-visualização, com o período, o modelo Todos e as colunas Nº, Modelo, Data, Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/14-relatorio-ibscbs.webp"><img src="/img/14-relatorio-ibscbs.webp" width="1040" height="663" alt="Relatório IBS/CBS do ProXML na pré-visualização, com o período, o modelo Todos e as colunas Nº, Modelo, Data, Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       </div>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
 
     <li class="passo" id="configurar-email">
@@ -229,8 +239,9 @@
         <p>A senha fica gravada sem criptografia no arquivo <code>db\notas.db</code>, na pasta do ProXML. Não compartilhe esse arquivo depois de configurado.</p>
       </div>
       <figure class="print">
-      <img src="/img/15-configuracoes.webp" width="1352" height="761" alt="Tela Configurações do ProXML com o servidor SMTP smtp.exemplo.com.br, a porta 587 com TLS marcado, o e-mail contato@exemplo.com.br, a senha oculta, a mensagem padrão e os botões Testar conexão e Salvar." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/15-configuracoes.webp"><img src="/img/15-configuracoes.webp" width="1352" height="761" alt="Tela Configurações do ProXML com o servidor SMTP smtp.exemplo.com.br, a porta 587 com TLS marcado, o e-mail contato@exemplo.com.br, a senha oculta, a mensagem padrão e os botões Testar conexão e Salvar." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
 
     <li class="passo" id="enviar">
@@ -240,8 +251,9 @@
         <p>Os XMLs só são compactados quando você clica em Enviar, num arquivo <code>NFCe_ProXML.zip</code> criado pelo próprio ProXML (não precisa do WinRAR). O envio acontece em segundo plano. Se não for possível montar o anexo (por exemplo, arquivo em uso ou disco cheio), aparece uma mensagem e o e-mail não é enviado.</p>
       </div>
       <figure class="print">
-      <img src="/img/16-enviar.webp" width="1352" height="761" alt="Tela Enviar por e-mail do ProXML com o anexo de 20 XMLs (.zip), o destinatário contato@exemplo.com.br, uma mensagem de exemplo e o botão Enviar." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/16-enviar.webp"><img src="/img/16-enviar.webp" width="1352" height="761" alt="Tela Enviar por e-mail do ProXML com o anexo de 20 XMLs (.zip), o destinatário contato@exemplo.com.br, uma mensagem de exemplo e o botão Enviar." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
   </ol>
 
@@ -324,7 +336,7 @@
       </div>
     </div>
     <div class="rodape-fim">
-      <p>Desenvolvido por Caique Garcia.</p>
+      <p>© 2026 ProXML · Desenvolvido por Caique Garcia.</p>
     </div>
   </div>
 </footer>

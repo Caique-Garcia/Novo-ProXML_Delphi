@@ -46,6 +46,7 @@
   --mono: Consolas, "Cascadia Mono", "SFMono-Regular", Menlo, monospace;
   --largura: 1100px;
   --raio: 6px;
+  --fundo-secao: var(--fundo); /* fundo da seção atual (degradês); .secao-alt troca */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -86,6 +87,7 @@ body {
 }
 
 img, svg { max-width: 100%; height: auto; }
+button { font: inherit; }
 
 a { color: var(--link); text-underline-offset: 0.15em; }
 a:hover { color: var(--link-hover); }
@@ -128,6 +130,17 @@ pre code { background: none; padding: 0; overflow-wrap: normal; }
 .container { max-width: var(--largura); margin: 0 auto; padding: 0 1rem; }
 .texto-sec { color: var(--texto-sec); }
 .pequeno { font-size: 0.9rem; }
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 /* Pular para o conteúdo */
 .pular {
@@ -159,16 +172,19 @@ pre code { background: none; padding: 0; overflow-wrap: normal; }
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.25rem 1rem;
+  gap: 0.5rem 1rem; /* linha maior: o contorno de foco não invade a linha de baixo se o menu quebrar */
   list-style: none;
   margin: 0;
   padding: 0;
 }
 .menu li + li { margin-top: 0; }
-.menu a { color: var(--texto); text-decoration: none; font-weight: 500; padding: 0.35rem 0; display: inline-block; }
+/* Área de toque >= 44px: padding maior, compensado com margem negativa para o topo não crescer */
+.menu a { color: var(--texto); text-decoration: none; font-weight: 500; padding: 0.6rem 0; margin: -0.25rem 0; display: inline-block; }
 .menu a:hover { color: var(--link); text-decoration: underline; }
-.menu a:not(.botao)[aria-current="page"] { color: var(--link); text-decoration: underline; text-decoration-thickness: 2px; }
-.menu .botao { padding: 0.4rem 1rem; color: #FFFFFF; text-decoration: none; }
+.menu a:not(.botao)[aria-current="page"], .menu a:not(.botao)[aria-current="true"] { color: var(--link); text-decoration: underline; text-decoration-thickness: 2px; }
+.menu .botao { padding: 0.4rem 1rem; margin: 0; position: relative; color: #FFFFFF; text-decoration: none; }
+/* O botão mantém o tamanho visível; a área de toque cresce 4px em cima e embaixo */
+.menu .botao::after { content: ""; position: absolute; inset: calc(-0.25rem - 2px) -2px; } /* -2px: a partir da borda */
 .menu .botao:hover { color: #FFFFFF; text-decoration: none; }
 /* Botão "Baixar" na própria /download: tom pressionado como indicador visual; aria-current continua no HTML */
 .menu .botao[aria-current="page"] { background: var(--CorPrimariaPressionada); border-color: var(--botao-atual-borda); color: #FFFFFF; }
@@ -185,6 +201,90 @@ pre code { background: none; padding: 0; overflow-wrap: normal; }
   margin-left: 0.2em;
 }
 
+/* Menu recolhível no celular, sem JavaScript: botão com popovertarget abre a lista (popover).
+   Só entra em ação se o navegador tiver popover; sem suporte, ou em tela larga, o menu fica como sempre.
+   O "Baixar" aparece uma vez só: fora da lista no celular (.baixar-movel), dentro dela na tela larga. */
+.topo .baixar-movel, .menu-botao { display: none; }
+@supports selector(:popover-open) {
+  /* Tela larga: a lista com popover fica no fluxo normal, como um menu comum */
+  .menu[popover] {
+    position: static;
+    inset: auto;
+    width: auto;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    overflow: visible;
+    display: flex;
+  }
+  @media (max-width: 880px) {
+    .topo-int { flex-wrap: nowrap; gap: 0.5rem; }
+    /* A logo encolhe se faltar espaço (ex.: 320 px), em vez de empurrar os botões para fora */
+    .marca { flex: 0 1 157px; margin-right: auto; min-width: 0; }
+    .marca img { width: 100%; height: auto; }
+    .nav-principal { display: flex; align-items: center; gap: 0.5rem; flex: none; }
+    .topo .baixar-movel, .menu-botao {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.75rem;
+      min-width: 2.75rem;
+    }
+    .topo .baixar-movel { padding: 0.4rem 0.9rem; }
+    .topo .baixar-movel[aria-current="page"] { background: var(--CorPrimariaPressionada); border-color: var(--botao-atual-borda); }
+    .menu-botao {
+      gap: 0.45rem;
+      padding: 0.4rem 0.75rem;
+      font: inherit;
+      font-weight: 600;
+      color: var(--texto);
+      background: var(--superficie);
+      border: 2px solid var(--CorBordaCampo);
+      border-radius: var(--raio);
+      cursor: pointer;
+    }
+    .menu-botao:hover { border-color: var(--link); color: var(--link); }
+    /* Ícone de três traços desenhado em CSS */
+    .menu-botao::before {
+      content: "";
+      width: 1.1rem;
+      height: 2px;
+      background: currentColor;
+      box-shadow: 0 -0.35rem 0 currentColor, 0 0.35rem 0 currentColor;
+    }
+    .menu[popover]:not(:popover-open) { display: none; }
+    .menu[popover]:popover-open {
+      /* Na camada do topo, "absolute" conta a partir do topo da página: a lista abre logo abaixo do cabeçalho */
+      position: absolute;
+      inset: calc(4.25rem + 1px) 1rem auto auto;
+      width: min(20rem, calc(100vw - 2rem));
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 0.35rem 0;
+      background: var(--superficie);
+      color: var(--texto);
+      border: 1px solid var(--borda);
+      border-radius: var(--raio);
+      box-shadow: 0 6px 24px rgb(23 26 33 / 0.25); /* CorMarinho */
+    }
+    .menu[popover] li + li { border-top: 1px solid var(--borda); }
+    .menu[popover] a { display: flex; align-items: center; min-height: 2.75rem; padding: 0.5rem 1rem; margin: 0; }
+    .menu[popover] a:focus-visible { outline-offset: -3px; }
+    /* Menu aberto: o botão fica com a cor de link, como no hover */
+    .nav-principal:has(.menu:popover-open) .menu-botao { border-color: var(--link); color: var(--link); }
+    .menu-baixar { display: none; }
+  }
+}
+@media (prefers-color-scheme: dark) {
+  /* No fundo escuro, a borda fraca some: o menu aberto usa a borda forte (o aviso também, mais abaixo) */
+  .menu[popover]:popover-open { border-color: var(--CorBordaCampo); }
+}
+
 /* Botões */
 .botao {
   display: inline-block;
@@ -195,6 +295,7 @@ pre code { background: none; padding: 0; overflow-wrap: normal; }
   border: 2px solid var(--CorPrimaria);
   line-height: 1.3;
   text-align: center;
+  cursor: pointer;
 }
 .botao-primario { background: var(--CorPrimaria); color: #FFFFFF; }
 .botao-primario:hover { background: var(--CorPrimariaHover); border-color: var(--CorPrimariaHover); color: #FFFFFF; }
@@ -213,8 +314,8 @@ pre code { background: none; padding: 0; overflow-wrap: normal; }
 
 /* Seções */
 main { display: block; }
-.secao { padding: 3rem 0; }
-.secao-alt { background: var(--fundo-alt); }
+.secao { padding: 3rem 0; --fundo-secao: var(--fundo); }
+.secao-alt { background: var(--fundo-alt); --fundo-secao: var(--fundo-alt); }
 .cabeca-pagina { padding: 1.5rem 0 1rem; }
 .lead { font-size: 1.15rem; color: var(--texto-sec); max-width: 46rem; }
 .prosa { max-width: 46rem; }
@@ -248,6 +349,7 @@ main { display: block; }
   padding: 1.25rem;
 }
 .cartao h3 { margin-bottom: 0.4rem; }
+.icone { display: block; width: 24px; height: 24px; color: var(--link); margin-bottom: 0.6rem; }
 .cartao p:last-child, .cartao ul:last-child { margin-bottom: 0; }
 .cartao-destaque { border: 2px solid var(--CorPrimaria); }
 .etiqueta {
@@ -302,6 +404,10 @@ main { display: block; }
 }
 .resumo-passos { padding-left: 1.4rem; }
 
+.voltar-sumario { font-size: 0.9rem; margin: 1rem 0 0; }
+.voltar-sumario a { color: var(--texto-sec); }
+.voltar-sumario a:hover { color: var(--link); }
+
 /* Tabelas */
 .tabela-rolagem { overflow-x: auto; margin-bottom: 1rem; }
 table { border-collapse: collapse; width: 100%; background: var(--superficie); }
@@ -317,13 +423,28 @@ td code, th code { white-space: normal; }
   border-radius: var(--raio);
   margin-bottom: 0.75rem;
 }
+/* O triângulo é desenhado em CSS dentro do padding, para a linha do summary aberto ir de borda a borda */
 .perguntas summary {
+  display: block;
+  position: relative;
   cursor: pointer;
-  padding: 0.9rem 1.1rem;
-  list-style-position: outside;
-  margin-left: 1rem;
+  padding: 0.9rem 1.1rem 0.9rem 2.6rem;
+  list-style: none;
 }
-.perguntas summary h3 { display: inline; font-size: 1.05rem; margin: 0; }
+.perguntas summary::-webkit-details-marker { display: none; }
+.perguntas summary::before {
+  content: "";
+  position: absolute;
+  left: 1.15rem;
+  top: calc(0.9rem + (1.05rem * 1.25 - 0.7rem) / 2);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0.35rem 0 0.35rem 0.55rem;
+  border-color: transparent transparent transparent currentColor;
+}
+.perguntas details[open] > summary::before { transform: rotate(90deg); }
+.perguntas summary h3 { display: block; font-size: 1.05rem; line-height: 1.25; margin: 0; }
 .perguntas details[open] summary { border-bottom: 1px solid var(--borda); }
 .resposta { padding: 1rem 1.1rem 0.25rem; }
 .perguntas details:target { border-color: var(--CorPrimaria); }
@@ -343,10 +464,65 @@ td code, th code { white-space: normal; }
   border-radius: var(--raio);
   background: #FFFFFF;
 }
+/* Cada print é um link para a imagem inteira (mesma aba) */
+.print-link { display: block; position: relative; cursor: zoom-in; border-radius: var(--raio); }
+.print-link:hover img { border-color: var(--link); }
+.print-selo {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  bottom: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--CorPrimaria);
+  color: #FFFFFF;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  border: 1.5px solid #FFFFFF;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
+  pointer-events: none;
+}
+/* Lupa: círculo + cabo, em CSS */
+.print-selo::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  box-shadow: 0.3rem 0.3rem 0 -0.12rem currentColor;
+}
+/* Print alto (ex.: DANFE retrato) mostrado só na parte de cima, na proporção dos relatórios (1040×663),
+   com degradê para a cor de fundo da seção (--fundo-secao). O link abre a imagem inteira. */
+.print-cortado img { aspect-ratio: 1040 / 663; object-fit: cover; object-position: top; }
+.print-cortado .print-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 35%;
+  background: linear-gradient(to bottom, transparent, var(--fundo-secao));
+  border-radius: 0 0 var(--raio) var(--raio);
+  pointer-events: none;
+}
+.print-link:hover .print-selo, .print-link:focus-visible .print-selo { background: var(--CorPrimariaPressionada); }
 figcaption { font-size: 0.9rem; color: var(--texto-sec); margin-top: 0.5rem; }
 .par-prints { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
 
 /* Download */
+.arquivo-info { margin: 0 0 1rem; font-size: 0.9rem; }
+.arquivo-info div { display: flex; flex-wrap: wrap; gap: 0 0.4rem; }
+.arquivo-info div + div { margin-top: 0.2rem; }
+.arquivo-info dt { font-weight: 600; }
+.arquivo-info dd { margin: 0; min-width: 0; }
+/* Hash: quebra em qualquer ponto no celular; um toque seleciona o hash inteiro para copiar */
+.hash { word-break: break-all; overflow-wrap: anywhere; -webkit-user-select: all; user-select: all; }
+/* Mensagem depois do clique em baixar (site.js, só no computador) */
+.aviso-download { margin: 0 0 1rem; font-size: 0.95rem; }
 .downloads { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); margin-bottom: 1rem; }
 
 /* Rodapé */
@@ -357,9 +533,38 @@ figcaption { font-size: 0.9rem; color: var(--texto-sec); margin-top: 0.5rem; }
 .rodape-grade { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
 .rodape h2 { font-size: 1rem; margin-bottom: 0.5rem; color: var(--rodape-texto); }
 .rodape ul { list-style: none; padding: 0; margin: 0; }
+@media (max-width: 880px) {
+  .rodape li + li { margin-top: 0; }
+  .rodape li a { display: inline-flex; align-items: center; min-height: 2.75rem; }
+}
 .rodape p { color: var(--rodape-sec); }
 .rodape-fim { border-top: 1px solid #363B50; margin-top: 2rem; padding-top: 1rem; font-size: 0.9rem; color: var(--rodape-sec); }
 .rodape-fim p { margin: 0; }
+
+/* Aviso "O ProXML é um programa para Windows" (site.js, só no celular/tablet) */
+.aviso-windows {
+  width: min(28rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  padding: 0;
+  background: var(--superficie);
+  color: var(--texto);
+  border: 1px solid var(--borda);
+  border-radius: var(--raio);
+}
+.aviso-windows::backdrop { background: rgb(23 26 33 / 0.6); } /* CorMarinho */
+/* O padding fica no corpo: tocar no fundo escurecido fecha, tocar dentro da caixa não */
+.aviso-windows-corpo { padding: 1.5rem 1.25rem 1.25rem; }
+.aviso-windows h2 { font-size: 1.3rem; }
+.aviso-windows .botoes { margin-bottom: 0.5rem; }
+.aviso-windows-link code { font-size: 1rem; }
+.aviso-windows-status { min-height: 1.6em; margin-bottom: 0; font-weight: 600; }
+
+@media (prefers-color-scheme: dark) {
+  .aviso-windows { border-color: var(--CorBordaCampo); }
+  .aviso-windows::backdrop { background: rgb(0 0 0 / 0.72); }
+}
 
 /* Página 404 */
 .erro-404 { padding: 4rem 0; }
@@ -369,6 +574,6 @@ figcaption { font-size: 0.9rem; color: var(--texto-sec); margin-top: 0.5rem; }
 }
 
 @media print {
-  .topo nav, .rodape, .faixa, .pular { display: none; }
+  .topo nav, .rodape, .faixa, .pular, .print-selo { display: none; }
   .perguntas details { border: 0; }
 }

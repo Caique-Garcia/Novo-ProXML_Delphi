@@ -11,7 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/styles.css?v=20261110b">
+<link rel="stylesheet" href="/styles.css?v=20261110g">
 <meta property="og:type" content="article">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="ProXML">
@@ -67,13 +67,15 @@
         <img src="/img/proxml-logo-claro.svg" width="157" height="32" alt="ProXML, página inicial">
       </picture>
     </a>
-    <nav aria-label="Principal">
-      <ul class="menu">
+    <nav class="nav-principal" aria-label="Principal">
+      <a class="botao botao-primario baixar-movel" href="/download">Baixar</a>
+      <button type="button" class="menu-botao" popovertarget="menu-principal">Menu</button>
+      <ul class="menu" id="menu-principal" popover>
         <li><a href="/tutorial">Tutorial</a></li>
         <li><a href="/gerar-danfe-xml">Gerar DANFE</a></li>
-        <li><a href="/reforma-tributaria" aria-current="true">Reforma Tributária <span class="selo">Novo</span></a></li>
+        <li><a href="/reforma-tributaria" aria-current="true">Reforma Tributária <span class="selo">Novo</span><!-- Selo "Novo": remover a partir de 01/01/2027 --></a></li>
         <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
-        <li><a class="botao botao-primario" href="/download">Baixar</a></li>
+        <li class="menu-baixar"><a class="botao botao-primario" href="/download">Baixar</a></li>
       </ul>
     </nav>
   </div>
@@ -190,7 +192,7 @@
       <p>Como nos outros totais, notas canceladas continuam somadas e, nas NF-e, as notas de entrada e de saída são somadas juntas. <a href="/tutorial#totais">Veja os cuidados ao conferir os totais</a>.</p>
     </div>
     <figure class="print">
-      <img src="/img/14-relatorio-ibscbs.webp" width="1040" height="663" alt="Relatório IBS/CBS do ProXML na pré-visualização, com o período, o modelo Todos e as colunas Nº, Modelo, Data, Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/14-relatorio-ibscbs.webp"><img src="/img/14-relatorio-ibscbs.webp" width="1040" height="663" alt="Relatório IBS/CBS do ProXML na pré-visualização, com o período, o modelo Todos e as colunas Nº, Modelo, Data, Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
   </section>
 
@@ -256,7 +258,7 @@
       </div>
     </div>
     <div class="rodape-fim">
-      <p>Desenvolvido por Caique Garcia.</p>
+      <p>© 2026 ProXML · Desenvolvido por Caique Garcia.</p>
     </div>
   </div>
 </footer>

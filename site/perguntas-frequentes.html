@@ -11,7 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/styles.css?v=20261110b">
+<link rel="stylesheet" href="/styles.css?v=20261110g">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="ProXML">
@@ -243,13 +243,15 @@
         <img src="/img/proxml-logo-claro.svg" width="157" height="32" alt="ProXML, página inicial">
       </picture>
     </a>
-    <nav aria-label="Principal">
-      <ul class="menu">
+    <nav class="nav-principal" aria-label="Principal">
+      <a class="botao botao-primario baixar-movel" href="/download">Baixar</a>
+      <button type="button" class="menu-botao" popovertarget="menu-principal">Menu</button>
+      <ul class="menu" id="menu-principal" popover>
         <li><a href="/tutorial">Tutorial</a></li>
         <li><a href="/gerar-danfe-xml">Gerar DANFE</a></li>
-        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span></a></li>
+        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span><!-- Selo "Novo": remover a partir de 01/01/2027 --></a></li>
         <li><a href="/perguntas-frequentes" aria-current="page">Perguntas frequentes</a></li>
-        <li><a class="botao botao-primario" href="/download">Baixar</a></li>
+        <li class="menu-baixar"><a class="botao botao-primario" href="/download">Baixar</a></li>
       </ul>
     </nav>
   </div>
@@ -453,7 +455,7 @@
       </div>
     </div>
     <div class="rodape-fim">
-      <p>Desenvolvido por Caique Garcia.</p>
+      <p>© 2026 ProXML · Desenvolvido por Caique Garcia.</p>
     </div>
   </div>
 </footer>

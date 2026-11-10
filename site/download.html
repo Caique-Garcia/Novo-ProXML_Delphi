@@ -11,7 +11,8 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/styles.css?v=20261110b">
+<link rel="stylesheet" href="/styles.css?v=20261110g">
+<script src="/site.js?v=20261110g" defer></script>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="ProXML">
@@ -59,13 +60,15 @@
         <img src="/img/proxml-logo-claro.svg" width="157" height="32" alt="ProXML, página inicial">
       </picture>
     </a>
-    <nav aria-label="Principal">
-      <ul class="menu">
+    <nav class="nav-principal" aria-label="Principal">
+      <a class="botao botao-primario baixar-movel" href="/download" aria-current="page">Baixar</a>
+      <button type="button" class="menu-botao" popovertarget="menu-principal">Menu</button>
+      <ul class="menu" id="menu-principal" popover>
         <li><a href="/tutorial">Tutorial</a></li>
         <li><a href="/gerar-danfe-xml">Gerar DANFE</a></li>
-        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span></a></li>
+        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span><!-- Selo "Novo": remover a partir de 01/01/2027 --></a></li>
         <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
-        <li><a class="botao botao-primario" href="/download" aria-current="page">Baixar</a></li>
+        <li class="menu-baixar"><a class="botao botao-primario" href="/download" aria-current="page">Baixar</a></li>
       </ul>
     </nav>
   </div>
@@ -84,35 +87,60 @@
     <p class="versao">Versão 1.2.0 · Windows 10 ou 11 (32 ou 64 bits)</p>
   </div>
 
+  <!-- Ao lançar uma versão: trocar juntos URL (vX.Y.Z), versão, data, tamanho e SHA-256 dos dois cartões, e a seção "O que há de novo". -->
   <div class="downloads">
     <div class="cartao cartao-destaque">
       <span class="etiqueta">Recomendado</span>
       <h2>Instalador</h2>
       <p><code>ProXML-Setup.exe</code></p>
+      <dl class="arquivo-info">
+        <div><dt>Tamanho:</dt> <dd>12,8 MB</dd></div>
+        <div><dt>Versão:</dt> <dd>1.2.0, de 09/11/2026</dd></div>
+        <div><dt>SHA-256:</dt> <dd><code class="hash">04833ce0286277405ee0bf1cfa0a429edd3791e5ac2c5f1c0b8173b8da70dace</code></dd></div>
+      </dl>
       <ul>
         <li>Instala só para o seu usuário, em <code>%LocalAppData%\ProXML</code>, sem pedir administrador.</li>
         <li>Cria o atalho no Menu Iniciar e, se você quiser, na Área de Trabalho.</li>
         <li>Para atualizar, basta executar o instalador da versão nova: as suas configurações ficam.</li>
       </ul>
       <div class="botoes">
-        <a class="botao botao-primario" href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML-Setup.exe">Baixar o instalador</a>
+        <a class="botao botao-primario" href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/download/v1.2.0/ProXML-Setup.exe" data-so-windows>Baixar o instalador</a>
       </div>
     </div>
     <div class="cartao" id="portatil">
       <span class="etiqueta">Sem instalar</span>
       <h2>Versão portátil</h2>
       <p><code>ProXML.zip</code></p>
+      <dl class="arquivo-info">
+        <div><dt>Tamanho:</dt> <dd>18,5 MB</dd></div>
+        <div><dt>Versão:</dt> <dd>1.2.0, de 09/11/2026</dd></div>
+        <div><dt>SHA-256:</dt> <dd><code class="hash">dc632fb545b3d063dfd1649875f36958586d6c7b22075288cfa41904477fdc08</code></dd></div>
+      </dl>
       <ul>
         <li>Extraia o conteúdo para uma pasta (ex.: <code>C:\ProXML</code>) e execute o <code>ProXML.exe</code>.</li>
         <li>O próprio Windows abre o .zip: clique com o botão direito e escolha <strong>Extrair tudo</strong>.</li>
         <li>Ao atualizar, mantenha a sua pasta <code>db\</code> (veja abaixo).</li>
       </ul>
       <div class="botoes">
-        <a class="botao botao-secundario" href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML.zip">Baixar a versão portátil (.zip)</a>
+        <a class="botao botao-secundario" href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/download/v1.2.0/ProXML.zip" data-so-windows>Baixar a versão portátil (.zip)</a>
       </div>
     </div>
   </div>
-  <p>Todas as versões e o que mudou em cada uma estão na <a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases">página de Releases do ProXML no GitHub</a>. O projeto fica no <a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi">repositório do ProXML no GitHub</a>.</p>
+  <p class="pequeno" id="conferir">Quer conferir se o arquivo baixado é o original? No PowerShell, vá até a pasta onde ele foi salvo (normalmente <code>cd $HOME\Downloads</code>) e digite <code>(Get-FileHash .\ProXML-Setup.exe).Hash</code> (ou <code>(Get-FileHash .\ProXML.zip).Hash</code>). O código que aparece deve ser igual ao SHA-256 acima. Letras maiúsculas ou minúsculas não fazem diferença.</p>
+  <p>Todas as versões e o que mudou em cada uma estão na <a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases">página de Releases do ProXML no GitHub</a>.</p>
+
+  <section class="secao" id="novidades" aria-labelledby="titulo-novidades">
+    <div class="prosa">
+      <h2 id="titulo-novidades">O que há de novo na 1.2.0</h2>
+      <ul>
+        <li><strong>Instalador (<code>ProXML-Setup.exe</code>):</strong> instala só para o seu usuário, sem administrador, com atalho no Menu Iniciar e, se você quiser, na Área de Trabalho. Para atualizar, basta executar o instalador novo, sem perder as configurações.</li>
+        <li><strong>E-mail sem WinRAR:</strong> os XMLs vão num anexo <code>NFCe_ProXML.zip</code>, criado pelo próprio ProXML. Não é mais preciso copiar o <code>WinRAR.exe</code> para a pasta do programa.</li>
+        <li><strong>Versão portátil em .zip</strong> (<code>ProXML.zip</code>), que o Windows abre sem programas extras.</li>
+        <li><strong>Correções:</strong> o ProXML encontra o banco e as configurações mesmo quando é aberto por um atalho ou por outro programa que inicia em outra pasta. E, se não for possível montar o anexo do e-mail (por exemplo, arquivo em uso ou disco cheio), aparece uma mensagem clara e o e-mail não é enviado.</li>
+      </ul>
+      <p>Veja as <a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/tag/v1.2.0">notas completas da versão 1.2.0 no GitHub</a>, com as limitações conhecidas.</p>
+    </div>
+  </section>
 
   <section class="secao" id="smartscreen" aria-labelledby="titulo-smartscreen">
     <h2 id="titulo-smartscreen">Aviso “O Windows protegeu o computador”</h2>
@@ -122,14 +150,15 @@
         <li>Clique em <strong>Mais informações</strong>.</li>
         <li>Clique em <strong>Executar assim mesmo</strong>.</li>
       </ol>
-      <p>Baixe o ProXML só por esta página ou pela página de Releases do GitHub.</p>
+      <p>Antes disso, o Chrome ou o Edge podem dizer que o arquivo “não é baixado com frequência”. Nesse caso, abra a lista de downloads do navegador, abra o menu ao lado do arquivo e escolha a opção para manter o arquivo. No Edge, pode ser preciso confirmar mais uma vez.</p>
+      <p>Baixe o ProXML só por esta página ou pela página de Releases do GitHub. O código do ProXML é público no GitHub: veja no <a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi">repositório do ProXML</a>.</p>
     </div>
     <div class="par-prints">
       <figure class="print">
-      <img src="/img/01-smartscreen.webp" width="529" height="496" alt="Aviso azul do Windows SmartScreen “O Windows protegeu o computador”, dizendo que um aplicativo não reconhecido foi impedido de iniciar, com o link Mais informações e o botão Não executar." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/01-smartscreen.webp"><img src="/img/01-smartscreen.webp" width="529" height="496" alt="Aviso azul do Windows SmartScreen “O Windows protegeu o computador”, dizendo que um aplicativo não reconhecido foi impedido de iniciar, com o link Mais informações e o botão Não executar." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       <figure class="print">
-      <img src="/img/02-smartscreen-executar.webp" width="529" height="497" alt="O mesmo aviso do SmartScreen depois de clicar em Mais informações: Aplicativo: ProXML-Setup.exe, Fornecedor: Fornecedor desconhecido, com os botões Executar assim mesmo e Não executar." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/02-smartscreen-executar.webp"><img src="/img/02-smartscreen-executar.webp" width="529" height="497" alt="O mesmo aviso do SmartScreen depois de clicar em Mais informações: Aplicativo: ProXML-Setup.exe, Fornecedor: Fornecedor desconhecido, com os botões Executar assim mesmo e Não executar." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
     </div>
   </section>
@@ -137,7 +166,7 @@
   <section class="secao" id="instalar" aria-labelledby="titulo-instalar">
     <h2 id="titulo-instalar">Como instalar</h2>
     <ol class="prosa">
-      <li>Baixe o <a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML-Setup.exe"><code>ProXML-Setup.exe</code></a>.</li>
+      <li>Baixe o <a href="https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/download/v1.2.0/ProXML-Setup.exe" data-so-windows><code>ProXML-Setup.exe</code></a>.</li>
       <li>Execute o instalador. Se aparecer o aviso do SmartScreen, siga os passos acima.</li>
       <li>Na tela “Selecione o Local de Destino”, mantenha a pasta sugerida (<code>%LocalAppData%\ProXML</code>) e clique em <strong>Avançar</strong>.</li>
       <li>Na tela “Selecionar Tarefas Adicionais”, deixe marcado “Criar um atalho na área de trabalho” se quiser o atalho, e siga até o fim.</li>
@@ -145,10 +174,10 @@
     </ol>
     <div class="par-prints">
       <figure class="print">
-      <img src="/img/03-instalador.webp" width="595" height="462" alt="Tela “Selecione o Local de Destino” do instalador do ProXML, com a pasta C:\Users\Usuario\AppData\Local\ProXML e os botões Procurar…, Avançar e Cancelar." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/03-instalador.webp"><img src="/img/03-instalador.webp" width="595" height="462" alt="Tela “Selecione o Local de Destino” do instalador do ProXML, com a pasta C:\Users\Usuario\AppData\Local\ProXML e os botões Procurar…, Avançar e Cancelar." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       <figure class="print">
-      <img src="/img/04-instalador-atalhos.webp" width="594" height="460" alt="Tela “Selecionar Tarefas Adicionais” do instalador do ProXML, com a opção “Criar um atalho na área de trabalho” marcada e os botões Voltar, Avançar e Cancelar." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/04-instalador-atalhos.webp"><img src="/img/04-instalador-atalhos.webp" width="594" height="460" alt="Tela “Selecionar Tarefas Adicionais” do instalador do ProXML, com a opção “Criar um atalho na área de trabalho” marcada e os botões Voltar, Avançar e Cancelar." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
     </div>
     <p>Com o ProXML aberto, siga o <a href="/tutorial">tutorial de uso do ProXML</a>.</p>
@@ -227,7 +256,7 @@
       </div>
     </div>
     <div class="rodape-fim">
-      <p>Desenvolvido por Caique Garcia.</p>
+      <p>© 2026 ProXML · Desenvolvido por Caique Garcia.</p>
     </div>
   </div>
 </footer>

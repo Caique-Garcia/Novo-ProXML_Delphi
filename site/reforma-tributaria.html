@@ -11,7 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/styles.css?v=20261110b">
+<link rel="stylesheet" href="/styles.css?v=20261110g">
 <meta property="og:type" content="article">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="ProXML">
@@ -287,13 +287,15 @@
         <img src="/img/proxml-logo-claro.svg" width="157" height="32" alt="ProXML, página inicial">
       </picture>
     </a>
-    <nav aria-label="Principal">
-      <ul class="menu">
+    <nav class="nav-principal" aria-label="Principal">
+      <a class="botao botao-primario baixar-movel" href="/download">Baixar</a>
+      <button type="button" class="menu-botao" popovertarget="menu-principal">Menu</button>
+      <ul class="menu" id="menu-principal" popover>
         <li><a href="/tutorial">Tutorial</a></li>
         <li><a href="/gerar-danfe-xml">Gerar DANFE</a></li>
-        <li><a href="/reforma-tributaria" aria-current="page">Reforma Tributária <span class="selo">Novo</span></a></li>
+        <li><a href="/reforma-tributaria" aria-current="page">Reforma Tributária <span class="selo">Novo</span><!-- Selo "Novo": remover a partir de 01/01/2027 --></a></li>
         <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
-        <li><a class="botao botao-primario" href="/download">Baixar</a></li>
+        <li class="menu-baixar"><a class="botao botao-primario" href="/download">Baixar</a></li>
       </ul>
     </nav>
   </div>
@@ -319,7 +321,7 @@
       <li><a href="#cronograma">Cronograma da reforma tributária (2026 a 2033)</a></li>
       <li><a href="#o-basico">O básico: IVA dual, IBS e CBS</a></li>
       <li><a href="#prazos">Prazos da reforma tributária</a></li>
-      <li><a href="#nota-fiscal">O que muda na nota fiscal</a></li>
+      <li><a href="#nota-fiscal">O que muda na nota fiscal</a> (detalhe técnico: <a href="/ibs-cbs">IBS e CBS no XML</a>)</li>
       <li><a href="#aliquotas">Alíquotas, split payment e cashback</a></li>
       <li><a href="#proxml">IBS e CBS no ProXML</a></li>
       <li><a href="#glossario">Glossário</a></li>
@@ -341,10 +343,10 @@
       </ul>
       <div class="par-prints">
         <figure class="print">
-      <img src="/img/07-resumo.webp" width="1352" height="761" alt="Tela Resumo do ProXML depois de processar a pasta de exemplo: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, 20 notas autorizadas, 0 ignoradas, 0 com erro e os Detalhes da leitura, com o filtro em Todos." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/07-resumo.webp"><img src="/img/07-resumo.webp" width="1352" height="761" alt="Tela Resumo do ProXML depois de processar a pasta de exemplo: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, 20 notas autorizadas, 0 ignoradas, 0 com erro e os Detalhes da leitura, com o filtro em Todos." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
         <figure class="print">
-      <img src="/img/14-relatorio-ibscbs.webp" width="1040" height="663" alt="Relatório IBS/CBS do ProXML na pré-visualização, com o período, o modelo Todos e as colunas Nº, Modelo, Data, Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/14-relatorio-ibscbs.webp"><img src="/img/14-relatorio-ibscbs.webp" width="1040" height="663" alt="Relatório IBS/CBS do ProXML na pré-visualização, com o período, o modelo Todos e as colunas Nº, Modelo, Data, Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       </div>
       <div class="botoes">
@@ -681,7 +683,7 @@
       </div>
     </div>
     <div class="rodape-fim">
-      <p>Desenvolvido por Caique Garcia.</p>
+      <p>© 2026 ProXML · Desenvolvido por Caique Garcia.</p>
     </div>
   </div>
 </footer>

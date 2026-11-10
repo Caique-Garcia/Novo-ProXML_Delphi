@@ -11,7 +11,7 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/styles.css?v=20261110b">
+<link rel="stylesheet" href="/styles.css?v=20261110g">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="ProXML">
@@ -59,13 +59,15 @@
         <img src="/img/proxml-logo-claro.svg" width="157" height="32" alt="ProXML, página inicial">
       </picture>
     </a>
-    <nav aria-label="Principal">
-      <ul class="menu">
+    <nav class="nav-principal" aria-label="Principal">
+      <a class="botao botao-primario baixar-movel" href="/download">Baixar</a>
+      <button type="button" class="menu-botao" popovertarget="menu-principal">Menu</button>
+      <ul class="menu" id="menu-principal" popover>
         <li><a href="/tutorial">Tutorial</a></li>
         <li><a href="/gerar-danfe-xml" aria-current="page">Gerar DANFE</a></li>
-        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span></a></li>
+        <li><a href="/reforma-tributaria">Reforma Tributária <span class="selo">Novo</span><!-- Selo "Novo": remover a partir de 01/01/2027 --></a></li>
         <li><a href="/perguntas-frequentes">Perguntas frequentes</a></li>
-        <li><a class="botao botao-primario" href="/download">Baixar</a></li>
+        <li class="menu-baixar"><a class="botao botao-primario" href="/download">Baixar</a></li>
       </ul>
     </nav>
   </div>
@@ -101,7 +103,7 @@
       <li>O PDF abre sozinho quando fica pronto (até 15 segundos). Ele fica salvo na pasta <code>NFCe\danfePDF</code> do ProXML. Quem usou o instalador encontra essa pasta em <code>%LocalAppData%\ProXML\NFCe\danfePDF</code>.</li>
     </ol>
     <figure class="print">
-      <img src="/img/08-notas.webp" width="1352" height="761" alt="Tela Notas do ProXML com 20 notas na grade (Nº, Modelo, Data, Chave, Valor, Base ICMS, ICMS, IBS e CBS), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/08-notas.webp"><img src="/img/08-notas.webp" width="1352" height="761" alt="Tela Notas do ProXML com 20 notas na grade (Nº, Modelo, Data, Chave, Valor, Base ICMS, ICMS, IBS e CBS), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
   </section>
 
@@ -121,10 +123,10 @@
     </div>
     <div class="par-prints">
       <figure class="print">
-      <img src="/img/12-danfe-nfe.webp" width="1240" height="1754" alt="DANFE retrato em PDF de uma NF-e (modelo 55) de exemplo gerado pelo ProXML, com emitente e destinatário fictícios, o cálculo do imposto e os produtos." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/12-danfe-nfe.webp"><img src="/img/12-danfe-nfe.webp" width="1240" height="1754" alt="DANFE retrato em PDF de uma NF-e (modelo 55) de exemplo gerado pelo ProXML, com emitente e destinatário fictícios, o cálculo do imposto e os produtos." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       <figure class="print">
-      <img src="/img/11-danfe-nfce.webp" width="1240" height="1176" alt="DANFCe em PDF, em página A4, de uma NFC-e (modelo 65) de exemplo gerado pelo ProXML, com os itens, o total, a forma de pagamento, a chave de acesso e o QR Code." loading="lazy" decoding="async">
+      <a class="print-link" href="/img/11-danfe-nfce.webp"><img src="/img/11-danfe-nfce.webp" width="1240" height="1176" alt="DANFCe em PDF, em página A4, de uma NFC-e (modelo 65) de exemplo gerado pelo ProXML, com os itens, o total, a forma de pagamento, a chave de acesso e o QR Code." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
     </div>
   </section>
@@ -188,7 +190,7 @@
       </div>
     </div>
     <div class="rodape-fim">
-      <p>Desenvolvido por Caique Garcia.</p>
+      <p>© 2026 ProXML · Desenvolvido por Caique Garcia.</p>
     </div>
   </div>
 </footer>
