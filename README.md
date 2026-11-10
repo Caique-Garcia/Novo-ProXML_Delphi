@@ -6,6 +6,8 @@ Aplicativo desktop para Windows que lê uma pasta de XMLs de **NF-e (modelo 55)*
 
 > ⬇️ **[Baixar o instalador (ProXML-Setup.exe)](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML-Setup.exe)** (recomendado) — ou a versão portátil **[ProXML.zip](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML.zip)**. Todas as versões estão na página de [Releases](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases).
 
+> 🌐 **Site:** <https://proxml.vercel.app>, com tutorial passo a passo, como gerar o DANFE e dúvidas sobre a Reforma Tributária (IBS e CBS).
+
 ---
 
 ## Funcionalidades
