@@ -78,3 +78,9 @@ modules/
 
 # Saida do instalador (setup gerado e staging do build.ps1)
 /installer/Output/
+
+# Banco local e log do app (senha do e-mail e XMLs de notas - nunca versionar).
+# O modelo vazio para o instalador fica em installer/notas-vazio.db.
+/bin/db/
+/bin/ErroLog.txt
+*.db-journal

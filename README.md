@@ -200,7 +200,7 @@ O script fica em `installer/`: `ProXML.iss` (Inno Setup 6) e `build.ps1`, que mo
    powershell -NoProfile -ExecutionPolicy Bypass -File installer\build.ps1 -Version 1.2.0 -ExePath <pasta do build>\ProXML.exe
    ```
 
-O `build.ps1` confere se a FileVersion do exe é a mesma de `-Version`, pega `Report\`, `Schemas\`, o `db\notas.db` vazio e o `LICENSE-lucide.txt` do `HEAD` do git (só o que está versionado), junta o exe e o `bin\sk4d.dll` e recusa `ErroLog.txt`, `WinRAR.exe`, conteúdo em `NFCe\` e nomes de arquivo com 14 ou mais dígitos seguidos. O setup sai em `installer\Output\ProXML-Setup.exe` (fora do git), com o tamanho e o SHA-256 no fim da execução. O `AppId` do `ProXML.iss` é fixo: não o altere, senão a atualização deixa de substituir a versão instalada.
+O `build.ps1` confere se a FileVersion do exe é a mesma de `-Version`, pega `Report\`, `Schemas\`, o modelo vazio `installer\notas-vazio.db` (instalado como `db\notas.db` e conferido pelo SHA-256) e o `LICENSE-lucide.txt` do `HEAD` do git (só o que está versionado), junta o exe e o `bin\sk4d.dll` e recusa `ErroLog.txt`, `WinRAR.exe`, conteúdo em `NFCe\` e nomes de arquivo com 14 ou mais dígitos seguidos. O setup sai em `installer\Output\ProXML-Setup.exe` (fora do git), com o tamanho e o SHA-256 no fim da execução. O `AppId` do `ProXML.iss` é fixo: não o altere, senão a atualização deixa de substituir a versão instalada.
 
 ### Estrutura do código
 
@@ -222,10 +222,11 @@ datamodule/
 classes/
   ProXML.Classes.pas               # TConfig (configurações de e-mail)
 src/                               # imagens, ícones e animações
-bin/                               # Report/, Schemas/ e db/ (saída da compilação)
+bin/                               # Report/ e Schemas/ (saída da compilação; db/ não é versionado)
 installer/
   ProXML.iss                       # script do instalador (Inno Setup 6)
   build.ps1                        # gera installer\Output\ProXML-Setup.exe
+  notas-vazio.db                   # modelo VAZIO do banco, usado pelo instalador e pelo pacote portátil
 docs/
   planos/                          # planos de cada versão e decisões
   ui/                              # tokens visuais, glossário de textos, ícones, logo e mockups
@@ -234,7 +235,7 @@ tests/gabarito/                    # gabarito dos totais usado nos testes
 
 ### Banco de dados
 
-SQLite em `db\notas.db`, na pasta do `ProXML.exe` (não depende da pasta de trabalho do atalho), criado na primeira execução se não existir. No repositório fica em `bin\db\notas.db`; no instalador, em `%LocalAppData%\ProXML\db\notas.db`. Tabelas:
+SQLite em `db\notas.db`, na pasta do `ProXML.exe` (não depende da pasta de trabalho do atalho), criado na primeira execução se não existir. Ao compilar, fica em `bin\db\notas.db`, que **não é versionado** (guarda a senha do e-mail e os XMLs lidos); no instalador, em `%LocalAppData%\ProXML\db\notas.db`. O instalador e o pacote portátil levam o modelo vazio `installer\notas-vazio.db`. Tabelas:
 
 | Tabela   | Conteúdo                                                                                        |
 |----------|-------------------------------------------------------------------------------------------------|

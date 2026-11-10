@@ -7,8 +7,10 @@
   2. Monta uma pasta de staging limpa em installer\Output\staging com:
        - o ProXML.exe informado em -ExePath;
        - sk4d.dll (não versionado; padrão bin\sk4d.dll);
-       - Report\, Schemas\ e db\notas.db VAZIO, extraídos do HEAD do git
+       - Report\ e Schemas\, extraídos do HEAD do git
          (só o versionado; nada de bin\NFCe, ErroLog.txt ou WinRAR.exe);
+       - db\notas.db VAZIO, vindo do modelo installer\notas-vazio.db (HEAD),
+         conferido pelo SHA-256 (o bin\db\ não é versionado);
        - LICENSE-lucide.txt (docs/ui/icones), também do HEAD.
   3. Recusa nomes de arquivo com sequências de 14+ dígitos (CNPJ/chave de acesso).
   4. Chama o ISCC com /DAppVersion e /DSourceDir e mostra tamanho e SHA-256.
@@ -70,7 +72,11 @@ $TarPath = Join-Path $env:SystemRoot 'System32\tar.exe'
 if (-not (Test-Path $TarPath)) { Fail "tar.exe não encontrado em $TarPath." }
 
 # --- Staging a partir do HEAD ---------------------------------------------
-$GitItems = @('bin/Report', 'bin/Schemas', 'bin/db/notas.db', 'docs/ui/icones/LICENSE-lucide.txt')
+$GitItems = @('bin/Report', 'bin/Schemas', 'installer/notas-vazio.db', 'docs/ui/icones/LICENSE-lucide.txt')
+
+# SHA-256 do modelo vazio (tabelas nf, config e LOG sem linhas, após VACUUM).
+# Se o esquema mudar, gere um modelo novo VAZIO, faça VACUUM e atualize este valor.
+$NotasVazioSha256 = '3F68A635705EFF9554D5ECD33BD12028243DD898F8F6D43A955C4345479BB43F'
 
 $dirty = & $GitPath -C $RepoRoot status --porcelain -- $GitItems
 if ($LASTEXITCODE -ne 0) { Fail 'git status falhou.' }
@@ -96,7 +102,9 @@ Remove-Item -LiteralPath $TarFile -Force
 Move-Item -LiteralPath (Join-Path $GitTree 'bin\Report')  -Destination (Join-Path $Staging 'Report')
 Move-Item -LiteralPath (Join-Path $GitTree 'bin\Schemas') -Destination (Join-Path $Staging 'Schemas')
 New-Item -ItemType Directory -Force -Path (Join-Path $Staging 'db') | Out-Null
-Move-Item -LiteralPath (Join-Path $GitTree 'bin\db\notas.db') -Destination (Join-Path $Staging 'db\notas.db')
+Move-Item -LiteralPath (Join-Path $GitTree 'installer\notas-vazio.db') -Destination (Join-Path $Staging 'db\notas.db')
+$dbHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $Staging 'db\notas.db')).Hash
+if ($dbHash -ne $NotasVazioSha256) { Fail "installer\notas-vazio.db mudou (SHA-256 $dbHash). Ele precisa estar VAZIO; veja o comentário de `$NotasVazioSha256." }
 Move-Item -LiteralPath (Join-Path $GitTree 'docs\ui\icones\LICENSE-lucide.txt') -Destination (Join-Path $Staging 'LICENSE-lucide.txt')
 Remove-Item -LiteralPath $GitTree -Recurse -Force
 

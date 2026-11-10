@@ -15,6 +15,7 @@ Você cuida do instalador do **ProXML** usando **Inno Setup 6**.
 - O script fica versionado em `installer/ProXML.iss`, e um `installer/build.ps1` compila o setup com `ISCC.exe`.
 - Arquivos instalados: `ProXML.exe`, `sk4d.dll`, `Report\`, `Schemas\` e `db\` (este só se ainda não existir: `onlyifdoesntexist uninsneveruninstall`, para não apagar dados do usuário).
 - Não incluir `ErroLog.txt`, `NFCe\` com conteúdo, `notas.db` com dados reais nem `WinRAR.exe`.
+- O `db\notas.db` do setup vem **só** do modelo versionado `installer/notas-vazio.db`, conferido pelo SHA-256 em `$NotasVazioSha256` no `build.ps1`. `bin/db/` e `ErroLog.txt` estão no `.gitignore` e nunca devem voltar ao Git (em 11/2026 foi preciso reescrever o histórico porque um `notas.db` com senha e XMLs de cliente estava versionado). Se o esquema mudar, gere um modelo novo vazio, faça `VACUUM` e atualize o hash.
 - Atalhos no Menu Iniciar e (opcional) na Área de Trabalho, **com `WorkingDir: {app}`**. Desde a v1.2.0 o app localiza o `db\` pela pasta do `ProXML.exe`; o `WorkingDir` continua por segurança.
 - `AppId` fixo (GUID) para que atualizações substituam a versão anterior. A versão vem de um parâmetro (`/DAppVersion=1.2.0`).
 - Idioma: Português (Brasil).
