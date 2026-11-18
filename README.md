@@ -2,7 +2,7 @@
 
 Totalizador de XMLs de NF-e (55) e NFC-e (65) com IBS/CBS, DANFE e relatórios - Delphi VCL.
 
-Aplicativo desktop para Windows que lê uma pasta de XMLs de **NF-e (modelo 55)** e **NFC-e (modelo 65)**, soma os valores das notas autorizadas (incluindo **IBS/CBS** da Reforma Tributária) e facilita a conferência, a impressão e o envio desses arquivos.
+Aplicativo desktop para Windows que lê uma pasta de XMLs de **NF-e (modelo 55)** e **NFC-e (modelo 65)**, soma os valores das notas autorizadas (incluindo **IBS/CBS** da Reforma Tributária), **confere os cálculos de IBS/CBS** de cada nota e facilita a conferência, a impressão e o envio desses arquivos.
 
 > ⬇️ **[Baixar o instalador (ProXML-Setup.exe)](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML-Setup.exe)** (recomendado) — ou a versão portátil **[ProXML.zip](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases/latest/download/ProXML.zip)**. Todas as versões estão na página de [Releases](https://github.com/Caique-Garcia/Novo-ProXML_Delphi/releases).
 
@@ -24,9 +24,30 @@ Aplicativo desktop para Windows que lê uma pasta de XMLs de **NF-e (modelo 55)*
 
 > **Atenção (NF-e 55):** as notas de **entrada** e de **saída** são **somadas juntas**, sem distinção. Se a pasta tiver compras e vendas misturadas, os totais misturam as duas. Para conferir só as vendas, processe uma pasta que tenha apenas as notas de saída.
 
+### Conferência de IBS/CBS
+
+O ProXML refaz as contas de IBS e CBS de cada item e dos totais das notas autorizadas e mostra o resultado na coluna IBS/CBS da tela Notas, no Resumo e no relatório Divergências IBS/CBS. A conferência só informa: não muda os totais, os cards nem os contadores. Ela segue a **NT 2025.002 v1.53**, a **NT 2026.005 v1.00** (Simples Nacional) e a **tabela de cClassTrib v1.71** e **não substitui a validação da SEFAZ nem a análise fiscal**.
+
+| Nível | O que confere | Resultado |
+|-------|---------------|-----------|
+| **1. Conta do item** | IBS UF, IBS municipal e CBS = base × alíquota (com a alíquota efetiva quando há redução) e IBS = IBS UF + IBS municipal | Erro |
+| **2. Itens × totais** | A soma dos itens bate com os totais da nota (`IBSCBSTot`) | Erro |
+| **3. Base de cálculo** | A base do item comparada com a soma do valor do produto, frete, seguro e outras despesas, menos o desconto e os tributos que saem da base em 2026 (ICMS, PIS, Cofins, ISS e FCP) | Alerta |
+| **4. Alíquota, redução e CST** | Alíquota esperada para o ano da emissão, redução coerente com o CST e o cClassTrib, diferimento e grupos previstos na tabela oficial | Alerta |
+
+> **Alerta não é erro.** O ProXML marca como Alerta o que depende da operação e da regra legal: base de cálculo, alíquota, redução, CST e cClassTrib. É uma indicação para conferir a nota com quem cuida da parte fiscal, não uma afirmação de que a nota está errada. Erro indica uma conta que não fecha com os próprios valores do XML, no item ou nos totais.
+
+- **Simples Nacional:** nas notas com o grupo do Simples (`gTribSN`, NT 2026.005), o ProXML confere se a soma do IBS e da CBS do Simples dos itens bate com o total da nota e se o grupo do Simples vem nos itens e no total. A alíquota do Simples depende do anexo e da faixa de faturamento e **não é conferida**. Quando o item também traz o grupo de cálculo do IBS/CBS (`gIBSCBS`), ele é conferido como nas outras notas, menos a alíquota da CBS quando o item só tem a CBS do Simples.
+- **Sem conferência na v1.3.0:** tributação monofásica, transferência de crédito, ajustes de competência e da ZFM, compras governamentais e as alíquotas que a lei ainda não fixou para o ano (a CBS a partir de 2027 e o IBS a partir de 2029). O Resumo informa esses casos, sem contar como divergência.
+- **Onde aparece:**
+  - **Notas:** coluna **IBS/CBS**, sempre visível, com **OK**, **Alerta** ou **Erro** (vazia nas notas sem IBS/CBS). Uma nota com Erro e Alerta aparece como Erro. A dica de cada célula explica o resultado, e o clique no título ordena por gravidade (Erro primeiro).
+  - **Resumo:** bloco no fim dos Detalhes da leitura, com uma linha de resumo ("Conferência de IBS/CBS: N notas conferidas, …") e uma linha por divergência, com o valor do XML e o esperado.
+  - **Relatórios:** relatório **Divergências IBS/CBS**, com uma linha por divergência (nota, item, nível, tipo, campo, valor no XML e esperado), a contagem de notas com Erro e com Alerta e as versões das regras usadas.
+  - **Exportar CSV:** coluna **Conferência IBS/CBS** no fim, com OK, Alerta ou Erro.
+
 ### Notas
 
-- **Grade** com Nº, Modelo, Data, Chave (44 dígitos) e valores. As colunas de Base ICMS, ICMS, IBS e CBS aparecem conforme a largura da janela.
+- **Grade** com Nº, Modelo, Data, Chave (44 dígitos), valores e a coluna **IBS/CBS** da conferência. As colunas de IBS e CBS, ICMS e Base ICMS aparecem conforme a largura da janela.
 - **Busca** por número ou chave enquanto você digita, e **ordenação** pelo clique no título da coluna.
 - **Barra de ações:** **Copiar chave**, **Gerar DANFE** e **Exportar CSV**. O duplo clique numa linha também gera o DANFE, e o botão direito continua com Copiar chave e Gerar DANFE.
 - **DANFE em PDF** (ACBr + FastReport), aberto automaticamente, com o layout escolhido por nota:
@@ -38,8 +59,8 @@ Aplicativo desktop para Windows que lê uma pasta de XMLs de **NF-e (modelo 55)*
 
 ### Relatórios
 
-- Tela **Relatórios** com o **Relatório de Notas** e o **Relatório IBS/CBS** (este só com as notas que têm o grupo IBS/CBS).
-- Layout novo em A4: período das notas, modelo do filtro, pasta de origem, colunas alinhadas, valores em `R$`, linha de total e rodapé "Gerado pelo ProXML v1.2.0 · data e hora · Página X de Y".
+- Tela **Relatórios** com o **Relatório de Notas**, o **Relatório IBS/CBS** (só com as notas que têm o grupo IBS/CBS) e o **Divergências IBS/CBS** (erros e alertas da conferência, um por linha; sem divergência, mostra "Nenhuma divergência de IBS/CBS").
+- Layout em A4: período das notas, modelo do filtro, pasta de origem, colunas alinhadas, valores em `R$`, linha de total e rodapé "Gerado pelo ProXML v1.3.0 · data e hora · Página X de Y".
 
 ### E-mail
 
@@ -120,15 +141,15 @@ O instalador novo não substitui o antigo `setupProXML.exe`. Para trocar:
 4. Escolha **Todos**, **NF-e 55** ou **NFC-e 65** na barra de cima: cards, grade, relatórios e e-mail mudam na hora.
 5. Use o menu lateral:
 
-| Tela              | O que faz                                                                                                  |
-|-------------------|------------------------------------------------------------------------------------------------------------|
-| **Resumo**        | Contadores, tempo, avisos e detalhes da última leitura.                                                    |
-| **Notas**         | Grade com busca e ordenação; **Copiar chave**, **Gerar DANFE** e **Exportar CSV**.                         |
-| **Relatórios**    | **Relatório de Notas** e **Relatório IBS/CBS**: **Gerar relatório** grava as notas e abre a visualização.  |
-| **Enviar**        | Mostra o anexo e envia os XMLs por e-mail para o endereço em **Para**.                                     |
-| **Configurações** | Servidor SMTP, porta, SSL/TLS, e-mail, senha e mensagem padrão; **Testar conexão** e **Salvar**.           |
+| Tela              | O que faz                                                                                                                           |
+|-------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| **Resumo**        | Contadores, tempo, avisos, detalhes da última leitura e o bloco da conferência de IBS/CBS.                                          |
+| **Notas**         | Grade com busca, ordenação e a coluna IBS/CBS; **Copiar chave**, **Gerar DANFE** e **Exportar CSV**.                                |
+| **Relatórios**    | **Relatório de Notas**, **Relatório IBS/CBS** e **Divergências IBS/CBS**: **Gerar relatório** grava as notas e abre a visualização. |
+| **Enviar**        | Mostra o anexo e envia os XMLs por e-mail para o endereço em **Para**.                                                              |
+| **Configurações** | Servidor SMTP, porta, SSL/TLS, e-mail, senha e mensagem padrão; **Testar conexão** e **Salvar**.                                    |
 
-O link **Sobre**, no canto do cabeçalho, mostra a versão, o autor e os créditos.
+O link **Sobre**, no canto do cabeçalho, mostra a versão, o autor e os créditos, com links para o [site](https://proxml.vercel.app) e o repositório no GitHub e o botão **Apoiar no Apoia.se**, para quem quiser apoiar o desenvolvimento.
 
 ### Atalhos de teclado
 
@@ -163,6 +184,8 @@ Em **Configurações**, informe o **Servidor SMTP**, a **Porta**, marque **SSL**
 | Com a janela no tamanho mínimo, a Chave pode aparecer cortada com "…" na grade. | **Copiar chave** copia a chave inteira. Para vê-la na grade, aumente a janela. |
 | Fora da escala de 100%, a visualização do relatório na tela pode ficar um pouco diferente do PDF. | O PDF não depende da escala: use o PDF como referência. |
 | A senha do e-mail fica sem criptografia no `db\notas.db`. | Não compartilhe o arquivo `db\notas.db`. |
+| A conferência de IBS/CBS **não é uma validação fiscal completa**. Ficam sem conferência a tributação monofásica, a transferência de crédito, os ajustes de competência e da ZFM, as compras governamentais e as alíquotas que a lei ainda não fixou (CBS a partir de 2027 e IBS a partir de 2029). No Simples Nacional, só os totais do grupo do Simples são conferidos. | Use a coluna, o Resumo e o relatório como indicação para conferir. O Resumo lista as notas com partes sem conferência. |
+| As regras de IBS/CBS (NT 2025.002 v1.53, NT 2026.005 v1.00 e tabela de cClassTrib v1.71) ficam dentro do programa. Uma versão nova da NT ou da tabela pode mudar o resultado. | As versões usadas aparecem no relatório Divergências IBS/CBS. Use a versão mais recente do ProXML. |
 
 ## Desenvolvimento
 
@@ -172,7 +195,7 @@ Em **Configurações**, informe o **Servidor SMTP**, a **Porta**, marque **SSL**
 - Componentes de terceiros:
   - [ACBr](https://projetoacbr.com.br/) — `ACBrNFe`, `ACBrNFeDANFEFR`, `ACBrMail`
   - [FastReport VCL](https://www.fast-report.com/) — DANFE e DANFCe
-  - [QuickReport](https://www.quickreport.co.uk/) — Relatório de Notas e Relatório IBS/CBS
+  - [QuickReport](https://www.quickreport.co.uk/) — Relatório de Notas, Relatório IBS/CBS e Divergências IBS/CBS
   - [Skia4Delphi](https://github.com/skia4delphi/skia4delphi) — ícones SVG, logo e animação
 - FireDAC com driver **SQLite** (nativo do Delphi)
 - [Inno Setup 6](https://jrsoftware.org/isinfo.php) — instalador (`winget install JRSoftware.InnoSetup`)
@@ -180,7 +203,7 @@ Em **Configurações**, informe o **Servidor SMTP**, a **Porta**, marque **SSL**
 ### Compilando
 
 1. Instale os componentes acima na IDE.
-2. Abra o `ProXML.dproj` e compile na configuração **Release / Win32** (é ela que tem a VersionInfo 1.2.0 e o suporte à escala do Windows). Pela linha de comando:
+2. Abra o `ProXML.dproj` e compile na configuração **Release / Win32** (é ela que tem a VersionInfo 1.3.0 e o suporte à escala do Windows). Pela linha de comando:
 
    ```bat
    call "C:\Program Files (x86)\Embarcadero\Studio\19.0\bin\rsvars.bat"
@@ -197,7 +220,7 @@ O script fica em `installer/`: `ProXML.iss` (Inno Setup 6) e `build.ps1`, que mo
 2. Rode:
 
    ```bat
-   powershell -NoProfile -ExecutionPolicy Bypass -File installer\build.ps1 -Version 1.2.0 -ExePath <pasta do build>\ProXML.exe
+   powershell -NoProfile -ExecutionPolicy Bypass -File installer\build.ps1 -Version 1.3.0 -ExePath <pasta do build>\ProXML.exe
    ```
 
 O `build.ps1` confere se a FileVersion do exe é a mesma de `-Version`, pega `Report\`, `Schemas\`, o modelo vazio `installer\notas-vazio.db` (instalado como `db\notas.db` e conferido pelo SHA-256) e o `LICENSE-lucide.txt` do `HEAD` do git (só o que está versionado), junta o exe e o `bin\sk4d.dll` e recusa `ErroLog.txt`, `WinRAR.exe`, conteúdo em `NFCe\` e nomes de arquivo com 14 ou mais dígitos seguidos. O setup sai em `installer\Output\ProXML-Setup.exe` (fora do git), com o tamanho e o SHA-256 no fim da execução. O `AppId` do `ProXML.iss` é fixo: não o altere, senão a atualização deixa de substituir a versão instalada.
@@ -211,12 +234,14 @@ view/
                                    #   Relatórios, Enviar, Configurações, Sobre, DANFE e e-mail
   ProXML.FormRelatorios.pas        # Relatório de Notas (QuickReport)
   ProXML.FormRelatorioIBSCBS.pas   # Relatório IBS/CBS (QuickReport)
+  ProXML.FormRelatorioDivergencias.pas # Relatório Divergências IBS/CBS (QuickReport)
   ProXML.Tema.pas                  # cores, fontes e medidas da interface (fonte única do tema)
   ProXML.Botao.pas                 # TProBotao: botão próprio (foco, hover, desabilitado, modo menu)
   ProXML.Icones.pas                # ícones SVG Lucide usados na interface
   ProXML.FrameLoad.pas             # animação da tela Carregando
 lib/
   uCalculadoraXML.pas              # leitura e validação dos XMLs (55 e 65, IBS/CBS) em thread
+  uConferenciaIBSCBS.pas           # conferência de IBS/CBS (níveis 1 a 4 e Simples Nacional), sem tela nem banco
 datamodule/
   DM.pas                           # conexão SQLite (FireDAC), migração do banco, notas, config e LOG
 classes/
@@ -230,25 +255,30 @@ installer/
 docs/
   planos/                          # planos de cada versão e decisões
   ui/                              # tokens visuais, glossário de textos, ícones, logo e mockups
-tests/gabarito/                    # gabarito dos totais usado nos testes
+tests/
+  gabarito/                        # gabarito dos totais e das divergências de IBS/CBS (scripts Python)
+  conferencia/                     # verificador de console da conferência de IBS/CBS
 ```
 
 ### Banco de dados
 
 SQLite em `db\notas.db`, na pasta do `ProXML.exe` (não depende da pasta de trabalho do atalho), criado na primeira execução se não existir. Ao compilar, fica em `bin\db\notas.db`, que **não é versionado** (guarda a senha do e-mail e os XMLs lidos); no instalador, em `%LocalAppData%\ProXML\db\notas.db`. O instalador e o pacote portátil levam o modelo vazio `installer\notas-vazio.db`. Tabelas:
 
-| Tabela   | Conteúdo                                                                                        |
-|----------|-------------------------------------------------------------------------------------------------|
-| `nf`     | Notas gravadas para os relatórios (número, chave, valor, data, BC, ICMS, XML, modelo e IBS/CBS) |
-| `config` | Configurações SMTP, mensagem padrão e preferências da tela                                      |
-| `LOG`    | Registro de erros da aplicação                                                                  |
+| Tabela               | Conteúdo                                                                                                           |
+|----------------------|--------------------------------------------------------------------------------------------------------------------|
+| `nf`                 | Notas gravadas para os relatórios (número, chave, valor, data, BC, ICMS, XML, modelo, IBS/CBS e conferência)       |
+| `divergencia_ibscbs` | Divergências da conferência de IBS/CBS (nota, item, nível, tipo, campo, valor no XML e esperado), para o relatório |
+| `config`             | Configurações SMTP, mensagem padrão e preferências da tela                                                         |
+| `LOG`                | Registro de erros da aplicação                                                                                     |
 
 Colunas novas da v1.1.0:
 
 - `nf`: `MODELO`, `TEM_IBSCBS`, `VBCIBSCBS`, `VIBSUF`, `VIBSMUN`, `VIBS` e `VCBS`;
 - `config`: `ULTIMA_PASTA`, `JANELA_ESQUERDA`, `JANELA_TOPO`, `JANELA_LARGURA`, `JANELA_ALTURA` e `JANELA_MAXIMIZADA`.
 
-Ao abrir um banco da v1.0.0, o programa cria as colunas que faltam (`ALTER TABLE`), sem perder os dados. A gravação das notas é feita numa única transação.
+Na v1.3.0: coluna `CONF_IBSCBS` em `nf` (vazia, OK, Alerta ou Erro) e a tabela `divergencia_ibscbs`.
+
+Ao abrir um banco de uma versão anterior, o programa cria as colunas e tabelas que faltam (`ALTER TABLE` e `CREATE TABLE IF NOT EXISTS`), sem perder os dados. A gravação das notas e das divergências é feita numa única transação.
 
 ## Créditos e licenças
 
