@@ -5,7 +5,12 @@ unit uCalculadoraXML;
   Plano 4, etapa 4.6: a unit não acessa a tela nem o banco. A leitura devolve um resultado
   (TResultadoLeitura: notas autorizadas, linhas do log e contadores) e avisa o progresso por
   callback. TThreadLeituraXML faz a leitura fora da thread principal; quem a cria recebe os avisos
-  de progresso e o fim na thread principal (TThread.Queue e OnTerminate) e só então mexe na tela. }
+  de progresso e o fim na thread principal (TThread.Queue e OnTerminate) e só então mexe na tela.
+
+  Plano 7, etapa 7.3: a leitura também lê os itens com det/imposto/IBSCBS e confere os cálculos de
+  IBS/CBS (uConferenciaIBSCBS) na mesma thread. A conferência só informa: não muda totais, cards nem
+  contadores. As linhas do log da conferência ficam em TResultadoLeitura.LogConferencia, para a tela
+  mostrar juntas no fim do log (decisão P7-7). }
 
 interface
 
@@ -13,7 +18,8 @@ uses
   System.SysUtils,
   System.Classes,
   System.Generics.Collections,
-  Data.DB;
+  Data.DB,
+  uConferenciaIBSCBS;
 
 type
   //Dados lidos de um XML de Nota Fiscal (NF-e modelo 55 ou NFC-e modelo 65)
@@ -37,6 +43,9 @@ type
     vIBSMun      : Double;
     vIBS         : Double;
     vCBS         : Double;
+    //Conferência de IBS/CBS (Plano 7): situação, divergências e casos sem conferência.
+    //Situação vazia = nota sem IBS/CBS ou não autorizada (fora da conferência)
+    Conferencia  : TConferenciaIBSCBS;
   end;
 
   //Totais das notas da grade (respeitando o filtro ativo)
@@ -51,6 +60,11 @@ type
     IBSMun           : Double;
     IBS              : Double;
     CBS              : Double;
+    //Conferência de IBS/CBS (Plano 7): notas conferidas e, entre elas, com Erro (com ou sem Alerta) e só
+    //com Alerta. Zeradas quando o DataSet não tem o campo conf_ibscbs
+    QuantidadeConferidas : Integer;
+    ConferidasComErro    : Integer;
+    ConferidasComAlerta  : Integer;
   end;
 
   //Chave de acesso inválida (decisão D4): a nota vira "não processada" com o motivo no log
@@ -90,9 +104,19 @@ type
     Entrada       : Integer;   //NF-e autorizadas com tpNF 0 (somadas aos totais)
     Cancelado     : Boolean;   //a leitura parou antes do último arquivo
     DuracaoMs     : Cardinal;  //tempo da leitura
+    //Conferência de IBS/CBS (Plano 7). Não muda os contadores acima
+    LogConferencia       : TList<TLinhaLog>;   //bloco do fim do log: resumo (17.23) e uma linha por divergência
+    NotasConferidas      : Integer;            //notas com IBS/CBS conferidas
+    NotasComErroIBSCBS   : Integer;            //notas com Erro (com ou sem Alerta)
+    NotasComAlertaIBSCBS : Integer;            //notas só com Alerta
+    NotasSimplesIBSCBS   : Integer;            //notas do Simples Nacional com item só com gTribSN (17.23b)
     constructor Create;
     destructor Destroy; override;
     procedure AdicionarLog(const Tipo: TTipoLinhaLog; const Texto: String);
+    //Monta o LogConferencia e os contadores da conferência a partir das notas lidas: linha de resumo
+    //(17.23) e depois as divergências e os casos sem conferência, em ordem de número da nota, item e nível
+    //(P7-7, P7-11, P7-15 e D22). Erro vira llErro; Alerta e sem conferência, llAviso
+    procedure GerarLogConferencia;
   end;
 
   //Aviso de progresso: Lidos de Total arquivos, Arquivo = nome do arquivo que está sendo lido.
@@ -176,7 +200,9 @@ uses
   System.Variants,
   System.SyncObjs,
   System.Types,
-  System.StrUtils;
+  System.StrUtils,
+  System.Math,
+  System.Generics.Defaults;
 
 var
   //Formato dos números no XML: ponto decimal e sem separador de milhar
@@ -284,6 +310,272 @@ begin
     Result := XMLParaFloat(NodeValor.Text);
 end;
 
+{ Leitura para a conferência de IBS/CBS (Plano 7, etapa 7.3) }
+
+function NoCaminho(Node: IXMLNode; const Caminho: String): IXMLNode;
+var
+  Partes: TArray<String>;
+  I     : Integer;
+begin
+  //Nó num caminho relativo ("gIBSCBS/gIBSUF/vIBSUF") ou nil quando alguma parte não existe
+  Result := Node;
+  Partes := Caminho.Split(['/']);
+  for I := 0 to High(Partes) do
+  begin
+    Result := NoFilho(Result, Partes[I]);
+    if Result = nil then
+      Exit;
+  end;
+end;
+
+function ValorIBSCBS(Node: IXMLNode; const Caminho: String): Int64;
+var
+  NodeValor: IXMLNode;
+  Texto    : String;
+begin
+  //Valor exato da conferência (décimos de milésimo). Tag ou grupo ausente, ou tag vazia, vale 0.
+  //Valor numérico inválido gera a exceção do Plano 1 (decisão D12): o arquivo não é processado
+  Result := 0;
+  NodeValor := NoCaminho(Node, Caminho);
+  if NodeValor = nil then
+    Exit;
+  Texto := Trim(NodeValor.Text);
+  if not TextoParaValorIBSCBS(Texto, Result) then
+    //Fora do formato do XML: o XMLParaFloat gera a mesma exceção dos outros valores da nota
+    //(número com expoente, que o StrToFloat aceita, é convertido)
+    Result := Round(XMLParaFloat(Texto) * ESCALA_IBSCBS);
+end;
+
+function SomaFilhosIBSCBS(Node: IXMLNode; const Nome: String): Int64;
+var
+  I: Integer;
+begin
+  //Soma da tag Nome em cada filho do grupo (ex.: ICMS/ICMS00/vICMS, PIS/PISAliq/vPIS)
+  Result := 0;
+  if Node = nil then
+    Exit;
+  for I := 0 to Node.ChildNodes.Count - 1 do
+    if Node.ChildNodes[I].NodeType = ntElement then
+      Result := Result + ValorIBSCBS(Node.ChildNodes[I], Nome);
+end;
+
+procedure LerEsferaIBSCBS(NodeGrupo: IXMLNode; const TagAliquota, TagValor: String;
+  var Esfera: TEsferaItemIBSCBS);
+var
+  NodeRed, NodeDif, NodeDevTrib: IXMLNode;
+begin
+  //Grupo gIBSUF, gIBSMun ou gCBS do item (seção 2.1 das regras)
+  Esfera.Presente := NodeGrupo <> nil;
+  if not Esfera.Presente then
+    Exit;
+  Esfera.pAliq    := ValorIBSCBS(NodeGrupo, TagAliquota);
+  Esfera.vTributo := ValorIBSCBS(NodeGrupo, TagValor);
+
+  NodeRed := NoFilho(NodeGrupo, 'gRed');
+  Esfera.TemRed := NodeRed <> nil;
+  if Esfera.TemRed then
+  begin
+    Esfera.pRedAliq  := ValorIBSCBS(NodeRed, 'pRedAliq');
+    Esfera.pAliqEfet := ValorIBSCBS(NodeRed, 'pAliqEfet');
+  end;
+
+  NodeDif := NoFilho(NodeGrupo, 'gDif');
+  Esfera.TemDif := NodeDif <> nil;
+  if Esfera.TemDif then
+  begin
+    Esfera.pDif := ValorIBSCBS(NodeDif, 'pDif');
+    Esfera.vDif := ValorIBSCBS(NodeDif, 'vDif');
+  end;
+
+  NodeDevTrib := NoFilho(NodeGrupo, 'gDevTrib');
+  Esfera.TemDevTrib := NodeDevTrib <> nil;
+  if Esfera.TemDevTrib then
+  begin
+    Esfera.vDevTrib    := ValorIBSCBS(NodeDevTrib, 'vDevTrib');
+    Esfera.TempDevTrib := TextoOpcional(NodeDevTrib, 'pDevTrib') <> '';
+    if Esfera.TempDevTrib then
+      Esfera.pDevTrib := ValorIBSCBS(NodeDevTrib, 'pDevTrib');
+  end;
+
+  Esfera.TemALCZFM := NoFilho(NodeGrupo, 'gALCZFMCBS') <> nil;
+end;
+
+procedure LerComposicaoBase(NodeDet, NodeImposto: IXMLNode; var Composicao: TComposicaoBaseIBSCBS);
+var
+  NodeProd, NodeICMS, NodePISST, NodeCOFINSST: IXMLNode;
+begin
+  //Campos do item usados na base do nível 3 (seção 2.1 das regras, "Campos do item usados na base")
+  NodeProd := NoFilho(NodeDet, 'prod');
+  Composicao.vProd  := ValorIBSCBS(NodeProd, 'vProd');
+  Composicao.vFrete := ValorIBSCBS(NodeProd, 'vFrete');
+  Composicao.vSeg   := ValorIBSCBS(NodeProd, 'vSeg');
+  Composicao.vOutro := ValorIBSCBS(NodeProd, 'vOutro');
+  Composicao.vDesc  := ValorIBSCBS(NodeProd, 'vDesc');
+
+  Composicao.vII := ValorIBSCBS(NodeImposto, 'II/vII');
+  Composicao.vIS := ValorIBSCBS(NodeImposto, 'IS/vIS');
+
+  NodeICMS := NoFilho(NodeImposto, 'ICMS');
+  Composicao.vICMS     := SomaFilhosIBSCBS(NodeICMS, 'vICMS');
+  Composicao.vFCP      := SomaFilhosIBSCBS(NodeICMS, 'vFCP');
+  Composicao.vICMSMono := SomaFilhosIBSCBS(NodeICMS, 'vICMSMono');
+
+  Composicao.vICMSUFDest := ValorIBSCBS(NodeImposto, 'ICMSUFDest/vICMSUFDest');
+  Composicao.vFCPUFDest  := ValorIBSCBS(NodeImposto, 'ICMSUFDest/vFCPUFDest');
+  Composicao.vISSQN      := ValorIBSCBS(NodeImposto, 'ISSQN/vISSQN');
+  Composicao.vPIS        := SomaFilhosIBSCBS(NoFilho(NodeImposto, 'PIS'), 'vPIS');
+  Composicao.vCOFINS     := SomaFilhosIBSCBS(NoFilho(NodeImposto, 'COFINS'), 'vCOFINS');
+
+  NodePISST := NoFilho(NodeImposto, 'PISST');
+  Composicao.TemPISST := NodePISST <> nil;
+  if Composicao.TemPISST then
+  begin
+    Composicao.SomaPISST := TextoOpcional(NodePISST, 'indSomaPISST') = '1';
+    Composicao.vPISST    := ValorIBSCBS(NodePISST, 'vPIS');
+  end;
+
+  NodeCOFINSST := NoFilho(NodeImposto, 'COFINSST');
+  Composicao.TemCOFINSST := NodeCOFINSST <> nil;
+  if Composicao.TemCOFINSST then
+  begin
+    Composicao.SomaCOFINSST := TextoOpcional(NodeCOFINSST, 'indSomaCOFINSST') = '1';
+    Composicao.vCOFINSST    := ValorIBSCBS(NodeCOFINSST, 'vCOFINS');
+  end;
+end;
+
+function LerItemIBSCBS(NodeDet, NodeImposto, NodeIBSCBS: IXMLNode; const finNFe: String): TItemIBSCBS;
+var
+  NodeG, NodeReg, NodeSN: IXMLNode;
+  E: TEsferaIBSCBS;
+const
+  TAG_ALIQUOTA: array[TEsferaIBSCBS] of String = ('pIBSUF', 'pIBSMun', 'pCBS');
+  TAG_VALOR   : array[TEsferaIBSCBS] of String = ('vIBSUF', 'vIBSMun', 'vCBS');
+  GRUPO       : array[TEsferaIBSCBS] of String = ('gIBSUF', 'gIBSMun', 'gCBS');
+  SUFIXO_REG  : array[TEsferaIBSCBS] of String = ('IBSUF', 'IBSMun', 'CBS');
+begin
+  //Item com det/imposto/IBSCBS (seção 2.1 das regras). Grupos e tags ausentes valem 0
+  Result := Default(TItemIBSCBS);
+  //nItem é obrigatório no XML: inválido gera exceção (arquivo não processado)
+  Result.NumeroItem := StrToInt(Trim(VarToStr(NodeDet.Attributes['nItem'])));
+  Result.CST        := TextoOpcional(NodeIBSCBS, 'CST');
+  Result.cClassTrib := TextoOpcional(NodeIBSCBS, 'cClassTrib');
+
+  NodeG := NoFilho(NodeIBSCBS, 'gIBSCBS');
+  Result.TemgIBSCBS := NodeG <> nil;
+  if Result.TemgIBSCBS then
+  begin
+    Result.vBC := ValorIBSCBS(NodeG, 'vBC');
+    for E := Low(TEsferaIBSCBS) to High(TEsferaIBSCBS) do
+      LerEsferaIBSCBS(NoFilho(NodeG, GRUPO[E]), TAG_ALIQUOTA[E], TAG_VALOR[E], Result.Esferas[E]);
+    Result.vIBS := ValorIBSCBS(NodeG, 'vIBS');
+
+    NodeReg := NoFilho(NodeG, 'gTribRegular');
+    Result.TemTribRegular := NodeReg <> nil;
+    if Result.TemTribRegular then
+      for E := Low(TEsferaIBSCBS) to High(TEsferaIBSCBS) do
+      begin
+        Result.pAliqEfetReg[E] := ValorIBSCBS(NodeReg, 'pAliqEfetReg' + SUFIXO_REG[E]);
+        Result.vTribReg[E]     := ValorIBSCBS(NodeReg, 'vTribReg' + SUFIXO_REG[E]);
+      end;
+
+    Result.TemTribCompraGov := NoFilho(NodeG, 'gTribCompraGov') <> nil;
+  end;
+
+  //Crédito presumido (NT v1.53: em IBSCBS/gCredPresOper)
+  Result.vCredPresIBS        := ValorIBSCBS(NodeIBSCBS, 'gCredPresOper/gIBSCredPres/vCredPres');
+  Result.vCredPresCondSusIBS := ValorIBSCBS(NodeIBSCBS, 'gCredPresOper/gIBSCredPres/vCredPresCondSus');
+  Result.vCredPresCBS        := ValorIBSCBS(NodeIBSCBS, 'gCredPresOper/gCBSCredPres/vCredPres');
+  Result.vCredPresCondSusCBS := ValorIBSCBS(NodeIBSCBS, 'gCredPresOper/gCBSCredPres/vCredPresCondSus');
+  Result.TemCredPresIBSZFM   := NoFilho(NodeIBSCBS, 'gCredPresIBSZFM') <> nil;
+
+  //Simples Nacional (NT 2026.005): o ACBr local ainda não tem esses campos, lidos direto do XML
+  NodeSN := NoFilho(NodeIBSCBS, 'gTribSN');
+  Result.TemgTribSN := NodeSN <> nil;
+  if Result.TemgTribSN then
+  begin
+    Result.TemgIBSSN := NoFilho(NodeSN, 'gIBSSN') <> nil;
+    Result.TemgCBSSN := NoFilho(NodeSN, 'gCBSSN') <> nil;
+    Result.vIBSSN    := ValorIBSCBS(NodeSN, 'gIBSSN/vIBSSN');
+    Result.vCBSSN    := ValorIBSCBS(NodeSN, 'gCBSSN/vCBSSN');
+  end;
+
+  //Composição da base: lida só quando o nível 3 roda no item, como no gabarito
+  Result.TemComposicao := ItemTemNivel3IBSCBS(Result.TemgIBSCBS, Result.CST, finNFe);
+  if Result.TemComposicao then
+    LerComposicaoBase(NodeDet, NodeImposto, Result.Composicao);
+end;
+
+function LerTotalIBSCBS(NodeIBSCBSTot: IXMLNode): TTotalIBSCBS;
+var
+  NodeSN: IXMLNode;
+begin
+  //Grupo total/IBSCBSTot (seção 2.2 das regras). Subgrupos ausentes valem 0
+  Result := Default(TTotalIBSCBS);
+  Result.Presente := NodeIBSCBSTot <> nil;
+  if not Result.Presente then
+    Exit;
+  Result.vBCIBSCBS              := ValorIBSCBS(NodeIBSCBSTot, 'vBCIBSCBS');
+  Result.vDif[esIBSUF]          := ValorIBSCBS(NodeIBSCBSTot, 'gIBS/gIBSUF/vDif');
+  Result.vDevTrib[esIBSUF]      := ValorIBSCBS(NodeIBSCBSTot, 'gIBS/gIBSUF/vDevTrib');
+  Result.vTributo[esIBSUF]      := ValorIBSCBS(NodeIBSCBSTot, 'gIBS/gIBSUF/vIBSUF');
+  Result.vDif[esIBSMun]         := ValorIBSCBS(NodeIBSCBSTot, 'gIBS/gIBSMun/vDif');
+  Result.vDevTrib[esIBSMun]     := ValorIBSCBS(NodeIBSCBSTot, 'gIBS/gIBSMun/vDevTrib');
+  Result.vTributo[esIBSMun]     := ValorIBSCBS(NodeIBSCBSTot, 'gIBS/gIBSMun/vIBSMun');
+  Result.vIBS                   := ValorIBSCBS(NodeIBSCBSTot, 'gIBS/vIBS');
+  Result.vCredPresIBS           := ValorIBSCBS(NodeIBSCBSTot, 'gIBS/vCredPres');
+  Result.vCredPresCondSusIBS    := ValorIBSCBS(NodeIBSCBSTot, 'gIBS/vCredPresCondSus');
+  Result.vDif[esCBS]            := ValorIBSCBS(NodeIBSCBSTot, 'gCBS/vDif');
+  Result.vDevTrib[esCBS]        := ValorIBSCBS(NodeIBSCBSTot, 'gCBS/vDevTrib');
+  Result.vTributo[esCBS]        := ValorIBSCBS(NodeIBSCBSTot, 'gCBS/vCBS');
+  Result.vCredPresCBS           := ValorIBSCBS(NodeIBSCBSTot, 'gCBS/vCredPres');
+  Result.vCredPresCondSusCBS    := ValorIBSCBS(NodeIBSCBSTot, 'gCBS/vCredPresCondSus');
+
+  NodeSN := NoFilho(NodeIBSCBSTot, 'gTribSN');
+  Result.TemgTribSN := NodeSN <> nil;
+  if Result.TemgTribSN then
+  begin
+    Result.vIBSSN := ValorIBSCBS(NodeSN, 'vIBSSN');
+    Result.vCBSSN := ValorIBSCBS(NodeSN, 'vCBSSN');
+  end;
+
+  Result.TemgMono        := NoFilho(NodeIBSCBSTot, 'gMono') <> nil;
+  Result.TemgEstornoCred := NoFilho(NodeIBSCBSTot, 'gEstornoCred') <> nil;
+end;
+
+function LerNotaIBSCBS(NodeinfNFe, NodeIde, NodeTotal: IXMLNode; const Dados: TDadosNotaXML): TNotaIBSCBS;
+var
+  NodeCompraGov, NodeDet, NodeImposto, NodeIBSCBS: IXMLNode;
+  I: Integer;
+begin
+  //Dados da nota autorizada para a conferência: ide, emitente, itens com IBSCBS e IBSCBSTot
+  Result := Default(TNotaIBSCBS);
+  Result.NumeroNF    := Dados.NumeroNF;
+  Result.Modelo      := Dados.Modelo;
+  Result.DataEmissao := TextoOpcional(NodeIde, 'dhEmi');
+  Result.finNFe      := TextoOpcional(NodeIde, 'finNFe');
+  Result.tpNFCredito := TextoOpcional(NodeIde, 'tpNFCredito');
+  Result.UFEmitente  := TextoOpcional(NoCaminho(NodeinfNFe, 'emit/enderEmit'), 'UF');
+
+  NodeCompraGov := NoFilho(NodeIde, 'gCompraGov');
+  Result.TemCompraGov := NodeCompraGov <> nil;
+  Result.pRedutor     := ValorIBSCBS(NodeCompraGov, 'pRedutor');
+
+  for I := 0 to NodeinfNFe.ChildNodes.Count - 1 do
+  begin
+    NodeDet := NodeinfNFe.ChildNodes[I];
+    if (NodeDet.NodeType <> ntElement) or (NodeDet.NodeName <> 'det') then
+      Continue;
+    NodeImposto := NoFilho(NodeDet, 'imposto');
+    NodeIBSCBS  := NoFilho(NodeImposto, 'IBSCBS');
+    if NodeIBSCBS = nil then
+      Continue;
+    SetLength(Result.Itens, Length(Result.Itens) + 1);
+    Result.Itens[High(Result.Itens)] := LerItemIBSCBS(NodeDet, NodeImposto, NodeIBSCBS, Result.finNFe);
+  end;
+
+  Result.Total := LerTotalIBSCBS(NoFilho(NodeTotal, 'IBSCBSTot'));
+end;
+
 function LerNotaXML(const CaminhoXML: String): TDadosNotaXML;
 var
   XMLDocument: IXMLDocument;
@@ -311,6 +603,7 @@ begin
   Result.vIBSMun      := 0;
   Result.vIBS         := 0;
   Result.vCBS         := 0;
+  Result.Conferencia  := Default(TConferenciaIBSCBS);
 
   XMLDocument := TXMLDocument.Create(Nil);
 
@@ -398,11 +691,17 @@ begin
 
     Result.vCBS    := ValorOpcional(NoFilho(NodeIBSCBSTot, 'gCBS'), 'vCBS');
   end;
+
+  //Conferência de IBS/CBS (Plano 7): itens com det/imposto/IBSCBS e o IBSCBSTot. Nota sem IBS/CBS
+  //fica com a situação vazia. Valor numérico inválido nesses grupos gera exceção (D12)
+  Result.Conferencia := ConferirNotaIBSCBS(LerNotaIBSCBS(NodeinfNFe, NodeIde, NodeTotal, Result));
 end;
 
 function CalcularTotais(DataSet: TDataSet): TTotaisNotas;
 var
-  Marcador: TBookmark;
+  Marcador    : TBookmark;
+  Conferencia : TField;
+  Situacao    : String;
 begin
   Result.Quantidade       := 0;
   Result.ValorTotal       := 0;
@@ -414,9 +713,15 @@ begin
   Result.IBSMun           := 0;
   Result.IBS              := 0;
   Result.CBS              := 0;
+  Result.QuantidadeConferidas := 0;
+  Result.ConferidasComErro    := 0;
+  Result.ConferidasComAlerta  := 0;
 
   if (DataSet = nil) or (not DataSet.Active) then
     Exit;
+
+  //Situação da conferência de IBS/CBS (Plano 7, glossário 16.2): vazia = nota fora da conferência
+  Conferencia := DataSet.FindField('conf_ibscbs');
 
   DataSet.DisableControls;
   try
@@ -439,6 +744,17 @@ begin
           Result.IBSMun     := Result.IBSMun     + DataSet.FieldByName('vibsmun').AsFloat;
           Result.IBS        := Result.IBS        + DataSet.FieldByName('vibs').AsFloat;
           Result.CBS        := Result.CBS        + DataSet.FieldByName('vcbs').AsFloat;
+        end;
+
+        if Conferencia <> nil then
+        begin
+          Situacao := Conferencia.AsString;
+          if Situacao <> '' then
+            Inc(Result.QuantidadeConferidas);
+          if Situacao = TextoSituacaoIBSCBS(scErro) then
+            Inc(Result.ConferidasComErro)
+          else if Situacao = TextoSituacaoIBSCBS(scAlerta) then
+            Inc(Result.ConferidasComAlerta);
         end;
 
         DataSet.Next;
@@ -548,10 +864,12 @@ begin
   inherited Create;
   Notas := TList<TNotaLida>.Create;
   Log   := TList<TLinhaLog>.Create;
+  LogConferencia := TList<TLinhaLog>.Create;
 end;
 
 destructor TResultadoLeitura.Destroy;
 begin
+  LogConferencia.Free;
   Log.Free;
   Notas.Free;
   inherited;
@@ -564,6 +882,123 @@ begin
   Linha.Tipo  := Tipo;
   Linha.Texto := Texto;
   Log.Add(Linha);
+end;
+
+type
+  //Linha do bloco da conferência com a chave de ordenação (P7-7: número da nota, item e nível)
+  TLinhaConferencia = record
+    Numero : Integer;
+    Modelo : Integer;
+    Chave  : String;
+    Item   : Integer;   //itens primeiro; total (nível 2) e casos sem conferência no fim da nota
+    Nivel  : Integer;   //casos sem conferência = 5 (depois das divergências da nota)
+    Ordem  : Integer;   //ordem em que as regras rodaram (desempate)
+    Linha  : TLinhaLog;
+  end;
+
+function CompararLinhasConferencia(const A, B: TLinhaConferencia): Integer;
+begin
+  Result := CompareValue(A.Numero, B.Numero);
+  if Result = 0 then
+    Result := CompareValue(A.Modelo, B.Modelo);
+  if Result = 0 then
+    Result := CompareStr(A.Chave, B.Chave);
+  if Result = 0 then
+    Result := CompareValue(A.Item, B.Item);
+  if Result = 0 then
+    Result := CompareValue(A.Nivel, B.Nivel);
+  if Result = 0 then
+    Result := CompareValue(A.Ordem, B.Ordem);
+end;
+
+procedure TResultadoLeitura.GerarLogConferencia;
+var
+  Linhas : TList<TLinhaConferencia>;
+  L      : TLinhaConferencia;
+  Resumo : TLinhaLog;
+  Nota   : TNotaLida;
+  I, J   : Integer;
+  Ordem  : Integer;
+begin
+  LogConferencia.Clear;
+  NotasConferidas      := 0;
+  NotasComErroIBSCBS   := 0;
+  NotasComAlertaIBSCBS := 0;
+  NotasSimplesIBSCBS   := 0;
+
+  Linhas := TList<TLinhaConferencia>.Create(TComparer<TLinhaConferencia>.Construct(CompararLinhasConferencia));
+  try
+    Ordem := 0;
+    for I := 0 to Notas.Count - 1 do
+    begin
+      Nota := Notas[I];
+      if Nota.Dados.Conferencia.Situacao = scVazia then
+        Continue;
+
+      //Contagem da linha de resumo: a nota com Erro e Alerta conta só em Erro (18.21a)
+      Inc(NotasConferidas);
+      case Nota.Dados.Conferencia.Situacao of
+        scErro  : Inc(NotasComErroIBSCBS);
+        scAlerta: Inc(NotasComAlertaIBSCBS);
+      end;
+      if Nota.Dados.Conferencia.SimplesNacional then
+        Inc(NotasSimplesIBSCBS);
+
+      L.Numero := Nota.Numero;
+      L.Modelo := Nota.Modelo;
+      L.Chave  := Nota.Dados.Chave;
+      for J := 0 to High(Nota.Dados.Conferencia.Divergencias) do
+      begin
+        if Nota.Dados.Conferencia.Divergencias[J].Item = ITEM_TOTAL_IBSCBS then
+          L.Item := MaxInt
+        else
+          L.Item := Nota.Dados.Conferencia.Divergencias[J].Item;
+        L.Nivel := Nota.Dados.Conferencia.Divergencias[J].Nivel;
+        Inc(Ordem);
+        L.Ordem := Ordem;
+        if Nota.Dados.Conferencia.Divergencias[J].Tipo = tdErro then
+          L.Linha.Tipo := llErro
+        else
+          L.Linha.Tipo := llAviso;
+        L.Linha.Texto := Nota.Dados.Conferencia.Divergencias[J].TextoLog;
+        Linhas.Add(L);
+      end;
+
+      //Casos sem conferência (17.21): uma linha por nota, llAviso, sem contar como divergência (P7-6)
+      if Nota.Dados.Conferencia.TextoSemConferencia <> '' then
+      begin
+        L.Item  := MaxInt;
+        L.Nivel := 5;
+        Inc(Ordem);
+        L.Ordem := Ordem;
+        L.Linha.Tipo  := llAviso;
+        L.Linha.Texto := Nota.Dados.Conferencia.TextoSemConferencia;
+        Linhas.Add(L);
+      end;
+    end;
+
+    //Sem nota com IBS/CBS: sem bloco da conferência
+    if NotasConferidas = 0 then
+      Exit;
+
+    //Linha de resumo no início do bloco (17.23, 17.23a e 17.23b): Erro se houver Erro, senão Aviso;
+    //sem divergência, Sucesso
+    Resumo.Texto := TextoResumoConferenciaIBSCBS(NotasConferidas, NotasComErroIBSCBS, NotasComAlertaIBSCBS,
+                                                 NotasSimplesIBSCBS);
+    if NotasComErroIBSCBS > 0 then
+      Resumo.Tipo := llErro
+    else if NotasComAlertaIBSCBS > 0 then
+      Resumo.Tipo := llAviso
+    else
+      Resumo.Tipo := llSucesso;
+    LogConferencia.Add(Resumo);
+
+    Linhas.Sort;
+    for I := 0 to Linhas.Count - 1 do
+      LogConferencia.Add(Linhas[I].Linha);
+  finally
+    Linhas.Free;
+  end;
 end;
 
 { TCalculadoraXML }
@@ -599,6 +1034,9 @@ begin
       LerArquivoXML(Arquivos[I], Resultado);
       Resultado.ArquivosLidos := I + 1;
     end;
+
+    //Bloco da conferência de IBS/CBS no fim do log (P7-7), montado ainda na thread de leitura
+    Resultado.GerarLogConferencia;
   finally
     Resultado.DuracaoMs := GetTickCount - Inicio;
   end;

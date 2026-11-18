@@ -126,4 +126,38 @@ object DMConfig: TDMConfig
       Size = 30
     end
   end
+  object QryDivergencias: TFDQuery
+    BeforeOpen = QryNotasBeforeOpen
+    Connection = Conexao
+    SQL.Strings = (
+      'SELECT NUMERO, MODELO, CHAVE, DATA, ITEM, NIVEL, TIPO, CAMPO, VALOR_XML, ESPERADO FROM divergencia_ibscbs'
+      'WHERE (:MODELO = 0 OR MODELO = :MODELO)'
+      'ORDER BY CAST(NUMERO AS INTEGER), MODELO, CHAVE, CASE WHEN ITEM = 0 THEN 1 ELSE 0 END, ITEM, NIVEL, SEQ')
+    Left = 320
+    Top = 120
+    ParamData = <
+      item
+        Name = 'MODELO'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = 0
+      end>
+  end
+  object QryNotasConferidas: TFDQuery
+    BeforeOpen = QryNotasBeforeOpen
+    Connection = Conexao
+    SQL.Strings = (
+      'SELECT NUMERO, DATA, MODELO, CONF_IBSCBS FROM NF'
+      'WHERE COALESCE(CONF_IBSCBS, '#39#39') <> '#39#39
+      'AND (:MODELO = 0 OR MODELO = :MODELO)')
+    Left = 320
+    Top = 176
+    ParamData = <
+      item
+        Name = 'MODELO'
+        DataType = ftInteger
+        ParamType = ptInput
+        Value = 0
+      end>
+  end
 end

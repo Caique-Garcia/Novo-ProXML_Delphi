@@ -1,0 +1,19 @@
+CST;descricao;exige_gIBSCBS;reducao_aliquota;reducao_bc;diferimento;monofasica;transf_credito;ajuste_compet;credpres_ibs_zfm
+000;Tributação integral;S;N;N;N;N;N;N;N
+010;Tributação com alíquotas uniformes;S;N;N;N;N;N;N;N
+011;Tributação com alíquotas uniformes reduzidas;S;S;N;N;N;N;N;N
+200;Alíquota reduzida;S;S;N;N;N;N;N;N
+220;Alíquota fixa;S;N;N;N;N;N;N;N
+221;Alíquota fixa proporcional;S;N;N;N;N;N;N;N
+222;Redução de Base de Cálculo;S;N;S;N;N;N;N;N
+400;Isenção;N;N;N;N;N;N;N;N
+410;Imunidade e não incidência;N;N;N;N;N;N;N;N
+510;Diferimento;S;N;N;S;N;N;N;N
+515;Diferimento com redução de alíquota;S;S;N;S;N;N;N;N
+550;Suspensão;S;N;N;N;N;N;N;N
+620;Tributação Monofásica;N;N;N;N;S;N;N;N
+800;Transferência de crédito;N;N;N;N;N;S;N;N
+810;Ajuste de IBS na ZFM;N;N;N;N;N;N;N;S
+811;Ajustes;N;N;N;N;N;N;S;N
+820;Tributação em documento específico;N;N;N;N;N;N;N;N
+830;Exclusão da Base de Cálculo;S;N;N;N;N;N;N;N

@@ -45,6 +45,7 @@ uses
   DM,
   ProXML.FormRelatorios,
   ProXML.FormRelatorioIBSCBS,
+  ProXML.FormRelatorioDivergencias,
   System.ImageList,
   Vcl.ImgList,
   ACBrDFeReport,
@@ -71,7 +72,7 @@ uses
 
 type
   //Relatório aberto depois de gravar as notas no banco (GravarNotasDB)
-  TTipoRelatorio = (trNotas, trIBSCBS);
+  TTipoRelatorio = (trNotas, trIBSCBS, trDivergencias);
 
 const
   //Erro ao ler as configurações de e-mail no FormCreate: a caixa 12.18 aparece depois que a janela abre
@@ -165,6 +166,12 @@ type
     function PontoEmNota(const X, Y: Integer): Boolean;
     //O último clique (inclusive o duplo) foi sobre uma nota
     function UltimoCliqueEmNota: Boolean;
+    //Célula no ponto (coordenadas da grade): a coluna e a linha de dados (0 = 1ª linha visível; -1 = título).
+    //False fora das colunas e das linhas (Plano 7: dica por célula da coluna IBS/CBS)
+    function CelulaNoPonto(const X, Y: Integer; out Coluna: TColumn; out Linha: Integer): Boolean;
+    //Valor de um campo numa linha de dados visível (0 = 1ª linha visível), sem mudar a nota atual. Null se
+    //a linha não tem nota
+    function ValorNaLinha(const Linha: Integer; const Campo: string): Variant;
     property OnDesenharTitulo: TDesenharTituloGrade read FOnDesenharTitulo write FOnDesenharTitulo;
     property OnRedimensionar: TNotifyEvent read FOnRedimensionar write FOnRedimensionar;
     property OnCliqueNota: TNotifyEvent read FOnCliqueNota write FOnCliqueNota;
@@ -339,6 +346,14 @@ type
     FDMemTable1vibsmun: TFloatField;
     FDMemTable1vibs: TFloatField;
     FDMemTable1vcbs: TFloatField;
+    //Conferência de IBS/CBS (Plano 7): situação da coluna IBS/CBS (OK, Alerta, Erro ou vazia), gravidade para
+    //ordenar (0 vazia, 1 OK, 2 Alerta, 3 Erro) e o que a dica da célula precisa (glossário 16.4 a 16.8)
+    FDMemTable1conf_ibscbs: TWideStringField;
+    FDMemTable1conf_ordem: TIntegerField;
+    FDMemTable1conf_erros: TIntegerField;
+    FDMemTable1conf_alertas: TIntegerField;
+    FDMemTable1conf_parcial: TBooleanField;
+    FDMemTable1conf_simples: TBooleanField;
     ACBrNFe: TACBrNFe;
     GerarDANFe1: TMenuItem;
     ACBrNFeDANFeFPDF1: TACBrNFeDANFeFPDF;
@@ -422,7 +437,8 @@ type
     Panel9: TPanel;
     TimerConfigSalva: TTimer;
     TimerTesteConexao: TTimer;
-    //Tela Sobre (etapa 4.7; mockup sobre.html e glossário 13.1 a 13.6), aberta pelo "Sobre" do cabeçalho
+    //Tela Sobre (etapa 4.7; mockup sobre.html e glossário 13.1 a 13.6), aberta pelo "Sobre" do cabeçalho.
+    //Plano 3, etapa 3.5: link do site, divisória e o bloco "Apoie o projeto" (glossário 13.7 a 13.8c)
     TelaSobre: TTabSheet;
     PnlTelaSobre: TPanel;
     PnlTelaSobreFundo: TPanel;
@@ -430,7 +446,12 @@ type
     LabelSobreVersao: TLabel;
     LabelSobreDescricao: TLabel;
     LabelSobreAutor: TLabel;
+    PnlSobreSite: TPanel;
     PnlSobreLink: TPanel;
+    PnlSobreDivisoria: TPanel;
+    LabelSobreApoioTitulo: TLabel;
+    LabelSobreApoioTexto: TLabel;
+    PnlSobreApoiar: TPanel;
     LabelSobreCreditos: TLabel;
     PnlSobreAtivo: TPanel;
     ACBrMail1: TACBrMail;
@@ -477,6 +498,17 @@ type
     PnlGerarIBSCBS: TPanel;
     SkSvgDicaIBSCBS: TSkSvg;
     LabelDicaIBSCBS: TLabel;
+    //Plano 7, etapa 7.4: 3º quadro, relatório Divergências IBS/CBS (decisão P7-1; glossário 18.1 a 18.4)
+    PnlOpcaoDivergencias: TPanel;
+    PnlOpcaoDivergenciasFundo: TPanel;
+    PnlOpcaoDivergenciasTitulo: TPanel;
+    SkSvgOpcaoDivergencias: TSkSvg;
+    LabelOpcaoDivergenciasTitulo: TLabel;
+    LabelOpcaoDivergenciasDescricao: TLabel;
+    PnlOpcaoDivergenciasRodape: TPanel;
+    PnlGerarDivergencias: TPanel;
+    SkSvgDicaDivergencias: TSkSvg;
+    LabelDicaDivergencias: TLabel;
     LabelRelatoriosRodape: TLabel;
     procedure SelecionarPastaClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
@@ -559,6 +591,10 @@ type
     FErroLeituraConfig  : string;         //12.18 no FormCreate: a caixa aparece depois que a janela abre
     FPastaLeitura       : string;         //pasta do último Processar (texto 5.38)
     FPastaNotas         : string;         //pasta das notas carregadas na grade (linha "Pasta:" dos relatórios)
+    //Plano 7, etapa 7.4: divergências da conferência de IBS/CBS das notas da grade (uma linha por divergência,
+    //gravadas no banco junto com as notas para o relatório Divergências IBS/CBS) e a célula da última dica
+    FDivergencias       : TFDMemTable;
+    FCelulaDica         : TPoint;         //coluna e linha da dica atual da grade (X = -1: nenhuma)
     function  CopiarTextoTolerante(const Texto: string): Boolean;
     procedure AjustarAlturaLinhasGrade;
     procedure PrepararTelaNotas;
@@ -605,6 +641,11 @@ type
     procedure GerarRelatorio(const Relatorio: TTipoRelatorio);
     procedure FinalizaRelatorio(const Relatorio: TTipoRelatorio);
     procedure AbrirRelatorioIBSCBS;
+    procedure AbrirRelatorioDivergencias;
+    procedure CriarTabelaDivergencias;
+    procedure AdicionarDivergencias(const Nota: TNotaLida);
+    procedure DBGrid1MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    function  TextoDicaConferencia(const Linha: Integer): string;
     procedure ConfigACBR;
     procedure GerarDanfe(const CaminhoArq, Numero: String);
     function  ConfigurarLayoutDanfe(out Mensagem: string): Boolean;
@@ -679,10 +720,11 @@ type
     procedure AjustarLayoutRelatorios;
     procedure PnlOpcoesResize(Sender: TObject);
     procedure AjustarIndicadorFiltro;
-    procedure MostrarDica(IconeDica: TSkSvg; Dica: TLabel; const Texto: string);
+    procedure MostrarDica(Quadro: TPanel; IconeDica: TSkSvg; Dica: TLabel; const Texto: string);
     function  AlturaTextoQuebrado(Rotulo: TLabel; const Largura: Integer): Integer;
     procedure GerarRelatorioNotasClick(Sender: TObject);
     procedure GerarRelatorioIBSCBSClick(Sender: TObject);
+    procedure GerarRelatorioDivergenciasClick(Sender: TObject);
     procedure PrepararTelaCarregando;
     procedure AjustarLayoutCarregando;
     procedure PnlCarregandoFundoResize(Sender: TObject);
@@ -791,6 +833,8 @@ type
     procedure PnlTelaSobreFundoResize(Sender: TObject);
     procedure SobreClick(Sender: TObject);
     procedure LinkGitHubClick(Sender: TObject);
+    procedure LinkSiteClick(Sender: TObject);
+    procedure ApoiarClick(Sender: TObject);
     procedure AtualizarVisualSobre;
     procedure WMProXMLErroConfig(var Message: TMessage); message WM_PROXML_ERRO_CONFIG;
 
@@ -823,6 +867,7 @@ type
     //Botões "Gerar relatório" da tela Relatórios (criados em PrepararTelaRelatorios)
     btnGerarRelNotas   : TProBotao;
     btnGerarRelIBSCBS  : TProBotao;
+    btnGerarRelDivergencias : TProBotao;   //Plano 7: relatório Divergências IBS/CBS
     //Tela Notas (etapa 4.5): ações da linha de título e botão do estado vazio (PrepararTelaNotas)
     btnCopiarChave     : TProBotao;
     btnGerarDanfe      : TProBotao;
@@ -835,6 +880,9 @@ type
     btnTestarConexao   : TProBotao;
     btnAlterarConfig   : TProBotao;
     btnLinkGitHub      : TProBotao;
+    //Plano 3, etapa 3.5: link do site e "Apoiar no Apoia.se" (Sobre)
+    btnLinkSite        : TProBotao;
+    btnApoiar          : TProBotao;
     //Leitura dos XMLs em andamento (thread) e envio do e-mail em andamento
     property  Lendo: Boolean read FLendo;
     property  Enviando: Boolean read FEnviando;
@@ -909,6 +957,7 @@ uses
   blcksock,
   smtpsend,
   ssl_openssl,
+  uConferenciaIBSCBS,
   ProXML.Icones;
 
 {$R *.dfm}
@@ -936,6 +985,11 @@ const
   //Link da tela Sobre (glossário 13.4)
   URL_GITHUB   = 'https://github.com/Caique-Garcia/Novo-ProXML_Delphi';
   TEXTO_GITHUB = 'github.com/Caique-Garcia/Novo-ProXML_Delphi';
+
+  //Plano 3, etapa 3.5: site e Apoia.se na tela Sobre (glossário 13.7 e 13.8b)
+  URL_SITE     = 'https://proxml.vercel.app';
+  TEXTO_SITE   = 'proxml.vercel.app';
+  URL_APOIASE  = 'https://apoia.se/proxmlferramenta';
 
   //Anexo do e-mail (Plano 2: ZIP nativo no lugar do WinRAR), relativo à pasta do ProXML. O nome continua
   //NFCe_ProXML; o NFCe_ProXML.rar da v1.1.0 que sobrar na pasta NFCe fica onde está
@@ -1581,6 +1635,47 @@ begin
         FOnCliqueNota(Self);
 end;
 
+function TDBGrid.CelulaNoPonto(const X, Y: Integer; out Coluna: TColumn; out Linha: Integer): Boolean;
+var
+    Celula : TGridCoord;
+    Indice : Integer;
+begin
+    //Coluna e linha de dados sob o ponto; a linha do título vale -1
+    Coluna := nil;
+    Linha  := -1;
+    Result := False;
+    Celula := MouseCoord(X, Y);
+    if (Celula.X < IndicatorOffset) or (Celula.Y < 0) then
+        Exit;
+    Indice := RawToDataColumn(Celula.X);
+    if (Indice < 0) or (Indice >= Columns.Count) then
+        Exit;
+    Coluna := Columns[Indice];
+    if dgTitles in Options then
+        Linha := Celula.Y - 1
+    else
+        Linha := Celula.Y;
+    Result := True;
+end;
+
+function TDBGrid.ValorNaLinha(const Linha: Integer; const Campo: string): Variant;
+var
+    Anterior: Integer;
+begin
+    //A grade só guarda as linhas visíveis: o registro ativo do DataLink muda por um instante (como a própria
+    //pintura do TDBGrid faz), sem mover a nota atual e sem eventos do DataSet
+    Result := Null;
+    if (not DataLink.Active) or (Linha < 0) or (Linha >= DataLink.RecordCount) then
+        Exit;
+    Anterior := DataLink.ActiveRecord;
+    try
+        DataLink.ActiveRecord := Linha;
+        Result := DataLink.DataSet.FieldByName(Campo).Value;
+    finally
+        DataLink.ActiveRecord := Anterior;
+    end;
+end;
+
 procedure TFormPrincipal.ApplicationException(Sender: TObject; E: Exception);
 begin
   // Grava no log o erro com detalhes
@@ -1760,6 +1855,12 @@ begin
         Exit;
    end;
 
+   if Relatorio = trDivergencias then
+   begin
+        AbrirRelatorioDivergencias;
+        Exit;
+   end;
+
    FormRelatorio := TFormRelatorios.Create(Nil);
    try
         //Totais da memória (cards), com o filtro de modelo; o modelo vem de DMConfig.FiltroModelo
@@ -1801,6 +1902,32 @@ begin
     end;
 end;
 
+procedure TFormPrincipal.AbrirRelatorioDivergencias;
+var
+    FormDivergencias: TFormRelatorioDivergencias;
+begin
+    //Relatório Divergências IBS/CBS (Plano 7): uma linha por divergência das notas do modelo escolhido. Sai
+    //mesmo sem divergência (decisão P7-9); só não sai sem nota conferida no filtro (glossário 18.4)
+    FormDivergencias := TFormRelatorioDivergencias.Create(Nil);
+    try
+        //Contagens da conferência da memória (cards), com o filtro de modelo; o modelo vem de DMConfig.FiltroModelo
+        FormDivergencias.SetTotais(FTotais);
+        FormDivergencias.SetPasta(FPastaNotas);
+        FormDivergencias.SetVersao(VersaoDoExecutavel);
+
+        if not FormDivergencias.GerarRelatorio then
+        begin
+            //Com o botão desabilitado nesse caso, a caixa só aparece se o relatório for pedido mesmo assim
+            EncerrarCarregando(tlRelatorios);
+            CaixaMensagem('Nenhuma nota do modelo selecionado tem IBS/CBS.', mtInformation);
+        end;
+
+        //Visualização fechada: GravarNotasDB fecha a tela Carregando e volta para Relatórios
+    finally
+        FreeAndNil(FormDivergencias);
+    end;
+end;
+
 procedure TFormPrincipal.GerarRelatorio(const Relatorio: TTipoRelatorio);
 begin
     //Confere se a grade (filtrada) tem notas, grava no banco e abre o relatório escolhido.
@@ -1815,6 +1942,13 @@ begin
     if (Relatorio = trIBSCBS) and (FTotais.QuantidadeIBSCBS = 0) then
     begin
        //Sem nota com IBS/CBS no filtro: não grava nada no banco
+       CaixaMensagem('Nenhuma nota do modelo selecionado tem IBS/CBS.', mtInformation);
+       Exit;
+    end;
+
+    if (Relatorio = trDivergencias) and (FTotais.QuantidadeConferidas = 0) then
+    begin
+       //Sem nota conferida no filtro (glossário 18.4, igual a 8.10): não grava nada no banco
        CaixaMensagem('Nenhuma nota do modelo selecionado tem IBS/CBS.', mtInformation);
        Exit;
     end;
@@ -2278,10 +2412,12 @@ begin
   //Tela Carregando antes de começar a gravar (glossário 8.15 e 8.16). Fluxo: Carregando ->
   //visualização do QuickReport -> volta para Relatórios, com sucesso ou erro (o finally garante
   //a volta e o menu reabilitado; nos erros a tela volta antes da mensagem)
-  if Relatorio = trIBSCBS then
-    Titulo := 'Gerando o Relatório IBS/CBS' + #$2026
+  case Relatorio of
+    trIBSCBS       : Titulo := 'Gerando o Relatório IBS/CBS' + #$2026;
+    trDivergencias : Titulo := 'Gerando o relatório Divergências IBS/CBS' + #$2026;   //glossário 18.6
   else
     Titulo := 'Gerando o Relatório de Notas' + #$2026;
+  end;
   //Glossário 8.16: {n} = total gravado (todas as carregadas, sem o filtro de modelo)
   if FDMemTable1.Table.Rows.Count = 1 then
     Legenda := 'Gravando 1 nota e montando a visualização.'
@@ -2293,7 +2429,8 @@ begin
     Screen.Cursor := crHourGlass;
     try
       try
-        DMConfig.GravarNotas(Notas);
+        //Notas e divergências da conferência de IBS/CBS na mesma transação (Plano 7)
+        DMConfig.GravarNotas(Notas, FDivergencias);
       except
         on E: Exception do
         begin
@@ -3715,18 +3852,27 @@ begin
     //Quadros dos dois relatórios (8.3 a 8.7). "Gerar relatório" é TProBotao primário com printer
     btnGerarRelNotas  := TProBotao.CriarEm(PnlGerarNotas,  'Gerar relatório', ebPrimario, GerarRelatorioNotasClick);
     btnGerarRelIBSCBS := TProBotao.CriarEm(PnlGerarIBSCBS, 'Gerar relatório', ebPrimario, GerarRelatorioIBSCBSClick);
+    //Plano 7: 3º quadro, Divergências IBS/CBS (decisão P7-1; glossário 18.1 a 18.3), com o ícone list-checks
+    btnGerarRelDivergencias := TProBotao.CriarEm(PnlGerarDivergencias, 'Gerar relatório', ebPrimario,
+                                                 GerarRelatorioDivergenciasClick);
     PrepararOpcaoRelatorio(PnlOpcaoNotas, PnlOpcaoNotasFundo, PnlOpcaoNotasTitulo, SkSvgOpcaoNotas,
                            LabelOpcaoNotasTitulo, LabelOpcaoNotasDescricao, PnlOpcaoNotasRodape, PnlGerarNotas,
                            SkSvgDicaNotas, LabelDicaNotas, btnGerarRelNotas);
     PrepararOpcaoRelatorio(PnlOpcaoIBSCBS, PnlOpcaoIBSCBSFundo, PnlOpcaoIBSCBSTitulo, SkSvgOpcaoIBSCBS,
                            LabelOpcaoIBSCBSTitulo, LabelOpcaoIBSCBSDescricao, PnlOpcaoIBSCBSRodape, PnlGerarIBSCBS,
                            SkSvgDicaIBSCBS, LabelDicaIBSCBS, btnGerarRelIBSCBS);
+    PrepararOpcaoRelatorio(PnlOpcaoDivergencias, PnlOpcaoDivergenciasFundo, PnlOpcaoDivergenciasTitulo,
+                           SkSvgOpcaoDivergencias, LabelOpcaoDivergenciasTitulo, LabelOpcaoDivergenciasDescricao,
+                           PnlOpcaoDivergenciasRodape, PnlGerarDivergencias, SkSvgDicaDivergencias,
+                           LabelDicaDivergencias, btnGerarRelDivergencias);
     SkSvgOpcaoNotas.Svg.Source  := IconeNotas;
     SkSvgOpcaoIBSCBS.Svg.Source := IconeIBS;
+    SkSvgOpcaoDivergencias.Svg.Source := IconeDivergencias;
     LabelOpcaoNotasTitulo.Caption    := 'Relatório de Notas';
     LabelOpcaoNotasDescricao.Caption := 'Nº, modelo, data, chave, valor da nota, base de cálculo do ICMS e ICMS ' +
                                         'de cada nota, com os totais no fim.';
     LabelOpcaoIBSCBSTitulo.Caption   := 'Relatório IBS/CBS';
+    LabelOpcaoDivergenciasTitulo.Caption := 'Divergências IBS/CBS';
 
     //Linha do título do quadro: a maior entre o ícone de 20 px e o texto de 12 pt
     Medida := TBitmap.Create;
@@ -3734,12 +3880,14 @@ begin
         Medida.Canvas.Font.Assign(LabelOpcaoNotasTitulo.Font);
         PnlOpcaoNotasTitulo.Height := Max(Escalar(TamanhoIconeMenu), Medida.Canvas.TextHeight('Ag'));
         PnlOpcaoIBSCBSTitulo.Height := PnlOpcaoNotasTitulo.Height;
+        PnlOpcaoDivergenciasTitulo.Height := PnlOpcaoNotasTitulo.Height;
     finally
         Medida.Free;
     end;
     SkSvgOpcaoNotas.Margins.SetBounds(0, (PnlOpcaoNotasTitulo.Height - Escalar(TamanhoIconeMenu)) div 2, 0,
         PnlOpcaoNotasTitulo.Height - Escalar(TamanhoIconeMenu) - (PnlOpcaoNotasTitulo.Height - Escalar(TamanhoIconeMenu)) div 2);
     SkSvgOpcaoIBSCBS.Margins.Assign(SkSvgOpcaoNotas.Margins);
+    SkSvgOpcaoDivergencias.Margins.Assign(SkSvgOpcaoNotas.Margins);
 
     //Rodapé da tela (8.11): legenda 9 pt CorTextoSecundario, 16 px abaixo dos quadros
     AplicarFonte(LabelRelatoriosRodape.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
@@ -3760,9 +3908,9 @@ var
 begin
     //Quadro de um relatório (mockup .opc): borda CorBorda de 1 px, fundo CorSuperficie e padding 16;
     //título 12 pt Semibold com ícone de 20 px CorPrimaria, descrição 10 pt CorTextoSecundario e, embaixo,
-    //"Gerar relatório" com a dica visível ao lado (ícone info 14 px + texto 9 pt CorTextoSecundario).
-    //O painel de encaixe do botão tem a margem do contorno de foco em volta da face: o padding esquerdo
-    //e o de baixo do quadro descontam essa margem para a face ficar alinhada ao texto
+    //"Gerar relatório" com a dica visível abaixo dele (ícone info 14 px + texto 9 pt CorTextoSecundario;
+    //tokens.md 5.16). O painel de encaixe do botão tem a margem do contorno de foco em volta da face: o padding
+    //esquerdo e o de baixo do quadro descontam essa margem para a face ficar alinhada ao texto
     Margem := Botao.MargemFoco;
     Borda.Color := CorBorda;
     Borda.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
@@ -3787,39 +3935,55 @@ begin
     Descricao.AutoSize := False;
     Descricao.WordWrap := True;
 
+    //Rodapé: botão em cima e dica embaixo, posicionados em AjustarLayoutRelatorios (sem Align: a dica não
+    //fica mais ao lado do botão)
     Rodape.Color  := CorSuperficie;
     Encaixe.Color := CorSuperficie;
-    Encaixe.AlignWithMargins := True;
+    Encaixe.Align := alNone;
+    Encaixe.AlignWithMargins := False;
     Botao.IconeSvg := IconeRelatorios;
     Botao.Hint     := 'Gravar as notas e abrir a visualização do relatório';
     Botao.ShowHint := True;
-    Encaixe.Width  := Botao.LarguraIdeal;
+    Encaixe.SetBounds(0, 0, Botao.LarguraIdeal, Escalar(AlturaBotao) + 2 * Margem);
 
     IconeDica.Svg.Source        := IconeInfo;
     IconeDica.Svg.OverrideColor := CorAlpha(CorTextoSecundario);
+    IconeDica.Align             := alNone;
+    IconeDica.AlignWithMargins  := False;
     IconeDica.Width             := Escalar(TamanhoIconeDica);
-    IconeDica.AlignWithMargins  := True;
+    IconeDica.Height            := Escalar(TamanhoIconeDica);
     AplicarFonte(Dica.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
-    Dica.AlignWithMargins := True;
-    Dica.Margins.SetBounds(Escalar(EspacoMeio), 0, 0, 0);
-    Dica.Layout   := tlCenter;
+    Dica.Align            := alNone;
+    Dica.AlignWithMargins := False;
+    Dica.AutoSize := False;
+    Dica.Layout   := tlTop;
     Dica.WordWrap := True;
-
-    //Ordem da esquerda para a direita: botão, ícone da dica, texto da dica
-    Encaixe.Left   := 0;
-    IconeDica.Left := Encaixe.Left + Encaixe.Width + 1;
 end;
 
-procedure TFormPrincipal.MostrarDica(IconeDica: TSkSvg; Dica: TLabel; const Texto: string);
+procedure TFormPrincipal.MostrarDica(Quadro: TPanel; IconeDica: TSkSvg; Dica: TLabel; const Texto: string);
+
+    procedure AplicarHint(Controle: TControl);
+    var
+        I: Integer;
+    begin
+        //O botão guarda a própria dica ("Gravar as notas…"); o resto do quadro mostra a dica visível
+        if Controle is TProBotao then
+            Exit;
+        Controle.Hint     := Texto;
+        Controle.ShowHint := Texto <> '';
+        if Controle is TWinControl then
+            for I := 0 to TWinControl(Controle).ControlCount - 1 do
+                AplicarHint(TWinControl(Controle).Controls[I]);
+    end;
+
 begin
-    //Dica visível ao lado do botão desabilitado (tokens.md 5.12: o hint de um controle desabilitado
-    //não aparece na VCL). Texto vazio: sem dica
+    //Dica visível abaixo do botão desabilitado (tokens.md 5.12 e 5.16: o hint de um controle desabilitado
+    //não aparece na VCL). Texto vazio: sem dica. A posição e a altura vêm de AjustarLayoutRelatorios.
+    //O mesmo texto vai para o Hint do quadro inteiro (tokens.md 5.16) e é limpo quando a dica some
     Dica.Caption      := Texto;
     Dica.Visible      := Texto <> '';
     IconeDica.Visible := Texto <> '';
-    //alLeft: o ícone volta sempre depois do botão
-    if IconeDica.Visible then
-        IconeDica.Left := IconeDica.Parent.ClientWidth;
+    AplicarHint(Quadro);
 end;
 
 procedure TFormPrincipal.AtualizarTelaRelatorios;
@@ -3828,6 +3992,9 @@ var
     Total     : Integer;
     ComIBSCBS : Integer;
     Descricao : string;
+    Conferidas: Integer;
+    ComErro   : Integer;
+    ComAlerta : Integer;
 
     function QuantidadeNotas(const N: Integer): string;
     begin
@@ -3840,7 +4007,8 @@ var
 begin
     //Glossário 8.2 a 8.10, sempre com as notas do filtro de modelo atual (a busca da tela Notas não
     //entra: decisão D5). Só atualiza a tela: nada é gravado ao abrir ou atualizar a tela Relatórios
-    if (SeletorModelo = nil) or (btnGerarRelNotas = nil) or (btnGerarRelIBSCBS = nil) then
+    if (SeletorModelo = nil) or (btnGerarRelNotas = nil) or (btnGerarRelIBSCBS = nil) or
+       (btnGerarRelDivergencias = nil) then
         Exit;
 
     Carregadas := 0;
@@ -3867,28 +4035,60 @@ begin
         Descricao := Descricao + ' ' + IntToStr(ComIBSCBS) + ' de ' + IntToStr(Total) + ' notas têm IBS/CBS.';
     LabelOpcaoIBSCBSDescricao.Caption := Descricao;
 
-    //Botões e dicas visíveis: sem notas carregadas, os dois desabilitados (8.8); com notas carregadas
-    //mas nenhuma no filtro de modelo, os dois desabilitados (8.8a); com notas e nenhuma com
-    //IBS/CBS no filtro, só o IBS/CBS (8.10)
+    //Divergências IBS/CBS (18.2 e 18.2a): contagens das notas conferidas do filtro (a nota com Erro e Alerta
+    //conta só em Erro). Como no IBS/CBS, a contagem só aparece com notas no filtro
+    Conferidas := FTotais.QuantidadeConferidas;
+    ComErro    := FTotais.ConferidasComErro;
+    ComAlerta  := FTotais.ConferidasComAlerta;
+    Descricao  := 'Erros e alertas da conferência de IBS/CBS, um por linha: nota, item, nível, campo, valor no ' +
+                  'XML e valor esperado.';
+    if (Total > 0) and (Conferidas > 0) then
+    begin
+        if (ComErro > 0) and (ComAlerta > 0) then
+            Descricao := Descricao + ' ' + QuantidadeNotas(ComErro) + ' com Erro e ' + IntToStr(ComAlerta) +
+                         ' com Alerta.'
+        else if ComErro > 0 then
+            Descricao := Descricao + ' ' + QuantidadeNotas(ComErro) + ' com Erro.'
+        else if ComAlerta > 0 then
+            Descricao := Descricao + ' ' + QuantidadeNotas(ComAlerta) + ' com Alerta.'
+        else if Conferidas = 1 then
+            Descricao := Descricao + ' Nenhuma divergência na nota conferida.'
+        else
+            Descricao := Descricao + ' Nenhuma divergência nas ' + IntToStr(Conferidas) + ' notas conferidas.';
+    end;
+    LabelOpcaoDivergenciasDescricao.Caption := Descricao;
+
+    //Botões e dicas visíveis: sem notas carregadas, os três desabilitados (8.8); com notas carregadas
+    //mas nenhuma no filtro de modelo, os três desabilitados (8.8a); com notas e nenhuma com
+    //IBS/CBS no filtro, IBS/CBS e Divergências desabilitados (8.10 e 18.4). Sem divergência, o
+    //Divergências continua habilitado (decisão P7-9)
     btnGerarRelNotas.Enabled  := (Total > 0) and (not Bloqueado);
     btnGerarRelIBSCBS.Enabled := (Total > 0) and (ComIBSCBS > 0) and (not Bloqueado);
+    btnGerarRelDivergencias.Enabled := (Total > 0) and (Conferidas > 0) and (not Bloqueado);
     if (Total = 0) and (Carregadas > 0) then
     begin
-        MostrarDica(SkSvgDicaNotas,  LabelDicaNotas,  'Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima.');
-        MostrarDica(SkSvgDicaIBSCBS, LabelDicaIBSCBS, 'Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima.');
+        MostrarDica(PnlOpcaoNotas, SkSvgDicaNotas,  LabelDicaNotas,  'Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima.');
+        MostrarDica(PnlOpcaoIBSCBS, SkSvgDicaIBSCBS, LabelDicaIBSCBS, 'Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima.');
+        MostrarDica(PnlOpcaoDivergencias, SkSvgDicaDivergencias, LabelDicaDivergencias,
+                    'Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima.');
     end
     else if Total = 0 then
     begin
-        MostrarDica(SkSvgDicaNotas,  LabelDicaNotas,  'Processe uma pasta para gerar relatórios.');
-        MostrarDica(SkSvgDicaIBSCBS, LabelDicaIBSCBS, 'Processe uma pasta para gerar relatórios.');
+        MostrarDica(PnlOpcaoNotas, SkSvgDicaNotas,  LabelDicaNotas,  'Processe uma pasta para gerar relatórios.');
+        MostrarDica(PnlOpcaoIBSCBS, SkSvgDicaIBSCBS, LabelDicaIBSCBS, 'Processe uma pasta para gerar relatórios.');
+        MostrarDica(PnlOpcaoDivergencias, SkSvgDicaDivergencias, LabelDicaDivergencias, 'Processe uma pasta para gerar relatórios.');
     end
     else
     begin
-        MostrarDica(SkSvgDicaNotas, LabelDicaNotas, '');
+        MostrarDica(PnlOpcaoNotas, SkSvgDicaNotas, LabelDicaNotas, '');
         if ComIBSCBS = 0 then
-            MostrarDica(SkSvgDicaIBSCBS, LabelDicaIBSCBS, 'Nenhuma nota do modelo selecionado tem IBS/CBS.')
+            MostrarDica(PnlOpcaoIBSCBS, SkSvgDicaIBSCBS, LabelDicaIBSCBS, 'Nenhuma nota do modelo selecionado tem IBS/CBS.')
         else
-            MostrarDica(SkSvgDicaIBSCBS, LabelDicaIBSCBS, '');
+            MostrarDica(PnlOpcaoIBSCBS, SkSvgDicaIBSCBS, LabelDicaIBSCBS, '');
+        if Conferidas = 0 then
+            MostrarDica(PnlOpcaoDivergencias, SkSvgDicaDivergencias, LabelDicaDivergencias, 'Nenhuma nota do modelo selecionado tem IBS/CBS.')
+        else
+            MostrarDica(PnlOpcaoDivergencias, SkSvgDicaDivergencias, LabelDicaDivergencias, '');
     end;
 
     AjustarIndicadorFiltro;
@@ -3926,6 +4126,7 @@ end;
 
 procedure TFormPrincipal.AjustarLayoutRelatorios;
 var
+    Medida          : TBitmap;
     Margem          : Integer;
     Espaco          : Integer;
     Largura         : Integer;
@@ -3933,23 +4134,44 @@ var
     LarguraDica     : Integer;
     AlturaDescricao : Integer;
     AlturaBotaoEncx : Integer;
+    AlturaFonte     : Integer;
+    AlturaLinha     : Integer;
+    Linhas          : Integer;
     AlturaRodape    : Integer;
     Altura          : Integer;
 
-    procedure AjustarRodape(Rodape, Encaixe: TPanel; IconeDica: TSkSvg);
-    var
-        Folga: Integer;
+    function LinhasDica(Dica: TLabel): Integer;
     begin
+        //Linhas da dica quebrada na largura do texto, pela fonte real no PPI atual (0: quadro sem dica)
+        if not Dica.Visible then
+            Result := 0
+        else
+            Result := Max(1, (AlturaTextoQuebrado(Dica, LarguraDica) + AlturaFonte div 2) div AlturaFonte);
+    end;
+
+    procedure AjustarRodape(Rodape, Encaixe: TPanel; Botao: TProBotao; IconeDica: TSkSvg; Dica: TLabel);
+    var
+        Topo: Integer;
+    begin
+        //Botão no alto do rodapé, alinhado à esquerda; a dica (se houver) 8 px abaixo da face, no mesmo Left
+        //dela: ícone info alinhado à primeira linha + 4 px + texto quebrado na largura interna do quadro
         Rodape.Height := AlturaRodape;
-        Folga := AlturaRodape - AlturaBotaoEncx;
-        Encaixe.Margins.SetBounds(0, Folga div 2, 0, Folga - Folga div 2);
-        Folga := AlturaRodape - Escalar(TamanhoIconeDica);
-        IconeDica.Margins.SetBounds(Escalar(EspacoDica) - Margem, Folga div 2, 0, Folga - Folga div 2);
+        Encaixe.SetBounds(0, 0, Botao.LarguraIdeal, AlturaBotaoEncx);
+        if Dica.Visible then
+        begin
+            Topo := AlturaBotaoEncx - Margem + Escalar(EspacoDica);
+            IconeDica.SetBounds(Margem, Topo + (AlturaLinha - Escalar(TamanhoIconeDica)) div 2,
+                                Escalar(TamanhoIconeDica), Escalar(TamanhoIconeDica));
+            Dica.SetBounds(Margem + Escalar(TamanhoIconeDica) + Escalar(EspacoMeio), Topo + (AlturaLinha - AlturaFonte) div 2,
+                           LarguraDica, LinhasDica(Dica) * AlturaLinha);
+        end;
     end;
 
 begin
-    //Dois quadros lado a lado com a mesma largura e a mesma altura (espaço de 16 px entre eles).
-    //A altura vem da maior descrição e da dica, que pode quebrar em duas linhas em 1024 px
+    //Três quadros lado a lado com a mesma largura e a mesma altura (espaço de 16 px entre eles; Plano 7,
+    //tokens.md 5.16, mockup relatorios.html#p7-desabilitado). A altura vem da maior descrição e da dica com mais
+    //linhas: a dica fica sempre abaixo do botão e a área dela é igual nos 3 quadros (o quadro sem dica reserva
+    //o espaço vazio), para os 3 botões ficarem na mesma linha
     if (btnGerarRelNotas = nil) or FAjustandoRelatorios then
         Exit;
 
@@ -3957,30 +4179,43 @@ begin
     try
         Margem  := btnGerarRelNotas.MargemFoco;
         Espaco  := Escalar(Espaco2);
-        Largura := (PnlOpcoes.ClientWidth - Espaco) div 2;
+        Largura := (PnlOpcoes.ClientWidth - 2 * Espaco) div 3;
         if Largura <= 0 then
             Exit;
 
         //Largura do texto dentro do quadro: borda e padding dos dois lados
         LarguraTexto := Largura - 2 * Escalar(BordaQuadro) - 2 * Escalar(PaddingOpcao);
-        AlturaDescricao := Max(AlturaTextoQuebrado(LabelOpcaoNotasDescricao, LarguraTexto),
-                               AlturaTextoQuebrado(LabelOpcaoIBSCBSDescricao, LarguraTexto));
+        AlturaDescricao := Max(Max(AlturaTextoQuebrado(LabelOpcaoNotasDescricao, LarguraTexto),
+                                   AlturaTextoQuebrado(LabelOpcaoIBSCBSDescricao, LarguraTexto)),
+                               AlturaTextoQuebrado(LabelOpcaoDivergenciasDescricao, LarguraTexto));
         LabelOpcaoNotasDescricao.Height  := AlturaDescricao;
         LabelOpcaoIBSCBSDescricao.Height := AlturaDescricao;
+        LabelOpcaoDivergenciasDescricao.Height := AlturaDescricao;
 
-        //Rodapé: face do botão (32 px) com a margem do foco; a dica pode precisar de mais altura
+        //Altura de uma linha da fonte da dica (9 pt) no PPI atual; a linha da dica tem 16 px (ou a da fonte,
+        //se for maior)
+        Medida := TBitmap.Create;
+        try
+            Medida.Canvas.Font.Assign(LabelDicaNotas.Font);
+            AlturaFonte := Max(1, Medida.Canvas.TextHeight('Ag'));
+        finally
+            Medida.Free;
+        end;
+        AlturaLinha := Max(Escalar(AlturaLinhaDica), AlturaFonte);
+
+        //Rodapé: face do botão (32 px) com a margem do foco; com dica na faixa, mais 8 px e a área da dica
+        //(linhas da dica mais longa x 16 px). Texto da dica = largura interna - ícone 14 - 4
         AlturaBotaoEncx := Escalar(AlturaBotao) + 2 * Margem;
-        AlturaRodape    := AlturaBotaoEncx;
-        LarguraDica := LarguraTexto + Margem - PnlGerarNotas.Width - (Escalar(EspacoDica) - Margem) -
-                       Escalar(TamanhoIconeDica) - Escalar(EspacoMeio);
-        if LabelDicaNotas.Visible then
-            AlturaRodape := Max(AlturaRodape, AlturaTextoQuebrado(LabelDicaNotas, LarguraDica));
-        LarguraDica := LarguraTexto + Margem - PnlGerarIBSCBS.Width - (Escalar(EspacoDica) - Margem) -
-                       Escalar(TamanhoIconeDica) - Escalar(EspacoMeio);
-        if LabelDicaIBSCBS.Visible then
-            AlturaRodape := Max(AlturaRodape, AlturaTextoQuebrado(LabelDicaIBSCBS, LarguraDica));
-        AjustarRodape(PnlOpcaoNotasRodape, PnlGerarNotas, SkSvgDicaNotas);
-        AjustarRodape(PnlOpcaoIBSCBSRodape, PnlGerarIBSCBS, SkSvgDicaIBSCBS);
+        LarguraDica := Max(1, LarguraTexto - Escalar(TamanhoIconeDica) - Escalar(EspacoMeio));
+        Linhas := Max(Max(LinhasDica(LabelDicaNotas), LinhasDica(LabelDicaIBSCBS)), LinhasDica(LabelDicaDivergencias));
+        if Linhas > 0 then
+            AlturaRodape := AlturaBotaoEncx + Escalar(EspacoDica) + Linhas * AlturaLinha
+        else
+            AlturaRodape := AlturaBotaoEncx;
+        AjustarRodape(PnlOpcaoNotasRodape, PnlGerarNotas, btnGerarRelNotas, SkSvgDicaNotas, LabelDicaNotas);
+        AjustarRodape(PnlOpcaoIBSCBSRodape, PnlGerarIBSCBS, btnGerarRelIBSCBS, SkSvgDicaIBSCBS, LabelDicaIBSCBS);
+        AjustarRodape(PnlOpcaoDivergenciasRodape, PnlGerarDivergencias, btnGerarRelDivergencias, SkSvgDicaDivergencias,
+                      LabelDicaDivergencias);
 
         Altura := 2 * Escalar(BordaQuadro) + PnlOpcaoNotasFundo.Padding.Top +
                   PnlOpcaoNotasTitulo.Height + PnlOpcaoNotasTitulo.Margins.Bottom +
@@ -3988,13 +4223,22 @@ begin
                   AlturaRodape + PnlOpcaoNotasFundo.Padding.Bottom;
 
         PnlOpcoes.Height := Altura;
-        LabelRelatoriosRodape.Height := AlturaTextoQuebrado(LabelRelatoriosRodape, PnlOpcoes.ClientWidth);
+        //Legenda 8.11 logo abaixo dos quadros (D3 da B4). Ao alargar a janela de uma vez, a VCL alinha a tela
+        //e só depois chama o OnResize dos quadros: a altura nova chegava com a legenda já posicionada pela
+        //altura antiga (33 a 57 px mais abaixo). A posição é refeita aqui; um alinhamento seguinte dá o mesmo
+        LabelRelatoriosRodape.SetBounds(LabelRelatoriosRodape.Left,
+                                        PnlOpcoes.Top + PnlOpcoes.Height + LabelRelatoriosRodape.Margins.Top,
+                                        LabelRelatoriosRodape.Width,
+                                        AlturaTextoQuebrado(LabelRelatoriosRodape, PnlOpcoes.ClientWidth));
         PnlOpcaoNotas.SetBounds(0, 0, Largura, Altura);
-        PnlOpcaoIBSCBS.SetBounds(Largura + Espaco, 0, PnlOpcoes.ClientWidth - Largura - Espaco, Altura);
+        PnlOpcaoIBSCBS.SetBounds(Largura + Espaco, 0, Largura, Altura);
+        //O 3º fica com o que sobrar da divisão (no máximo 2 px a mais)
+        PnlOpcaoDivergencias.SetBounds(2 * (Largura + Espaco), 0, PnlOpcoes.ClientWidth - 2 * (Largura + Espaco),
+                                       Altura);
     finally
         FAjustandoRelatorios := False;
     end;
-    //A altura pode ter mudado (dica em duas linhas): a rolagem de reserva acompanha
+    //A altura pode ter mudado (dica em mais linhas): a rolagem de reserva acompanha
     AjustarRolagem(FRolagemRelatorios);
 end;
 
@@ -4013,6 +4257,12 @@ procedure TFormPrincipal.GerarRelatorioIBSCBSClick(Sender: TObject);
 begin
     //"Gerar relatório" do Relatório IBS/CBS
     GerarRelatorio(trIBSCBS);
+end;
+
+procedure TFormPrincipal.GerarRelatorioDivergenciasClick(Sender: TObject);
+begin
+    //"Gerar relatório" do Divergências IBS/CBS (Plano 7)
+    GerarRelatorio(trDivergencias);
 end;
 
 procedure TFormPrincipal.PrepararTelaCarregando;
@@ -4142,6 +4392,8 @@ begin
         Result := 'IBS'
     else if Campo = 'vcbs' then
         Result := 'CBS'
+    else if Campo = 'conf_ibscbs' then
+        Result := 'IBS/CBS'   //glossário 16.1
     else
         Result := Campo;
 end;
@@ -4236,6 +4488,10 @@ begin
     DBGrid1.OnTitleClick     := DBGrid1TitleClick;
     DBGrid1.OnDblClick       := DBGrid1DblClick;
     DBGrid1.OnKeyDown        := DBGrid1KeyDown;
+    //Plano 7: dica por célula da coluna IBS/CBS (glossário 16.3 a 16.8; tokens.md 5.15)
+    DBGrid1.OnMouseMove      := DBGrid1MouseMove;
+    DBGrid1.ShowHint         := True;
+    FCelulaDica              := Point(-1, -1);
 
     //Colunas: Nº e valores à direita, Modelo centralizado, Data e Chave à esquerda (larguras da 5.7;
     //a Chave fica com o resto e as colunas de valor extras entram conforme a largura, decisão D3)
@@ -4259,7 +4515,10 @@ begin
         else if Coluna.FieldName = 'vibs' then
             PrepararColuna(Coluna, LarguraColunaIBS, taRightJustify)
         else if Coluna.FieldName = 'vcbs' then
-            PrepararColuna(Coluna, LarguraColunaCBS, taRightJustify);
+            PrepararColuna(Coluna, LarguraColunaCBS, taRightJustify)
+        else if Coluna.FieldName = 'conf_ibscbs' then
+            //Plano 7 (tokens.md 5.15): última coluna, sempre visível, alinhada à esquerda (ícone + texto)
+            PrepararColuna(Coluna, LarguraColunaConferencia, taLeftJustify);
     end;
 
     //Valores "R$ 1.234,56" com o formato pt-BR explícito da 4.3 (glossário 6.9), na grade e em
@@ -4275,6 +4534,8 @@ begin
 
     //Busca (OnFilterRecord, junto com o filtro de modelo) e ordenação padrão por Nº crescente
     FDMemTable1.OnFilterRecord := FDMemTable1FiltrarBusca;
+    //Divergências da conferência de IBS/CBS (Plano 7), guardadas para o relatório
+    CriarTabelaDivergencias;
     FColunaOrdem      := 'numero';
     FOrdemDecrescente := False;
     AplicarOrdenacao;
@@ -4412,16 +4673,24 @@ begin
 end;
 
 procedure TFormPrincipal.AjustarColunasGrade;
+const
+    //Colunas extras por prioridade (decisão P7-4, tokens.md 5.15): IBS e CBS, depois ICMS e por último
+    //Base ICMS. IBS e CBS continuam entrando juntas (nunca IBS sem CBS; decisão do usuário de 21/10/2026)
+    CAMPOS_EXTRAS : array[0..3] of string  = ('vibs', 'vcbs', 'vlicms', 'bcicms');
+    GRUPO_EXTRAS  : array[0..3] of Integer = (0, 0, 1, 2);
+    ULTIMO_GRUPO  = 2;
 var
-    Coluna   : TColumn;
-    Chave    : TColumn;
-    Extras   : array[0..3] of TColumn;
-    Larguras : array[0..3] of Integer;
-    Ocupado  : Integer;
-    Disponivel: Integer;
-    Resto    : Integer;
-    Cabe     : Boolean;
-    I        : Integer;
+    Coluna     : TColumn;
+    Chave      : TColumn;
+    Conferencia: TColumn;
+    Extras     : array[0..3] of TColumn;
+    Larguras   : array[0..3] of Integer;
+    Ocupado    : Integer;
+    Disponivel : Integer;
+    Resto      : Integer;
+    LarguraGrupo: Integer;
+    Cabe       : Boolean;
+    I, Grupo   : Integer;
 
     function ColunaDoCampo(const Campo: string): TColumn;
     var
@@ -4443,24 +4712,27 @@ var
     end;
 
 begin
-    //Decisão D3: Nº, Modelo, Data, Chave e Valor sempre. As colunas extras entram em pares, cada par
-    //só quando couber inteiro sem a Chave ficar abaixo do mínimo: primeiro Base ICMS + ICMS, depois
-    //IBS + CBS (nunca IBS sem CBS; decisão do usuário de 21/10/2026). A barra de rolagem vertical conta
+    //Decisão D3: Nº, Modelo, Data, Chave e Valor sempre; Plano 7 (P7-3): a coluna IBS/CBS também, sempre por
+    //último. As colunas extras entram por prioridade (P7-4), cada grupo só quando couber inteiro sem a Chave
+    //ficar abaixo do mínimo: IBS + CBS, depois ICMS e por último Base ICMS. A barra de rolagem vertical conta
     //sempre, para a coluna não aparecer e sumir junto com ela. A Chave fica com o resto da largura
     if FAjustandoColunas or (btnCopiarChave = nil) then
         Exit;
 
-    Chave     := ColunaDoCampo('chave');
-    Extras[0] := ColunaDoCampo('bcicms');
-    Extras[1] := ColunaDoCampo('vlicms');
-    Extras[2] := ColunaDoCampo('vibs');
-    Extras[3] := ColunaDoCampo('vcbs');
-    if (Chave = nil) or (Extras[0] = nil) or (Extras[1] = nil) or (Extras[2] = nil) or (Extras[3] = nil) then
+    Chave       := ColunaDoCampo('chave');
+    Conferencia := ColunaDoCampo('conf_ibscbs');
+    if (Chave = nil) or (Conferencia = nil) then
         Exit;
-    Larguras[0] := Escalar(LarguraColunaBaseICMS);
-    Larguras[1] := Escalar(LarguraColunaICMS);
-    Larguras[2] := Escalar(LarguraColunaIBS);
-    Larguras[3] := Escalar(LarguraColunaCBS);
+    for I := Low(Extras) to High(Extras) do
+    begin
+        Extras[I] := ColunaDoCampo(CAMPOS_EXTRAS[I]);
+        if Extras[I] = nil then
+            Exit;
+    end;
+    Larguras[0] := Escalar(LarguraColunaIBS);
+    Larguras[1] := Escalar(LarguraColunaCBS);
+    Larguras[2] := Escalar(LarguraColunaICMS);
+    Larguras[3] := Escalar(LarguraColunaBaseICMS);
 
     FAjustandoColunas := True;
     DBGrid1.Columns.BeginUpdate;
@@ -4471,22 +4743,33 @@ begin
         DefinirLargura('modelo', LarguraColunaModelo);
         DefinirLargura('data', LarguraColunaData);
         DefinirLargura('vtotal', LarguraColunaValor);
-        Disponivel := DBGrid1.Width - MulDiv(GetSystemMetrics(SM_CXVSCROLL), PPIAtual, Screen.PixelsPerInch);
+        DefinirLargura('conf_ibscbs', LarguraColunaConferencia);
+        Conferencia.Visible := True;
+        //Largura útil das colunas: a área cliente real da grade (sem a borda e sem a barra vertical). Sem a barra
+        //à vista, desconta a largura dela assim mesmo, para a coluna não aparecer e sumir junto com a barra.
+        //Defeito D1 da B3: Width - SM_CXVSCROLL não descontava a borda e a Chave ficava com 328 px nos limiares
+        Disponivel := DBGrid1.ClientWidth;
+        if (not DBGrid1.HandleAllocated) or ((GetWindowLong(DBGrid1.Handle, GWL_STYLE) and WS_VSCROLL) = 0) then
+            Dec(Disponivel, MulDiv(GetSystemMetrics(SM_CXVSCROLL), PPIAtual, Screen.PixelsPerInch));
         Ocupado := Escalar(LarguraColunaNumero) + Escalar(LarguraColunaModelo) + Escalar(LarguraColunaData) +
-                   Escalar(LarguraColunaChaveMin) + Escalar(LarguraColunaValor);
+                   Escalar(LarguraColunaChaveMin) + Escalar(LarguraColunaValor) + Escalar(LarguraColunaConferencia);
         Cabe := True;
-        I := Low(Extras);
-        while I < High(Extras) do
+        for Grupo := 0 to ULTIMO_GRUPO do
         begin
-            //Par I e I + 1: (Base ICMS, ICMS) e (IBS, CBS)
-            Cabe := Cabe and (Ocupado + Larguras[I] + Larguras[I + 1] <= Disponivel);
+            LarguraGrupo := 0;
+            for I := Low(Extras) to High(Extras) do
+                if GRUPO_EXTRAS[I] = Grupo then
+                    Inc(LarguraGrupo, Larguras[I]);
+            //Um grupo que não cabe tira também os de menor prioridade (a ordem nunca se inverte)
+            Cabe := Cabe and (Ocupado + LarguraGrupo <= Disponivel);
             if Cabe then
-                Inc(Ocupado, Larguras[I] + Larguras[I + 1]);
-            Extras[I].Width       := Larguras[I];
-            Extras[I + 1].Width   := Larguras[I + 1];
-            Extras[I].Visible     := Cabe;
-            Extras[I + 1].Visible := Cabe;
-            Inc(I, 2);
+                Inc(Ocupado, LarguraGrupo);
+            for I := Low(Extras) to High(Extras) do
+                if GRUPO_EXTRAS[I] = Grupo then
+                begin
+                    Extras[I].Width   := Larguras[I];
+                    Extras[I].Visible := Cabe;
+                end;
         end;
 
         Resto := DBGrid1.ClientWidth;
@@ -4497,7 +4780,7 @@ begin
                 Dec(Resto, Coluna.Width);
         end;
         //Sem largura para o mínimo da Chave (tela pequena, em qualquer escala): ela encolhe, com "…", e o Valor
-        //continua à vista
+        //e a coluna IBS/CBS continuam à vista
         Chave.Width := Max(Escalar(LarguraColunaChaveReduzida), Resto);
     finally
         DBGrid1.Columns.EndUpdate;
@@ -4777,7 +5060,10 @@ begin
     //data real (data_ordem = aaaammdd); empate desfeito pelo Nº crescente
     Campo := FColunaOrdem;
     if Campo = 'data' then
-        Campo := 'data_ordem';
+        Campo := 'data_ordem'
+    else if Campo = 'conf_ibscbs' then
+        //Plano 7 (16.9): por gravidade (vazia < OK < Alerta < Erro), empate por Nº
+        Campo := 'conf_ordem';
     Indice := Campo;
     if FOrdemDecrescente then
         Indice := Indice + ':D';
@@ -4822,7 +5108,8 @@ end;
 
 procedure TFormPrincipal.DBGrid1TitleClick(Column: TColumn);
 begin
-    //Clique no título: ordena pela coluna (crescente); de novo na mesma coluna, inverte
+    //Clique no título: ordena pela coluna (crescente); de novo na mesma coluna, inverte. A coluna IBS/CBS
+    //começa decrescente, com o Erro no topo (decisão P7-5)
     if Column.FieldName = '' then
         Exit;
 
@@ -4831,7 +5118,7 @@ begin
     else
     begin
         FColunaOrdem      := Column.FieldName;
-        FOrdemDecrescente := False;
+        FOrdemDecrescente := Column.FieldName = 'conf_ibscbs';
     end;
     AplicarOrdenacao;
 end;
@@ -4945,6 +5232,9 @@ var
     Divisoria  : Integer;
     Texto      : TRect;
     Valor      : string;
+    Icone      : TBitmap;
+    CorStatus  : TColor;
+    Esquerda   : Integer;
 begin
     //Linha (tokens.md 5.7): 10 pt CorTexto; linhas pares CorZebra; a nota escolhida em CorPrimariaSuave
     //com a marca de 3 px CorPrimaria na 1ª célula; divisória inferior de 1 px CorBorda
@@ -4967,6 +5257,45 @@ begin
     begin
         Tela.Brush.Color := CorPrimaria;
         Tela.FillRect(Rect(Area.Left, Area.Top, Area.Left + Escalar(MarcaSelecaoGrade), Area.Bottom - Divisoria));
+    end;
+
+    //Coluna IBS/CBS (Plano 7, tokens.md 5.15): ícone de 16 px + texto 10 pt, os dois na cor do status. Os
+    //ícones são os do log do Resumo (circle-check, triangle-alert e circle-x), pintados uma vez em bitmaps na
+    //escala atual. Nota sem IBS/CBS: só o fundo e a divisória
+    if Column.FieldName = 'conf_ibscbs' then
+    begin
+        Valor := '';
+        if Column.Field <> nil then
+            Valor := Column.Field.AsString;
+        if Valor = TextoSituacaoIBSCBS(scErro) then
+        begin
+            Icone     := IconeLog(llErro);
+            CorStatus := CorErro;
+        end
+        else if Valor = TextoSituacaoIBSCBS(scAlerta) then
+        begin
+            Icone     := IconeLog(llAviso);
+            CorStatus := CorAviso;
+        end
+        else if Valor = TextoSituacaoIBSCBS(scOK) then
+        begin
+            Icone     := IconeLog(llSucesso);
+            CorStatus := CorSucesso;
+        end
+        else
+            Exit;
+
+        Esquerda := Area.Left + Escalar(PaddingCelulaGrade);
+        Tela.Draw(Esquerda, Area.Top + (Area.Bottom - Divisoria - Area.Top - Icone.Height) div 2, Icone);
+        Tela.Font.Assign(DBGrid1.Font);
+        Tela.Font.Color := CorStatus;
+        Texto := Rect(Esquerda + Icone.Width + Escalar(EspacoIconeConferencia), Area.Top,
+                      Area.Right - Escalar(PaddingCelulaGrade), Area.Bottom - Divisoria);
+        Tela.Brush.Style := bsClear;
+        DrawText(Tela.Handle, PChar(Valor), Length(Valor), Texto,
+                 DT_SINGLELINE or DT_VCENTER or DT_NOPREFIX or DT_END_ELLIPSIS or DT_LEFT);
+        Tela.Brush.Style := bsSolid;
+        Exit;
     end;
 
     //Texto: valores pelo OnGetText (R$ pt-BR), centralizado na altura, com reticências se não couber
@@ -5044,8 +5373,10 @@ begin
     //Linhas visíveis na grade (filtro de modelo + busca), na ordem da grade; separador ";" (PD-2)
     Linhas := TStringBuilder.Create;
     try
-        //Cabeçalho (glossário 6.29)
-        Linhas.Append('Nº;Modelo;Data;Chave;Valor;Base ICMS;ICMS;Base IBS/CBS;IBS UF;IBS Mun.;IBS;CBS');
+        //Cabeçalho (glossário 16.10, que substitui a 6.29): a coluna da conferência fica no fim, para não mudar
+        //a posição das outras
+        Linhas.Append('Nº;Modelo;Data;Chave;Valor;Base ICMS;ICMS;Base IBS/CBS;IBS UF;IBS Mun.;IBS;CBS;' +
+                      'Conferência IBS/CBS');
         Linhas.Append(sLineBreak);
 
         if TemNotaVisivel then
@@ -5069,7 +5400,9 @@ begin
                         Linhas.Append(Valor('vibsuf')).Append(';');
                         Linhas.Append(Valor('vibsmun')).Append(';');
                         Linhas.Append(Valor('vibs')).Append(';');
-                        Linhas.Append(Valor('vcbs'));
+                        Linhas.Append(Valor('vcbs')).Append(';');
+                        //16.11: OK, Alerta, Erro ou vazio, o mesmo texto da grade
+                        Linhas.Append(FDMemTable1.FieldByName('conf_ibscbs').AsString);
                         Linhas.Append(sLineBreak);
                         FDMemTable1.Next;
                     end;
@@ -6268,8 +6601,10 @@ end;
 
 procedure TFormPrincipal.CarregarNotasLidas(Resultado: TResultadoLeitura);
 var
-    I    : Integer;
-    Nota : TNotaLida;
+    I      : Integer;
+    Nota   : TNotaLida;
+    Entrou : Boolean;
+    Falhou : Boolean;
 begin
     //Leitura concluída: as notas lidas substituem as anteriores na grade, na thread principal. Pasta
     //nova: o seletor de modelo volta para "Todos" e a busca da tela Notas é limpa (as notas novas
@@ -6286,10 +6621,13 @@ begin
             FDMemTable1.EmptyDataSet
         else
             FDMemTable1.CreateDataSet;
+        FDivergencias.EmptyDataSet;
 
+        Falhou := False;
         for I := 0 to Resultado.Notas.Count - 1 do
         begin
             Nota := Resultado.Notas[I];
+            Entrou := False;
             FDMemTable1.Append;
             try
                 FDMemTable1.FieldByName('numero').AsInteger := Nota.Numero;
@@ -6317,7 +6655,17 @@ begin
                 FDMemTable1.FieldByName('vibs').AsFloat        := Nota.Dados.vIBS;
                 FDMemTable1.FieldByName('vcbs').AsFloat        := Nota.Dados.vCBS;
 
+                //Conferência de IBS/CBS (Plano 7): situação da coluna (16.2), gravidade para a ordenação (16.9)
+                //e o que a dica da célula precisa (16.4 a 16.8)
+                FDMemTable1.FieldByName('conf_ibscbs').AsString   := TextoSituacaoIBSCBS(Nota.Dados.Conferencia.Situacao);
+                FDMemTable1.FieldByName('conf_ordem').AsInteger   := Ord(Nota.Dados.Conferencia.Situacao);
+                FDMemTable1.FieldByName('conf_erros').AsInteger   := Nota.Dados.Conferencia.QuantidadeErros;
+                FDMemTable1.FieldByName('conf_alertas').AsInteger := Nota.Dados.Conferencia.QuantidadeAlertas;
+                FDMemTable1.FieldByName('conf_parcial').AsBoolean := Nota.Dados.Conferencia.TextoSemConferencia <> '';
+                FDMemTable1.FieldByName('conf_simples').AsBoolean := Nota.Dados.Conferencia.SimplesNacional;
+
                 FDMemTable1.Post;
+                Entrou := True;
             except
                 on E: Exception do
                 begin
@@ -6332,12 +6680,27 @@ begin
                         Dec(Resultado.Entrada);
                     Resultado.AdicionarLog(llErro, ExtractFileName(Nota.Caminho) +
                                                    ': não foi possível ler o arquivo (' + MotivoDoErro(E) + ').');
+                    //Plano 7 (revisão da 7.3): a nota também sai da conferência. Sem isso, as divergências dela
+                    //ficariam no log e o resumo 17.23 contaria uma nota que não está na grade, nos cards nem
+                    //nos relatórios. O bloco da conferência é refeito no fim, só com as notas da grade
+                    Nota.Dados.Conferencia := Default(TConferenciaIBSCBS);
+                    Resultado.Notas[I] := Nota;
+                    Falhou := True;
                 end;
             end;
+
+            //Divergências só das notas que entraram na grade (relatório Divergências IBS/CBS)
+            if Entrou then
+                AdicionarDivergencias(Nota);
         end;
     finally
         FDMemTable1.EnableControls;
     end;
+
+    //Alguma nota não entrou na grade: o log da conferência (resumo e linhas) passa a valer só para as que
+    //entraram, coerente com a coluna IBS/CBS e com o relatório
+    if Falhou then
+        Resultado.GerarLogConferencia;
 
     //Filtro "Todos" na grade, nos cards e nos relatórios: os cards passam a somar as notas novas
     AplicarFiltroModelo;
@@ -6348,6 +6711,168 @@ begin
         FDMemTable1.First;
     AtualizarTelaNotas;
     DBGrid1.Refresh;
+end;
+
+procedure TFormPrincipal.CriarTabelaDivergencias;
+begin
+    //Divergências da conferência de IBS/CBS das notas da grade (Plano 7): tabela em memória preenchida junto
+    //com a grade (CarregarNotasLidas) e gravada no banco pelo GravarNotasDB, na mesma transação das notas
+    FDivergencias := TFDMemTable.Create(Self);
+    FDivergencias.FieldDefs.Add('numero', ftInteger);
+    FDivergencias.FieldDefs.Add('modelo', ftInteger);
+    FDivergencias.FieldDefs.Add('chave', ftWideString, 50);
+    FDivergencias.FieldDefs.Add('data', ftWideString, 20);
+    FDivergencias.FieldDefs.Add('item', ftInteger);
+    FDivergencias.FieldDefs.Add('nivel', ftInteger);
+    FDivergencias.FieldDefs.Add('tipo', ftWideString, 10);
+    //Mesmos tamanhos das colunas da tabela divergencia_ibscbs (DM.ConexaoAfterConnect)
+    FDivergencias.FieldDefs.Add('campo', ftWideString, 120);
+    FDivergencias.FieldDefs.Add('valor_xml', ftWideString, 60);
+    FDivergencias.FieldDefs.Add('esperado', ftWideString, 60);
+    FDivergencias.FieldDefs.Add('seq', ftInteger);
+    FDivergencias.CreateDataSet;
+end;
+
+procedure TFormPrincipal.AdicionarDivergencias(const Nota: TNotaLida);
+const
+    //Tamanhos das colunas (iguais aos da tabela divergencia_ibscbs): o FireDAC recusa texto maior que a coluna.
+    //Os textos da conferência são bem menores; o corte só protege contra um valor estranho vindo do XML
+    TAMANHO_CAMPO = 120;
+    TAMANHO_VALOR = 60;
+var
+    I : Integer;
+    D : TDivergenciaIBSCBS;
+begin
+    //Uma linha por divergência da nota, com os textos do relatório (glossário 18.15 a 18.20 e 18.C). A ordem
+    //do relatório (Nº, item com o Total por último, nível) fica na consulta do banco; seq desempata pela ordem
+    //em que as regras rodaram
+    for I := 0 to High(Nota.Dados.Conferencia.Divergencias) do
+    begin
+        D := Nota.Dados.Conferencia.Divergencias[I];
+        FDivergencias.Append;
+        FDivergencias.FieldByName('numero').AsInteger  := Nota.Numero;
+        FDivergencias.FieldByName('modelo').AsInteger  := Nota.Modelo;
+        FDivergencias.FieldByName('chave').AsString    := Nota.Dados.Chave;
+        FDivergencias.FieldByName('data').AsString     := FormatarDataNota(Nota.Dados.DataEmissao);
+        FDivergencias.FieldByName('item').AsInteger    := D.Item;
+        FDivergencias.FieldByName('nivel').AsInteger   := D.Nivel;
+        if D.Tipo = tdErro then
+            FDivergencias.FieldByName('tipo').AsString := TextoSituacaoIBSCBS(scErro)
+        else
+            FDivergencias.FieldByName('tipo').AsString := TextoSituacaoIBSCBS(scAlerta);
+        FDivergencias.FieldByName('campo').AsString     := Copy(D.Campo, 1, TAMANHO_CAMPO);
+        FDivergencias.FieldByName('valor_xml').AsString := Copy(D.ValorXMLExibido, 1, TAMANHO_VALOR);
+        FDivergencias.FieldByName('esperado').AsString  := Copy(D.EsperadoExibido, 1, TAMANHO_VALOR);
+        FDivergencias.FieldByName('seq').AsInteger      := I;
+        FDivergencias.Post;
+    end;
+end;
+
+function TFormPrincipal.TextoDicaConferencia(const Linha: Integer): string;
+const
+    DETALHES = 'Detalhes no Resumo e no relatório Divergências IBS/CBS.';
+var
+    Situacao : string;
+    Erros    : Integer;
+    Alertas  : Integer;
+
+    function Inteiro(const Campo: string): Integer;
+    var
+        Valor: Variant;
+    begin
+        Valor := DBGrid1.ValorNaLinha(Linha, Campo);
+        if VarIsNull(Valor) or VarIsEmpty(Valor) then
+            Result := 0
+        else
+            Result := Valor;
+    end;
+
+    function Logico(const Campo: string): Boolean;
+    var
+        Valor: Variant;
+    begin
+        Valor := DBGrid1.ValorNaLinha(Linha, Campo);
+        Result := (not VarIsNull(Valor)) and (not VarIsEmpty(Valor)) and Boolean(Valor);
+    end;
+
+begin
+    //Dica da célula IBS/CBS de uma linha visível (glossário 16.4 a 16.8, com a 16.5 aprovada em 11/11/2026)
+    Result := '';
+    if VarIsNull(DBGrid1.ValorNaLinha(Linha, 'numero')) then
+        Exit;
+
+    Situacao := VarToStr(DBGrid1.ValorNaLinha(Linha, 'conf_ibscbs'));
+    if Situacao = TextoSituacaoIBSCBS(scErro) then
+    begin
+        //16.7; com alertas na mesma nota, a 1ª linha ganha "…, e há {a} indicações para conferir."
+        Erros   := Inteiro('conf_erros');
+        Alertas := Inteiro('conf_alertas');
+        if Erros = 1 then
+            Result := 'Erro: 1 conta de IBS/CBS não fecha com os valores do XML'
+        else
+            Result := 'Erro: ' + IntToStr(Erros) + ' contas de IBS/CBS não fecham com os valores do XML';
+        if Alertas = 1 then
+            Result := Result + ', e há 1 indicação para conferir'
+        else if Alertas > 1 then
+            Result := Result + ', e há ' + IntToStr(Alertas) + ' indicações para conferir';
+        Result := Result + '.' + sLineBreak + DETALHES;
+    end
+    else if Situacao = TextoSituacaoIBSCBS(scAlerta) then
+    begin
+        //16.6
+        Alertas := Inteiro('conf_alertas');
+        if Alertas = 1 then
+            Result := 'Alerta: 1 indicação para conferir'
+        else
+            Result := 'Alerta: ' + IntToStr(Alertas) + ' indicações para conferir';
+        Result := Result + ' (base, alíquota ou CST). Não quer dizer que a nota está errada.' + sLineBreak + DETALHES;
+    end
+    else if Situacao = TextoSituacaoIBSCBS(scOK) then
+    begin
+        //16.5a (nota do Simples Nacional), 16.5 (partes sem conferência) ou 16.4
+        if Logico('conf_simples') then
+            Result := 'Totais de IBS/CBS conferidos, sem divergência.' + sLineBreak +
+                      'Nota do Simples Nacional (gTribSN): base e alíquota dos itens não são conferidas.'
+        else if Logico('conf_parcial') then
+            Result := 'Cálculos de IBS/CBS conferidos, sem divergência.' + sLineBreak +
+                      'Alguns itens ou totais não foram conferidos; veja o Resumo.'
+        else
+            Result := 'Cálculos de IBS/CBS conferidos, sem divergência.';
+    end
+    else
+        //16.8
+        Result := 'Nota sem IBS/CBS: fora da conferência.';
+end;
+
+procedure TFormPrincipal.DBGrid1MouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+var
+    Coluna : TColumn;
+    Linha  : Integer;
+    Celula : TPoint;
+    Texto  : string;
+begin
+    //Dica por célula só na coluna IBS/CBS (tokens.md 5.15): o título (16.3) e cada nota (16.4 a 16.8). O TDBGrid
+    //não tem dica por coluna: ao mudar de célula, troca o Hint e fecha a dica aberta (Application.CancelHint),
+    //para a nova aparecer no lugar
+    Texto  := '';
+    Celula := Point(-1, -1);
+    if DBGrid1.CelulaNoPonto(X, Y, Coluna, Linha) and (Coluna.FieldName = 'conf_ibscbs') then
+    begin
+        if Linha < 0 then
+            Texto := 'Conferência dos cálculos de IBS/CBS.' + sLineBreak +
+                     'Erro: conta que não fecha com os valores do XML. Alerta: indicação para conferir.'
+        else
+            Texto := TextoDicaConferencia(Linha);
+        if Texto <> '' then
+            Celula := Point(Coluna.Index, Linha);
+    end;
+
+    if (Celula.X <> FCelulaDica.X) or (Celula.Y <> FCelulaDica.Y) or (DBGrid1.Hint <> Texto) then
+    begin
+        FCelulaDica  := Celula;
+        DBGrid1.Hint := Texto;
+        Application.CancelHint;
+    end;
 end;
 
 procedure TFormPrincipal.MostrarResultadoLeitura(Resultado: TResultadoLeitura);
@@ -6390,6 +6915,14 @@ begin
         else
             ListBoxLog.Items.AddObject(IntToStr(Resultado.Autorizadas) + ' notas autorizadas carregadas.',
                                        TObject(NativeInt(Ord(llSucesso))));
+
+        //Conferência de IBS/CBS (Plano 7, P7-7): bloco no fim do log, depois da 5.21, aberto pela linha de
+        //resumo (17.23) e em ordem de Nº, item e nível. Não muda os contadores
+        for I := 0 to Resultado.LogConferencia.Count - 1 do
+        begin
+            Linha := Resultado.LogConferencia[I];
+            ListBoxLog.Items.AddObject(Linha.Texto, TObject(NativeInt(Ord(Linha.Tipo))));
+        end;
     finally
         ListBoxLog.Items.EndUpdate;
     end;
@@ -7838,7 +8371,7 @@ begin
     end;
 end;
 
-{ Tela Sobre (mockup sobre.html; glossário 13.1 a 13.6) }
+{ Tela Sobre (mockup sobre.html; glossário 13.1 a 13.8c) }
 
 function TFormPrincipal.VersaoDoExecutavel: string;
 var
@@ -7868,7 +8401,8 @@ var
 begin
     //Quadro com borda (mockup .panel.sobre) e o conteúdo centralizado: logo claro vetorial (216 x 44, no
     //.dfm), "ProXML v{versão}" 14 pt Semibold, descrição 10 pt CorTextoSecundario, autor 10 pt, link do
-    //GitHub (external-link) e os créditos 9 pt. As posições ficam em AjustarLayoutSobre
+    //site e do GitHub (external-link), divisória, bloco "Apoie o projeto" (Plano 3, etapa 3.5) e os
+    //créditos 9 pt. As posições ficam em AjustarLayoutSobre
     PnlTelaSobre.Color := CorBorda;
     PnlTelaSobre.Padding.SetBounds(Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro), Escalar(BordaQuadro));
     PnlTelaSobreFundo.Color    := CorSuperficie;
@@ -7889,6 +8423,14 @@ begin
     AplicarFonte(LabelSobreCreditos.Font, FonteTexto, TamanhoLegenda, CorTextoSecundario);
     LabelSobreCreditos.Caption := 'Ícones: Lucide (licença ISC) ' + #$00B7 + ' Componentes: ACBr, Skia4Delphi';
 
+    //13.7 e 13.7a: link do site, logo acima do GitHub (ordem de Tab: site, GitHub, Apoiar)
+    PnlSobreSite.Color := CorSuperficie;
+    btnLinkSite := TProBotao.CriarEm(PnlSobreSite, TEXTO_SITE, ebLink, LinkSiteClick);
+    AplicarFonte(btnLinkSite.Font, FonteTexto, TamanhoCorpo, CorPrimaria);
+    btnLinkSite.IconeSvg := IconeLinkExterno;
+    btnLinkSite.Hint     := 'Abrir no navegador';
+    btnLinkSite.ShowHint := True;
+
     //13.4 e 13.5: link que abre o navegador
     PnlSobreLink.Color := CorSuperficie;
     btnLinkGitHub := TProBotao.CriarEm(PnlSobreLink, TEXTO_GITHUB, ebLink, LinkGitHubClick);
@@ -7896,6 +8438,23 @@ begin
     btnLinkGitHub.IconeSvg := IconeLinkExterno;
     btnLinkGitHub.Hint     := 'Abrir no navegador';
     btnLinkGitHub.ShowHint := True;
+
+    //Divisória de 320 x 1 px na CorBorda entre os links e o bloco "Apoie o projeto"
+    PnlSobreDivisoria.Color := CorBorda;
+
+    //13.8 e 13.8a: título 10 pt Semibold e texto de apoio 10 pt CorTextoSecundario
+    AplicarFonte(LabelSobreApoioTitulo.Font, FonteDestaque, TamanhoCorpo, CorTexto);
+    LabelSobreApoioTitulo.Caption := 'Apoie o projeto';
+    AplicarFonte(LabelSobreApoioTexto.Font, FonteTexto, TamanhoCorpo, CorTextoSecundario);
+    LabelSobreApoioTexto.Caption := 'O ProXML é gratuito e sem anúncios. Se ele ajuda no seu trabalho, apoie o ' +
+                                    'desenvolvimento no Apoia.se.';
+
+    //13.8b e 13.8c: botão secundário com o ícone heart; a dica mostra o endereço
+    PnlSobreApoiar.Color := CorSuperficie;
+    btnApoiar := TProBotao.CriarEm(PnlSobreApoiar, 'Apoiar no Apoia.se', ebSecundario, ApoiarClick);
+    btnApoiar.IconeSvg := IconeCoracao;
+    btnApoiar.Hint     := 'Abrir apoia.se/proxmlferramenta no navegador';
+    btnApoiar.ShowHint := True;
 end;
 
 procedure TFormPrincipal.AjustarLayoutSobre;
@@ -7907,14 +8466,21 @@ var
     AlturaVersao  : Integer;
     AlturaDescr   : Integer;
     AlturaAutor   : Integer;
+    AlturaSite    : Integer;
     AlturaLink    : Integer;
+    AlturaDivis   : Integer;
+    AlturaApoio   : Integer;
+    AlturaTxApoio : Integer;
+    AlturaApoiar  : Integer;
     AlturaCredito : Integer;
     Total         : Integer;
     Topo          : Integer;
 begin
     //Coluna centralizada na largura e na altura do quadro (mockup .sobre: gap 8; logo com 8 px em cima e
-    //embaixo e mais 8 de margem; autor com mais 8 em cima; créditos com mais 16 em cima)
-    if btnLinkGitHub = nil then
+    //embaixo e mais 8 de margem; autor com mais 8 em cima; divisória com mais 8 em cima; créditos com
+    //mais 8 em cima). Ordem: logo, versão, descrição, autor, site, GitHub, divisória, "Apoie o projeto",
+    //texto de apoio, Apoiar no Apoia.se e créditos
+    if (btnLinkGitHub = nil) or (btnLinkSite = nil) or (btnApoiar = nil) then
         Exit;
 
     W       := PnlTelaSobreFundo.ClientWidth;
@@ -7928,16 +8494,24 @@ begin
         AlturaVersao := Medida.Canvas.TextHeight('Ag');
         Medida.Canvas.Font.Assign(LabelSobreAutor.Font);
         AlturaAutor := Medida.Canvas.TextHeight('Ag');
+        Medida.Canvas.Font.Assign(LabelSobreApoioTitulo.Font);
+        AlturaApoio := Medida.Canvas.TextHeight('Ag');
     finally
         Medida.Free;
     end;
     AlturaDescr   := AlturaTextoQuebrado(LabelSobreDescricao, Largura);
+    AlturaTxApoio := AlturaTextoQuebrado(LabelSobreApoioTexto, Largura);
     AlturaCredito := AlturaTextoQuebrado(LabelSobreCreditos, Largura);
+    AlturaSite    := btnLinkSite.AlturaIdeal - 2 * btnLinkSite.MargemFoco;
     AlturaLink    := btnLinkGitHub.AlturaIdeal - 2 * btnLinkGitHub.MargemFoco;
+    AlturaApoiar  := btnApoiar.AlturaIdeal - 2 * btnApoiar.MargemFoco;
+    AlturaDivis   := Escalar(AlturaDivisoriaSobre);
 
     Total := 2 * Escalar(PaddingLogoSobre) + Escalar(AlturaLogoSobre) + Escalar(PaddingLogoSobre) + Espaco +
              AlturaVersao + Espaco + AlturaDescr + Espaco + Escalar(EspacoAutorSobre) + AlturaAutor + Espaco +
-             AlturaLink + Espaco + Escalar(EspacoCreditosSobre) + AlturaCredito;
+             AlturaSite + Espaco + AlturaLink + Espaco + Escalar(EspacoDivisoriaSobre) + AlturaDivis + Espaco +
+             AlturaApoio + Espaco + AlturaTxApoio + Espaco + AlturaApoiar + Espaco +
+             Escalar(EspacoCreditosSobre) + AlturaCredito;
     Topo := Max(0, (H - Total) div 2);
 
     Inc(Topo, Escalar(PaddingLogoSobre));
@@ -7950,9 +8524,22 @@ begin
     Inc(Topo, AlturaDescr + Espaco + Escalar(EspacoAutorSobre));
     LabelSobreAutor.SetBounds((W - Largura) div 2, Topo, Largura, AlturaAutor);
     Inc(Topo, AlturaAutor + Espaco);
+    PnlSobreSite.SetBounds((W - btnLinkSite.LarguraIdeal) div 2, Topo - btnLinkSite.MargemFoco,
+                           btnLinkSite.LarguraIdeal, btnLinkSite.AlturaIdeal);
+    Inc(Topo, AlturaSite + Espaco);
     PnlSobreLink.SetBounds((W - btnLinkGitHub.LarguraIdeal) div 2, Topo - btnLinkGitHub.MargemFoco,
                            btnLinkGitHub.LarguraIdeal, btnLinkGitHub.AlturaIdeal);
-    Inc(Topo, AlturaLink + Espaco + Escalar(EspacoCreditosSobre));
+    Inc(Topo, AlturaLink + Espaco + Escalar(EspacoDivisoriaSobre));
+    PnlSobreDivisoria.SetBounds((W - Escalar(LarguraDivisoriaSobre)) div 2, Topo, Escalar(LarguraDivisoriaSobre),
+                                AlturaDivis);
+    Inc(Topo, AlturaDivis + Espaco);
+    LabelSobreApoioTitulo.SetBounds((W - Largura) div 2, Topo, Largura, AlturaApoio);
+    Inc(Topo, AlturaApoio + Espaco);
+    LabelSobreApoioTexto.SetBounds((W - Largura) div 2, Topo, Largura, AlturaTxApoio);
+    Inc(Topo, AlturaTxApoio + Espaco);
+    PnlSobreApoiar.SetBounds((W - btnApoiar.LarguraIdeal) div 2, Topo - btnApoiar.MargemFoco,
+                             btnApoiar.LarguraIdeal, btnApoiar.AlturaIdeal);
+    Inc(Topo, AlturaApoiar + Espaco + Escalar(EspacoCreditosSobre));
     LabelSobreCreditos.SetBounds((W - Largura) div 2, Topo, Largura, AlturaCredito);
 end;
 
@@ -7974,6 +8561,18 @@ procedure TFormPrincipal.LinkGitHubClick(Sender: TObject);
 begin
     //13.4: abre o repositório no navegador padrão
     ShellExecute(Handle, 'open', PChar(URL_GITHUB), nil, nil, SW_SHOWNORMAL);
+end;
+
+procedure TFormPrincipal.LinkSiteClick(Sender: TObject);
+begin
+    //13.7: abre o site no navegador padrão, sem confirmação (falha sem tratamento, como o GitHub)
+    ShellExecute(Handle, 'open', PChar(URL_SITE), nil, nil, SW_SHOWNORMAL);
+end;
+
+procedure TFormPrincipal.ApoiarClick(Sender: TObject);
+begin
+    //13.8b: abre a página do Apoia.se no navegador padrão, sem confirmação (falha sem tratamento)
+    ShellExecute(Handle, 'open', PChar(URL_APOIASE), nil, nil, SW_SHOWNORMAL);
 end;
 
 procedure TFormPrincipal.AtualizarVisualSobre;

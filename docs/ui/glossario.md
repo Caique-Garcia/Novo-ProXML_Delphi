@@ -1,6 +1,6 @@
 # ProXML · Glossário de textos da interface (v1.1.0)
 
-> **Etapa:** 4.1 do Plano 4 · **Status:** aprovado pelo usuário em 19/10/2026, com os acréscimos registrados em cada item. **Revisão do Plano 2 (v1.2.0, 06/11/2026):** textos do ZIP nativo, sem WinRAR (11.3, 11.20, 11.20a, 14.4a e 14.4b)
+> **Etapa:** 4.1 do Plano 4 · **Status:** aprovado pelo usuário em 19/10/2026, com os acréscimos registrados em cada item. **Revisão do Plano 2 (v1.2.0, 06/11/2026):** textos do ZIP nativo, sem WinRAR (11.3, 11.20, 11.20a, 14.4a e 14.4b). **Plano 7 (v1.3.0, 11/11/2026):** textos da conferência de IBS/CBS nas seções 16 a 19, **aguardando aprovação do usuário** (etapa 7.2)
 > **Levantamento:** `view/*.pas`, `view/*.dfm`, `lib/uCalculadoraXML.pas`, `datamodule/DM.pas` no commit `6be6cd8` (`.pas` lidos como Windows-1252; `#nnn` dos `.dfm` decodificados).
 > Depois de aprovado, o `delphi-dev` aplica estes textos na 4.7 e o `qa-reviewer` confere com `grep` (4.10): **nenhum texto visível fora desta lista**.
 
@@ -174,7 +174,7 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 8.3 | opção 1 (novo) | R | — | Relatório de Notas | |
 | 8.4 | opção 1 (novo) | F | — | Nº, modelo, data, chave, valor da nota, base de cálculo do ICMS e ICMS de cada nota, com os totais no fim. | |
 | 8.5 | opção 2 (novo) | R | — | Relatório IBS/CBS | |
-| 8.6 | opção 2 (novo) | F | — | Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS das notas que têm o grupo IBS/CBS. {x} de {n} notas têm IBS/CBS. | Singular: "{x} de 1 nota tem IBS/CBS." (registrado em 28/10/2026, 4.9) |
+| 8.6 | opção 2 (novo) | F | — | Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS das notas que têm o grupo IBS/CBS. {x} de {n} notas têm IBS/CBS. | Singular: "{x} de 1 nota tem IBS/CBS." (registrado em 28/10/2026, 4.9). {x} conta só as notas com o grupo de totais `IBSCBSTot`; por isso pode ser menor que as "notas conferidas" da 18.2a, que incluem notas com IBS/CBS só nos itens (decisão do usuário na B3, 11/11/2026) |
 | 8.7 | botões (novo) | B/H | — | Gerar relatório · *hint:* Gravar as notas e abrir a visualização do relatório | |
 | 8.8 | sem notas (novo) | F | — | Processe uma pasta para gerar relatórios. | Dica visível ao lado dos botões desabilitados |
 | 8.8a | sem notas no modelo (novo) | F | — | Nenhuma nota do modelo selecionado. Escolha outro modelo na barra de cima. | Há notas carregadas, mas nenhuma no filtro de modelo. Aprovado em 20/10/2026 (4.4). Também no painel da tela Notas (sem busca), aprovado em 21/10/2026 (4.5), e no quadro do anexo da tela Enviar (decisão da 4.7) |
@@ -296,6 +296,8 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 
 ## 13. Sobre
 
+> **Etapa 3.5 do [Plano 3](../planos/plano-3-site-vercel.md) (v1.2.1, 11/11/2026):** itens 13.7 a 13.8c (link do site e "Apoie o projeto"), **aguardando aprovação do usuário**. Mockup: `mockups/sobre.html` (sugestão A). Ordem na tela: 13.1, 13.2, 13.3, 13.7, 13.4, divisor, 13.8, 13.8a, 13.8b, 13.6.
+
 | # | Onde | Tipo | Antes | Depois | Observação |
 |---|------|------|-------|--------|------------|
 | 13.1 | tela nova | R | — | ProXML v{versão} | Versão do VersionInfo (ex.: 1.1.0). Sem VersionInfo: "ProXML" (registrado em 03/11/2026, 4.10) |
@@ -304,6 +306,12 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 13.4 | tela nova | B | — | github.com/Caique-Garcia/Novo-ProXML_Delphi | Link; abre `https://github.com/Caique-Garcia/Novo-ProXML_Delphi` |
 | 13.5 | link (novo) | H | — | Abrir no navegador | |
 | 13.6 | tela nova | F | — | Ícones: Lucide (licença ISC) · Componentes: ACBr, Skia4Delphi | Atende à licença dos ícones |
+| 13.7 | link do site (novo, v1.2.1) | B | — | proxml.vercel.app | Link no mesmo estilo do 13.4 (ícone `external-link`), logo acima dele. Clique: abre `https://proxml.vercel.app` no navegador padrão, sem confirmação; o ProXML continua na tela Sobre |
+| 13.7a | link do site (novo, v1.2.1) | H | — | Abrir no navegador | Igual ao 13.5 |
+| 13.8 | bloco "Apoie o projeto" (novo, v1.2.1) | R | — | Apoie o projeto | Título do bloco, 10 pt Semibold. Mesmo título da seção do site |
+| 13.8a | bloco "Apoie o projeto" (novo, v1.2.1) | F | — | O ProXML é gratuito e sem anúncios. Se ele ajuda no seu trabalho, apoie o desenvolvimento no Apoia.se. | Texto de apoio, 10 pt `CorTextoSecundario`. Versão curta da frase do site |
+| 13.8b | bloco "Apoie o projeto" (novo, v1.2.1) | B | — | Apoiar no Apoia.se | Botão secundário com o ícone `heart` (sugestão A; ver opções no mockup). Clique: abre `https://apoia.se/proxmlferramenta` no navegador padrão, sem confirmação |
+| 13.8c | bloco "Apoie o projeto" (novo, v1.2.1) | H | — | Abrir apoia.se/proxmlferramenta no navegador | A dica mostra o endereço, porque o texto do botão não mostra |
 
 ## 14. Banco de dados e mensagens internas
 
@@ -324,3 +332,189 @@ Legenda de tipo: **R** rótulo · **B** botão · **H** hint/dica · **M** mensa
 | 15.1 | Título das caixas | definido pela VCL (`MessageDlg`) | ProXML | Conferir no app compilado: no Delphi 10.2 o `MessageDlg` pode mostrar títulos e botões em inglês ("Information", "Yes"). Se aparecer, usar um helper único (`TaskDialog` ou `Application.MessageBox`) com título "ProXML" e botões do Windows em português |
 | 15.2 | Tipos | `mtInformation`, `mtWarning`, `mtError` | Informação, Aviso, Erro | Mesmo ícone do Windows |
 | 15.3 | Botões | OK | OK · Sim / Não (só em 5.28) | |
+
+---
+
+## Plano 7 · Conferência de IBS/CBS (v1.3.0): convenções
+
+> **Etapa:** 7.2 do [Plano 7](../planos/plano-7-conferencia-ibs-cbs.md) · **Status:** dúvidas P7-1 a P7-14 decididas em 11/11/2026 com a sugestão; textos e mockups **aguardando aprovação visual do usuário**.
+> **Base:** regras e decisões D1 a D24 em [plano-7-regras-ibs-cbs.md](../planos/plano-7-regras-ibs-cbs.md) (seções 5.1, 7.5, 7.6 e 10). Exemplos tirados de `tests/gabarito/divergencias.csv` (47 divergências em 62 notas conferidas, com a NF-e 910060 incluída em 11/11/2026).
+> **Simples Nacional (NT 2026.005, D17, D22 e D23), incluído em 11/11/2026:** 16.5a, 17.7a, 17.7b, 17.8a, 17.9a, 17.23b, 18.C, 18.24, 18.25, 19.2 e 19.4.
+> **Mockups:** `mockups/notas.html#p7-conferencia`, `mockups/resumo.html#p7-conferencia`, `mockups/relatorios.html#p7-divergencias` e `mockups/relatorio-divergencias-a4.html`.
+> As citações **P7-1 a P7-14** são decisões (11/11/2026). **P7-15 a P7-17** são dúvidas novas do Simples Nacional, em aberto, com a sugestão aplicada aqui.
+
+1. **Erro** (níveis 1 e 2) diz o que não fecha: termina com `(erro).` e usa "esperado".
+2. **Alerta** (níveis 3 e 4) **não afirma que a nota está errada**: mostra o valor do XML e a referência do ProXML ("pela composição do item", "para 2026", "pela tabela do cClassTrib") e termina com `; confira (alerta).`
+3. Valores em reais no formato do app (4.6): `R$ 1.234,56`. Alíquotas (`pIBSUF`, `pIBSMun`, `pCBS`, `pAliqEfet`, `pAliqEfetReg…`) com 4 casas e `%`: `0,1000%`. Percentuais de redução, diferimento e devolução sem casas quando inteiros (`60%`); se não, até 4 casas, sem zeros no fim (`12,5%`).
+4. Esferas: `{esf}` = **IBS UF**, **IBS municipal** ou **CBS**; `{do esf}` = "do IBS UF", "do IBS municipal", "da CBS". No relatório (coluna Campo, espaço curto): IBS UF, IBS Mun., CBS.
+5. Placeholders: `{n}` número da nota (nNF), `{i}` número do item (nItem), `{xml}` valor no XML, `{esp}` valor esperado, `{cst}` CST, `{c}` cClassTrib, `{ano}` ano da emissão; `{d}` divergências, `{e}` notas (ou contas) com Erro, `{a}` notas (ou indicações) com Alerta, `{k}` notas conferidas, `{m}` notas com divergência, `{s}` notas sem divergência.
+6. Uma linha por esfera (D7). Singular e plural como no resto do app ("1 nota", "2 notas").
+
+## 16. Conferência de IBS/CBS: tela Notas e CSV
+
+| # | Onde | Tipo | Antes | Depois | Observação |
+|---|------|------|-------|--------|------------|
+| 16.1 | `DBGrid1`, coluna nova `conf_ibscbs` | R | — | IBS/CBS | Título da coluna. Posição e largura: tokens 5.15 (decisões P7-3 e P7-4). Título mantido na decisão P7-14 |
+| 16.2 | células da coluna | R | — | OK · Alerta · Erro · *(vazia)* | Vazia = nota sem IBS/CBS (fora da conferência). Nota com Erro e Alerta mostra **Erro**. Itens sem conferência não mudam a célula (D9) |
+| 16.3 | título da coluna (dica) | H | — | Conferência dos cálculos de IBS/CBS.<br>Erro: conta que não fecha com os valores do XML. Alerta: indicação para conferir. | Duas linhas (`#13#10`). Dica por célula via `OnMouseMove` (tokens 5.15) |
+| 16.4 | célula OK (dica) | H | — | Cálculos de IBS/CBS conferidos, sem divergência. | |
+| 16.5 | célula OK com itens sem conferência (dica) | H | — | Cálculos de IBS/CBS conferidos, sem divergência.<br>Alguns itens ou totais não foram conferidos; veja o Resumo. | Ex.: 910020 (item monofásico e total gMono). Decisão P7-12; "itens ou totais" aprovado em 11/11/2026 |
+| 16.5a | célula OK de nota do Simples Nacional (dica) (**proposta**) | H | — | Totais de IBS/CBS conferidos, sem divergência.<br>Nota do Simples Nacional (gTribSN): base e alíquota dos itens não são conferidas. | Nota com item com `gTribSN` e sem `gIBSCBS` (D22). Ex.: 910040, 910050. Célula continua **OK**. Com Erro ou Alerta, vale a 16.6 ou a 16.7. Dúvida P7-17 |
+| 16.6 | célula Alerta (dica) | H | — | Alerta: {a} indicações para conferir (base, alíquota ou CST). Não quer dizer que a nota está errada.<br>Detalhes no Resumo e no relatório Divergências IBS/CBS. | Singular: "Alerta: 1 indicação para conferir (…)" |
+| 16.7 | célula Erro (dica) | H | — | Erro: {e} contas de IBS/CBS não fecham com os valores do XML.<br>Detalhes no Resumo e no relatório Divergências IBS/CBS. | Singular: "Erro: 1 conta de IBS/CBS não fecha com os valores do XML." Com alertas na mesma nota, a 1ª linha ganha: "…, e há {a} indicações para conferir." |
+| 16.8 | célula vazia (dica) | H | — | Nota sem IBS/CBS: fora da conferência. | |
+| 16.9 | ordenação pela coluna | R | — | IBS/CBS ▲ · IBS/CBS ▼ | Ordem por gravidade (vazia < OK < Alerta < Erro), empate por Nº. 1º clique em ▼, Erro no topo (decisão P7-5) |
+| 16.10 | CSV: cabeçalho | R | Nº;Modelo;Data;Chave;Valor;Base ICMS;ICMS;Base IBS/CBS;IBS UF;IBS Mun.;IBS;CBS (6.29) | Nº;Modelo;Data;Chave;Valor;Base ICMS;ICMS;Base IBS/CBS;IBS UF;IBS Mun.;IBS;CBS;Conferência IBS/CBS | Coluna nova **no fim**, para não mudar a posição das outras (planilhas de quem já usa o CSV). Substitui 6.29 a partir da v1.3.0 |
+| 16.11 | CSV: valores da coluna nova | R | — | OK · Alerta · Erro · *(vazio)* | Mesmo texto da grade, sem ícone |
+| 16.12 | botão Exportar CSV (dica) | H | Salvar as notas da lista num arquivo CSV (abre no Excel) (6.16) | sem mudança | |
+
+## 17. Conferência de IBS/CBS: log do Resumo
+
+Erro → `llErro` (ícone `circle-x`); Alerta e linhas informativas → `llAviso` (`triangle-alert`). As linhas **não mudam** os contadores Autorizadas, Ignoradas e Com erro. Posição das linhas no log (decisão P7-7): juntas no fim, depois da 5.21, abertas pela 17.23 e em ordem de Nº, item e nível.
+
+### 17.A Nível 1: conta do item (Erro)
+
+| # | Regra | Tipo | Texto | Exemplo (gabarito) |
+|---|-------|------|-------|--------------------|
+| 17.1 | N1-vIBSUF · N1-vIBSMun · N1-vCBS | L | Nota Fiscal {n}, item {i}: {esf} {xml}, esperado {esp} ({conta}) (erro). | Nota Fiscal 910003, item 1: IBS UF R$ 0,50, esperado R$ 0,24 (R$ 238,13 × 0,1000%) (erro). |
+| 17.1a | `{conta}` sem redução | I | {vBC} × {alíquota} | R$ 238,13 × 0,1000% |
+| 17.1b | `{conta}` com redução (`gRed`) | I | {vBC} × {pAliqEfet}, alíquota efetiva | Nota Fiscal 910006, item 1: CBS R$ 3,35, esperado R$ 1,34 (R$ 372,07 × 0,3600%, alíquota efetiva) (erro). |
+| 17.1c | `{conta}` com diferimento ou devolução de tributo | I | {vBC} × {alíquota} − {vDif} de diferimento − {vDevTrib} de devolução de tributo | Só os termos que existem no item. Ex.: "R$ 100,00 × 0,9000% − R$ 0,90 de diferimento" |
+| 17.2 | N1-vIBS | L | Nota Fiscal {n}, item {i}: IBS {xml}, esperado {esp} (IBS UF + IBS municipal) (erro). | Nota Fiscal 910005, item 1: IBS R$ 0,20, esperado R$ 0,09 (IBS UF + IBS municipal) (erro). |
+| 17.2a | N1-vIBS com crédito presumido (D10) | L | Nota Fiscal {n}, item {i}: IBS {xml}, esperado {esp} (IBS UF + IBS municipal, com ou sem o crédito presumido de {vCredPres}) (erro). | Só quando nenhuma das duas formas bate. `{esp}` = a soma sem o crédito |
+| 17.3 | N1-pAliqEfet | L | Nota Fiscal {n}, item {i}: alíquota efetiva {do esf} {xml}, esperado {esp} ({alíquota} com redução de {pRedAliq}) (erro). | Nota Fiscal 910007, item 1: alíquota efetiva da CBS 0,5000%, esperado 0,3600% (0,9000% com redução de 60%) (erro). |
+| 17.3a | N1-pAliqEfet com compra governamental | L | … ({alíquota} com redução de {pRedAliq} e redutor de compra governamental de {pRedutor}) (erro). | |
+| 17.4 | N1-vDif | L | Nota Fiscal {n}, item {i}: diferimento {do esf} {xml}, esperado {esp} ({pDif} do imposto) (erro). | |
+| 17.5 | N1-vDevTrib | L | Nota Fiscal {n}, item {i}: devolução de tributo {do esf} {xml}, esperado {esp} ({pDevTrib} do imposto) (erro). | |
+| 17.6 | N1-vTribReg | L | Nota Fiscal {n}, item {i}: tributação regular {do esf} {xml}, esperado {esp} ({vBC} × {pAliqEfetReg}) (erro). | |
+
+### 17.B Nível 2: itens × totais (Erro)
+
+| # | Regra | Tipo | Texto | Exemplo (gabarito) |
+|---|-------|------|-------|--------------------|
+| 17.7 | N2-{campo} | L | Nota Fiscal {n}: total {do campo} {xml}, soma dos itens {esp} (erro). | Nota Fiscal 910009: total da CBS R$ 12,00, soma dos itens R$ 10,05 (erro). |
+| 17.7a | `{do campo}` | I | da base de IBS/CBS · do IBS UF · do IBS municipal · do IBS · da CBS · do diferimento do IBS UF (do IBS municipal, da CBS) · da devolução de tributo do IBS UF (…) · do crédito presumido do IBS · do crédito presumido da CBS · do crédito presumido do IBS em condição suspensiva · do crédito presumido da CBS em condição suspensiva · do IBS do Simples Nacional · da CBS do Simples Nacional | Nota Fiscal 910008: total da base de IBS/CBS R$ 150,00, soma dos itens R$ 111,62 (erro). Os dois últimos (`vIBSSN`, `vCBSSN`) são da NT 2026.005 e só são comparados quando o total tem `gTribSN` |
+| 17.7b | N2-vIBSSN · N2-vCBSSN (Simples Nacional, D17) | L | Nota Fiscal {n}: total {do IBS do Simples Nacional / da CBS do Simples Nacional} {xml}, soma dos itens {esp} (erro). | Nota Fiscal 910041: total do IBS do Simples Nacional R$ 1,50, soma dos itens R$ 1,20 (erro).<br>Nota Fiscal 910042: total da CBS do Simples Nacional R$ 5,34, soma dos itens R$ 5,33 (erro). (diferença de 1 centavo: tolerância zero no nível 2)<br>Nota Fiscal 910051: total do IBS do Simples Nacional R$ 0,40, soma dos itens R$ 0,42 (erro). |
+| 17.8 | N2-IBSCBSTot (total ausente) | L | Nota Fiscal {n}: itens com IBS/CBS e nota sem o total de IBS/CBS (IBSCBSTot) (erro). | Nota Fiscal 910010. Vale também para itens com `gTribSN` (910047): sai só esta linha, sem a 17.8a |
+| 17.8a | N2-gTribSN (total do Simples ausente, W59h-10) | L | Nota Fiscal {n}: itens com IBS/CBS do Simples Nacional e nota sem o total do Simples Nacional (gTribSN) (erro). | Nota Fiscal 910043: itens com IBS/CBS do Simples Nacional e nota sem o total do Simples Nacional (gTribSN) (erro). Também 910053 |
+| 17.9 | N2-IBSCBSTot (sem itens, D6) | L | Nota Fiscal {n}: total de IBS/CBS (IBSCBSTot) informado e nenhum item com IBS/CBS (erro). | |
+| 17.9a | N2-gTribSN (total do Simples sem itens, W59h-20) | L | Nota Fiscal {n}: total do Simples Nacional (gTribSN) informado e nenhum item com IBS/CBS do Simples Nacional (erro). | Nota Fiscal 910044: total do Simples Nacional (gTribSN) informado e nenhum item com IBS/CBS do Simples Nacional (erro). |
+
+### 17.C Nível 3: base de cálculo (Alerta)
+
+| # | Regra | Tipo | Texto | Exemplo (gabarito) |
+|---|-------|------|-------|--------------------|
+| 17.10 | N3-vBC | L | Nota Fiscal {n}, item {i}: base de IBS/CBS {xml} no XML e {esp} pela composição do item; confira (alerta). | Nota Fiscal 10435, item 1: base de IBS/CBS R$ 30,00 no XML e R$ 38,50 pela composição do item; confira (alerta). |
+
+A composição (vProd + frete + seguro + outras − desconto − tributos, D1) **não** vai para a linha, para ela caber no log. Ela fica no README e no site (19.3).
+
+### 17.D Nível 4: alíquota, redução e CST (Alerta)
+
+| # | Regra | Tipo | Texto | Exemplo (gabarito) |
+|---|-------|------|-------|--------------------|
+| 17.11 | N4-cClassTrib | L | Nota Fiscal {n}, item {i}: o cClassTrib {c} não está na tabela oficial (v{versão}); confira (alerta). | `{versão}` = versão da tabela embutida (hoje 1.71) |
+| 17.12 | N4-CSTxcClassTrib | L | Nota Fiscal {n}, item {i}: pela tabela oficial, o cClassTrib {c} não pertence ao CST {cst}; confira (alerta). | Nota Fiscal 910019, item 1: pela tabela oficial, o cClassTrib 200034 não pertence ao CST 000; confira (alerta). |
+| 17.13 | N4-cClassTribModelo | L | Nota Fiscal {n}, item {i}: pela tabela oficial, o cClassTrib {c} não é usado na {NF-e (55) / NFC-e (65)}; confira (alerta). | |
+| 17.14 | N4-cClassTribVigencia | L | Nota Fiscal {n}, item {i}: pela tabela oficial, o cClassTrib {c} não estava vigente em {dd/mm/aaaa}; confira (alerta). | Data = emissão |
+| 17.15 | N4-gIBSCBS (ausente) | L | Nota Fiscal {n}, item {i}: sem o grupo de cálculo do IBS/CBS (gIBSCBS) no XML, e o CST {cst} prevê esse grupo; confira (alerta). | |
+| 17.15a | N4-gIBSCBS (presente) | L | Nota Fiscal {n}, item {i}: grupo de cálculo do IBS/CBS (gIBSCBS) no XML, e o CST {cst} não prevê esse grupo; confira (alerta). | |
+| 17.16 | N4-pIBSUF · N4-pIBSMun · N4-pCBS | L | Nota Fiscal {n}, item {i}: alíquota {do esf} {xml} no XML e {esp} para {ano}; confira (alerta). | Nota Fiscal 910014, item 1: alíquota do IBS UF 0,0500% no XML e 0,1000% para 2026; confira (alerta). |
+| 17.16a | idem, tributação regular | L | Nota Fiscal {n}, item {i}: alíquota {do esf} {xml} no XML e 0,0000% para o cClassTrib {c} (tributação regular); confira (alerta). | |
+| 17.16b | idem, ZFM/ALC (`gALCZFMCBS`) | L | Nota Fiscal {n}, item {i}: alíquota da CBS {xml} no XML e 0,0000% com o grupo da ZFM/ALC (gALCZFMCBS); confira (alerta). | |
+| 17.17 | N4-pRedAliq | L | Nota Fiscal {n}, item {i}: redução {do esf} de {xml} no XML e {esp} pela tabela do cClassTrib {c}; confira (alerta). | Nota Fiscal 910016, item 1: redução da CBS de 40% no XML e 60% pela tabela do cClassTrib 200034; confira (alerta). |
+| 17.18 | N4-gRed (ausente) | L | Nota Fiscal {n}, item {i}: sem redução {do esf} no XML, e a tabela prevê {esp} para o cClassTrib {c}; confira (alerta). | Nota Fiscal 910018, item 1: sem redução do IBS UF no XML, e a tabela prevê 60% para o cClassTrib 200034; confira (alerta). |
+| 17.18a | N4-gRed (presente) | L | Nota Fiscal {n}, item {i}: redução {do esf} de {xml} no XML, e o CST {cst} não prevê redução; confira (alerta). | Nota Fiscal 910017, item 1: redução do IBS UF de 60% no XML, e o CST 000 não prevê redução; confira (alerta). |
+| 17.19 | N4-gDif (ausente) | L | Nota Fiscal {n}, item {i}: sem diferimento {do esf} no XML, e o CST {cst} prevê diferimento; confira (alerta). | |
+| 17.19a | N4-gDif (presente) | L | Nota Fiscal {n}, item {i}: diferimento {do esf} no XML, e o CST {cst} não prevê diferimento; confira (alerta). | |
+| 17.20 | N4-gTribRegular (ausente) | L | Nota Fiscal {n}, item {i}: sem tributação regular (gTribRegular) no XML, e o cClassTrib {c} prevê esse grupo; confira (alerta). | |
+| 17.20a | N4-gTribRegular (presente) | L | Nota Fiscal {n}, item {i}: tributação regular (gTribRegular) no XML, e o cClassTrib {c} não prevê esse grupo; confira (alerta). | |
+
+### 17.E Casos sem conferência (D9 e D14) e resumo
+
+| # | Onde | Tipo | Texto | Observação |
+|---|------|------|-------|------------|
+| 17.21 | uma linha por nota | L | Nota Fiscal {n}, sem conferência de IBS/CBS: {motivo}; {motivo}. | `llAviso`, sem contar como divergência e sem mudar a coluna da grade. Os motivos da mesma nota vão na mesma linha, separados por "; ", e a linha sai depois das divergências da mesma nota (11/11/2026, revisão da 7.3). Nível do log: `llAviso` (decisão P7-6) |
+| 17.22a | motivo: monofásico | I | item {i} (tributação monofásica, CST 620) | Vários itens: "itens 1, 3 e 4 (tributação monofásica, CST 620)". Ex.: Nota Fiscal 910020, sem conferência de IBS/CBS: item 1 (tributação monofásica, CST 620); totais de IBS/CBS monofásico (gMono). (a 910020 também tem `gMono` no total: os dois motivos na mesma linha, 17.21 e 17.22i; decisão de 11/11/2026, revisão da 7.3) |
+| 17.22b | motivo: CST 800 / 810 / 811 | I | item {i} (transferência de crédito, CST 800) · item {i} (ajuste de IBS na ZFM, CST 810) · item {i} (ajuste de competência, CST 811) | |
+| 17.22c | motivo: compra governamental | I | item {i} (compra governamental, valores sem o redutor) | `gTribCompraGov` |
+| 17.22d | motivo: crédito presumido da ZFM | I | item {i} (crédito presumido da ZFM) | `gCredPresIBSZFM` |
+| 17.22e | motivo: devolução | I | base e alíquotas (devolução, finNFe 4) | Ex.: Nota Fiscal 910022, sem conferência de IBS/CBS: base e alíquotas (devolução, finNFe 4). |
+| 17.22f | motivo: outras finalidades (D3) | I | base (nota complementar, finNFe 2) · base (nota de ajuste, finNFe 3) · base (nota de crédito, finNFe 5) · base (nota de débito, finNFe 6) | ✅ 11/11/2026, `nfe-fiscal`: nomes do finNFe 5 e 6 conferidos na NT 2025.002 v1.53, campo B25 ("5=Nota de crédito; 6=Nota de débito"). O texto já estava certo e não mudou |
+| 17.22g | motivo: nota de crédito | I | alíquotas (nota de crédito, tpNFCredito {x}) | `tpNFCredito` 03, 04 ou 06 |
+| 17.22h | motivo: ano sem alíquota em lei (D8) | I | alíquota da CBS de {ano} (depende da alíquota de referência) · alíquotas do IBS de {ano} (dependem da lei de cada ente) | |
+| 17.22i | motivo: totais não conferidos | I | totais de IBS/CBS monofásico (gMono) · totais de estorno de crédito (gEstornoCred) | |
+| 17.23 | resumo da conferência | L | Conferência de IBS/CBS: {k} notas conferidas, {e} com Erro e {a} com Alerta{simples}. | Depois da 5.21. `llErro` se houver Erro; senão `llAviso`. Só Erro: "…, {e} com Erro"; só Alerta: "…, {a} com Alerta". Singular: "1 nota conferida". Decisão P7-11. Sem nota conferida, a linha não sai. O log descreve a leitura da pasta inteira e **não muda com o filtro de modelo**; grade e relatório respeitam o filtro (decisões de 11/11/2026, revisão da 7.3; o exemplo "Filtro NFC-e 65" da 17.23b foi retirado). `{simples}` = 17.23b, vazio quando não há nota do Simples |
+| 17.23a | resumo sem divergência | L | Conferência de IBS/CBS: {k} notas conferidas, sem divergência{simples}. | `llSucesso` |
+| 17.23b | `{simples}`: menção do Simples Nacional (D22) (**proposta**) | I | ; {x} do Simples Nacional, sem conferir base e alíquota | Uma menção só, na linha de resumo; **nenhuma linha por nota**. `{x}` = notas conferidas com algum item com `gTribSN` e sem `gIBSCBS` (já contadas em `{k}`). `{x}` = `{k}`: "; todas do Simples Nacional, sem conferir base e alíquota"; `{k}` = 1: "; do Simples Nacional, sem conferir base e alíquota". Ex. (gabarito): Conferência de IBS/CBS: 62 notas conferidas, 20 com Erro e 18 com Alerta; 9 do Simples Nacional, sem conferir base e alíquota. Não conta como divergência. Dúvida P7-15 |
+| 17.24 | 5.23 "Todos os {n} arquivos foram lidos sem ocorrências." | L | sem mudança | Continua valendo só para a leitura (sem ignoradas nem erros). A divergência não é ocorrência de leitura; quem informa a conferência é a 17.23 |
+
+## 18. Relatório Divergências IBS/CBS
+
+### 18.A Tela Relatórios, menu e carregamento
+
+| # | Onde | Tipo | Antes | Depois | Observação |
+|---|------|------|-------|--------|------------|
+| 18.1 | quadro novo (tela Relatórios) | R | — | Divergências IBS/CBS | 3º quadro, depois do Relatório IBS/CBS (decisão P7-1). Ícone `list-checks` |
+| 18.2 | quadro (descrição) | F | — | Erros e alertas da conferência de IBS/CBS, um por linha: nota, item, nível, campo, valor no XML e valor esperado. {e} notas com Erro e {a} com Alerta. | Só Erro: "{e} notas com Erro."; só Alerta: "{a} notas com Alerta." Singular: "1 nota com Erro" |
+| 18.2a | quadro, sem divergência | F | — | Erros e alertas da conferência de IBS/CBS, um por linha: nota, item, nível, campo, valor no XML e valor esperado. Nenhuma divergência nas {k} notas conferidas. | Singular: "Nenhuma divergência na nota conferida." Botão habilitado (decisão P7-9) |
+| 18.3 | botão | B/H | — | Gerar relatório · *dica:* Gravar as notas e abrir a visualização do relatório | Igual a 8.7 |
+| 18.4 | sem nota com IBS/CBS no filtro | F | — | Nenhuma nota do modelo selecionado tem IBS/CBS. | Igual a 8.10: botão desabilitado com a dica visível |
+| 18.5 | ~~item de menu~~ | — | — | *(não entra)* | Descartado na decisão P7-1: o relatório é o 3º quadro (18.1) e o menu continua com 5 itens |
+| 18.6 | Carregando | F | — | Gerando o relatório Divergências IBS/CBS… | Mesmo padrão de 8.15 |
+| 18.7 | Carregando (legenda) | F | — | Gravando {n} notas e montando a visualização. | Igual a 8.16 |
+| 18.8 | erros ao gravar e gerar | M | — | *(8.12 e 8.13 sem mudança)* | O `{motivo}` da 8.14 ("Nenhuma nota para o relatório.") vale também aqui |
+
+### 18.B Relatório impresso (QuickReport, form novo `FormRelatorioDivergencias`)
+
+| # | Onde | Tipo | Antes | Depois | Observação |
+|---|------|------|-------|--------|------------|
+| 18.10 | título | P | — | Divergências IBS/CBS | 16 pt Semibold |
+| 18.11 | marca | P | — | ProXML | Como 9.2 |
+| 18.12 | subtítulo (Todos) | P | — | Período: {dd/mm/aaaa} a {dd/mm/aaaa} · Modelo: Todos (NF-e 55 e NFC-e 65) · {k} notas conferidas · {d} divergências | Singular: "1 nota conferida", "1 divergência". Período = notas conferidas do filtro |
+| 18.13 | subtítulo (filtro) | P | — | Período: {…} · Modelo: {NF-e 55 / NFC-e 65} · {k} notas conferidas · {d} divergências | |
+| 18.14 | pasta | P | — | Pasta: {caminho} | Como 9.6 |
+| 18.15 | títulos das colunas | P | — | Nº · Mod. · Data · Item · Nível · Tipo · Campo · Valor no XML · Esperado | Nº antes de Mod. (decisão P7-10). Larguras em tokens 6 |
+| 18.16 | Item | P | — | {nItem} · Total | "Total" = divergência de nível 2 |
+| 18.17 | Nível | P | — | 1 · 2 · 3 · 4 | Explicado na legenda 18.22 |
+| 18.18 | Tipo | P | — | Erro · Alerta | Erro em Semibold (impressão monocromática) |
+| 18.19 | Campo | P | — | *(tabela 18.C)* | Nome curto + tag do XML entre parênteses (decisão P7-13) |
+| 18.20 | Valor no XML / Esperado | P | — | R$ 1.234,56 · 0,1000% · 60% · ausente · presente · {cClassTrib} · do CST {cst} | A unidade vai na célula, porque a coluna mistura tipos |
+| 18.21 | linha de total | P | — | Total · {d} divergências em {m} notas | Singular: "1 divergência em 1 nota" |
+| 18.21a | contagem | P | — | Notas com Erro: {e} · Notas com Alerta: {a} · Notas sem divergência: {s} · a nota com Erro e Alerta conta só em Erro | Mesma regra da coluna da grade |
+| 18.22 | legenda dos níveis | P | — | Nível 1: conta do item · Nível 2: itens × totais · Nível 3: base de cálculo · Nível 4: alíquota, redução e CST. Níveis 1 e 2 são Erro; 3 e 4, Alerta. | 8 pt |
+| 18.23 | legenda Erro × Alerta | P | — | Erro: conta que não fecha com os valores do próprio XML. Alerta: indicação para conferir; depende da operação e da regra legal e não afirma que a nota está errada. | 8 pt |
+| 18.24 | legenda do que não entra | P | — | Não entram: notas sem IBS/CBS e itens sem conferência (monofásico, transferência de crédito, ajustes, compra governamental; veja o Resumo). Nos itens do Simples Nacional (gTribSN), só os totais e o cClassTrib são conferidos. | 8 pt. 2ª frase nova (D17/D22); sai sempre, mesmo sem nota do Simples no filtro |
+| 18.25 | legenda das regras | P | — | Regras da NT 2025.002 v{versão}, da NT 2026.005 v{versão} (Simples Nacional) e da tabela de cClassTrib v{versão}. A conferência não muda os totais do ProXML. | Versões vindas da unit `uConferenciaIBSCBS` (hoje 1.53, 1.00 e 1.71). Também na 18.27 (sem divergência) |
+| 18.26 | sem divergência (título) | P | — | Nenhuma divergência de IBS/CBS | 12 pt Semibold, no corpo da 1ª página |
+| 18.27 | sem divergência (texto) | P | — | As {k} notas com IBS/CBS do filtro foram conferidas, sem Erro nem Alerta. | Singular: "A nota com IBS/CBS do filtro foi conferida, sem Erro nem Alerta." Logo abaixo, a 18.25 |
+| 18.28 | continuação | P | — | Divergências IBS/CBS · Modelo: {m} · continuação | Topo das páginas 2+ |
+| 18.29 | rodapé | P | — | Gerado pelo ProXML v{versão} · {dd/mm/aaaa hh:mm} · Página {x} de {y} | Igual a 9.19 |
+
+### 18.C Coluna Campo do relatório
+
+| Regra | Campo (relatório) |
+|-------|-------------------|
+| N1-vIBSUF · N1-vIBSMun · N1-vCBS | IBS UF (vIBSUF) · IBS Mun. (vIBSMun) · CBS (vCBS) |
+| N1-vIBS | IBS (vIBS) |
+| N1-pAliqEfet | Alíq. efetiva {IBS UF / IBS Mun. / CBS} (pAliqEfet) |
+| N1-vDif · N1-vDevTrib | Diferimento {esfera} (vDif) · Devolução trib. {esfera} (vDevTrib) |
+| N1-vTribReg | Trib. regular IBS UF (vTribRegIBSUF) · Trib. regular IBS Mun. (vTribRegIBSMun) · Trib. regular CBS (vTribRegCBS) (nome real da tag; 11/11/2026, revisão da 7.3) |
+| N2 (Item = Total) | Base IBS/CBS (vBCIBSCBS) · IBS UF (vIBSUF) · IBS Mun. (vIBSMun) · IBS (vIBS) · CBS (vCBS) · Diferimento {esfera} (vDif) · Devolução trib. {esfera} (vDevTrib) · Créd. presumido {IBS / CBS} (vCredPres) · Créd. pres. susp. {IBS / CBS} (vCredPresCondSus) · Total IBS/CBS (IBSCBSTot) |
+| N2 do Simples Nacional (Item = Total, D17) | N2-vIBSSN: IBS Simples (vIBSSN) · N2-vCBSSN: CBS Simples (vCBSSN) · N2-gTribSN: Total Simples (gTribSN). Dúvida P7-16 |
+| N3-vBC | Base IBS/CBS (vBC) |
+| N4-pIBSUF · pIBSMun · pCBS | Alíquota IBS UF (pIBSUF) · Alíquota IBS Mun. (pIBSMun) · Alíquota CBS (pCBS) |
+| N4-pRedAliq · N4-gRed | Redução {esfera} (pRedAliq) · Redução {esfera} (gRed) |
+| N4-gDif · N4-gTribRegular · N4-gIBSCBS | Diferimento {esfera} (gDif) · Trib. regular (gTribRegular) · Grupo IBS/CBS (gIBSCBS) |
+| N4-cClassTrib · CSTxcClassTrib · Modelo · Vigência | cClassTrib · cClassTrib × CST · cClassTrib × modelo · cClassTrib × vigência |
+
+Valores das regras de presença e de tabela: `gRed`, `gDif`, `gTribRegular`, `gIBSCBS`, `IBSCBSTot` e `gTribSN` → "ausente" ou "presente" (no `gRed` presente, o percentual: "60%"); cClassTrib × CST → XML "{c}", esperado "do CST {cst}"; cClassTrib × modelo → esperado "só NF-e (55)" ou "só NFC-e (65)"; cClassTrib × vigência → XML "{data de emissão}", esperado "desde {dd/mm/aaaa}" ou "até {dd/mm/aaaa}"; cClassTrib que não existe → esperado "na tabela v{versão}". No Total Simples (gTribSN): total ausente com itens do Simples → XML "ausente", esperado "presente" (910043, 910053); total presente sem itens do Simples → XML "presente", esperado "ausente" (910044). `vIBSSN` e `vCBSSN` em reais: "R$ 1,50" / "R$ 1,20".
+
+## 19. README e site (etapas 7.6 e 7.7)
+
+| # | Onde | Tipo | Texto | Observação |
+|---|------|------|-------|------------|
+| 19.1 | README e site: aviso sobre Alerta | F | **Alerta não é erro.** O ProXML marca como Alerta o que depende da operação e da regra legal: base de cálculo, alíquota, redução, CST e cClassTrib. É uma indicação para conferir a nota com quem cuida da parte fiscal, não uma afirmação de que a nota está errada. Erro indica uma conta que não fecha com os próprios valores do XML, no item ou nos totais. | Pedido no plano (7.6). Revisão fiscal pelo `nfe-fiscal` antes de publicar (7.7) |
+| 19.2 | README e site: o que a conferência faz | F | O ProXML refaz as contas de IBS e CBS de cada item e dos totais das notas autorizadas e mostra o resultado na coluna IBS/CBS da tela Notas, no Resumo e no relatório Divergências IBS/CBS. A conferência só informa: não muda os totais, os cards nem os contadores. Ela segue a NT 2025.002 v1.53, a NT 2026.005 v1.00 (Simples Nacional) e a tabela de cClassTrib v1.71 e não substitui a validação da SEFAZ nem a análise fiscal. | NT 2026.005 incluída em 11/11/2026 (D17) |
+| 19.3 | README e site: base de cálculo (nível 3) | F | No nível 3, o ProXML compara a base do item com a soma do valor do produto, frete, seguro e outras despesas, menos o desconto e os tributos que saem da base em 2026 (ICMS, PIS, Cofins, ISS e FCP). Como a regra ainda depende de orientação da SEFAZ e da operação, a diferença aparece como Alerta. | Fórmula da D1 |
+| 19.4 | README e site: casos sem conferência | F | Ficam sem conferência na v1.3.0: tributação monofásica, transferência de crédito, ajustes de competência e da ZFM, compras governamentais e as alíquotas que a lei ainda não fixou para o ano. O Resumo informa esses casos, sem contar como divergência. | D9 e D14 |
+| 19.4a | README e site: Simples Nacional | F | Nas notas do Simples Nacional com o grupo do Simples (gTribSN, NT 2026.005), o ProXML confere se a soma do IBS e da CBS do Simples dos itens bate com o total da nota e se o grupo do Simples vem nos itens e no total. A alíquota do Simples depende do anexo e da faixa de faturamento e não é conferida. Quando o item também traz o grupo de cálculo do IBS/CBS (gIBSCBS), ele é conferido como nas outras notas, menos a alíquota da CBS quando o item só tem a CBS do Simples. | D17, D20 e D21. Revisão do `nfe-fiscal` na 7.7 |

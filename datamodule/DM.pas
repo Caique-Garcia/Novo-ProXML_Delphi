@@ -66,6 +66,8 @@ type
     QryNotasIBSCBSVIBSMUN: TWideStringField;
     QryNotasIBSCBSVIBS: TWideStringField;
     QryNotasIBSCBSVCBS: TWideStringField;
+    QryDivergencias: TFDQuery;
+    QryNotasConferidas: TFDQuery;
     procedure DataModuleCreate(Sender: TObject);
     procedure ConexaoBeforeConnect(Sender: TObject);
     procedure ConexaoAfterConnect(Sender: TObject);
@@ -75,6 +77,7 @@ type
     procedure GravarConfig(const Config: TConfig);
     procedure AdicionarColunasFaltantes(const Tabela: String; const Colunas, Definicoes: array of String);
     procedure MigrarTabelaNF;
+    procedure InserirDivergenciaDB(Divergencias: TDataSet);
     procedure MigrarTabelaConfig;
     function  ConfigVazia: Boolean;
     procedure SetFiltroModelo(const Value: Integer);
@@ -82,8 +85,10 @@ type
     procedure CreateLog(const Classe, Msg: String);
     procedure InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String;
       const Modelo: Integer; const TemIBSCBS: Boolean;
-      const BCIBSCBS, IBSUF, IBSMun, IBS, CBS: String);
-    procedure GravarNotas(DataSet: TDataSet);
+      const BCIBSCBS, IBSUF, IBSMun, IBS, CBS, ConfIBSCBS: String);
+    //Grava as notas (tabela nf) e as divergências da conferência de IBS/CBS (tabela divergencia_ibscbs)
+    //na mesma transação. Divergencias pode ser nil (nenhuma divergência gravada)
+    procedure GravarNotas(DataSet: TDataSet; Divergencias: TDataSet);
     procedure DeleteDados;
     function GetConfig: TConfig;
     procedure UpdateConfig(const Config: TConfig);
@@ -92,7 +97,8 @@ type
     function  GetPreferencias: TPreferencias;
     procedure GravarUltimaPasta(const Pasta: String);
     procedure GravarJanela(const Esquerda, Topo, Largura, Altura: Integer; const Maximizada: Boolean);
-    //Filtro de modelo usado por QryNotas e QryNotasIBSCBS: 0 = Todos, 55 = NF-e, 65 = NFC-e
+    //Filtro de modelo usado por QryNotas, QryNotasIBSCBS, QryDivergencias e QryNotasConferidas:
+    //0 = Todos, 55 = NF-e, 65 = NFC-e
     //Vale na próxima abertura das queries
     property FiltroModelo: Integer read FFiltroModelo write SetFiltroModelo;
   end;
@@ -128,11 +134,29 @@ begin
                                 'VIBSUF           TEXT (30), '  +
                                 'VIBSMUN          TEXT (30), '  +
                                 'VIBS             TEXT (30), '  +
-                                'VCBS             TEXT (30) '  +
+                                'VCBS             TEXT (30), '  +
+                                'CONF_IBSCBS      TEXT (10) '  +
                                 ' ); ');
 
-   //Bancos criados pela versão 1.0 não têm as colunas novas
+   //Bancos criados pela versão 1.0 não têm as colunas novas (e os de antes da 1.3.0, a CONF_IBSCBS)
    MigrarTabelaNF;
+
+   //Plano 7 (v1.3.0): uma linha por divergência da conferência de IBS/CBS (relatório Divergências IBS/CBS).
+   //Tabela nova: bancos antigos a ganham aqui, sem mexer nas outras. ITEM 0 = divergência dos totais
+   //(nível 2); SEQ = ordem das regras na nota (desempate na ordenação do relatório)
+   Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS divergencia_ibscbs ( ' +
+                                'NUMERO           TEXT (20), '  +
+                                'MODELO           INTEGER, '  +
+                                'CHAVE            TEXT (50), '  +
+                                'DATA             TEXT (36), '  +
+                                'ITEM             INTEGER, '  +
+                                'NIVEL            INTEGER, '  +
+                                'TIPO             TEXT (10), '  +
+                                'CAMPO            TEXT (120), '  +
+                                'VALOR_XML        TEXT (60), '  +
+                                'ESPERADO         TEXT (60), '  +
+                                'SEQ              INTEGER '  +
+                                ' ); ');
 
    Conexao.ExecSQL('CREATE TABLE IF NOT EXISTS config ( ' +
                                 'SMTP             TEXT (32), '  +
@@ -194,9 +218,11 @@ end;
 
 procedure TDMConfig.MigrarTabelaNF;
 const
-  //Colunas novas da tabela nf (versão 1.1) e suas definições
-  ColunasNovas: array[0..6] of String = ('MODELO', 'TEM_IBSCBS', 'VBCIBSCBS', 'VIBSUF', 'VIBSMUN', 'VIBS', 'VCBS');
-  DefColunas: array[0..6] of String = ('INTEGER', 'INTEGER DEFAULT 0', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)');
+  //Colunas novas da tabela nf (versão 1.1; CONF_IBSCBS na 1.3.0, Plano 7) e suas definições
+  ColunasNovas: array[0..7] of String = ('MODELO', 'TEM_IBSCBS', 'VBCIBSCBS', 'VIBSUF', 'VIBSMUN', 'VIBS', 'VCBS',
+                                         'CONF_IBSCBS');
+  DefColunas: array[0..7] of String = ('INTEGER', 'INTEGER DEFAULT 0', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)', 'TEXT (30)',
+                                       'TEXT (30)', 'TEXT (10)');
 begin
   AdicionarColunasFaltantes('nf', ColunasNovas, DefColunas);
 end;
@@ -247,19 +273,20 @@ end;
 procedure TDMConfig.DeleteDados();
 begin
     Conexao.ExecSQL('DELETE FROM nf ;');
+    Conexao.ExecSQL('DELETE FROM divergencia_ibscbs ;');
 end;
 
 procedure TDMConfig.InserirNotaDB(const Numero, Chave, Data, Valor, ICMS, BC, XML: String;
   const Modelo: Integer; const TemIBSCBS: Boolean;
-  const BCIBSCBS, IBSUF, IBSMun, IBS, CBS: String);
+  const BCIBSCBS, IBSUF, IBSMun, IBS, CBS, ConfIBSCBS: String);
 begin
     Query.Active := False;
     Query.SQL.Clear;
 
     Query.SQL.Add('insert into nf ( NUMERO, CHAVE, VALOR, DATA, BCICMS, VLICMS, XML, ');
-    Query.SQL.Add('                 MODELO, TEM_IBSCBS, VBCIBSCBS, VIBSUF, VIBSMUN, VIBS, VCBS ) ');
+    Query.SQL.Add('                 MODELO, TEM_IBSCBS, VBCIBSCBS, VIBSUF, VIBSMUN, VIBS, VCBS, CONF_IBSCBS ) ');
     Query.SQL.Add('values( :NUMERO, :CHAVE, :VALOR, :DATA, :BCICMS, :VLICMS, :XML, ');
-    Query.SQL.Add('        :MODELO, :TEM_IBSCBS, :VBCIBSCBS, :VIBSUF, :VIBSMUN, :VIBS, :VCBS )');
+    Query.SQL.Add('        :MODELO, :TEM_IBSCBS, :VBCIBSCBS, :VIBSUF, :VIBSMUN, :VIBS, :VCBS, :CONF_IBSCBS )');
     Query.Params.ParamByName('NUMERO').AsString         := Trim(Numero);
     Query.Params.ParamByName('CHAVE').AsString          := Trim(Chave);
     Query.Params.ParamByName('VALOR').AsString          := Trim(Valor);
@@ -277,6 +304,8 @@ begin
     Query.Params.ParamByName('VIBSMUN').AsString        := Trim(IBSMun);
     Query.Params.ParamByName('VIBS').AsString           := Trim(IBS);
     Query.Params.ParamByName('VCBS').AsString           := Trim(CBS);
+    //Situação da conferência de IBS/CBS (glossário 16.2): OK, Alerta, Erro ou vazia (nota sem IBS/CBS)
+    Query.Params.ParamByName('CONF_IBSCBS').AsString    := Trim(ConfIBSCBS);
 
     try
         Query.ExecSQL;
@@ -285,15 +314,45 @@ begin
     end;
 end;
 
-procedure TDMConfig.GravarNotas(DataSet: TDataSet);
+procedure TDMConfig.InserirDivergenciaDB(Divergencias: TDataSet);
+begin
+    //Divergência atual do DataSet de divergências (FormPrincipal) na tabela divergencia_ibscbs
+    Query.Active := False;
+    Query.SQL.Clear;
+
+    Query.SQL.Add('insert into divergencia_ibscbs ( NUMERO, MODELO, CHAVE, DATA, ITEM, NIVEL, TIPO, CAMPO, ');
+    Query.SQL.Add('                                 VALOR_XML, ESPERADO, SEQ ) ');
+    Query.SQL.Add('values( :NUMERO, :MODELO, :CHAVE, :DATA, :ITEM, :NIVEL, :TIPO, :CAMPO, ');
+    Query.SQL.Add('        :VALOR_XML, :ESPERADO, :SEQ )');
+    Query.Params.ParamByName('NUMERO').AsString     := Trim(Divergencias.FieldByName('numero').AsString);
+    Query.Params.ParamByName('MODELO').AsInteger    := Divergencias.FieldByName('modelo').AsInteger;
+    Query.Params.ParamByName('CHAVE').AsString      := Trim(Divergencias.FieldByName('chave').AsString);
+    Query.Params.ParamByName('DATA').AsString       := Trim(Divergencias.FieldByName('data').AsString);
+    Query.Params.ParamByName('ITEM').AsInteger      := Divergencias.FieldByName('item').AsInteger;
+    Query.Params.ParamByName('NIVEL').AsInteger     := Divergencias.FieldByName('nivel').AsInteger;
+    Query.Params.ParamByName('TIPO').AsString       := Trim(Divergencias.FieldByName('tipo').AsString);
+    Query.Params.ParamByName('CAMPO').AsString      := Trim(Divergencias.FieldByName('campo').AsString);
+    Query.Params.ParamByName('VALOR_XML').AsString  := Trim(Divergencias.FieldByName('valor_xml').AsString);
+    Query.Params.ParamByName('ESPERADO').AsString   := Trim(Divergencias.FieldByName('esperado').AsString);
+    Query.Params.ParamByName('SEQ').AsInteger       := Divergencias.FieldByName('seq').AsInteger;
+
+    try
+        Query.ExecSQL;
+    except on e: Exception do
+        raise Exception.Create('Erro ao gravar no banco de dados: ' + e.message);
+    end;
+end;
+
+procedure TDMConfig.GravarNotas(DataSet: TDataSet; Divergencias: TDataSet);
 var
     Marcador: TBookmark;
     FiltroAtivo: Boolean;
 begin
-    //Grava as notas do DataSet (grade de notas) na tabela nf, numa transação.
+    //Grava as notas do DataSet (grade de notas) na tabela nf e as divergências da conferência de IBS/CBS
+    //na tabela divergencia_ibscbs, numa transação só.
     //Deve ser chamada na thread principal: a conexão também é usada pela tela.
     //Grava todas as notas, mesmo com filtro ativo: o filtro de modelo é aplicado nas queries (FiltroModelo).
-    //Em caso de erro desfaz tudo (inclusive a limpeza da tabela) e repassa a exceção.
+    //Em caso de erro desfaz tudo (inclusive a limpeza das tabelas) e repassa a exceção.
     DataSet.DisableControls;
     try
         Marcador    := DataSet.GetBookmark;
@@ -322,10 +381,22 @@ begin
                         FormatFloat('0.00', DataSet.FieldByName('vibsuf').AsFloat),
                         FormatFloat('0.00', DataSet.FieldByName('vibsmun').AsFloat),
                         FormatFloat('0.00', DataSet.FieldByName('vibs').AsFloat),
-                        FormatFloat('0.00', DataSet.FieldByName('vcbs').AsFloat)
+                        FormatFloat('0.00', DataSet.FieldByName('vcbs').AsFloat),
+                        DataSet.FieldByName('conf_ibscbs').AsString
                     );
 
                     DataSet.Next;
+                end;
+
+                //Divergências de todas as notas (sem filtro): o filtro de modelo fica na QryDivergencias
+                if (Divergencias <> nil) and Divergencias.Active then
+                begin
+                    Divergencias.First;
+                    while not Divergencias.Eof do
+                    begin
+                        InserirDivergenciaDB(Divergencias);
+                        Divergencias.Next;
+                    end;
                 end;
 
                 Conexao.Commit;
@@ -346,7 +417,7 @@ end;
 
 procedure TDMConfig.QryNotasBeforeOpen(DataSet: TDataSet);
 begin
-    //Aplica o filtro de modelo (0 = Todos) em QryNotas e QryNotasIBSCBS
+    //Aplica o filtro de modelo (0 = Todos) em QryNotas, QryNotasIBSCBS, QryDivergencias e QryNotasConferidas
     TFDQuery(DataSet).ParamByName('MODELO').AsInteger := FFiltroModelo;
 end;
 

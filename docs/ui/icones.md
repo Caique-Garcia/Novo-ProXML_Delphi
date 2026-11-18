@@ -10,7 +10,7 @@
 | Versão | 1.59.0 (baixada de `https://unpkg.com/lucide-static@1.59.0/icons/` em 19/10/2026) |
 | Site | https://lucide.dev |
 | Licença | **ISC** (ícones derivados do Feather: **MIT**). Ambas permitem uso, cópia, modificação e distribuição gratuita ou comercial, exigindo só manter o aviso de copyright e a licença |
-| Arquivos no repositório | `docs/ui/icones/*.svg` (37 ícones) e `docs/ui/icones/LICENSE-lucide.txt` (texto completo das licenças ISC e MIT) |
+| Arquivos no repositório | `docs/ui/icones/*.svg` (37 ícones; 38 com o `list-checks` do Plano 7) e `docs/ui/icones/LICENSE-lucide.txt` (texto completo das licenças ISC e MIT) |
 | Crédito no app | Tela Sobre: "Ícones: Lucide (licença ISC)" (glossário 13.6). Ao empacotar a release, incluir o `LICENSE-lucide.txt` junto do executável |
 
 **Por que Lucide e não Tabler:** as duas têm licença livre e traço de 2 px em grade de 24 px. A Lucide tem os ícones exatos que o ProXML precisa (`sheet`, `file-down`, `plug-zap`, `folder-input`, `search-x`), traço um pouco mais leve, que combina com a Segoe UI, e é a mais usada hoje (mais fácil achar um ícone novo no mesmo estilo). Tabler seria uma troca equivalente se o usuário preferir.
@@ -56,6 +56,17 @@
 | Anexo do e-mail | paperclip | `paperclip.svg` | 20 |
 | Campos de e-mail | mail | `mail.svg` | 16 |
 | Link do GitHub (Sobre) | external-link | `external-link.svg` | 16 |
+| Link do site (Sobre, Plano 3, v1.2.1) | external-link | `external-link.svg` | 16 |
+| Botão "Apoiar no Apoia.se" (Sobre, Plano 3, v1.2.1) | heart (sugestão; alternativa `hand-heart`, só no mockup) | `heart.svg` | 16 |
+| Coluna IBS/CBS da grade · OK (Plano 7) | circle-check | `circle-check.svg` | 16 |
+| Coluna IBS/CBS da grade · Alerta (Plano 7) | triangle-alert (decisão P7-2) | `triangle-alert.svg` | 16 |
+| Coluna IBS/CBS da grade · Erro (Plano 7) | circle-x | `circle-x.svg` | 16 |
+| Log do Resumo · divergência Erro / Alerta / sem conferência (Plano 7) | circle-x / triangle-alert / triangle-alert | já existentes (`llErro`, `llAviso`) | 16 |
+| Quadro "Divergências IBS/CBS" da tela Relatórios (Plano 7, novo) | list-checks | `list-checks.svg` | 20 |
+
+**Plano 7 (v1.3.0, 11/11/2026):** o único ícone novo é o `list-checks`, baixado de `https://unpkg.com/lucide-static@1.59.0/icons/list-checks.svg` (mesma versão e licença ISC dos outros). Total: 38 ícones. A coluna IBS/CBS reaproveita o trio de status do Resumo (`circle-check`, `triangle-alert`, `circle-x`): o usuário vê o mesmo ícone na grade e no log para a mesma situação, e o triângulo do Alerta se distingue dos círculos pela forma, não só pela cor. **Aguardando aprovação do usuário.**
+
+**Plano 3, etapa 3.5 (v1.2.1, 11/11/2026):** ícone novo `heart`, baixado de `https://unpkg.com/lucide-static@1.59.0/icons/heart.svg` (mesma versão e licença ISC dos outros; o aviso `@license` ficou no arquivo). Total: 39 ícones. A alternativa `hand-heart` (mesma origem) aparece só no mockup `sobre.html` (opção C) e não foi adicionada à pasta. **Aguardando aprovação do usuário.**
 
 ## Cores
 

@@ -4,6 +4,7 @@
 > **Status:** proposta, **aguardando aprovação do usuário**
 > **Mockups:** `docs/ui/mockups/index.html` · **Opções para decidir:** `docs/ui/mockups/opcoes.html`
 > **Ícones:** `docs/ui/icones.md` · **Textos:** `docs/ui/glossario.md`
+> **Plano 7 (v1.3.0, 11/11/2026):** coluna de conferência IBS/CBS (5.15), pares de contraste novos (2.1) e colunas do relatório Divergências IBS/CBS (6). Sem cor nova: usa só os tokens de sucesso, aviso e erro. **Aguardando aprovação do usuário.**
 
 Este arquivo é a fonte única de cores, fontes, medidas e estados dos componentes. A unit `view/ProXML.Tema.pas` (etapa 4.2) deve declarar **exatamente** estes valores, com os mesmos nomes. Nos mockups HTML as cores vêm de variáveis CSS com os mesmos nomes (`var(--CorPrimaria)` = `CorPrimaria`).
 
@@ -92,6 +93,12 @@ Fórmula de luminância relativa da WCAG; texto exige **4,5:1** (AA). Valores ca
 | `CorErro` sobre `CorSuperficie` | 5,62:1 | passa | Contador Com erro, mensagem abaixo do campo |
 | `CorErro` sobre `CorErroSuave` | 4,92:1 | passa | Ícone na faixa de erro |
 | `CorTexto` sobre `CorErroSuave` | 13,57:1 | passa | Texto da faixa de erro |
+| `CorSucesso` sobre `CorZebra` | 5,15:1 | passa | Coluna IBS/CBS: "OK" em linha zebrada (Plano 7) |
+| `CorSucesso` sobre `CorPrimariaSuave` | 4,77:1 | passa | Coluna IBS/CBS: "OK" na linha selecionada (Plano 7) |
+| `CorAviso` sobre `CorZebra` | 5,65:1 | passa | Coluna IBS/CBS: "Alerta" em linha zebrada (Plano 7) |
+| `CorAviso` sobre `CorPrimariaSuave` | 5,23:1 | passa | Coluna IBS/CBS: "Alerta" na linha selecionada (Plano 7) |
+| `CorErro` sobre `CorZebra` | 5,29:1 | passa | Coluna IBS/CBS: "Erro" em linha zebrada (Plano 7) |
+| `CorErro` sobre `CorPrimariaSuave` | 4,90:1 | passa | Coluna IBS/CBS: "Erro" na linha selecionada (Plano 7) |
 
 ### 2.2 Componentes não textuais (WCAG 1.4.11, mínimo 3:1) e isenções
 
@@ -102,7 +109,7 @@ Fórmula de luminância relativa da WCAG; texto exige **4,5:1** (AA). Valores ca
 | `CorErro` sobre `CorSuperficie` | 5,62:1 | Borda do campo inválido |
 | `CorPrimaria` sobre `CorBorda` | 4,00:1 | Preenchimento × trilho da barra de progresso |
 | `CorBorda` sobre `CorSuperficie` | 1,36:1 | Só divisórias e contorno de cards (decorativo, sem mínimo) |
-| `CorTextoDesabilitado` sobre `CorFundoDesabilitado` | 2,70:1 | Controle desabilitado: **isento** pela WCAG. Por isso todo desabilitado importante tem dica visível ao lado |
+| `CorTextoDesabilitado` sobre `CorFundoDesabilitado` | 2,70:1 | Controle desabilitado: **isento** pela WCAG. Por isso todo desabilitado importante tem dica visível ao lado (na tela Relatórios, abaixo do botão: 5.16) |
 | `CorTextoDesabilitado` sobre `CorSuperficie` | 3,09:1 | Item de menu desabilitado (isento) |
 | Cinza do `TextHint` (≈ `#6D6D6D`) sobre branco | ≈ 5,17:1 | O `TextHint` do `TEdit` é desenhado pelo Windows (`EM_SETCUEBANNER`) com a cor do sistema; **não dá para trocar a cor**. Passa mesmo assim |
 
@@ -316,6 +323,64 @@ Durante leitura dos XMLs, envio, teste de conexão e geração de DANFE/relatór
 
 Animação `TSkAnimatedImage` do `ProXML.FrameLoad` (160×134) centralizada, texto 12 pt Semibold com a operação e legenda 10 pt `CorTextoSecundario`. A animação atual usa ciano `#00BAFF` (decisão D10).
 
+### 5.15 Coluna IBS/CBS da grade (Plano 7, v1.3.0)
+
+Situação da conferência de IBS/CBS de cada nota (campo `conf_ibscbs`). Textos no glossário, seção 16. Mockup: `mockups/notas.html#p7-conferencia`.
+
+| Parte | Especificação |
+|-------|---------------|
+| Título | "IBS/CBS", 10 pt Semibold, alinhado à esquerda (como o dado). Ordenada: seta no `Title.Caption` e `CorPrimariaHover`, como as outras |
+| Largura | **80 px** (a 100%): padding 8 + ícone 16 + espaço 6 + "Alerta" (~34 px em 10 pt) + padding 8, com folga. O título Semibold mede ~63 px com padding |
+| Posição | **Última coluna, sempre visível** (decisão P7-3) |
+| Célula | Ícone Lucide 16 px centrado na vertical + texto 10 pt Regular, **os dois na cor do status** |
+| OK | `circle-check` + "OK" em `CorSucesso` |
+| Alerta | `triangle-alert` + "Alerta" em `CorAviso` (decisão P7-2) |
+| Erro | `circle-x` + "Erro" em `CorErro`. Nota com Erro e Alerta mostra Erro |
+| Vazia | Nota sem IBS/CBS: nada desenhado (só fundo e divisória) |
+| Fundo | Igual ao resto da linha: `CorSuperficie`, `CorZebra` ou `CorPrimariaSuave` (selecionada). Contraste do texto ≥ 4,77:1 nos três (seção 2.1) |
+| Ordenação | Por gravidade: vazia < OK < Alerta < Erro, empate por Nº. 1º clique em ▼ (Erro no topo), decisão P7-5 |
+| Dica | Por célula (glossário 16.3 a 16.8): no `OnMouseMove` do `TDBGrid`, `MouseCoord(X, Y)` dá coluna e linha; ao mudar de célula, trocar o `Hint` e chamar `Application.CancelHint`. Em linhas que não são a atual, ler a situação pelo `DataLink.ActiveRecord` ou por um `TFDMemTable` clone |
+
+**Larguras com a coluna nova** (área da grade sem a barra de rolagem: ~757 px em 1024×640 e ~1099 px em 1366×768):
+
+| Janela | Colunas | Chave |
+|--------|---------|-------|
+| 1024×640 | Nº 72 · Modelo 64 · Data 88 · Chave · Valor 120 · IBS/CBS 80 | 333 px (mínimo 330: cabe) |
+| 1366×768, com as 4 extras (regra D3 atual) | + Base ICMS 120 · ICMS 104 · IBS 88 · CBS 96 | faltariam 63 px: pela regra atual as 4 extras **somem** em 1366 |
+| 1366×768, extras por prioridade (decisão P7-4) | + ICMS 104 · IBS 88 · CBS 96 (Base ICMS oculta) | 387 px |
+| ≥ ~1440 px de largura | todas | ≥ 330 px |
+
+Prioridade sugerida das extras: IBS, CBS, ICMS e por último Base ICMS (cada uma entra quando sobra largura com a Chave em 330 px).
+
+**Viabilidade em VCL 10.2:** o `OnDrawColumnCell` já pinta a grade (5.7). O `TSkSvg` não desenha num `TCanvas` qualquer: pintar os 3 SVGs uma vez em `TBitmap` 32 bits (pf32bit, alfa) no tamanho do PPI atual (16 × PPI / 96), com a cor do token, e usar `Canvas.Draw` na célula. Refazer os bitmaps quando o PPI mudar (`OnAfterMonitorDpiChanged`). Alternativa mais simples, se o bitmap der trabalho: só o texto colorido, sem ícone (o contraste continua ≥ 4,77:1), mas a forma do ícone ajuda quem não distingue as cores.
+
+### 5.16 Tela Relatórios: quadros e dica do botão desabilitado (Plano 7, defeito D2 da B3)
+
+Três quadros lado a lado (Relatório de Notas, Relatório IBS/CBS, Divergências IBS/CBS). Mockup: `mockups/relatorios.html#p7-desabilitado`.
+
+**Regra (11/11/2026):** a dica do botão desabilitado (glossário 8.8, 8.8a, 8.10 / 18.4) fica **sempre abaixo do botão**, em qualquer largura de janela, ocupando a largura interna toda do quadro. Não há limiar: a dica ao lado do botão só caberia em uma linha com o quadro a partir de ~485 px (janela de ~1720 px), e a troca de posição ao redimensionar faria os botões "pularem". Substitui a dica ao lado do botão dos mockups do Plano 4 (2 quadros).
+
+| Parte | Especificação |
+|-------|---------------|
+| Faixa dos quadros | 3 quadros com a **mesma largura** (espaço 16 entre eles) e a **mesma altura**: a maior altura necessária entre os 3, recalculada no `OnResize` e ao mudar o estado (filtro, processar) |
+| Quadro | Fundo `CorSuperficie`, borda 1 px `CorBorda`, padding 16. De cima para baixo: título (12 pt Semibold, ícone 20 px, 24 px de altura), 8, descrição (10 pt `CorTextoSecundario`, quebra de linha), espaço que cresce, rodapé |
+| Rodapé | Ancorado embaixo (`alBottom`). Botão "Gerar relatório" 32 px de altura, alinhado à esquerda; se a faixa tiver dica: 8 px e a área da dica |
+| Dica | Ícone `info` 14 px `CorTextoSecundario` alinhado à **primeira linha** (1 px abaixo do topo) + 4 px + texto 9 pt `CorTextoSecundario` com quebra de linha (`WordWrap`), altura de linha 16 px. Largura do texto = largura interna do quadro − 14 − 4. Começa no mesmo `Left` do botão. Contraste 6,13:1 sobre `CorSuperficie` (2.1) |
+| Altura da área da dica | **Igual nos 3 quadros**: a do quadro cuja dica tem mais linhas. O quadro com botão habilitado (sem dica) reserva essa altura vazia, para os 3 botões ficarem na mesma linha. Sem nenhuma dica na faixa, o rodapé é só o botão (32) |
+| Medir as linhas | Pela fonte real e no PPI atual: `DrawText(..., DT_CALCRECT or DT_WORDBREAK)` (ou `TLabel` com `AutoSize` + `WordWrap` e `Width` fixo) na largura do texto. Não fixar a contagem de linhas |
+| Hint | Continua igual: o texto da dica também no `Hint` do painel do quadro (controle desabilitado não dispara hint, 5.12) |
+
+**Medidas a 100%** (área cliente 1008×600 e 1350×728; conteúdo = área − menu 200 − padding 2 × 16):
+
+| Janela | Quadro | Interna (− 2 borda − 32 padding) | Texto da dica | 18.4 (275 px) | 8.8a (419 px) | 8.8 (214 px) | Rodapé com a dica mais longa |
+|--------|--------|------|------|------|------|------|------|
+| 1024×640 | 248 px | 214 px | 196 px | 2 linhas | 3 linhas | 2 linhas | 32 + 8 + 48 = 88 px (8.8a) · 72 px (18.4 ou 8.8) |
+| 1366×768 | 362 px | 328 px | 310 px | 1 linha | 2 linhas | 1 linha | 32 + 8 + 32 = 72 px (8.8a) · 56 px (18.4 ou 8.8) |
+
+Larguras dos textos medidas com Segoe UI 9 pt (12 px). Em 1024 o pior caso (8.8a nos 3 quadros) dá quadro de ~240 px de altura (16 + 24 + 8 + descrição de 4 linhas ≈ 76 + 8 + 88 + 16), que cabe nos ~320 px que sobram abaixo da linha de título, já descontada a legenda da tela.
+
+**Viabilidade em VCL 10.2:** só `TPanel` (quadro e rodapé), `TProBotao`, `TSkSvg` (ícone) e `TLabel` com `WordWrap`. Nada além do que a tela já usa.
+
 ---
 
 ## 6. Relatórios A4 (QuickReport)
@@ -329,6 +394,7 @@ Animação `TSkAnimatedImage` do `ProXML.FrameLoad` (160×134) centralizada, tex
 | Linhas | 20 px, 9 pt, zebra `CorZebra`, linha inteira na página |
 | Colunas (Notas) | Nº 52 · Mod. 36 · Data 68 · Chave ≥ 270 (resto) · Valor (R$) 92 · Base ICMS (R$) 96 · ICMS (R$) 80 |
 | Colunas (IBS/CBS) | Modelo 56 · Nº 60 · Data 76 · Base IBS/CBS (R$) resto · IBS UF (R$) 96 · IBS Mun. (R$) 100 · IBS (R$) 88 · CBS (R$) 88 |
+| Colunas (Divergências IBS/CBS, Plano 7) | Nº 52 · Mod. 36 · Data 68 · Item 40 (centro) · Nível 40 (centro) · Tipo 48 · Campo resto (≈ 242) · Valor no XML 96 · Esperado 96. Valores com a unidade na célula (R$, %, "ausente"). Tipo "Erro" em Semibold, sem cor. Total "Total · N divergências em M notas" + contagem e legendas em 8 pt (glossário 18.21 a 18.25). Sem divergência: título 12 pt Semibold e texto 9 pt `CorTextoSecundario` num quadro com borda `CorBorda`, no corpo da 1ª página. Mockup: `mockups/relatorio-divergencias-a4.html` |
 | Alinhamento | Título e dado da mesma coluna com o mesmo `Left`/`Width` e o mesmo alinhamento (números à direita) |
 | Total | linha alinhada às colunas, 9 pt Semibold, linha superior 2 px `CorMarinho`, "Total · N notas"; abaixo, legenda 8 pt |
 | Rodapé | 8 pt `CorTextoSecundario`, centralizado, linha superior 1 px `CorBorda`: "Gerado pelo ProXML v1.1.0 · dd/mm/aaaa hh:mm · Página X de Y" |

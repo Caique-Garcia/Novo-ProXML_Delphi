@@ -267,12 +267,26 @@ const
     'a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 ' +
     '0 0 0 1 1h7"/></svg>';
 
-  //external-link.svg: link do GitHub (tela Sobre)
+  //external-link.svg: links do site e do GitHub (tela Sobre)
   IconeLinkExterno =
     '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
     'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
     'path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V' +
     '8a2 2 0 0 1 2-2h6"/></svg>';
+
+  //list-checks.svg: quadro "Divergências IBS/CBS" da tela Relatórios (Plano 7)
+  IconeDivergencias =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d=' +
+    '"m3 7 2 2 4-4"/></svg>';
+
+  //heart.svg: botão "Apoiar no Apoia.se" (tela Sobre, Plano 3, etapa 3.5)
+  IconeCoracao =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="no' +
+    'ne" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><' +
+    'path d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1' +
+    '.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"/></svg>';
 
   //Logo vetorial para fundo claro (docs/ui/logo/proxml-logo-claro.svg, sem o comentário e sem
   //espaços entre as tags): cabeçalho dos relatórios impressos (etapa 4.8, decisão D7 revista).

@@ -1681,6 +1681,13 @@ object FormPrincipal: TFormPrincipal
                           Title.Caption = 'CBS'
                           Width = 96
                           Visible = True
+                        end
+                        item
+                          Expanded = False
+                          FieldName = 'conf_ibscbs'
+                          Title.Caption = 'IBS/CBS'
+                          Width = 80
+                          Visible = True
                         end>
                     end
                     object PnlNotasVazio: TPanel
@@ -2775,7 +2782,7 @@ object FormPrincipal: TFormPrincipal
                     object PnlOpcaoNotas: TPanel
                       Left = 0
                       Top = 0
-                      Width = 444
+                      Width = 290
                       Height = 170
                       BevelOuter = bvNone
                       Padding.Left = 1
@@ -2788,7 +2795,7 @@ object FormPrincipal: TFormPrincipal
                       object PnlOpcaoNotasFundo: TPanel
                         Left = 1
                         Top = 1
-                        Width = 442
+                        Width = 288
                         Height = 168
                         Align = alClient
                         BevelOuter = bvNone
@@ -2803,7 +2810,7 @@ object FormPrincipal: TFormPrincipal
                           AlignWithMargins = True
                           Left = 16
                           Top = 53
-                          Width = 410
+                          Width = 256
                           Height = 40
                           Margins.Left = 4
                           Margins.Top = 0
@@ -2818,7 +2825,7 @@ object FormPrincipal: TFormPrincipal
                           AlignWithMargins = True
                           Left = 16
                           Top = 16
-                          Width = 410
+                          Width = 256
                           Height = 29
                           Margins.Left = 4
                           Margins.Top = 0
@@ -2859,7 +2866,7 @@ object FormPrincipal: TFormPrincipal
                         object PnlOpcaoNotasRodape: TPanel
                           Left = 12
                           Top = 114
-                          Width = 414
+                          Width = 260
                           Height = 40
                           Align = alTop
                           BevelOuter = bvNone
@@ -2913,9 +2920,9 @@ object FormPrincipal: TFormPrincipal
                       end
                     end
                     object PnlOpcaoIBSCBS: TPanel
-                      Left = 452
+                      Left = 306
                       Top = 0
-                      Width = 444
+                      Width = 290
                       Height = 170
                       BevelOuter = bvNone
                       Padding.Left = 1
@@ -2928,7 +2935,7 @@ object FormPrincipal: TFormPrincipal
                       object PnlOpcaoIBSCBSFundo: TPanel
                         Left = 1
                         Top = 1
-                        Width = 442
+                        Width = 288
                         Height = 168
                         Align = alClient
                         BevelOuter = bvNone
@@ -2943,7 +2950,7 @@ object FormPrincipal: TFormPrincipal
                           AlignWithMargins = True
                           Left = 16
                           Top = 53
-                          Width = 410
+                          Width = 256
                           Height = 40
                           Margins.Left = 4
                           Margins.Top = 0
@@ -2958,7 +2965,7 @@ object FormPrincipal: TFormPrincipal
                           AlignWithMargins = True
                           Left = 16
                           Top = 16
-                          Width = 410
+                          Width = 256
                           Height = 29
                           Margins.Left = 4
                           Margins.Top = 0
@@ -2999,7 +3006,7 @@ object FormPrincipal: TFormPrincipal
                         object PnlOpcaoIBSCBSRodape: TPanel
                           Left = 12
                           Top = 114
-                          Width = 414
+                          Width = 260
                           Height = 40
                           Align = alTop
                           BevelOuter = bvNone
@@ -3034,6 +3041,146 @@ object FormPrincipal: TFormPrincipal
                             Align = alLeft
                           end
                           object PnlGerarIBSCBS: TPanel
+                            AlignWithMargins = True
+                            Left = 0
+                            Top = 0
+                            Width = 159
+                            Height = 40
+                            Margins.Left = 0
+                            Margins.Top = 0
+                            Margins.Right = 0
+                            Margins.Bottom = 0
+                            Align = alLeft
+                            BevelOuter = bvNone
+                            ParentBackground = False
+                            ShowCaption = False
+                            TabOrder = 0
+                          end
+                        end
+                      end
+                    end
+                    object PnlOpcaoDivergencias: TPanel
+                      Left = 612
+                      Top = 0
+                      Width = 292
+                      Height = 170
+                      BevelOuter = bvNone
+                      Padding.Left = 1
+                      Padding.Top = 1
+                      Padding.Right = 1
+                      Padding.Bottom = 1
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 2
+                      object PnlOpcaoDivergenciasFundo: TPanel
+                        Left = 1
+                        Top = 1
+                        Width = 290
+                        Height = 168
+                        Align = alClient
+                        BevelOuter = bvNone
+                        Padding.Left = 12
+                        Padding.Top = 16
+                        Padding.Right = 16
+                        Padding.Bottom = 12
+                        ParentBackground = False
+                        ShowCaption = False
+                        TabOrder = 0
+                        object LabelOpcaoDivergenciasDescricao: TLabel
+                          AlignWithMargins = True
+                          Left = 16
+                          Top = 53
+                          Width = 258
+                          Height = 40
+                          Margins.Left = 4
+                          Margins.Top = 0
+                          Margins.Right = 0
+                          Margins.Bottom = 4
+                          Align = alTop
+                          AutoSize = False
+                          ShowAccelChar = False
+                          WordWrap = True
+                        end
+                        object PnlOpcaoDivergenciasTitulo: TPanel
+                          AlignWithMargins = True
+                          Left = 16
+                          Top = 16
+                          Width = 258
+                          Height = 29
+                          Margins.Left = 4
+                          Margins.Top = 0
+                          Margins.Right = 0
+                          Margins.Bottom = 8
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 0
+                          object LabelOpcaoDivergenciasTitulo: TLabel
+                            AlignWithMargins = True
+                            Left = 28
+                            Top = 0
+                            Width = 4
+                            Height = 17
+                            Margins.Left = 8
+                            Margins.Top = 0
+                            Margins.Right = 0
+                            Margins.Bottom = 0
+                            Align = alClient
+                            ShowAccelChar = False
+                            Layout = tlCenter
+                          end
+                          object SkSvgOpcaoDivergencias: TSkSvg
+                            AlignWithMargins = True
+                            Left = 0
+                            Top = 4
+                            Width = 20
+                            Height = 20
+                            Margins.Left = 0
+                            Margins.Top = 4
+                            Margins.Right = 0
+                            Margins.Bottom = 5
+                            Align = alLeft
+                          end
+                        end
+                        object PnlOpcaoDivergenciasRodape: TPanel
+                          Left = 12
+                          Top = 114
+                          Width = 262
+                          Height = 40
+                          Align = alTop
+                          BevelOuter = bvNone
+                          ParentBackground = False
+                          ShowCaption = False
+                          TabOrder = 1
+                          object LabelDicaDivergencias: TLabel
+                            AlignWithMargins = True
+                            Left = 191
+                            Top = 0
+                            Width = 4
+                            Height = 17
+                            Margins.Left = 4
+                            Margins.Top = 0
+                            Margins.Right = 0
+                            Margins.Bottom = 0
+                            Align = alClient
+                            ShowAccelChar = False
+                            Layout = tlCenter
+                            WordWrap = True
+                          end
+                          object SkSvgDicaDivergencias: TSkSvg
+                            AlignWithMargins = True
+                            Left = 167
+                            Top = 13
+                            Width = 14
+                            Height = 14
+                            Margins.Left = 8
+                            Margins.Top = 13
+                            Margins.Right = 0
+                            Margins.Bottom = 13
+                            Align = alLeft
+                          end
+                          object PnlGerarDivergencias: TPanel
                             AlignWithMargins = True
                             Left = 0
                             Top = 0
@@ -3117,9 +3264,30 @@ object FormPrincipal: TFormPrincipal
                       Caption = 'Desenvolvido por Caique Garcia'
                       ShowAccelChar = False
                     end
+                    object LabelSobreApoioTitulo: TLabel
+                      Left = 0
+                      Top = 322
+                      Width = 902
+                      Height = 17
+                      Alignment = taCenter
+                      AutoSize = False
+                      Caption = 'Apoie o projeto'
+                      ShowAccelChar = False
+                    end
+                    object LabelSobreApoioTexto: TLabel
+                      Left = 0
+                      Top = 347
+                      Width = 902
+                      Height = 17
+                      Alignment = taCenter
+                      AutoSize = False
+                      Caption = 'O ProXML '#233' gratuito e sem an'#250'ncios. Se ele ajuda no seu trabalho, apoie o desenvolvimento no Apoia.se.'
+                      ShowAccelChar = False
+                      WordWrap = True
+                    end
                     object LabelSobreCreditos: TLabel
                       Left = 0
-                      Top = 302
+                      Top = 428
                       Width = 902
                       Height = 15
                       Alignment = taCenter
@@ -3166,15 +3334,45 @@ object FormPrincipal: TFormPrincipal
                         ' stroke-linejoin="round"/>'#13#10'  <ellipse cx="72" cy="18.6" rx="6.7" ' +
                         'ry="6.4" fill="none" stroke="#171A21" stroke-width="2.5"/>'#13#10'</svg>'
                     end
-                    object PnlSobreLink: TPanel
-                      Left = 299
+                    object PnlSobreSite: TPanel
+                      Left = 379
                       Top = 255
-                      Width = 304
+                      Width = 144
                       Height = 25
                       BevelOuter = bvNone
                       ParentBackground = False
                       ShowCaption = False
                       TabOrder = 0
+                    end
+                    object PnlSobreLink: TPanel
+                      Left = 299
+                      Top = 280
+                      Width = 304
+                      Height = 25
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 1
+                    end
+                    object PnlSobreApoiar: TPanel
+                      Left = 365
+                      Top = 368
+                      Width = 172
+                      Height = 40
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 2
+                    end
+                    object PnlSobreDivisoria: TPanel
+                      Left = 291
+                      Top = 313
+                      Width = 320
+                      Height = 1
+                      BevelOuter = bvNone
+                      ParentBackground = False
+                      ShowCaption = False
+                      TabOrder = 3
                     end
                   end
                 end
@@ -3296,6 +3494,31 @@ object FormPrincipal: TFormPrincipal
       item
         Name = 'data_ordem'
         DataType = ftInteger
+      end
+      item
+        Name = 'conf_ibscbs'
+        DataType = ftWideString
+        Size = 10
+      end
+      item
+        Name = 'conf_ordem'
+        DataType = ftInteger
+      end
+      item
+        Name = 'conf_erros'
+        DataType = ftInteger
+      end
+      item
+        Name = 'conf_alertas'
+        DataType = ftInteger
+      end
+      item
+        Name = 'conf_parcial'
+        DataType = ftBoolean
+      end
+      item
+        Name = 'conf_simples'
+        DataType = ftBoolean
       end>
     IndexDefs = <>
     FetchOptions.AssignedValues = [evMode, evUnidirectional]
@@ -3365,6 +3588,25 @@ object FormPrincipal: TFormPrincipal
     end
     object FDMemTable1data_ordem: TIntegerField
       FieldName = 'data_ordem'
+    end
+    object FDMemTable1conf_ibscbs: TWideStringField
+      FieldName = 'conf_ibscbs'
+      Size = 10
+    end
+    object FDMemTable1conf_ordem: TIntegerField
+      FieldName = 'conf_ordem'
+    end
+    object FDMemTable1conf_erros: TIntegerField
+      FieldName = 'conf_erros'
+    end
+    object FDMemTable1conf_alertas: TIntegerField
+      FieldName = 'conf_alertas'
+    end
+    object FDMemTable1conf_parcial: TBooleanField
+      FieldName = 'conf_parcial'
+    end
+    object FDMemTable1conf_simples: TBooleanField
+      FieldName = 'conf_simples'
     end
   end
   object PopupMenu: TPopupMenu

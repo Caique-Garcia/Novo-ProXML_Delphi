@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>ProXML – Relatório Divergências IBS/CBS A4 (mockup)</title>
+<style>
+:root{
+  --CorMarinho:#171A21; --CorMarinhoTexto:#C9CED6;
+  --CorPrimaria:#2067CA; --CorPrimariaHover:#1A56AB; --CorPrimariaPressionada:#164A93; --CorPrimariaSuave:#E8F0FB;
+  --CorFundo:#F2F3F5; --CorSuperficie:#FFFFFF; --CorZebra:#F7F8FA;
+  --CorBorda:#DADDE3; --CorBordaCampo:#878E9B;
+  --CorTexto:#1F2430; --CorTextoSecundario:#5B6270; --CorTextoDesabilitado:#8C93A0; --CorFundoDesabilitado:#EDF0F4;
+  --CorSucesso:#18793A; --CorSucessoSuave:#E7F4EA;
+  --CorAviso:#8F5600; --CorAvisoSuave:#FFF4E0;
+  --CorErro:#C62828; --CorErroSuave:#FDECEA;
+  --CorSucessoSobreMarinho:#7FD99A;
+  --CorTextHintSistema:#6D6D6D;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#C9CDD3;font-family:"Segoe UI",sans-serif;color:var(--CorTexto);font-size:10pt}
+.doc{max-width:1400px;margin:0 auto;padding:24px}
+.doc h1{font-size:18pt;font-weight:600;margin:0 0 4px}
+.doc h2{font-size:14pt;font-weight:600;margin:32px 0 8px;padding-top:16px;border-top:2px solid #A8ADB6}
+.doc h3{font-size:10pt;font-weight:600;margin:16px 0 8px;color:#3A4050}
+.doc p,.doc li{font-size:10pt;line-height:1.45;max-width:1000px}
+.doc .nota{background:#FFFFFF;border-left:4px solid var(--CorPrimaria);padding:8px 16px;margin:8px 0 16px;max-width:1000px}
+.doc .nota ul{margin:4px 0;padding-left:20px}
+.doc nav a{color:var(--CorPrimariaHover);margin-right:16px}
+.doc .toc{display:flex;flex-wrap:wrap;gap:8px 16px;margin:8px 0}
+.doc .toc a{color:var(--CorPrimariaHover)}
+.ic{flex:none;display:block}
+/* ---------- janela ---------- */
+.win{border:1px solid #6E7480;background:var(--CorFundo);position:relative;overflow:hidden;margin-bottom:24px}
+.s1024{width:1010px}.s1024 .client{height:600px}
+.s1366{width:1352px}.s1366 .client{height:728px}
+.tb{height:31px;background:#FFFFFF;display:flex;align-items:center;font-size:9pt;border-bottom:1px solid #E1E3E7}
+.tb .appic{width:16px;height:16px;background:var(--CorMarinho);margin:0 8px 0 8px;display:grid;place-items:center}
+.tb .appic i{width:6px;height:6px;background:var(--CorPrimaria);display:block}
+.tb .ttl{flex:1}
+.tb .wb{width:46px;height:31px;display:grid;place-items:center;color:#1F2430}
+.client{display:flex;flex-direction:column;overflow:hidden}
+.hdr{height:48px;flex:none;background:var(--CorMarinho);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.hdr img{display:block;height:28px;width:137px}
+.hlink{display:flex;align-items:center;gap:8px;color:var(--CorMarinhoTexto);font-size:9pt;padding:6px 8px}
+.hlink.on{color:#FFFFFF;box-shadow:inset 0 -2px 0 var(--CorPrimaria)}
+.folder{height:56px;flex:none;background:var(--CorSuperficie);border-bottom:1px solid var(--CorBorda);display:flex;align-items:center;gap:8px;padding:0 16px}
+.body{flex:1;display:flex;min-height:0}
+.menu{width:200px;flex:none;background:var(--CorSuperficie);border-right:1px solid var(--CorBorda);padding-top:8px}
+.mi{height:40px;display:flex;align-items:center;gap:12px;padding:0 16px 0 16px;font-size:10pt;border-left:4px solid transparent;color:var(--CorTexto)}
+.mi .ic{color:var(--CorTextoSecundario)}
+.mi.on{background:var(--CorPrimariaSuave);border-left-color:var(--CorPrimaria);font-weight:600}
+.mi.on .ic{color:var(--CorPrimaria)}
+.mi.hov{background:var(--CorFundo)}
+.mi.dis,.mi.dis .ic{color:var(--CorTextoDesabilitado)}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;padding:16px;gap:16px;min-height:0}
+/* ---------- cards ---------- */
+.cards{display:flex;gap:8px;flex:none}
+.card{flex:1 1 0;min-width:0;height:64px;background:var(--CorSuperficie);border:1px solid var(--CorBorda);padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between}
+.card .lbl{display:flex;align-items:center;gap:8px;font-size:9pt;color:var(--CorTextoSecundario);line-height:16px}
+.card .lbl .ic{color:var(--CorPrimaria)}
+.card .val{font-size:13pt;font-weight:600;white-space:nowrap;line-height:22px}
+.card .val.zero{color:var(--CorTextoSecundario);font-weight:400}
+/* ---------- botoes ---------- */
+.btn{height:32px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:10pt;font-weight:600;border:1px solid var(--CorBordaCampo);background:var(--CorSuperficie);color:var(--CorTexto);border-radius:4px;white-space:nowrap;flex:none;position:relative}
+.btn .ic{color:var(--CorPrimaria)}
+.btn.pri{background:var(--CorPrimaria);border-color:var(--CorPrimaria);color:#FFFFFF}
+.btn.pri .ic{color:#FFFFFF}
+.btn.pri.hov{background:var(--CorPrimariaHover);border-color:var(--CorPrimariaHover)}
+.btn.pri.pre{background:var(--CorPrimariaPressionada);border-color:var(--CorPrimariaPressionada)}
+.btn.sec.hov{background:var(--CorFundo)}
+.btn.sec.pre{background:var(--CorBorda)}
+.btn.foc{outline:2px solid var(--CorPrimaria);outline-offset:2px}
+.btn.dis{background:var(--CorFundoDesabilitado);border-color:var(--CorBorda);color:var(--CorTextoDesabilitado)}
+.btn.dis .ic{color:var(--CorTextoDesabilitado)}
+.btn.lnk{border-color:transparent;background:transparent;color:var(--CorPrimaria);padding:0 8px}
+.btn.w120{min-width:120px}
+/* ---------- campos ---------- */
+.fld{height:32px;border:1px solid var(--CorBordaCampo);background:var(--CorSuperficie);display:flex;align-items:center;gap:8px;padding:0 8px;font-size:10pt;min-width:0;white-space:nowrap;overflow:hidden}
+.fld .ic{color:var(--CorTextoSecundario)}
+.fld.foc{border:2px solid var(--CorPrimaria);padding:0 7px}
+.fld.err{border:2px solid var(--CorErro);padding:0 7px}
+.fld.dis{background:var(--CorFundoDesabilitado);border-color:var(--CorBorda);color:var(--CorTextoDesabilitado)}
+.fld .ph{color:var(--CorTextHintSistema)}
+.fld .tx{overflow:hidden;text-overflow:ellipsis}
+.fld.area{height:auto;align-items:flex-start;padding:8px;white-space:normal;line-height:1.4}
+.fld.area.foc{padding:7px}
+.flex1{flex:1}
+.caret{width:1px;height:16px;background:var(--CorTexto);display:inline-block;vertical-align:middle;margin-left:1px}
+.form{display:grid;gap:16px}
+.fg{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fg label,.flabel{font-size:9pt;font-weight:600;color:var(--CorTexto)}
+.help{font-size:9pt;color:var(--CorTextoSecundario)}
+.msgerr{font-size:9pt;color:var(--CorErro);display:flex;align-items:center;gap:4px}
+.chk{display:flex;align-items:center;gap:8px;font-size:10pt}
+.chk i{width:14px;height:14px;border:1px solid #333;background:#fff;display:grid;place-items:center;font-style:normal}
+.chk i.on{background:#005FB8;border-color:#005FB8}
+.chk.dis{color:var(--CorTextoDesabilitado)}.chk.dis i{border-color:var(--CorTextoDesabilitado)}
+/* segmentado */
+.seg{display:flex;flex:none}
+.seg span{height:32px;padding:0 12px;display:flex;align-items:center;border:1px solid var(--CorBordaCampo);margin-left:-1px;font-size:10pt;background:var(--CorSuperficie);white-space:nowrap}
+.seg span:first-child{margin-left:0;border-radius:4px 0 0 4px}.seg span:last-child{border-radius:0 4px 4px 0}
+.seg span.on{background:var(--CorPrimariaSuave);border-color:var(--CorPrimaria);font-weight:600;position:relative;z-index:1}
+.seg.dis span{background:var(--CorFundoDesabilitado);border-color:var(--CorBorda);color:var(--CorTextoDesabilitado)}
+.seg.dis span.on{background:var(--CorFundoDesabilitado)}
+.combo{height:32px;border:1px solid #7A7A7A;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 8px;width:128px;font-size:10pt}
+/* ---------- paineis e estados ---------- */
+.panel{background:var(--CorSuperficie);border:1px solid var(--CorBorda)}
+.trow{display:flex;align-items:center;gap:8px;flex:none;min-height:32px}
+.titulo{font-size:14pt;font-weight:600;line-height:32px;white-space:nowrap}
+.cont{font-size:9pt;color:var(--CorTextoSecundario);white-space:nowrap}
+.sp{flex:1}
+.banner{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-left:4px solid;font-size:10pt;line-height:1.4}
+.banner b{font-weight:600}
+.banner.ok{background:var(--CorSucessoSuave);border-color:var(--CorSucesso)}.banner.ok .ic{color:var(--CorSucesso)}
+.banner.av{background:var(--CorAvisoSuave);border-color:var(--CorAviso)}.banner.av .ic{color:var(--CorAviso)}
+.banner.er{background:var(--CorErroSuave);border-color:var(--CorErro)}.banner.er .ic{color:var(--CorErro)}
+.banner.in{background:var(--CorPrimariaSuave);border-color:var(--CorPrimaria)}.banner.in .ic{color:var(--CorPrimaria)}
+.vazio{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px}
+.vazio .ic{color:var(--CorTextoSecundario)}
+.vazio .t1{font-size:12pt;font-weight:600}
+.vazio .t2{font-size:10pt;color:var(--CorTextoSecundario);max-width:420px}
+.prog{height:8px;background:var(--CorBorda);width:100%}
+.prog i{display:block;height:8px;background:var(--CorPrimaria)}
+.tip{position:absolute;background:#FFFFFF;border:1px solid #767676;color:#1F2430;font-size:9pt;padding:4px 8px;white-space:nowrap;z-index:5;box-shadow:2px 2px 4px rgba(0,0,0,.18)}
+.toast{display:inline-flex;align-items:center;gap:4px;font-size:9pt;color:var(--CorSucesso);font-weight:600}
+.toastbox{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:var(--CorMarinho);color:#FFFFFF;font-size:9pt;font-weight:600;padding:8px 16px;display:flex;gap:8px;align-items:center;white-space:nowrap}
+.toastbox .ic{color:var(--CorSucessoSobreMarinho)}
+.cursor{position:absolute;z-index:6;width:12px;height:18px}
+/* contadores */
+.cnts{display:flex;gap:8px;flex:none}
+.cnt{flex:1;background:var(--CorSuperficie);border:1px solid var(--CorBorda);border-top:4px solid;padding:8px 12px;display:flex;align-items:center;gap:12px}
+.cnt .n{font-size:16pt;font-weight:600;line-height:1}
+.cnt .l{font-size:9pt;color:var(--CorTextoSecundario)}
+.cnt.ok{border-top-color:var(--CorSucesso)}.cnt.ok .n,.cnt.ok .ic{color:var(--CorSucesso)}
+.cnt.av{border-top-color:var(--CorAviso)}.cnt.av .n,.cnt.av .ic{color:var(--CorAviso)}
+.cnt.er{border-top-color:var(--CorErro)}.cnt.er .n,.cnt.er .ic{color:var(--CorErro)}
+.log{flex:1;min-height:0;overflow:hidden;padding:4px 0}
+.log div{display:flex;gap:8px;align-items:center;padding:3px 12px;font-size:9pt;white-space:nowrap}
+.log div .ic{flex:none}
+.log .lav .ic{color:var(--CorAviso)}.log .ler .ic{color:var(--CorErro)}.log .lok .ic{color:var(--CorSucesso)}.log .lin .ic{color:var(--CorTextoSecundario)}
+/* ---------- grade ---------- */
+.grid{flex:1;min-height:0;background:var(--CorSuperficie);border:1px solid var(--CorBorda);overflow:hidden;position:relative;display:flex;flex-direction:column}
+.grid table{border-collapse:collapse;width:calc(100% - 17px);table-layout:fixed;font-size:10pt}
+.grid th{height:32px;background:var(--CorFundo);font-weight:600;text-align:left;padding:0 8px;border-bottom:1px solid var(--CorBorda);white-space:nowrap;overflow:hidden}
+.grid td{height:28px;padding:0 8px;border-bottom:1px solid var(--CorBorda);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grid tr:nth-child(even) td{background:var(--CorZebra)}
+.grid tr.sel td{background:var(--CorPrimariaSuave)}
+.grid tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--CorPrimaria)}
+.grid .r{text-align:right}
+.grid .c{text-align:center}
+.grid th.ord{color:var(--CorPrimariaHover)}
+.s1024 .wx{display:none}
+.s1366 th.ch{width:340px}
+.grid.ns table{width:100%}
+.grid .sb{position:absolute;right:0;top:0;bottom:0;width:17px;background:#F0F0F0;border-left:1px solid #E3E3E3}
+.grid .sb i{position:absolute;left:4px;right:4px;top:22px;height:48px;background:#C2C2C2;display:block}
+.mono{font-variant-numeric:tabular-nums}
+/* tela relatorios */
+.opcs{display:flex;gap:16px}
+.opc{flex:1;background:var(--CorSuperficie);border:1px solid var(--CorBorda);padding:16px;display:flex;flex-direction:column;gap:8px}
+.opc .ot{font-size:12pt;font-weight:600;display:flex;align-items:center;gap:8px}
+.opc .ot .ic{color:var(--CorPrimaria)}
+.opc .od{font-size:10pt;color:var(--CorTextoSecundario);line-height:1.4;flex:1}
+.opc .rod{display:flex;align-items:center;gap:12px}
+.dica{font-size:9pt;color:var(--CorTextoSecundario);display:flex;align-items:center;gap:4px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:9pt;background:var(--CorFundo);border:1px solid var(--CorBorda);padding:2px 8px;color:var(--CorTexto)}
+.anexo{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--CorFundo);border:1px solid var(--CorBorda)}
+.anexo .ic{color:var(--CorPrimaria)}
+.anexo .a1{font-weight:600}
+.anexo .a2{font-size:9pt;color:var(--CorTextoSecundario)}
+.load{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.anim{width:160px;height:134px;border:1px dashed var(--CorBordaCampo);display:grid;place-items:center;position:relative}
+.anim .ring{width:56px;height:56px;border-radius:50%;border:6px solid var(--CorPrimariaSuave);border-top-color:var(--CorPrimaria)}
+.anim small{position:absolute;bottom:4px;font-size:8pt;color:var(--CorTextoSecundario)}
+.sobre{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center}
+.sobre .lg{padding:8px 0;margin-bottom:8px}
+.sobre .lg img{display:block;width:216px;height:44px}
+.sobre .v{font-size:14pt;font-weight:600}
+.sobre a{color:var(--CorPrimaria);text-decoration:underline;display:inline-flex;gap:4px;align-items:center}
+
+.a4{width:794px;height:1123px;background:#FFFFFF;padding:38px;position:relative;margin:0 0 24px;font-family:"Segoe UI",sans-serif;color:#1F2430;box-shadow:0 1px 4px rgba(0,0,0,.25);overflow:hidden}
+.rh{height:84px;border-bottom:2px solid var(--CorMarinho);display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.rh .t{font-size:16pt;font-weight:600;line-height:26px}
+.rh .m{font-size:9pt;color:var(--CorTextoSecundario);line-height:17px}
+.rh .m b{color:var(--CorTexto);font-weight:600}
+.wm img{display:block;width:98px;height:20px}
+.wm{font-size:12pt;font-weight:600;color:var(--CorMarinho);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.wm i{width:10px;height:10px;background:var(--CorPrimaria);display:block}
+.wm small{font-size:8pt;font-weight:400;color:var(--CorTextoSecundario)}
+.rh.banda{background:var(--CorMarinho);border-bottom:none;padding:12px 16px;color:#FFFFFF;height:84px}
+.rh.banda .m{color:var(--CorMarinhoTexto)}.rh.banda .m b{color:#FFFFFF}
+.run{height:24px;font-size:9pt;color:var(--CorTextoSecundario);display:flex;justify-content:space-between;border-bottom:1px solid var(--CorBorda);margin-bottom:0}
+.rt{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9pt}
+.rt th{height:24px;background:var(--CorFundo);font-weight:600;padding:0 6px;text-align:left;border-bottom:1px solid var(--CorBordaCampo);white-space:nowrap}
+.rt td{height:20px;padding:0 6px;white-space:nowrap;overflow:hidden;font-variant-numeric:tabular-nums}
+.rt tr:nth-child(even) td{background:var(--CorZebra)}
+.rt .r{text-align:right}.rt .c{text-align:center}
+.rt tr.tot td{border-top:2px solid var(--CorMarinho);background:#FFFFFF;font-weight:600;height:26px}
+.rt tr.tot2 td{background:#FFFFFF;font-size:8pt;color:var(--CorTextoSecundario);height:18px}
+.rf{position:absolute;left:38px;right:38px;bottom:30px;border-top:1px solid var(--CorBorda);padding-top:6px;font-size:8pt;color:var(--CorTextoSecundario);text-align:center}
+.blk{margin:16px 0 0 auto;width:300px;border-top:2px solid var(--CorMarinho);font-size:9pt}
+.blk div{display:flex;justify-content:space-between;height:22px;align-items:center;padding:0 6px}
+.blk div b{font-weight:600}
+/* P7:INICIO */
+.p7tag{display:inline-block;font-size:8pt;font-weight:600;color:#FFFFFF;background:var(--CorPrimaria);padding:1px 6px;margin-left:8px;vertical-align:middle}
+.st{display:flex;align-items:center;gap:6px}
+.st.ok{color:var(--CorSucesso)}.st.av{color:var(--CorAviso)}.st.er{color:var(--CorErro)}
+.st .ic{flex:none}
+.opt{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 16px}
+.opt>div{background:#FFFFFF;border:1px solid #A8ADB6;padding:12px 16px;min-width:300px;flex:1}
+.opt>div.sug{border:2px solid var(--CorPrimaria)}
+.opt h4{margin:0 0 8px;font-size:10pt;font-weight:600}
+.opt .sugl{font-size:8pt;font-weight:600;color:var(--CorPrimariaHover)}
+.logfull{background:var(--CorSuperficie);border:1px solid var(--CorBorda);max-width:1008px;padding:4px 0}
+.logfull div{display:flex;gap:8px;align-items:center;padding:3px 12px;font-size:9pt}
+.logfull .lav .ic{color:var(--CorAviso)}.logfull .ler .ic{color:var(--CorErro)}.logfull .lok .ic{color:var(--CorSucesso)}
+.logfull .sep{border-top:1px dashed var(--CorBorda);margin:4px 0;padding:0}
+
+.a4.corte{height:auto;min-height:0;padding-bottom:64px}
+.vazioa4{margin:48px auto 0;width:520px;text-align:center;border:1px solid var(--CorBorda);padding:24px}
+.vazioa4 .t1{font-size:12pt;font-weight:600;margin-bottom:6px}
+.vazioa4 .t2{font-size:9pt;color:var(--CorTextoSecundario)}
+.rt tr.tot2 td{white-space:normal}
+/* P7:FIM */
+</style>
+</head>
+<body>
+<div class="doc">
+<nav><a href="index.html">Índice</a><a href="resumo.html">Resumo</a><a href="notas.html">Notas</a><a href="relatorios.html">Relatórios</a><a href="enviar.html">Enviar</a><a href="configuracoes.html">Configurações</a><a href="sobre.html">Sobre</a><a href="carregando.html">Carregando</a><a href="relatorio-a4.html">Relatório A4</a><a href="relatorio-divergencias-a4.html">Divergências A4</a><a href="opcoes.html">Opções para decidir</a></nav>
+<h1>Relatório Divergências IBS/CBS (QuickReport, A4) <span class="p7tag">Plano 7 · v1.3.0</span></h1>
+<p class="help">A4 retrato a 96 dpi (794×1123 px), margens de 10 mm, mesmo padrão do Relatório de Notas e do Relatório IBS/CBS (<a href="relatorio-a4.html">relatorio-a4.html</a>). Dados do gabarito <code>tests/gabarito/divergencias.csv</code>: 47 divergências em 62 notas conferidas (pastas exemple, exemple\sinteticos e exemple\sinteticos-ibscbs). Sem CNPJ, CPF, nomes nem chaves.</p>
+<div class="nota"><ul><li>Colunas: Nº 52 · Mod. 36 · Data 68 · Item 40 · Nível 40 · Tipo 48 · Campo (resto, 242) · Valor no XML 96 · Esperado 96 = 718 px. Ordem Nº antes de Mod., como nos outros relatórios (decisão D9 do Plano 4; decisão P7-10).</li><li>Uma linha por divergência, ordenada por Nº, item (Total por último) e nível; esferas na ordem IBS UF, IBS Mun., CBS. Sem agrupar por nota (decisão P7-8).</li><li>Item “Total” = divergência de nível 2 (soma dos itens × total da nota).</li><li>Valores com a unidade na própria célula (R$, %, “ausente”), porque a coluna mistura tipos. Por isso não há “(R$)” no título.</li><li>Tipo “Erro” em Semibold, sem cor: o relatório continua legível em impressora monocromática (tokens, seção 6).</li><li>Cabem 45 linhas por página. Com as 47 linhas do gabarito, a 1ª página fica cheia e o rodapé de totais (6 linhas, algumas em 2 linhas) não cabe: o QuickReport passa a banda de resumo para a página 2, que sai só com a continuação, os títulos das colunas e os totais. A paginação segue o Relatório IBS/CBS.</li><li>Simples Nacional (NT 2026.005): campos IBS Simples (vIBSSN), CBS Simples (vCBSSN) e Total Simples (gTribSN), glossário 18.C. Exemplos: 910041 a 910044 e 910051 a 910053.</li></ul></div>
+<div class="toc"><a href="#todos">Todos · 1ª página</a><a href="#todos-ultima">Todos · última página (totais)</a><a href="#nfce">Filtro NFC-e 65 (página única)</a><a href="#vazio">Sem divergência</a></div>
+<h2 id="todos">Filtro Todos · página 1 de 2</h2>
+<div class="a4"><div class="rh"><div><div class="t">Divergências IBS/CBS</div><div class="m"><b>Período:</b> 24/09/2026 a 19/11/2026 · <b>Modelo:</b> Todos (NF-e 55 e NFC-e 65) · <b>62</b> notas conferidas · <b>47</b> divergências</div><div class="m"><b>Pasta:</b> C:\XMLs\Empresa Exemplo\2026-10</div></div><div class="wm"><img alt="ProXML" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTciIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxNTcgMzIiPg0KICA8dGl0bGU+UHJvWE1MIChwYXJhIGZ1bmRvIGNsYXJvKTwvdGl0bGU+DQogIDwhLS0gTG9nbyBQcm9YTUwgdmV0b3JpYWwgKHJlZGVzZW5oYWRvIGEgcGFydGlyIGRlIHNyYy9pbWcvTG9nby9Mb2dvMS5wbmcpLiBTZW0gZm9udGVzLCBmaWx0cm9zIG5lbSBzY3JpcHRzLiAtLT4NCiAgPGc+PGNpcmNsZSBjeD0iMTMiIGN5PSIzIiByPSIxLjI1IiBmaWxsPSIjQjRCQUNBIi8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjMiIHI9IjEuMjUiIGZpbGw9IiNCNEJBQ0EiLz48Y2lyY2xlIGN4PSI4LjI1IiBjeT0iNy43NSIgcj0iMS41NSIgZmlsbD0iIzhFOTdBRSIvPjxjaXJjbGUgY3g9IjEzIiBjeT0iNy43NSIgcj0iMS44IiBmaWxsPSIjNTU2ODhGIi8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjcuNzUiIHI9IjEuOCIgZmlsbD0iIzU1Njg4RiIvPjxjaXJjbGUgY3g9IjIzLjI1IiBjeT0iNy43NSIgcj0iMS41NSIgZmlsbD0iIzhFOTdBRSIvPjxjaXJjbGUgY3g9IjMuNSIgY3k9IjEyLjc1IiByPSIxLjI1IiBmaWxsPSIjQjRCQUNBIi8+PGNpcmNsZSBjeD0iOC4yNSIgY3k9IjEyLjc1IiByPSIxLjgiIGZpbGw9IiM1NTY4OEYiLz48Y2lyY2xlIGN4PSIxMyIgY3k9IjEyLjc1IiByPSIyLjEiIGZpbGw9IiMyRjRBNjYiLz48Y2lyY2xlIGN4PSIxOC41IiBjeT0iMTIuNzUiIHI9IjIuMSIgZmlsbD0iIzJGNEE2NiIvPjxjaXJjbGUgY3g9IjIzLjI1IiBjeT0iMTIuNzUiIHI9IjEuOCIgZmlsbD0iIzU1Njg4RiIvPjxjaXJjbGUgY3g9IjI4IiBjeT0iMTIuNzUiIHI9IjEuMjUiIGZpbGw9IiNCNEJBQ0EiLz48Y2lyY2xlIGN4PSIzLjUiIGN5PSIxOC4yNSIgcj0iMS4yNSIgZmlsbD0iI0I0QkFDQSIvPjxjaXJjbGUgY3g9IjguMjUiIGN5PSIxOC4yNSIgcj0iMS44IiBmaWxsPSIjNTU2ODhGIi8+PGNpcmNsZSBjeD0iMTMiIGN5PSIxOC4yNSIgcj0iMi4xIiBmaWxsPSIjMkY0QTY2Ii8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjE4LjI1IiByPSIyLjEiIGZpbGw9IiMyRjRBNjYiLz48Y2lyY2xlIGN4PSIyMy4yNSIgY3k9IjE4LjI1IiByPSIxLjgiIGZpbGw9IiM1NTY4OEYiLz48Y2lyY2xlIGN4PSIyOCIgY3k9IjE4LjI1IiByPSIxLjI1IiBmaWxsPSIjQjRCQUNBIi8+PGNpcmNsZSBjeD0iOC4yNSIgY3k9IjIzLjI1IiByPSIxLjU1IiBmaWxsPSIjOEU5N0FFIi8+PGNpcmNsZSBjeD0iMTMiIGN5PSIyMy4yNSIgcj0iMS44IiBmaWxsPSIjNTU2ODhGIi8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjIzLjI1IiByPSIxLjgiIGZpbGw9IiM1NTY4OEYiLz48Y2lyY2xlIGN4PSIyMy4yNSIgY3k9IjIzLjI1IiByPSIxLjU1IiBmaWxsPSIjOEU5N0FFIi8+PGNpcmNsZSBjeD0iMTMiIGN5PSIyOCIgcj0iMS4yNSIgZmlsbD0iI0I0QkFDQSIvPjxjaXJjbGUgY3g9IjE4LjUiIGN5PSIyOCIgcj0iMS4yNSIgZmlsbD0iI0I0QkFDQSIvPjwvZz4NCiAgPHBhdGggZD0iTTM1IDI1VjguMkEyLjIgMi4yIDAgMCAxIDM3LjIgNkg0NkE0IDQgMCAwIDEgNTAgMTBWMTRBNCA0IDAgMCAxIDQ2IDE4SDM1TTU1IDI1VjExLjhNNTUgMTUuNkM1NS40IDEzLjMgNTcuNCAxMi4zIDYwIDEyLjNINjIuNE05MSA1LjZMMTA2LjIgMjVNMTA2LjQgNS42TDkxIDI1TTExMiAyNVYxMS4yQTUuNzUgNS43NSAwIDAgMSAxMjMuNSAxMS4yVjI1TTEyMy41IDExLjJBNS43NSA1Ljc1IDAgMCAxIDEzNSAxMS4yVjI1TTE0MCA1LjZWMjJBMyAzIDAgMCAwIDE0MyAyNUgxNTMuMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTcxQTIxIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQogIDxlbGxpcHNlIGN4PSI3MiIgY3k9IjE4LjYiIHJ4PSI2LjciIHJ5PSI2LjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE3MUEyMSIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4NCjwvc3ZnPg0K"></div></div><table class="rt"><thead><tr><th class="r" style="width:52px">Nº</th><th class="c" style="width:36px">Mod.</th><th class="" style="width:68px">Data</th><th class="c" style="width:40px">Item</th><th class="c" style="width:40px">Nível</th><th class="" style="width:48px">Tipo</th><th class="">Campo</th><th class="r" style="width:96px">Valor no XML</th><th class="r" style="width:96px">Esperado</th></tr></thead><tbody><tr><td class="r">10432</td><td class="c">55</td><td>01/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 10,00</td><td class="r">R$ 12,00</td></tr><tr><td class="r">10433</td><td class="c">55</td><td>01/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 50,00</td><td class="r">R$ 58,00</td></tr><tr><td class="r">10434</td><td class="c">55</td><td>01/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 70,00</td><td class="r">R$ 79,00</td></tr><tr><td class="r">10435</td><td class="c">55</td><td>01/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 30,00</td><td class="r">R$ 38,50</td></tr><tr><td class="r">10435</td><td class="c">55</td><td>01/10/2026</td><td class="c">2</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 30,00</td><td class="r">R$ 38,50</td></tr><tr><td class="r">900001</td><td class="c">55</td><td>01/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 50,00</td><td class="r">R$ 58,00</td></tr><tr><td class="r">900002</td><td class="c">55</td><td>01/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 70,00</td><td class="r">R$ 79,00</td></tr><tr><td class="r">900003</td><td class="c">55</td><td>01/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 10.289,67</td><td class="r">R$ 9.054,91</td></tr><tr><td class="r">910003</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">1</td><td><b style="font-weight:600">Erro</b></td><td>IBS UF (vIBSUF)</td><td class="r">R$ 0,50</td><td class="r">R$ 0,24</td></tr><tr><td class="r">910004</td><td class="c">55</td><td>15/10/2026</td><td class="c">2</td><td class="c">1</td><td><b style="font-weight:600">Erro</b></td><td>CBS (vCBS)</td><td class="r">R$ 3,00</td><td class="r">R$ 1,91</td></tr><tr><td class="r">910005</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">1</td><td><b style="font-weight:600">Erro</b></td><td>IBS (vIBS)</td><td class="r">R$ 0,20</td><td class="r">R$ 0,09</td></tr><tr><td class="r">910006</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">1</td><td><b style="font-weight:600">Erro</b></td><td>CBS (vCBS)</td><td class="r">R$ 3,35</td><td class="r">R$ 1,34</td></tr><tr><td class="r">910007</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">1</td><td><b style="font-weight:600">Erro</b></td><td>Alíq. efetiva CBS (pAliqEfet)</td><td class="r">0,5000%</td><td class="r">0,3600%</td></tr><tr><td class="r">910008</td><td class="c">55</td><td>15/10/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>Base IBS/CBS (vBCIBSCBS)</td><td class="r">R$ 150,00</td><td class="r">R$ 111,62</td></tr><tr><td class="r">910009</td><td class="c">55</td><td>15/10/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>IBS UF (vIBSUF)</td><td class="r">R$ 1,50</td><td class="r">R$ 1,11</td></tr><tr><td class="r">910009</td><td class="c">55</td><td>15/10/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>CBS (vCBS)</td><td class="r">R$ 12,00</td><td class="r">R$ 10,05</td></tr><tr><td class="r">910010</td><td class="c">55</td><td>15/10/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>Total IBS/CBS (IBSCBSTot)</td><td class="r">ausente</td><td class="r">presente</td></tr><tr><td class="r">910011</td><td class="c">55</td><td>15/10/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>IBS UF (vIBSUF)</td><td class="r">R$ 0,00</td><td class="r">R$ 0,60</td></tr><tr><td class="r">910011</td><td class="c">55</td><td>15/10/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>IBS (vIBS)</td><td class="r">R$ 0,00</td><td class="r">R$ 0,60</td></tr><tr><td class="r">910012</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 400,00</td><td class="r">R$ 312,55</td></tr><tr><td class="r">910013</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 1.000,00</td><td class="r">R$ 706,95</td></tr><tr><td class="r">910014</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Alíquota IBS UF (pIBSUF)</td><td class="r">0,0500%</td><td class="r">0,1000%</td></tr><tr><td class="r">910015</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Alíquota CBS (pCBS)</td><td class="r">0,8000%</td><td class="r">0,9000%</td></tr><tr><td class="r">910016</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Redução IBS UF (pRedAliq)</td><td class="r">40%</td><td class="r">60%</td></tr><tr><td class="r">910016</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Redução IBS Mun. (pRedAliq)</td><td class="r">40%</td><td class="r">60%</td></tr><tr><td class="r">910016</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Redução CBS (pRedAliq)</td><td class="r">40%</td><td class="r">60%</td></tr><tr><td class="r">910017</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Redução IBS UF (gRed)</td><td class="r">60%</td><td class="r">ausente</td></tr><tr><td class="r">910018</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Redução IBS UF (gRed)</td><td class="r">ausente</td><td class="r">60%</td></tr><tr><td class="r">910018</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Redução IBS Mun. (gRed)</td><td class="r">ausente</td><td class="r">60%</td></tr><tr><td class="r">910018</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Redução CBS (gRed)</td><td class="r">ausente</td><td class="r">60%</td></tr><tr><td class="r">910019</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>cClassTrib × CST</td><td class="r">200034</td><td class="r">do CST 000</td></tr><tr><td class="r">910024</td><td class="c">55</td><td>15/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 70,00</td><td class="r">R$ 72,00</td></tr><tr><td class="r">910031</td><td class="c">65</td><td>15/10/2026</td><td class="c">1</td><td class="c">1</td><td><b style="font-weight:600">Erro</b></td><td>IBS UF (vIBSUF)</td><td class="r">R$ 0,20</td><td class="r">R$ 0,07</td></tr><tr><td class="r">910032</td><td class="c">65</td><td>15/10/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>CBS (vCBS)</td><td class="r">R$ 2,50</td><td class="r">R$ 1,50</td></tr><tr><td class="r">910033</td><td class="c">65</td><td>15/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 59,90</td><td class="r">R$ 40,86</td></tr><tr><td class="r">910034</td><td class="c">65</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Alíquota IBS Mun. (pIBSMun)</td><td class="r">0,0500%</td><td class="r">0,0000%</td></tr><tr><td class="r">910041</td><td class="c">55</td><td>16/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>IBS Simples (vIBSSN)</td><td class="r">R$ 1,50</td><td class="r">R$ 1,20</td></tr><tr><td class="r">910042</td><td class="c">55</td><td>17/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>CBS Simples (vCBSSN)</td><td class="r">R$ 5,34</td><td class="r">R$ 5,33</td></tr><tr><td class="r">910043</td><td class="c">55</td><td>17/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>Total Simples (gTribSN)</td><td class="r">ausente</td><td class="r">presente</td></tr><tr><td class="r">910044</td><td class="c">55</td><td>18/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>Total Simples (gTribSN)</td><td class="r">presente</td><td class="r">ausente</td></tr><tr><td class="r">910047</td><td class="c">55</td><td>19/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>Total IBS/CBS (IBSCBSTot)</td><td class="r">ausente</td><td class="r">presente</td></tr><tr><td class="r">910051</td><td class="c">65</td><td>16/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>IBS Simples (vIBSSN)</td><td class="r">R$ 0,40</td><td class="r">R$ 0,42</td></tr><tr><td class="r">910052</td><td class="c">65</td><td>17/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>CBS Simples (vCBSSN)</td><td class="r">R$ 1,00</td><td class="r">R$ 1,04</td></tr><tr><td class="r">910053</td><td class="c">65</td><td>17/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>Total Simples (gTribSN)</td><td class="r">ausente</td><td class="r">presente</td></tr><tr><td class="r">910060</td><td class="c">55</td><td>20/10/2026</td><td class="c">1</td><td class="c">1</td><td><b style="font-weight:600">Erro</b></td><td>IBS UF (vIBSUF)</td><td class="r">R$ 0,90</td><td class="r">R$ 0,22</td></tr></tbody></table><div class="rf">Gerado pelo ProXML v1.3.0 · 20/11/2026 14:32 · Página 1 de 2</div></div>
+<h2 id="todos-ultima">Filtro Todos · página 2 de 2 (última, com totais)</h2>
+<div class="nota"><ul><li>Linha de continuação no topo e títulos das colunas repetidos (banda ColumnHeader). Sem linhas de detalhe: todas couberam na página 1.</li></ul></div>
+<div class="a4 corte" style="min-height:420px"><div class="run"><span>Divergências IBS/CBS · Modelo: Todos · continuação</span><span>24/09/2026 a 19/11/2026</span></div><table class="rt"><thead><tr><th class="r" style="width:52px">Nº</th><th class="c" style="width:36px">Mod.</th><th class="" style="width:68px">Data</th><th class="c" style="width:40px">Item</th><th class="c" style="width:40px">Nível</th><th class="" style="width:48px">Tipo</th><th class="">Campo</th><th class="r" style="width:96px">Valor no XML</th><th class="r" style="width:96px">Esperado</th></tr></thead><tbody><tr><td class="r">910060</td><td class="c">55</td><td>20/10/2026</td><td class="c">2</td><td class="c">4</td><td>Alerta</td><td>Alíquota CBS (pCBS)</td><td class="r">0,8000%</td><td class="r">0,9000%</td></tr><tr><td class="r">910060</td><td class="c">55</td><td>20/10/2026</td><td class="c">3</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 150,00</td><td class="r">R$ 115,34</td></tr><tr class="tot"><td colspan="9">Total · 47 divergências em 38 notas</td></tr><tr class="tot2"><td colspan="9"><b style="font-weight:600;color:var(--CorTexto)">Notas com Erro: 20 · Notas com Alerta: 18 · Notas sem divergência: 24</b> · a nota com Erro e Alerta conta só em Erro</td></tr><tr class="tot2"><td colspan="9">Nível 1: conta do item · Nível 2: itens × totais · Nível 3: base de cálculo · Nível 4: alíquota, redução e CST. Níveis 1 e 2 são Erro; 3 e 4, Alerta.</td></tr><tr class="tot2"><td colspan="9">Erro: conta que não fecha com os valores do próprio XML. Alerta: indicação para conferir; depende da operação e da regra legal e não afirma que a nota está errada.</td></tr><tr class="tot2"><td colspan="9">Não entram: notas sem IBS/CBS e itens sem conferência (monofásico, transferência de crédito, ajustes, compra governamental; veja o Resumo). Nos itens do Simples Nacional (gTribSN), só os totais e o cClassTrib são conferidos.</td></tr><tr class="tot2"><td colspan="9">Regras da NT 2025.002 v1.53, da NT 2026.005 v1.00 (Simples Nacional) e da tabela de cClassTrib v1.71. A conferência não muda os totais do ProXML.</td></tr></tbody></table><div class="rf">Gerado pelo ProXML v1.3.0 · 20/11/2026 14:32 · Página 2 de 2</div></div>
+<h2 id="nfce">Filtro NFC-e 65</h2>
+<div class="a4 corte" style="min-height:560px"><div class="rh"><div><div class="t">Divergências IBS/CBS</div><div class="m"><b>Período:</b> 24/09/2026 a 17/11/2026 · <b>Modelo:</b> NFC-e 65 · <b>13</b> notas conferidas · <b>7</b> divergências</div><div class="m"><b>Pasta:</b> C:\XMLs\Empresa Exemplo\2026-10</div></div><div class="wm"><img alt="ProXML" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTciIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxNTcgMzIiPg0KICA8dGl0bGU+UHJvWE1MIChwYXJhIGZ1bmRvIGNsYXJvKTwvdGl0bGU+DQogIDwhLS0gTG9nbyBQcm9YTUwgdmV0b3JpYWwgKHJlZGVzZW5oYWRvIGEgcGFydGlyIGRlIHNyYy9pbWcvTG9nby9Mb2dvMS5wbmcpLiBTZW0gZm9udGVzLCBmaWx0cm9zIG5lbSBzY3JpcHRzLiAtLT4NCiAgPGc+PGNpcmNsZSBjeD0iMTMiIGN5PSIzIiByPSIxLjI1IiBmaWxsPSIjQjRCQUNBIi8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjMiIHI9IjEuMjUiIGZpbGw9IiNCNEJBQ0EiLz48Y2lyY2xlIGN4PSI4LjI1IiBjeT0iNy43NSIgcj0iMS41NSIgZmlsbD0iIzhFOTdBRSIvPjxjaXJjbGUgY3g9IjEzIiBjeT0iNy43NSIgcj0iMS44IiBmaWxsPSIjNTU2ODhGIi8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjcuNzUiIHI9IjEuOCIgZmlsbD0iIzU1Njg4RiIvPjxjaXJjbGUgY3g9IjIzLjI1IiBjeT0iNy43NSIgcj0iMS41NSIgZmlsbD0iIzhFOTdBRSIvPjxjaXJjbGUgY3g9IjMuNSIgY3k9IjEyLjc1IiByPSIxLjI1IiBmaWxsPSIjQjRCQUNBIi8+PGNpcmNsZSBjeD0iOC4yNSIgY3k9IjEyLjc1IiByPSIxLjgiIGZpbGw9IiM1NTY4OEYiLz48Y2lyY2xlIGN4PSIxMyIgY3k9IjEyLjc1IiByPSIyLjEiIGZpbGw9IiMyRjRBNjYiLz48Y2lyY2xlIGN4PSIxOC41IiBjeT0iMTIuNzUiIHI9IjIuMSIgZmlsbD0iIzJGNEE2NiIvPjxjaXJjbGUgY3g9IjIzLjI1IiBjeT0iMTIuNzUiIHI9IjEuOCIgZmlsbD0iIzU1Njg4RiIvPjxjaXJjbGUgY3g9IjI4IiBjeT0iMTIuNzUiIHI9IjEuMjUiIGZpbGw9IiNCNEJBQ0EiLz48Y2lyY2xlIGN4PSIzLjUiIGN5PSIxOC4yNSIgcj0iMS4yNSIgZmlsbD0iI0I0QkFDQSIvPjxjaXJjbGUgY3g9IjguMjUiIGN5PSIxOC4yNSIgcj0iMS44IiBmaWxsPSIjNTU2ODhGIi8+PGNpcmNsZSBjeD0iMTMiIGN5PSIxOC4yNSIgcj0iMi4xIiBmaWxsPSIjMkY0QTY2Ii8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjE4LjI1IiByPSIyLjEiIGZpbGw9IiMyRjRBNjYiLz48Y2lyY2xlIGN4PSIyMy4yNSIgY3k9IjE4LjI1IiByPSIxLjgiIGZpbGw9IiM1NTY4OEYiLz48Y2lyY2xlIGN4PSIyOCIgY3k9IjE4LjI1IiByPSIxLjI1IiBmaWxsPSIjQjRCQUNBIi8+PGNpcmNsZSBjeD0iOC4yNSIgY3k9IjIzLjI1IiByPSIxLjU1IiBmaWxsPSIjOEU5N0FFIi8+PGNpcmNsZSBjeD0iMTMiIGN5PSIyMy4yNSIgcj0iMS44IiBmaWxsPSIjNTU2ODhGIi8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjIzLjI1IiByPSIxLjgiIGZpbGw9IiM1NTY4OEYiLz48Y2lyY2xlIGN4PSIyMy4yNSIgY3k9IjIzLjI1IiByPSIxLjU1IiBmaWxsPSIjOEU5N0FFIi8+PGNpcmNsZSBjeD0iMTMiIGN5PSIyOCIgcj0iMS4yNSIgZmlsbD0iI0I0QkFDQSIvPjxjaXJjbGUgY3g9IjE4LjUiIGN5PSIyOCIgcj0iMS4yNSIgZmlsbD0iI0I0QkFDQSIvPjwvZz4NCiAgPHBhdGggZD0iTTM1IDI1VjguMkEyLjIgMi4yIDAgMCAxIDM3LjIgNkg0NkE0IDQgMCAwIDEgNTAgMTBWMTRBNCA0IDAgMCAxIDQ2IDE4SDM1TTU1IDI1VjExLjhNNTUgMTUuNkM1NS40IDEzLjMgNTcuNCAxMi4zIDYwIDEyLjNINjIuNE05MSA1LjZMMTA2LjIgMjVNMTA2LjQgNS42TDkxIDI1TTExMiAyNVYxMS4yQTUuNzUgNS43NSAwIDAgMSAxMjMuNSAxMS4yVjI1TTEyMy41IDExLjJBNS43NSA1Ljc1IDAgMCAxIDEzNSAxMS4yVjI1TTE0MCA1LjZWMjJBMyAzIDAgMCAwIDE0MyAyNUgxNTMuMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTcxQTIxIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQogIDxlbGxpcHNlIGN4PSI3MiIgY3k9IjE4LjYiIHJ4PSI2LjciIHJ5PSI2LjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE3MUEyMSIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4NCjwvc3ZnPg0K"></div></div><table class="rt"><thead><tr><th class="r" style="width:52px">Nº</th><th class="c" style="width:36px">Mod.</th><th class="" style="width:68px">Data</th><th class="c" style="width:40px">Item</th><th class="c" style="width:40px">Nível</th><th class="" style="width:48px">Tipo</th><th class="">Campo</th><th class="r" style="width:96px">Valor no XML</th><th class="r" style="width:96px">Esperado</th></tr></thead><tbody><tr><td class="r">910031</td><td class="c">65</td><td>15/10/2026</td><td class="c">1</td><td class="c">1</td><td><b style="font-weight:600">Erro</b></td><td>IBS UF (vIBSUF)</td><td class="r">R$ 0,20</td><td class="r">R$ 0,07</td></tr><tr><td class="r">910032</td><td class="c">65</td><td>15/10/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>CBS (vCBS)</td><td class="r">R$ 2,50</td><td class="r">R$ 1,50</td></tr><tr><td class="r">910033</td><td class="c">65</td><td>15/10/2026</td><td class="c">1</td><td class="c">3</td><td>Alerta</td><td>Base IBS/CBS (vBC)</td><td class="r">R$ 59,90</td><td class="r">R$ 40,86</td></tr><tr><td class="r">910034</td><td class="c">65</td><td>15/10/2026</td><td class="c">1</td><td class="c">4</td><td>Alerta</td><td>Alíquota IBS Mun. (pIBSMun)</td><td class="r">0,0500%</td><td class="r">0,0000%</td></tr><tr><td class="r">910051</td><td class="c">65</td><td>16/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>IBS Simples (vIBSSN)</td><td class="r">R$ 0,40</td><td class="r">R$ 0,42</td></tr><tr><td class="r">910052</td><td class="c">65</td><td>17/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>CBS Simples (vCBSSN)</td><td class="r">R$ 1,00</td><td class="r">R$ 1,04</td></tr><tr><td class="r">910053</td><td class="c">65</td><td>17/11/2026</td><td class="c">Total</td><td class="c">2</td><td><b style="font-weight:600">Erro</b></td><td>Total Simples (gTribSN)</td><td class="r">ausente</td><td class="r">presente</td></tr><tr class="tot"><td colspan="9">Total · 7 divergências em 7 notas</td></tr><tr class="tot2"><td colspan="9"><b style="font-weight:600;color:var(--CorTexto)">Notas com Erro: 5 · Notas com Alerta: 2 · Notas sem divergência: 6</b> · a nota com Erro e Alerta conta só em Erro</td></tr><tr class="tot2"><td colspan="9">Nível 1: conta do item · Nível 2: itens × totais · Nível 3: base de cálculo · Nível 4: alíquota, redução e CST. Níveis 1 e 2 são Erro; 3 e 4, Alerta.</td></tr><tr class="tot2"><td colspan="9">Erro: conta que não fecha com os valores do próprio XML. Alerta: indicação para conferir; depende da operação e da regra legal e não afirma que a nota está errada.</td></tr><tr class="tot2"><td colspan="9">Não entram: notas sem IBS/CBS e itens sem conferência (monofásico, transferência de crédito, ajustes, compra governamental; veja o Resumo). Nos itens do Simples Nacional (gTribSN), só os totais e o cClassTrib são conferidos.</td></tr><tr class="tot2"><td colspan="9">Regras da NT 2025.002 v1.53, da NT 2026.005 v1.00 (Simples Nacional) e da tabela de cClassTrib v1.71. A conferência não muda os totais do ProXML.</td></tr></tbody></table><div class="rf">Gerado pelo ProXML v1.3.0 · 20/11/2026 14:32 · Página 1 de 1</div></div>
+<h2 id="vazio">Sem divergência</h2>
+<div class="nota"><ul><li>Decisão P7-9: o relatório sai mesmo sem divergência (serve de registro de que a conferência foi feita). Exemplo: só as NFC-e reais, filtro NFC-e 65.</li><li>Sem nenhuma nota com IBS/CBS no filtro, o botão fica desabilitado (dica 8.10) e o relatório não é gerado.</li></ul></div>
+<div class="a4 corte" style="min-height:420px"><div class="rh"><div><div class="t">Divergências IBS/CBS</div><div class="m"><b>Período:</b> 24/09/2026 · <b>Modelo:</b> NFC-e 65 · <b>2</b> notas conferidas · <b>0</b> divergências</div><div class="m"><b>Pasta:</b> C:\XMLs\Loja Exemplo\2026-09</div></div><div class="wm"><img alt="ProXML" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTciIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAxNTcgMzIiPg0KICA8dGl0bGU+UHJvWE1MIChwYXJhIGZ1bmRvIGNsYXJvKTwvdGl0bGU+DQogIDwhLS0gTG9nbyBQcm9YTUwgdmV0b3JpYWwgKHJlZGVzZW5oYWRvIGEgcGFydGlyIGRlIHNyYy9pbWcvTG9nby9Mb2dvMS5wbmcpLiBTZW0gZm9udGVzLCBmaWx0cm9zIG5lbSBzY3JpcHRzLiAtLT4NCiAgPGc+PGNpcmNsZSBjeD0iMTMiIGN5PSIzIiByPSIxLjI1IiBmaWxsPSIjQjRCQUNBIi8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjMiIHI9IjEuMjUiIGZpbGw9IiNCNEJBQ0EiLz48Y2lyY2xlIGN4PSI4LjI1IiBjeT0iNy43NSIgcj0iMS41NSIgZmlsbD0iIzhFOTdBRSIvPjxjaXJjbGUgY3g9IjEzIiBjeT0iNy43NSIgcj0iMS44IiBmaWxsPSIjNTU2ODhGIi8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjcuNzUiIHI9IjEuOCIgZmlsbD0iIzU1Njg4RiIvPjxjaXJjbGUgY3g9IjIzLjI1IiBjeT0iNy43NSIgcj0iMS41NSIgZmlsbD0iIzhFOTdBRSIvPjxjaXJjbGUgY3g9IjMuNSIgY3k9IjEyLjc1IiByPSIxLjI1IiBmaWxsPSIjQjRCQUNBIi8+PGNpcmNsZSBjeD0iOC4yNSIgY3k9IjEyLjc1IiByPSIxLjgiIGZpbGw9IiM1NTY4OEYiLz48Y2lyY2xlIGN4PSIxMyIgY3k9IjEyLjc1IiByPSIyLjEiIGZpbGw9IiMyRjRBNjYiLz48Y2lyY2xlIGN4PSIxOC41IiBjeT0iMTIuNzUiIHI9IjIuMSIgZmlsbD0iIzJGNEE2NiIvPjxjaXJjbGUgY3g9IjIzLjI1IiBjeT0iMTIuNzUiIHI9IjEuOCIgZmlsbD0iIzU1Njg4RiIvPjxjaXJjbGUgY3g9IjI4IiBjeT0iMTIuNzUiIHI9IjEuMjUiIGZpbGw9IiNCNEJBQ0EiLz48Y2lyY2xlIGN4PSIzLjUiIGN5PSIxOC4yNSIgcj0iMS4yNSIgZmlsbD0iI0I0QkFDQSIvPjxjaXJjbGUgY3g9IjguMjUiIGN5PSIxOC4yNSIgcj0iMS44IiBmaWxsPSIjNTU2ODhGIi8+PGNpcmNsZSBjeD0iMTMiIGN5PSIxOC4yNSIgcj0iMi4xIiBmaWxsPSIjMkY0QTY2Ii8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjE4LjI1IiByPSIyLjEiIGZpbGw9IiMyRjRBNjYiLz48Y2lyY2xlIGN4PSIyMy4yNSIgY3k9IjE4LjI1IiByPSIxLjgiIGZpbGw9IiM1NTY4OEYiLz48Y2lyY2xlIGN4PSIyOCIgY3k9IjE4LjI1IiByPSIxLjI1IiBmaWxsPSIjQjRCQUNBIi8+PGNpcmNsZSBjeD0iOC4yNSIgY3k9IjIzLjI1IiByPSIxLjU1IiBmaWxsPSIjOEU5N0FFIi8+PGNpcmNsZSBjeD0iMTMiIGN5PSIyMy4yNSIgcj0iMS44IiBmaWxsPSIjNTU2ODhGIi8+PGNpcmNsZSBjeD0iMTguNSIgY3k9IjIzLjI1IiByPSIxLjgiIGZpbGw9IiM1NTY4OEYiLz48Y2lyY2xlIGN4PSIyMy4yNSIgY3k9IjIzLjI1IiByPSIxLjU1IiBmaWxsPSIjOEU5N0FFIi8+PGNpcmNsZSBjeD0iMTMiIGN5PSIyOCIgcj0iMS4yNSIgZmlsbD0iI0I0QkFDQSIvPjxjaXJjbGUgY3g9IjE4LjUiIGN5PSIyOCIgcj0iMS4yNSIgZmlsbD0iI0I0QkFDQSIvPjwvZz4NCiAgPHBhdGggZD0iTTM1IDI1VjguMkEyLjIgMi4yIDAgMCAxIDM3LjIgNkg0NkE0IDQgMCAwIDEgNTAgMTBWMTRBNCA0IDAgMCAxIDQ2IDE4SDM1TTU1IDI1VjExLjhNNTUgMTUuNkM1NS40IDEzLjMgNTcuNCAxMi4zIDYwIDEyLjNINjIuNE05MSA1LjZMMTA2LjIgMjVNMTA2LjQgNS42TDkxIDI1TTExMiAyNVYxMS4yQTUuNzUgNS43NSAwIDAgMSAxMjMuNSAxMS4yVjI1TTEyMy41IDExLjJBNS43NSA1Ljc1IDAgMCAxIDEzNSAxMS4yVjI1TTE0MCA1LjZWMjJBMyAzIDAgMCAwIDE0MyAyNUgxNTMuMiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTcxQTIxIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+DQogIDxlbGxpcHNlIGN4PSI3MiIgY3k9IjE4LjYiIHJ4PSI2LjciIHJ5PSI2LjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE3MUEyMSIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4NCjwvc3ZnPg0K"></div></div><div class="vazioa4"><div class="t1">Nenhuma divergência de IBS/CBS</div><div class="t2">As 2 notas com IBS/CBS do filtro foram conferidas, sem Erro nem Alerta.<br>Regras da NT 2025.002 v1.53, da NT 2026.005 v1.00 (Simples Nacional) e da tabela de cClassTrib v1.71.</div></div><div class="rf">Gerado pelo ProXML v1.3.0 · 20/11/2026 14:32 · Página 1 de 1</div></div>
+</div>
+</body>
+</html>

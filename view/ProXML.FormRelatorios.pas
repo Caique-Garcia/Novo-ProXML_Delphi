@@ -154,8 +154,10 @@ procedure PosicionarColunaRelatorio(const Controles: array of TQRPrintable; cons
 procedure FolgaDeEscalaRelatorio(Relatorio: TComponent);
 
 //Fora de 100%, na visualização: refaz uma linha do cabeçalho pela largura que a fonte tem na escala (ver a
-//implementação). No PDF, as posições exatas de sempre. Chamada no BeforePrint da faixa do título
-procedure LinhaCabecalhoNaEscala(Relatorio: TCustomQuickRep; const Trechos: array of TQRLabel);
+//implementação). No PDF, as posições exatas de sempre. Chamada no BeforePrint da faixa do título. A linha
+//começa em Esquerda
+procedure LinhaCabecalhoNaEscala(Relatorio: TCustomQuickRep; const Trechos: array of TQRLabel;
+  const Esquerda: Double = 0);
 
 //Trechos de uma linha do cabeçalho lado a lado (rótulos em Semibold, valores em cinza), a partir de
 //Esquerda. Trechos desabilitados ficam de fora. Devolve onde a linha termina
@@ -459,7 +461,8 @@ begin
             FolgaNoRotulo(TQRDBText(Relatorio.Components[I]), TQRDBText(Relatorio.Components[I]).Alignment);
 end;
 
-procedure LinhaCabecalhoNaEscala(Relatorio: TCustomQuickRep; const Trechos: array of TQRLabel);
+procedure LinhaCabecalhoNaEscala(Relatorio: TCustomQuickRep; const Trechos: array of TQRLabel;
+  const Esquerda: Double = 0);
 const
     Folga = 4;   //a mesma do MontarLinhaRelatorio
 var
@@ -476,7 +479,7 @@ begin
 
     Medida := TBitmap.Create;
     try
-        X := 0;
+        X := Esquerda;
         for I := Low(Trechos) to High(Trechos) do
         begin
             if not Trechos[I].Enabled then

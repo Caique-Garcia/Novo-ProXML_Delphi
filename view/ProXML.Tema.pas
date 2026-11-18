@@ -132,7 +132,8 @@ const
 
   //Tela Relatórios (mockup relatorios.html: .opc, .rod, .dica e .chip)
   PaddingOpcao            = 16;   //padding do quadro de cada relatório
-  EspacoDica              = 12;   //botão -> dica visível ao lado
+  EspacoDica              = 8;    //botão -> dica visível abaixo dele (tokens.md 5.16)
+  AlturaLinhaDica         = 16;   //linha do texto da dica visível (9 pt, tokens.md 5.16)
   PaddingChipHorizontal   = 8;    //indicador do filtro ("Modelo: Todos · 19 notas")
   PaddingChipVertical     = 2;
   EspacoIconeChip         = 6;    //ícone -> texto do indicador
@@ -159,6 +160,9 @@ const
   LarguraColunaICMS       = 104;
   LarguraColunaIBS        = 88;
   LarguraColunaCBS        = 96;
+  //Coluna IBS/CBS da grade (Plano 7, tokens.md 5.15): última, sempre visível, ícone 16 px + texto
+  LarguraColunaConferencia = 80;
+  EspacoIconeConferencia  = 6;    //ícone -> texto na célula da coluna IBS/CBS
   LarguraTextoVazio       = 420;  //largura máxima do texto do estado vazio (mockup .vazio .t2)
   EspacoVazio             = 8;    //ícone -> título -> texto -> botão no estado vazio
 
@@ -212,7 +216,11 @@ const
   PaddingLogoSobre        = 8;    //respiro do logo em cima e embaixo (.lg: padding 8 0, margin-bottom 8)
   EspacoSobre             = 8;    //entre as linhas da tela Sobre (gap 8)
   EspacoAutorSobre        = 8;    //espaço extra acima de "Desenvolvido por" (margin-top 8)
-  EspacoCreditosSobre     = 16;   //espaço extra acima dos créditos (margin-top 16)
+  EspacoCreditosSobre     = 8;    //espaço extra acima dos créditos (.cred: margin-top 8; era 16 até a v1.2.0)
+  //Bloco "Apoie o projeto" da tela Sobre (Plano 3, etapa 3.5; mockup sobre.html, opção A)
+  LarguraDivisoriaSobre   = 320;  //divisória entre os links e o bloco (.sep: 320 x 1, CorBorda)
+  AlturaDivisoriaSobre    = 1;
+  EspacoDivisoriaSobre    = 8;    //espaço extra acima da divisória (.sep: margin-top 8; 16 com o gap)
   MarcaSobreAtivo         = 2;    //linha CorPrimaria embaixo do "Sobre" do cabeçalho com a tela aberta
 
   //Relatórios A4 no QuickReport (tokens.md, seção 6; mockup relatorio-a4.html), etapa 4.8.
@@ -244,9 +252,25 @@ const
   LarguraRelIBSMun        = 100;
   LarguraRelIBS           = 88;
   LarguraRelCBS           = 88;
+  //Colunas do relatório Divergências IBS/CBS (Plano 7, tokens.md 6): Nº · Mod. · Data · Item · Nível · Tipo ·
+  //Campo (o resto) · Valor no XML · Esperado. Nº com 64 px, como no Relatório de Notas (nNF de até 9 dígitos;
+  //o tokens.md diz 52), tirados do Campo
+  LarguraRelDivNumero     = 64;
+  LarguraRelDivModelo     = 36;
+  LarguraRelDivData       = 68;
+  LarguraRelDivItem       = 40;
+  LarguraRelDivNivel      = 40;
+  LarguraRelDivTipo       = 48;
+  LarguraRelDivValor      = 96;
+  LarguraRelDivEsperado   = 96;
+  TamanhoRelatorioVazio   = 12;   //"Nenhuma divergência de IBS/CBS" no corpo da 1ª página (Semibold)
   //"Mod." e as datas são um pouco mais largos que a coluna menos o padding: nessas colunas o texto
   //usa só este padding (título e dado continuam com o mesmo Left/Width)
   PaddingCelulaEstreita   = 2;
+  //Contagem e legendas embaixo do Total do relatório Divergências (18.21a a 18.25): cada uma com as linhas em
+  //que o QuickReport quebra o texto, sem reservar linha vazia (D4 da B4). Mesmas medidas que o .dfm já usava
+  AlturaLinhaLegendaRelatorio = 13;   //uma linha de legenda 8 pt
+  EspacoLegendaRelatorio  = 2;    //de uma legenda para a seguinte
 
   //Ícones
   TamanhoIconePequeno     = 16;   //botões, campos, cards
