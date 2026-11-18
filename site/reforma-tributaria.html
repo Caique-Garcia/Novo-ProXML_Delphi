@@ -30,7 +30,7 @@
 <meta name="twitter:image" content="https://proxml.vercel.app/og-reforma-tributaria.png">
 <meta name="twitter:image:alt" content="Logo do ProXML com o título: IBS e CBS: tire suas dúvidas, e os cards IBS e CBS do app.">
 <meta property="article:published_time" content="2026-11-09">
-<meta property="article:modified_time" content="2026-11-09">
+<meta property="article:modified_time" content="2026-11-18">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -60,7 +60,7 @@
   "inLanguage": "pt-BR",
   "image": "https://proxml.vercel.app/og-reforma-tributaria.png",
   "datePublished": "2026-11-09",
-  "dateModified": "2026-11-09",
+  "dateModified": "2026-11-18",
   "author": {
     "@type": "Person",
     "name": "Caique Garcia",
@@ -199,7 +199,7 @@
       "name": "Empresa do Simples Nacional precisa informar IBS e CBS na nota?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "<p>Em 2026, não: as alíquotas de teste do IBS e da CBS não valem para as empresas do Simples Nacional. A partir de 1º de janeiro de 2027, sim: a NF-e e a NFC-e do Simples passam a trazer as informações do IBS e da CBS.<\/p><p>O que preencher depende da escolha da empresa. Quem continua com o IBS e a CBS dentro do DAS informa os valores calculados pelo Simples. Quem optou por recolher o IBS e a CBS pelo regime regular preenche os campos como as demais empresas. Essa opção vale por semestre: para o 1º semestre de 2027, o prazo terminou em 30/10/2026, e a próxima oportunidade prevista é em março de 2027, para o 2º semestre. As regras da nota estão na Nota Técnica 2026.005, do Portal da NF-e. Confirme com o seu contador.<\/p><p><strong>Atenção:<\/strong> a partir de 2027, as notas do Simples Nacional que não optarem pelo regime regular trazem o IBS e a CBS num grupo próprio do Simples, que o ProXML ainda não soma. Nessas notas, os cards de IBS e CBS aparecem zerados.<\/p>"
+        "text": "<p>Em 2026, não: as alíquotas de teste do IBS e da CBS não valem para as empresas do Simples Nacional. A partir de 1º de janeiro de 2027, sim: a NF-e e a NFC-e do Simples passam a trazer as informações do IBS e da CBS.<\/p><p>O que preencher depende da escolha da empresa. Quem continua com o IBS e a CBS dentro do DAS informa os valores calculados pelo Simples. Quem optou por recolher o IBS e a CBS pelo regime regular preenche os campos como as demais empresas. Essa opção vale por semestre: para o 1º semestre de 2027, o prazo terminou em 30/10/2026, e a próxima oportunidade prevista é em março de 2027, para o 2º semestre. As regras da nota estão na Nota Técnica 2026.005, do Portal da NF-e. Confirme com o seu contador.<\/p><p><strong>Atenção:<\/strong> a partir de 2027, as notas do Simples Nacional que não optarem pelo regime regular trazem o IBS e a CBS num grupo próprio do Simples, que o ProXML ainda não soma. Nas notas que trazem só esse grupo, os cards de IBS e CBS aparecem zerados. A conferência de IBS/CBS do ProXML confere se a soma do IBS e da CBS do Simples dos itens bate com o total da nota, mas não confere a alíquota do Simples.<\/p>"
       }
     },
     {
@@ -255,7 +255,7 @@
       "name": "Como conferir o total de IBS e CBS das minhas notas?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "<p>Use o ProXML: selecione a pasta com os XMLs, clique em Processar e veja os cards IBS e CBS. Para ver nota por nota, gere o Relatório IBS/CBS na tela Relatórios ou exporte o CSV na tela Notas.<\/p><p>O ProXML é grátis e lê NF-e (55) e NFC-e (65) da mesma pasta. <a href=\"https://proxml.vercel.app/download\">Baixe o ProXML<\/a> e siga o <a href=\"https://proxml.vercel.app/tutorial\">tutorial passo a passo<\/a>.<\/p>"
+        "text": "<p>Use o ProXML: selecione a pasta com os XMLs, clique em Processar e veja os cards IBS e CBS. Para ver nota por nota, gere o Relatório IBS/CBS na tela Relatórios ou exporte o CSV na tela Notas. Para conferir os cálculos, veja a coluna IBS/CBS da tela Notas e o relatório Divergências IBS/CBS.<\/p><p>O ProXML é grátis e lê NF-e (55) e NFC-e (65) da mesma pasta. <a href=\"https://proxml.vercel.app/download\">Baixe o ProXML<\/a> e siga o <a href=\"https://proxml.vercel.app/tutorial\">tutorial passo a passo<\/a>.<\/p>"
       }
     },
     {
@@ -263,7 +263,7 @@
       "name": "O ProXML calcula o IBS e a CBS?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "<p>Não. O ProXML soma os valores de IBS e CBS que já estão no XML de cada nota autorizada. Ele não calcula o imposto nem confere se a alíquota ou o cClassTrib estão certos.<\/p>"
+        "text": "<p>Ele não calcula o imposto das suas notas: os cards somam os valores de IBS e CBS que já estão no XML de cada nota autorizada. Desde a versão 1.3.0, o ProXML também refaz as contas de cada item e dos totais para conferir os valores do XML e mostra OK, Alerta ou Erro, sem mudar os totais.<\/p><p>A conferência não é uma validação fiscal completa e não substitui a validação da SEFAZ nem a análise fiscal. <a href=\"https://proxml.vercel.app/reforma-tributaria#conferencia-proxml\">Veja o que o ProXML confere<\/a>.<\/p>"
       }
     },
     {
@@ -312,13 +312,14 @@
   <div class="cabeca-pagina">
     <h1>Reforma Tributária: IBS e CBS explicados de forma simples</h1>
     <p class="lead" id="resposta-curta">O IBS (Imposto sobre Bens e Serviços) e a CBS (Contribuição sobre Bens e Serviços) são os dois tributos do IVA dual criado pela reforma tributária do consumo. A CBS é federal e substitui o PIS e a Cofins. O IBS é dos estados e municípios e substitui o ICMS e o ISS. A troca acontece aos poucos, de 2026 a 2033.</p>
-    <p class="atualizado">Atualizado em <time datetime="2026-11-09">09/11/2026</time></p>
+    <p class="atualizado">Atualizado em <time datetime="2026-11-18">18/11/2026</time></p>
   </div>
 
   <nav class="sumario prosa" aria-labelledby="titulo-sumario">
     <h2 id="titulo-sumario">Nesta página</h2>
     <ol>
       <li><a href="#como-o-proxml-ajuda">Como o ProXML ajuda a conferir o IBS e a CBS</a></li>
+      <li><a href="#conferencia-proxml">O que o ProXML confere no IBS e na CBS</a></li>
       <li><a href="#cronograma">Cronograma da reforma tributária (2026 a 2033)</a></li>
       <li><a href="#o-basico">O básico: IVA dual, IBS e CBS</a></li>
       <li><a href="#prazos">Prazos da reforma tributária</a></li>
@@ -336,15 +337,16 @@
       <ul class="prosa">
         <li>Lê o grupo <code>IBSCBSTot</code> dos XMLs de NF-e (55) e NFC-e (65) e mostra os totais de IBS e CBS em cards.</li>
         <li>Soma a Base IBS/CBS, o IBS UF, o IBS Município, o IBS total e a CBS de uma pasta inteira em segundos.</li>
-        <li>Gera o Relatório IBS/CBS, pronto para imprimir ou salvar em PDF, e exporta um CSV com essas colunas.</li>
+        <li>Confere os cálculos de IBS e CBS de cada item e dos totais e mostra OK, Alerta ou Erro em cada nota. <a href="#conferencia-proxml">Veja o que o ProXML confere</a>.</li>
+        <li>Gera o Relatório IBS/CBS e o relatório Divergências IBS/CBS, prontos para imprimir ou salvar em PDF, e exporta um CSV com essas colunas e o resultado da conferência.</li>
         <li>Filtra por modelo: Todos, NF-e 55 ou NFC-e 65.</li>
         <li>É grátis, roda no Windows e funciona sem internet: os XMLs não saem do seu computador. Veja as <a href="/perguntas-frequentes#xmls-vao-para-internet">dúvidas sobre privacidade</a> e <a href="/perguntas-frequentes#quanto-custa">sobre o preço</a>.</li>
-        <li><strong>Importante:</strong> o ProXML soma os valores que estão no XML. Ele não calcula o imposto nem confere se a alíquota está certa.</li>
-        <li><strong>Atenção:</strong> a partir de 2027, as notas do Simples Nacional que não optarem pelo regime regular trazem o IBS e a CBS num grupo próprio do Simples, que o ProXML ainda não soma. Nessas notas, os cards de IBS e CBS aparecem zerados.</li>
+        <li><strong>Importante:</strong> os cards somam os valores que estão no XML. A conferência só informa e não substitui a validação da SEFAZ nem a análise fiscal.</li>
+        <li><strong>Atenção:</strong> a partir de 2027, as notas do Simples Nacional que não optarem pelo regime regular trazem o IBS e a CBS num grupo próprio do Simples, que o ProXML ainda não soma. Nas notas que trazem só esse grupo, os cards de IBS e CBS aparecem zerados.</li>
       </ul>
       <div class="par-prints">
         <figure class="print">
-      <a class="print-link" href="/img/07-resumo.webp"><img src="/img/07-resumo.webp" width="1352" height="761" alt="Tela Resumo do ProXML depois de processar a pasta de exemplo: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, 20 notas autorizadas, 0 ignoradas, 0 com erro e os Detalhes da leitura, com o filtro em Todos." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
+      <a class="print-link" href="/img/07-resumo.webp?v=20261118"><img src="/img/07-resumo.webp?v=20261118" width="1352" height="761" alt="Tela Resumo do ProXML depois de processar a pasta de exemplo: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, 20 notas autorizadas, 0 ignoradas, 0 com erro e os Detalhes da leitura, com o filtro em Todos." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
         <figure class="print">
       <a class="print-link" href="/img/14-relatorio-ibscbs.webp"><img src="/img/14-relatorio-ibscbs.webp" width="1040" height="663" alt="Relatório IBS/CBS do ProXML na pré-visualização, com o período, o modelo Todos e as colunas Nº, Modelo, Data, Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
@@ -354,6 +356,27 @@
         <a class="botao botao-primario" href="/download">Baixar o ProXML grátis</a>
         <a class="botao botao-secundario" href="/ibs-cbs">Ver onde ficam o IBS e a CBS no XML</a>
       </div>
+    </div>
+  </section>
+
+  <section class="secao" id="conferencia-proxml" aria-labelledby="titulo-conferencia-proxml">
+    <div class="prosa">
+      <h2 id="titulo-conferencia-proxml">O que o ProXML confere no IBS e na CBS</h2>
+      <p>O ProXML refaz as contas de IBS e CBS de cada item e dos totais das notas autorizadas e mostra o resultado na coluna IBS/CBS da tela Notas, no Resumo e no relatório Divergências IBS/CBS. A conferência só informa: não muda os totais, os cards nem os contadores. Ela segue a NT 2025.002 v1.53, a NT 2026.005 v1.00 (Simples Nacional) e a tabela de cClassTrib v1.71 e não substitui a validação da SEFAZ nem a análise fiscal.</p>
+      <p>A conferência tem quatro níveis:</p>
+      <ol>
+        <li><strong>Conta do item (Erro):</strong> o IBS UF, o IBS municipal e a CBS de cada item batem com a base vezes a alíquota (a efetiva, quando há redução), menos o diferimento e a devolução de tributo, quando houver; o IBS é a soma do IBS UF com o IBS municipal; e as contas da alíquota efetiva, do diferimento e da tributação regular fecham.</li>
+        <li><strong>Itens × totais (Erro):</strong> a soma dos itens bate com os totais da nota.</li>
+        <li><strong>Base de cálculo (Alerta):</strong> a base do item é comparada com o valor do produto, mais frete, seguro, outras despesas e imposto de importação, menos o desconto e os tributos que saem da base de 2026 a 2032 (ICMS, inclusive o FCP, PIS, Cofins e ISS).</li>
+        <li><strong>Alíquota, redução e CST (Alerta):</strong> a alíquota esperada para o ano da emissão e a redução, o diferimento e os grupos previstos na tabela oficial para o CST e o cClassTrib do item.</li>
+      </ol>
+      <div class="caixa caixa-aviso">
+        <p class="caixa-titulo">Alerta não é erro</p>
+        <p>O ProXML marca como Alerta o que depende da operação e da regra legal: base de cálculo, alíquota, redução, CST e cClassTrib. É uma indicação para conferir a nota com quem cuida da parte fiscal, não uma afirmação de que a nota está errada. Erro indica uma conta que não fecha com os próprios valores do XML, no item ou nos totais.</p>
+      </div>
+      <p><strong>Simples Nacional:</strong> nos itens do Simples Nacional com o grupo do Simples, o ProXML confere a soma do IBS e da CBS do Simples com o total da nota, se o grupo vem nos itens e no total, e o cClassTrib. A alíquota do Simples depende do anexo e da faixa de faturamento e não é conferida. Quando o item também traz o grupo de cálculo do IBS/CBS, ele é conferido como nas outras notas.</p>
+      <p><strong>Sem conferência na versão 1.3.0:</strong> tributação monofásica, transferência de crédito, ajustes da ZFM e de competência, compras governamentais, as alíquotas que ainda dependem da alíquota de referência ou da lei de cada ente (CBS a partir de 2027 e IBS a partir de 2029), a base e as alíquotas de devoluções, a base de notas complementares, de ajuste, de crédito e de débito e as alíquotas de algumas notas de crédito. O Resumo informa esses casos, sem contar como divergência.</p>
+      <p><a href="/ibs-cbs#conferencia">Veja o detalhe técnico da conferência</a> ou <a href="/tutorial#conferencia-ibs-cbs">como ler o resultado no ProXML</a>.</p>
     </div>
   </section>
 
@@ -514,7 +537,7 @@
       <div class="resposta">
         <p>Em 2026, não: as alíquotas de teste do IBS e da CBS não valem para as empresas do Simples Nacional. A partir de 1º de janeiro de 2027, sim: a NF-e e a NFC-e do Simples passam a trazer as informações do IBS e da CBS.</p>
         <p>O que preencher depende da escolha da empresa. Quem continua com o IBS e a CBS dentro do DAS informa os valores calculados pelo Simples. Quem optou por recolher o IBS e a CBS pelo regime regular preenche os campos como as demais empresas. Essa opção vale por semestre: para o 1º semestre de 2027, o prazo terminou em 30/10/2026, e a próxima oportunidade prevista é em março de 2027, para o 2º semestre. As regras da nota estão na Nota Técnica 2026.005, do Portal da NF-e. Confirme com o seu contador.</p>
-        <p><strong>Atenção:</strong> a partir de 2027, as notas do Simples Nacional que não optarem pelo regime regular trazem o IBS e a CBS num grupo próprio do Simples, que o ProXML ainda não soma. Nessas notas, os cards de IBS e CBS aparecem zerados.</p>
+        <p><strong>Atenção:</strong> a partir de 2027, as notas do Simples Nacional que não optarem pelo regime regular trazem o IBS e a CBS num grupo próprio do Simples, que o ProXML ainda não soma. Nas notas que trazem só esse grupo, os cards de IBS e CBS aparecem zerados. A conferência de IBS/CBS do ProXML confere se a soma do IBS e da CBS do Simples dos itens bate com o total da nota, mas não confere a alíquota do Simples.</p>
       </div>
     </details>
 
@@ -580,7 +603,7 @@
     <details id="conferir-total-ibs-cbs" open>
       <summary><h3>Como conferir o total de IBS e CBS das minhas notas?</h3></summary>
       <div class="resposta">
-        <p>Use o ProXML: selecione a pasta com os XMLs, clique em Processar e veja os cards IBS e CBS. Para ver nota por nota, gere o Relatório IBS/CBS na tela Relatórios ou exporte o CSV na tela Notas.</p>
+        <p>Use o ProXML: selecione a pasta com os XMLs, clique em Processar e veja os cards IBS e CBS. Para ver nota por nota, gere o Relatório IBS/CBS na tela Relatórios ou exporte o CSV na tela Notas. Para conferir os cálculos, veja a coluna IBS/CBS da tela Notas e o relatório Divergências IBS/CBS.</p>
         <p>O ProXML é grátis e lê NF-e (55) e NFC-e (65) da mesma pasta. <a href="/download">Baixe o ProXML</a> e siga o <a href="/tutorial">tutorial passo a passo</a>.</p>
       </div>
     </details>
@@ -588,7 +611,8 @@
     <details id="proxml-calcula-ibs-cbs">
       <summary><h3>O ProXML calcula o IBS e a CBS?</h3></summary>
       <div class="resposta">
-        <p>Não. O ProXML soma os valores de IBS e CBS que já estão no XML de cada nota autorizada. Ele não calcula o imposto nem confere se a alíquota ou o cClassTrib estão certos.</p>
+        <p>Ele não calcula o imposto das suas notas: os cards somam os valores de IBS e CBS que já estão no XML de cada nota autorizada. Desde a versão 1.3.0, o ProXML também refaz as contas de cada item e dos totais para conferir os valores do XML e mostra OK, Alerta ou Erro, sem mudar os totais.</p>
+        <p>A conferência não é uma validação fiscal completa e não substitui a validação da SEFAZ nem a análise fiscal. <a href="#conferencia-proxml">Veja o que o ProXML confere</a>.</p>
       </div>
     </details>
 
@@ -648,7 +672,7 @@
 
   <section class="secao" aria-labelledby="titulo-baixar">
     <h2 id="titulo-baixar">Confira o IBS e a CBS das suas notas com o ProXML</h2>
-    <p>Grátis, para Windows 10 e 11. Lê NF-e (55) e NFC-e (65) e soma o IBS e a CBS de uma pasta inteira.</p>
+    <p>Grátis, para Windows 10 e 11. Lê NF-e (55) e NFC-e (65), soma o IBS e a CBS de uma pasta inteira e confere os cálculos de cada nota.</p>
     <div class="botoes">
       <a class="botao botao-primario" href="/download">Baixar o ProXML</a>
     </div>

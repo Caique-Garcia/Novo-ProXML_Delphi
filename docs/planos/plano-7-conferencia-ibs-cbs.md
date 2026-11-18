@@ -134,6 +134,7 @@ Depois da Release v1.3.0 publicada:
 - **Aceite:** site publicado na Vercel com a v1.3.0; usuário revisa as páginas alteradas.
 
 ## Melhorias anotadas para um plano futuro
+- (18/11/2026, revisão fiscal da 7.7) **Alíquota da CBS de 2027:** o Senado decide a alíquota de referência até 15/12/2026 (o TCU propôs 11,3% em 28/10/2026; sem decisão do Senado vale o número do TCU). Depois da resolução, rever a D8 e a tabela `ALIQ_ANO_CBS` de `lib/uConferenciaIBSCBS.pas` (hoje 2027+ fica sem conferência de alíquota) e os textos do site e do README sobre "alíquotas que ainda dependem da alíquota de referência". O usuário decidiu tratar numa v1.3.x ou no próximo plano.
 - (18/11/2026, achado da correção do D5) O Relatório de Notas e o Relatório IBS/CBS podem imprimir os títulos das colunas numa página sem linhas (só com os totais), como era o D5 do relatório Divergências. Não conferido; o usuário decidiu ver depois da v1.3.0.
 - (11/11/2026, achado da B1) Com filtro 55 ou 65, os contadores e o aviso "Os totais incluem N notas de homologação… e N NF-e de entrada" do Resumo continuam valendo para a pasta inteira, enquanto os cards seguem o filtro. Comportamento existente desde a v1.1.0; o usuário decidiu **manter na v1.3.0** e avaliar depois.
 

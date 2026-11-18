@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Como abrir e somar XML de nota fiscal: tutorial | ProXML</title>
-<meta name="description" content="Passo a passo para abrir XMLs de NF-e e NFC-e, somar valor, ICMS, IBS e CBS, gerar DANFE e relatórios e enviar os XMLs por e-mail.">
+<meta name="description" content="Passo a passo para abrir XMLs de NF-e e NFC-e, somar valor, ICMS, IBS e CBS, conferir os cálculos de IBS/CBS, gerar DANFE e relatórios e enviar por e-mail.">
 <link rel="canonical" href="https://proxml.vercel.app/tutorial">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#171A21" media="(prefers-color-scheme: dark)">
@@ -17,7 +17,7 @@
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="ProXML">
 <meta property="og:title" content="Como abrir e somar XML de nota fiscal: tutorial | ProXML">
-<meta property="og:description" content="Passo a passo para abrir XMLs de NF-e e NFC-e, somar valor, ICMS, IBS e CBS, gerar DANFE e relatórios e enviar os XMLs por e-mail.">
+<meta property="og:description" content="Passo a passo para abrir XMLs de NF-e e NFC-e, somar valor, ICMS, IBS e CBS, conferir os cálculos de IBS/CBS, gerar DANFE e relatórios e enviar por e-mail.">
 <meta property="og:url" content="https://proxml.vercel.app/tutorial">
 <meta property="og:image" content="https://proxml.vercel.app/og-image.png">
 <meta property="og:image:type" content="image/png">
@@ -26,7 +26,7 @@
 <meta property="og:image:alt" content="Logo do ProXML com a frase: leitor de XML de NF-e e NFC-e grátis para Windows, e a tela Resumo do app com os totais.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Como abrir e somar XML de nota fiscal: tutorial | ProXML">
-<meta name="twitter:description" content="Passo a passo para abrir XMLs de NF-e e NFC-e, somar valor, ICMS, IBS e CBS, gerar DANFE e relatórios e enviar os XMLs por e-mail.">
+<meta name="twitter:description" content="Passo a passo para abrir XMLs de NF-e e NFC-e, somar valor, ICMS, IBS e CBS, conferir os cálculos de IBS/CBS, gerar DANFE e relatórios e enviar por e-mail.">
 <meta name="twitter:image" content="https://proxml.vercel.app/og-image.png">
 <meta name="twitter:image:alt" content="Logo do ProXML com a frase: leitor de XML de NF-e e NFC-e grátis para Windows, e a tela Resumo do app com os totais.">
 <script type="application/ld+json">
@@ -96,6 +96,7 @@
       <li><a href="#totais">Conferir os totais e o Resumo</a></li>
       <li><a href="#filtro-modelo">Filtrar por modelo (NF-e ou NFC-e)</a></li>
       <li><a href="#notas">Ver as notas, copiar a chave e exportar CSV</a></li>
+      <li><a href="#conferencia-ibs-cbs">Conferir os cálculos de IBS/CBS</a></li>
       <li><a href="#relatorios">Gerar os relatórios</a></li>
       <li><a href="#configurar-email">Configurar o e-mail</a></li>
       <li><a href="#enviar">Enviar os XMLs por e-mail</a></li>
@@ -125,7 +126,7 @@
     <li class="passo" id="abrir">
       <h2>Abra o ProXML</h2>
       <div class="prosa">
-        <p>Na primeira vez, a tela mostra “Nenhuma pasta processada”. À esquerda fica o menu com as telas <strong>Resumo</strong>, <strong>Notas</strong>, <strong>Relatórios</strong>, <strong>Enviar</strong> e <strong>Configurações</strong>. O link <strong>Sobre</strong>, no canto do cabeçalho, mostra a versão e os créditos.</p>
+        <p>Na primeira vez, a tela mostra “Nenhuma pasta processada”. À esquerda fica o menu com as telas <strong>Resumo</strong>, <strong>Notas</strong>, <strong>Relatórios</strong>, <strong>Enviar</strong> e <strong>Configurações</strong>. O link <strong>Sobre</strong>, no canto do cabeçalho, mostra a versão e os créditos, com os links para o site do ProXML e para o repositório no GitHub e o botão <strong>Apoiar no Apoia.se</strong>, para quem quiser apoiar o desenvolvimento.</p>
         <p>A janela pode ser redimensionada e maximizada. O ProXML lembra o tamanho e a posição da janela para a próxima vez.</p>
       </div>
       <figure class="print">
@@ -158,12 +159,12 @@
     <li class="passo" id="totais">
       <h2>Confira os totais e o Resumo</h2>
       <div class="prosa">
-        <p>No alto ficam os cinco cards de totais: <strong>Valor Total</strong>, <strong>Base ICMS</strong>, <strong>ICMS</strong>, <strong>IBS</strong> e <strong>CBS</strong>. Na tela Resumo aparecem os contadores (Autorizadas, Ignoradas e Com erro), o tempo da leitura e os <strong>Detalhes da leitura</strong>, arquivo por arquivo.</p>
+        <p>No alto ficam os cinco cards de totais: <strong>Valor Total</strong>, <strong>Base ICMS</strong>, <strong>ICMS</strong>, <strong>IBS</strong> e <strong>CBS</strong>. Na tela Resumo aparecem os contadores (Autorizadas, Ignoradas e Com erro), o tempo da leitura e os <strong>Detalhes da leitura</strong>, arquivo por arquivo. No fim dos Detalhes da leitura fica o bloco da <a href="#conferencia-ibs-cbs">conferência de IBS/CBS</a>.</p>
         <p>Os cards IBS e CBS mostram os tributos novos da Reforma Tributária, lidos do XML de cada nota. <a href="/reforma-tributaria">Entenda o que são o IBS e a CBS</a>.</p>
         <p>Se os totais incluírem notas de homologação (ambiente de testes, sem valor fiscal) ou NF-e de entrada, o Resumo mostra um aviso para você conferir se a pasta é a certa.</p>
       </div>
       <figure class="print">
-      <a class="print-link" href="/img/07-resumo.webp"><img src="/img/07-resumo.webp" width="1352" height="761" alt="Tela Resumo do ProXML depois de processar a pasta de exemplo: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, 20 notas autorizadas, 0 ignoradas, 0 com erro e os Detalhes da leitura, com o filtro em Todos." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
+      <a class="print-link" href="/img/07-resumo.webp?v=20261118"><img src="/img/07-resumo.webp?v=20261118" width="1352" height="761" alt="Tela Resumo do ProXML depois de processar a pasta de exemplo: cards Valor Total, Base ICMS, ICMS, IBS e CBS preenchidos, 20 notas autorizadas, 0 ignoradas, 0 com erro e os Detalhes da leitura, com o filtro em Todos." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       <div class="caixa caixa-aviso prosa">
         <p class="caixa-titulo">Atenção ao conferir os totais</p>
@@ -189,18 +190,51 @@
     <li class="passo" id="notas">
       <h2>Veja as notas, copie a chave e exporte o CSV</h2>
       <div class="prosa">
-        <p>A tela <strong>Notas</strong> mostra uma grade com Nº, Modelo, Data, Chave (44 dígitos) e valores. As colunas Base ICMS, ICMS, IBS e CBS aparecem conforme a largura da janela.</p>
+        <p>A tela <strong>Notas</strong> mostra uma grade com Nº, Modelo, Data, Chave (44 dígitos), valores e, por último, a coluna <strong>IBS/CBS</strong>, com o resultado da <a href="#conferencia-ibs-cbs">conferência de IBS/CBS</a>. As colunas Base ICMS, ICMS, IBS e CBS aparecem conforme a largura da janela; a coluna IBS/CBS fica sempre visível.</p>
         <ul>
           <li><strong>Buscar:</strong> digite o número ou a chave no campo de busca (<kbd>Ctrl</kbd>+<kbd>F</kbd>). <kbd>Esc</kbd> limpa a busca.</li>
           <li><strong>Ordenar:</strong> clique no título da coluna.</li>
           <li><strong>Copiar chave:</strong> copia a chave de acesso inteira da nota selecionada (<kbd>Ctrl</kbd>+<kbd>C</kbd> na grade).</li>
           <li><strong>Gerar DANFE:</strong> gera o PDF da nota selecionada (<kbd>Ctrl</kbd>+<kbd>D</kbd> ou duplo clique). <a href="/gerar-danfe-xml">Veja como gerar o DANFE e o DANFCe</a>.</li>
-          <li><strong>Exportar CSV:</strong> salva as notas visíveis na lista (com o filtro e a busca) num arquivo que abre no Excel em português: separado por ponto e vírgula, com vírgula decimal e acentos corretos.</li>
+          <li><strong>Exportar CSV:</strong> salva as notas visíveis na lista (com o filtro e a busca) num arquivo que abre no Excel em português: separado por ponto e vírgula, com vírgula decimal e acentos corretos. A última coluna, <strong>Conferência IBS/CBS</strong>, traz OK, Alerta ou Erro.</li>
         </ul>
         <p>O botão direito do mouse na grade também tem Copiar chave e Gerar DANFE.</p>
       </div>
       <figure class="print">
-      <a class="print-link" href="/img/08-notas.webp"><img src="/img/08-notas.webp" width="1352" height="761" alt="Tela Notas do ProXML com 20 notas na grade (Nº, Modelo, Data, Chave, Valor, Base ICMS, ICMS, IBS e CBS), uma nota selecionada e os botões Copiar chave, Gerar DANFE e Exportar CSV." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
+      <a class="print-link" href="/img/08-notas.webp?v=20261118"><img src="/img/08-notas.webp?v=20261118" width="1352" height="761" alt="Tela Notas do ProXML com 26 notas na grade (Nº, Modelo, Data, Chave, Valor, ICMS, IBS, CBS e IBS/CBS), ordenada pela coluna IBS/CBS: 3 notas com Erro, 3 com Alerta e as demais com OK, e os botões Copiar chave, Gerar DANFE e Exportar CSV." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
+    </figure>
+      <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
+    </li>
+
+    <li class="passo" id="conferencia-ibs-cbs">
+      <h2>Confira os cálculos de IBS/CBS</h2>
+      <div class="prosa">
+        <p>Ao processar a pasta, o ProXML refaz as contas de IBS e CBS de cada item e dos totais das notas autorizadas. A conferência só informa: os cards, os totais e os contadores continuam com os valores do XML. <a href="/ibs-cbs#conferencia">Veja o que o ProXML confere em cada nível</a>.</p>
+        <h3>Na tela Notas: a coluna IBS/CBS</h3>
+        <ul>
+          <li><strong>OK:</strong> os cálculos de IBS/CBS foram conferidos, sem divergência.</li>
+          <li><strong>Alerta:</strong> há indicações para conferir (base, alíquota ou CST). Não quer dizer que a nota está errada.</li>
+          <li><strong>Erro:</strong> alguma conta de IBS/CBS não fecha com os valores do próprio XML, no item ou nos totais.</li>
+          <li><strong>Vazia:</strong> a nota não tem IBS/CBS e fica fora da conferência.</li>
+        </ul>
+        <p>Uma nota com Erro e Alerta aparece como Erro. Passe o mouse sobre a célula para ver a dica com o resultado da nota, por exemplo quantas contas não fecham ou quantas indicações há para conferir. Clique no título da coluna para ordenar por gravidade: no primeiro clique, as notas com Erro ficam no topo.</p>
+        <h3>Na tela Resumo: o bloco da conferência</h3>
+        <p>No fim dos Detalhes da leitura, uma linha resume a conferência (“Conferência de IBS/CBS: N notas conferidas, …”) e, depois dela, vem uma linha por divergência, com o valor do XML e o esperado. Por exemplo:</p>
+        <ul>
+          <li>Nota Fiscal 910003, item 1: IBS UF R$ 0,50, esperado R$ 0,24 (R$ 238,13 × 0,1000%) (erro).</li>
+          <li>Nota Fiscal 910014, item 1: alíquota do IBS UF 0,0500% no XML e 0,1000% para 2026; confira (alerta).</li>
+        </ul>
+        <p>O Resumo também informa as notas com partes que ficaram sem conferência (por exemplo, tributação monofásica), sem contar como divergência. Os Detalhes da leitura valem para a pasta inteira e não mudam com o filtro de modelo; a grade e o relatório seguem o filtro.</p>
+        <h3 id="relatorio-divergencias">No relatório Divergências IBS/CBS</h3>
+        <p>Na tela <strong>Relatórios</strong>, o terceiro quadro gera o relatório <strong>Divergências IBS/CBS</strong> em A4, com uma linha por divergência: Nº, modelo, data, item (ou “Total”, quando a diferença está entre os itens e o total da nota), nível, tipo (Erro ou Alerta), campo, valor no XML e esperado. No fim vêm a contagem de notas com Erro e com Alerta e as versões das regras usadas. Se não houver divergência, o relatório mostra “Nenhuma divergência de IBS/CBS”.</p>
+        <p>No CSV da tela Notas, a última coluna, <strong>Conferência IBS/CBS</strong>, traz o mesmo OK, Alerta ou Erro da grade.</p>
+      </div>
+      <div class="caixa caixa-aviso prosa">
+        <p class="caixa-titulo">Alerta não é erro</p>
+        <p>O ProXML marca como Alerta o que depende da operação e da regra legal: base de cálculo, alíquota, redução, CST e cClassTrib. É uma indicação para conferir a nota com quem cuida da parte fiscal, não uma afirmação de que a nota está errada. Erro indica uma conta que não fecha com os próprios valores do XML, no item ou nos totais.</p>
+      </div>
+      <figure class="print">
+      <a class="print-link" href="/img/17-relatorio-divergencias.webp"><img src="/img/17-relatorio-divergencias.webp" width="1040" height="663" alt="Relatório Divergências IBS/CBS do ProXML na pré-visualização, com o período, o modelo, a pasta de origem e uma linha por divergência nas colunas Nº, Mod., Data, Item, Nível, Tipo, Campo, Valor no XML e Esperado." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       <p class="voltar-sumario"><a href="#titulo-sumario">Voltar ao sumário</a></p>
     </li>
@@ -208,15 +242,16 @@
     <li class="passo" id="relatorios">
       <h2>Gere os relatórios</h2>
       <div class="prosa">
-        <p>A tela <strong>Relatórios</strong> tem duas opções, cada uma com o botão <strong>Gerar relatório</strong>, que grava as notas e abre a visualização:</p>
+        <p>A tela <strong>Relatórios</strong> tem três opções, cada uma com o botão <strong>Gerar relatório</strong>, que grava as notas e abre a visualização:</p>
         <ul>
           <li><strong>Relatório de Notas:</strong> Nº, modelo, data, chave, valor, base de cálculo do ICMS e ICMS de cada nota, com os totais no fim.</li>
           <li><strong>Relatório IBS/CBS:</strong> Base IBS/CBS, IBS UF, IBS municipal, IBS e CBS das notas que têm o grupo IBS/CBS.</li>
+          <li><strong>Divergências IBS/CBS:</strong> os erros e alertas da conferência de IBS/CBS, um por linha. <a href="#relatorio-divergencias">Veja como ler esse relatório</a>.</li>
         </ul>
         <p>Os relatórios saem em A4, com o período das notas, o modelo do filtro, a pasta de origem, a linha de total e o rodapé com a data e a página. Eles usam as notas do modelo selecionado na barra de cima; a busca da tela Notas não é aplicada.</p>
       </div>
       <figure class="print">
-      <a class="print-link" href="/img/10-relatorios.webp"><img src="/img/10-relatorios.webp" width="1352" height="761" alt="Tela Relatórios do ProXML com as opções Relatório de Notas e Relatório IBS/CBS, cada uma com o botão Gerar relatório, e o indicador Modelo: Todos · 20 notas." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
+      <a class="print-link" href="/img/10-relatorios.webp?v=20261118"><img src="/img/10-relatorios.webp?v=20261118" width="1352" height="761" alt="Tela Relatórios do ProXML com três opções, Relatório de Notas, Relatório IBS/CBS e Divergências IBS/CBS (3 notas com Erro e 3 com Alerta), cada uma com o botão Gerar relatório, e o indicador Modelo: Todos · 26 notas." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
       <div class="par-prints">
         <figure class="print">
@@ -293,6 +328,7 @@
           <tr><td><strong>Nota cancelada continua somada.</strong> O cancelamento é um evento separado e o XML da nota continua autorizado.</td><td>Retire da pasta os XMLs das notas canceladas antes de processar.</td></tr>
           <tr><td>Com a janela no tamanho mínimo, a Chave pode aparecer cortada com “…” na grade.</td><td><strong>Copiar chave</strong> copia a chave inteira. Para vê-la na grade, aumente a janela.</td></tr>
           <tr><td>Fora da escala de 100%, a visualização do relatório na tela pode ficar um pouco diferente do PDF.</td><td>O PDF não depende da escala: use o PDF como referência.</td></tr>
+          <tr><td>A conferência de IBS/CBS não é uma validação fiscal completa: alguns casos ficam sem conferência e, no Simples Nacional, a alíquota do Simples não é conferida.</td><td>Use a coluna, o Resumo e o relatório como indicação para conferir. <a href="/ibs-cbs#conferencia">Veja o que fica sem conferência</a>.</td></tr>
           <tr><td>A senha do e-mail fica sem criptografia no <code>db\notas.db</code>.</td><td>Não compartilhe o arquivo <code>db\notas.db</code>.</td></tr>
         </tbody>
       </table>

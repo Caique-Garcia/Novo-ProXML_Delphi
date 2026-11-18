@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IBS e CBS no XML da NF-e: grupo IBSCBSTot | ProXML</title>
-<meta name="description" content="Onde ficam o IBS e a CBS no XML da NF-e e da NFC-e (grupo IBSCBSTot, NT 2025.002), o caminho de cada tag e como o ProXML soma os valores.">
+<meta name="description" content="Onde ficam o IBS e a CBS no XML da NF-e e da NFC-e (grupo IBSCBSTot, NT 2025.002), o caminho de cada tag, como o ProXML soma e o que ele confere.">
 <link rel="canonical" href="https://proxml.vercel.app/ibs-cbs">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#171A21" media="(prefers-color-scheme: dark)">
@@ -17,7 +17,7 @@
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="ProXML">
 <meta property="og:title" content="IBS e CBS no XML da NF-e: grupo IBSCBSTot | ProXML">
-<meta property="og:description" content="Onde ficam o IBS e a CBS no XML da NF-e e da NFC-e (grupo IBSCBSTot, NT 2025.002), o caminho de cada tag e como o ProXML soma os valores.">
+<meta property="og:description" content="Onde ficam o IBS e a CBS no XML da NF-e e da NFC-e (grupo IBSCBSTot, NT 2025.002), o caminho de cada tag, como o ProXML soma e o que ele confere.">
 <meta property="og:url" content="https://proxml.vercel.app/ibs-cbs">
 <meta property="og:image" content="https://proxml.vercel.app/og-reforma-tributaria.png">
 <meta property="og:image:type" content="image/png">
@@ -26,11 +26,11 @@
 <meta property="og:image:alt" content="Logo do ProXML com o título: IBS e CBS: tire suas dúvidas, e os cards IBS e CBS do app.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="IBS e CBS no XML da NF-e: grupo IBSCBSTot | ProXML">
-<meta name="twitter:description" content="Onde ficam o IBS e a CBS no XML da NF-e e da NFC-e (grupo IBSCBSTot, NT 2025.002), o caminho de cada tag e como o ProXML soma os valores.">
+<meta name="twitter:description" content="Onde ficam o IBS e a CBS no XML da NF-e e da NFC-e (grupo IBSCBSTot, NT 2025.002), o caminho de cada tag, como o ProXML soma e o que ele confere.">
 <meta name="twitter:image" content="https://proxml.vercel.app/og-reforma-tributaria.png">
 <meta name="twitter:image:alt" content="Logo do ProXML com o título: IBS e CBS: tire suas dúvidas, e os cards IBS e CBS do app.">
 <meta property="article:published_time" content="2026-11-09">
-<meta property="article:modified_time" content="2026-11-09">
+<meta property="article:modified_time" content="2026-11-18">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -92,8 +92,8 @@
   </nav>
   <div class="cabeca-pagina">
     <h1>IBS e CBS no XML da NF-e e da NFC-e</h1>
-    <p class="lead">Onde ficam o IBS e a CBS no XML da NF-e (55) e da NFC-e (65), segundo a NT 2025.002, quais tags o ProXML lê e como ele soma esses valores. Para as dúvidas gerais, veja <a href="/reforma-tributaria">Reforma Tributária: IBS e CBS explicados de forma simples</a>.</p>
-    <p class="atualizado">Atualizado em <time datetime="2026-11-09">09/11/2026</time></p>
+    <p class="lead">Onde ficam o IBS e a CBS no XML da NF-e (55) e da NFC-e (65), segundo a NT 2025.002, quais tags o ProXML lê, como ele soma esses valores e o que ele confere nos cálculos. Para as dúvidas gerais, veja <a href="/reforma-tributaria">Reforma Tributária: IBS e CBS explicados de forma simples</a>.</p>
+    <p class="atualizado">Atualizado em <time datetime="2026-11-18">18/11/2026</time></p>
   </div>
 
   <section class="secao" id="onde-ficam" aria-labelledby="titulo-onde-ficam">
@@ -104,7 +104,7 @@
         <li><strong>Em cada item</strong>, no grupo <code>IBSCBS</code>, dentro de <code>det/imposto</code>: CST, cClassTrib, base de cálculo, alíquotas e valores do item.</li>
         <li><strong>Nos totais da nota</strong>, no grupo <code>IBSCBSTot</code>, dentro de <code>total</code>, ao lado do <code>ICMSTot</code>.</li>
       </ul>
-      <p>O ProXML lê só os totais (<code>IBSCBSTot</code>). Ele não lê os grupos dos itens.</p>
+      <p>Para os cards, as colunas de valores da grade, o CSV e o Relatório IBS/CBS, o ProXML lê só os totais (<code>IBSCBSTot</code>). Os grupos dos itens são lidos pela <a href="#conferencia">conferência de IBS/CBS</a>, que não muda os totais.</p>
     </div>
   </section>
 
@@ -174,7 +174,7 @@
       </table>
     </div>
     <div class="caixa caixa-aviso prosa">
-      <p><strong>Atenção:</strong> a partir de 2027, as notas do Simples Nacional que não optarem pelo regime regular trazem o IBS e a CBS num grupo próprio do Simples (<code>IBSCBSTot/gTribSN</code>, com <code>vIBSSN</code> e <code>vCBSSN</code>), que o ProXML ainda não soma. Nessas notas, os cards de IBS e CBS aparecem zerados.</p>
+      <p><strong>Atenção:</strong> a partir de 2027, as notas do Simples Nacional que não optarem pelo regime regular trazem o IBS e a CBS num grupo próprio do Simples (<code>IBSCBSTot/gTribSN</code>, com <code>vIBSSN</code> e <code>vCBSSN</code>), que o ProXML ainda não soma. Nas notas que trazem só esse grupo, os cards de IBS e CBS aparecem zerados. A conferência de IBS/CBS confere se a soma desse grupo nos itens bate com o total da nota (<a href="#conferencia">veja abaixo</a>).</p>
     </div>
   </section>
 
@@ -187,14 +187,52 @@
         <li><strong>Subgrupo ausente:</strong> se o XML não tiver <code>gIBS</code>, <code>gIBSUF</code>, <code>gIBSMun</code> ou <code>gCBS</code>, o valor correspondente conta como zero.</li>
         <li><strong>IBS total:</strong> é lido da tag <code>vIBS</code>. O ProXML não soma o IBS UF com o IBS Mun. para chegar a ele.</li>
         <li><strong>Filtro de modelo:</strong> Todos, NF-e 55 ou NFC-e 65 valem para os cards, a grade, o CSV e o relatório.</li>
-        <li><strong>O que fica de fora:</strong> os grupos dos itens, os valores do Imposto Seletivo e as outras tags do <code>IBSCBSTot</code> que não estão na tabela acima.</li>
-        <li><strong>Sem cálculo e sem validação:</strong> o ProXML soma o que está no XML. Ele não calcula o IBS e a CBS nem confere alíquota, CST ou cClassTrib.</li>
+        <li><strong>O que fica de fora da soma:</strong> os grupos dos itens, os valores do Imposto Seletivo e as outras tags do <code>IBSCBSTot</code> que não estão na tabela acima.</li>
+        <li><strong>A soma usa o que está no XML:</strong> os cards mostram os valores do XML, mesmo quando a conferência aponta Erro ou Alerta na nota. <a href="#conferencia">Veja o que o ProXML confere</a>.</li>
       </ul>
       <p>Como nos outros totais, notas canceladas continuam somadas e, nas NF-e, as notas de entrada e de saída são somadas juntas. <a href="/tutorial#totais">Veja os cuidados ao conferir os totais</a>.</p>
     </div>
     <figure class="print">
       <a class="print-link" href="/img/14-relatorio-ibscbs.webp"><img src="/img/14-relatorio-ibscbs.webp" width="1040" height="663" alt="Relatório IBS/CBS do ProXML na pré-visualização, com o período, o modelo Todos e as colunas Nº, Modelo, Data, Base IBS/CBS, IBS UF, IBS Mun., IBS e CBS." loading="lazy" decoding="async"><span class="visualmente-oculto"> (ampliar imagem)</span><span class="print-selo" aria-hidden="true">Ampliar</span></a>
     </figure>
+  </section>
+
+  <section class="secao" id="conferencia" aria-labelledby="titulo-conferencia">
+    <div class="prosa">
+      <h2 id="titulo-conferencia">O que o ProXML confere no IBS e na CBS</h2>
+      <p>Desde a versão 1.3.0, o ProXML refaz as contas de IBS e CBS de cada item e dos totais das notas autorizadas e mostra o resultado na coluna IBS/CBS da tela Notas, no Resumo e no relatório Divergências IBS/CBS. A conferência só informa: não muda os totais, os cards nem os contadores. Ela segue a NT 2025.002 v1.53, a NT 2026.005 v1.00 (Simples Nacional) e a tabela de cClassTrib v1.71 e não substitui a validação da SEFAZ nem a análise fiscal.</p>
+    </div>
+    <div class="tabela-rolagem">
+      <table>
+        <caption>Os quatro níveis da conferência</caption>
+        <thead><tr><th scope="col">Nível</th><th scope="col">O que confere</th><th scope="col">Resultado</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">1. Conta do item</th><td>IBS UF, IBS municipal e CBS = base × alíquota (a efetiva, quando há redução), menos o diferimento e a devolução de tributo, quando houver; IBS = IBS UF + IBS municipal; e as contas da alíquota efetiva, do diferimento e da tributação regular.</td><td>Erro</td></tr>
+          <tr><th scope="row">2. Itens × totais</th><td>A soma dos itens bate com os totais da nota (<code>IBSCBSTot</code>).</td><td>Erro</td></tr>
+          <tr><th scope="row">3. Base de cálculo</th><td>A base do item comparada com a soma do valor do produto, frete, seguro, outras despesas e imposto de importação, menos o desconto e os tributos que saem da base de 2026 a 2032 (ICMS, inclusive o FCP, PIS, Cofins e ISS).</td><td>Alerta</td></tr>
+          <tr><th scope="row">4. Alíquota, redução e CST</th><td>Alíquota esperada para o ano da emissão, redução coerente com o CST e o cClassTrib, diferimento e grupos previstos na tabela oficial.</td><td>Alerta</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="prosa">
+      <div class="caixa caixa-aviso">
+        <p class="caixa-titulo">Alerta não é erro</p>
+        <p>O ProXML marca como Alerta o que depende da operação e da regra legal: base de cálculo, alíquota, redução, CST e cClassTrib. É uma indicação para conferir a nota com quem cuida da parte fiscal, não uma afirmação de que a nota está errada. Erro indica uma conta que não fecha com os próprios valores do XML, no item ou nos totais.</p>
+      </div>
+      <h3>Simples Nacional</h3>
+      <p>Nos itens do Simples Nacional com o grupo do Simples (<code>gTribSN</code>, NT 2026.005), o ProXML confere a soma do IBS e da CBS do Simples com o total da nota, se o grupo vem nos itens e no total, e o cClassTrib. A alíquota do Simples depende do anexo e da faixa de faturamento e não é conferida. Quando o item também traz o grupo de cálculo do IBS/CBS (<code>gIBSCBS</code>), ele é conferido como nas outras notas.</p>
+      <h3>O que fica sem conferência</h3>
+      <p>A conferência não é uma validação fiscal completa. Na versão 1.3.0, ficam sem conferência:</p>
+      <ul>
+        <li>a tributação monofásica (CST 620) e os totais do monofásico e do estorno de crédito;</li>
+        <li>a transferência de crédito (CST 800);</li>
+        <li>os ajustes da ZFM e de competência (CST 810 e 811) e o crédito presumido da ZFM;</li>
+        <li>as compras governamentais;</li>
+        <li>as alíquotas que ainda dependem da alíquota de referência ou da lei de cada ente (CBS a partir de 2027 e IBS a partir de 2029);</li>
+        <li>a base e as alíquotas de devoluções, a base de notas complementares, de ajuste, de crédito e de débito e as alíquotas de algumas notas de crédito.</li>
+      </ul>
+      <p>O Resumo informa esses casos, sem contar como divergência. Notas sem IBS/CBS ficam fora da conferência, com a coluna IBS/CBS vazia. <a href="/tutorial#conferencia-ibs-cbs">Veja como ler a coluna IBS/CBS, o Resumo e o relatório Divergências IBS/CBS</a>.</p>
+    </div>
   </section>
 
   <section class="secao" id="cst-cclasstrib" aria-labelledby="titulo-cst">
@@ -205,14 +243,14 @@
         <li><strong>CST do IBS/CBS</strong> (tag <code>CST</code>): o código de situação tributária, com 3 dígitos.</li>
         <li><strong>cClassTrib</strong> (tag <code>cClassTrib</code>): o código de classificação tributária, com 6 dígitos, que detalha a regra do CST (por exemplo, tributação normal, redução de alíquota ou alíquota zero).</li>
       </ul>
-      <p>A tabela com os códigos válidos é publicada no Portal da NF-e. O ProXML não lê nem valida esses códigos: quem confere a classificação de cada item é o sistema emissor e o seu contador.</p>
+      <p>A tabela com os códigos válidos é publicada no Portal da NF-e. Na <a href="#conferencia">conferência de IBS/CBS</a>, o ProXML compara o CST, o cClassTrib e a redução de cada item com a tabela de cClassTrib v1.71, e o que não bate aparece como Alerta. Ele não decide qual é a classificação certa de cada produto: isso cabe ao sistema emissor e ao seu contador.</p>
     </div>
   </section>
 
   <section class="secao" id="nt-2025-002" aria-labelledby="titulo-nt">
     <div class="prosa">
       <h2 id="titulo-nt">NT 2025.002: versão em vigor</h2>
-      <p>A NT 2025.002-RTC é atualizada com frequência. Em 09/11/2026, a versão mais recente era a 1.53, publicada em 30/10/2026. As empresas do Simples Nacional têm regras extras na NT 2026.005. Confira sempre a versão em vigor no <a href="https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=">Portal da Nota Fiscal Eletrônica</a>.</p><p>Pela regra oficial, o preenchimento dos grupos de IBS e CBS na NF-e e na NFC-e é obrigatório desde 3 de agosto de 2026 para as empresas do regime normal e a partir de 1º de janeiro de 2027 para o Simples Nacional.</p>
+      <p>A NT 2025.002-RTC é atualizada com frequência. Em 09/11/2026, a versão mais recente era a 1.53, publicada em 30/10/2026. As empresas do Simples Nacional têm regras extras na NT 2026.005. Confira sempre a versão em vigor no <a href="https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=">Portal da Nota Fiscal Eletrônica</a>.</p><p>A conferência do ProXML 1.3.0 segue a NT 2025.002 v1.53, a NT 2026.005 v1.00 e a tabela de cClassTrib v1.71. Uma versão nova da NT ou da tabela pode mudar o resultado.</p><p>Pela regra oficial, o preenchimento dos grupos de IBS e CBS na NF-e e na NFC-e é obrigatório desde 3 de agosto de 2026 para as empresas do regime normal e a partir de 1º de janeiro de 2027 para o Simples Nacional.</p>
       <p>Para o que muda na nota fiscal, os prazos e as alíquotas, veja <a href="/reforma-tributaria#nota-fiscal">o que muda na NF-e e na NFC-e com a reforma tributária</a>.</p>
       <div class="caixa caixa-aviso">
         <p>Conteúdo informativo. Para decisões da sua empresa, consulte seu contador.</p>
@@ -221,7 +259,7 @@
   </section>
 
   <section class="secao" aria-labelledby="titulo-baixar">
-    <h2 id="titulo-baixar">Some o IBS e a CBS dos seus XMLs</h2>
+    <h2 id="titulo-baixar">Some e confira o IBS e a CBS dos seus XMLs</h2>
     <p>O ProXML é grátis, roda no Windows 10 e 11 e lê NF-e (55) e NFC-e (65) da mesma pasta.</p>
     <div class="botoes">
       <a class="botao botao-primario" href="/download">Baixar o ProXML</a>
