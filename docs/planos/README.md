@@ -6,7 +6,7 @@
 | 4 | [Redesign de UI/UX](plano-4-ui-ux.md) | v1.1.0 | ✅ Publicado na v1.1.0 (06/11/2026) |
 | 2 | [Instalador (Inno Setup) + ZIP nativo](plano-2-instalador.md) | v1.2.0 | ✅ Publicado na v1.2.0 (09/11/2026) |
 | 3 | [Página de apresentação na Vercel](plano-3-site-vercel.md) | — | ▶️ Em execução: site publicado em <https://proxml.vercel.app> (10/11/2026); faltam 3.3 e Search Console/Bing; a 3.5 (tela Sobre) está implementada e sai na v1.3.0, com o Plano 7 |
-| 7 | [Conferência dos cálculos de IBS/CBS](plano-7-conferencia-ibs-cbs.md) | v1.3.0 | ▶️ **v1.3.0 publicada em 18/11/2026** (7.1 a 7.6 concluídas, com a etapa 3.5 do Plano 3); falta a 7.7 (atualização do site) |
+| 7 | [Conferência dos cálculos de IBS/CBS](plano-7-conferencia-ibs-cbs.md) | v1.3.0 | ▶️ **v1.3.0 publicada em 18/11/2026** (7.1 a 7.6 concluídas, com a etapa 3.5 do Plano 3); site atualizado em 18/11/2026 (7.7); falta só a revisão das páginas pelo usuário |
 | 5 | [Chat com IA sobre os XMLs (Groq e Gemini)](plano-5-chat-ia.md) | v1.4.0 | 📝 Aguardando aprovação (10/11/2026); passou para depois do Plano 7 em 11/11/2026 |
 | 8 | [Apuração de Antecipação e DIFAL de ICMS (MG)](plano-8-apuracao-icms-mg.md) | a definir | 📝 Aprovado em 17/11/2026; plano separado, começa depois do Plano 7. [Análise fiscal](plano-8-analise-fiscal-icms-mg.md) |
 

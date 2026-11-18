@@ -132,6 +132,7 @@ Depois da Release v1.3.0 publicada:
 - `download.html`: versão, tamanho e SHA-256 da v1.3.0. `sitemap.xml`: `lastmod` das páginas alteradas.
 - Revisão fiscal dos textos novos pelo `nfe-fiscal` antes do commit.
 - **Aceite:** site publicado na Vercel com a v1.3.0; usuário revisa as páginas alteradas.
+- **Feito (18/11/2026):** commit `894d61b`, site no ar com a v1.3.0 (7 páginas, sitemap e os prints 07, 08, 10 e o novo 17, só com XMLs sintéticos; `?v=20261118` nas imagens trocadas por causa do cache de 1 ano da Vercel). Textos revisados pelo `nfe-fiscal` (1 correção obrigatória, Simples Nacional também confere o cClassTrib, e 9 sugestões, todas aplicadas). Print do Resumo com só as 20 notas do site, sem a faixa de homologação (decisão do usuário). **Falta a revisão das páginas pelo usuário.**
 
 ## Melhorias anotadas para um plano futuro
 - (18/11/2026, revisão fiscal da 7.7) **Alíquota da CBS de 2027:** o Senado decide a alíquota de referência até 15/12/2026 (o TCU propôs 11,3% em 28/10/2026; sem decisão do Senado vale o número do TCU). Depois da resolução, rever a D8 e a tabela `ALIQ_ANO_CBS` de `lib/uConferenciaIBSCBS.pas` (hoje 2027+ fica sem conferência de alíquota) e os textos do site e do README sobre "alíquotas que ainda dependem da alíquota de referência". O usuário decidiu tratar numa v1.3.x ou no próximo plano.
