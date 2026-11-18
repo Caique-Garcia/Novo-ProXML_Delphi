@@ -84,3 +84,7 @@ modules/
 /bin/db/
 /bin/ErroLog.txt
 *.db-journal
+
+# Chaves de API locais (Groq, Gemini etc.): nunca versionar
+.env
+.env.*
